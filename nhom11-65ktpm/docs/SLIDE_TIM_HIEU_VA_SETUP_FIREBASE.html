@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide: Tìm hiểu Firebase & Setup Tài khoản Nhóm 11</title>
+  <style>
+    :root {
+      --primary: #FF8F00;
+      --primary-dark: #E65100;
+      --secondary: #1A73E8;
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-green: #10b981;
+      --accent-cyan: #06b6d4;
+      --code-bg: #090d16;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top progress bar */
+    #progress-container {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    #progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Slide container */
+    #slides-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(60px);
+      transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+      padding: 30px 60px 80px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+      max-height: calc(100vh - 60px);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    /* Typography - Thiết lập cỡ chữ chuẩn 22px */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 16px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      width: fit-content;
+    }
+    .badge-orange { background: rgba(255, 143, 0, 0.2); color: #ffb74d; border: 1px solid rgba(255, 143, 0, 0.4); }
+    .badge-blue { background: rgba(26, 115, 232, 0.2); color: #64b5f6; border: 1px solid rgba(26, 115, 232, 0.4); }
+    .badge-green { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+    h1.title {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    h2.slide-title {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 2px solid var(--bg-card-border);
+      padding-bottom: 10px;
+    }
+
+    .slide-title span.number {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border-radius: 8px;
+      padding: 4px 14px;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    p.subtitle {
+      font-size: 24px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Grid & Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Cỡ chữ 22px cho toàn bộ nội dung */
+    .card-body {
+      color: #cbd5e1;
+      font-size: 22px;
+      line-height: 1.6;
+    }
+
+    ul.bullet-list {
+      list-style: none;
+      padding-left: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    ul.bullet-list li {
+      position: relative;
+      padding-left: 28px;
+      font-size: 22px;
+      line-height: 1.5;
+    }
+
+    ul.bullet-list li::before {
+      content: "✔";
+      position: absolute;
+      left: 0;
+      color: var(--accent-green);
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    /* Code blocks */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-family: "JetBrains Mono", "Fira Code", monospace, Consolas;
+      font-size: 20px;
+      color: #e2e8f0;
+      overflow-x: auto;
+      line-height: 1.45;
+    }
+
+    .code-keyword { color: #f43f5e; font-weight: bold; }
+    .code-string { color: #10b981; }
+    .code-func { color: #38bdf8; }
+    .code-comment { color: #64748b; font-style: italic; }
+
+    /* Tables - Cỡ chữ 22px */
+    table.custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: var(--bg-card);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    table.custom-table th, table.custom-table td {
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 22px;
+      border-bottom: 1px solid var(--bg-card-border);
+      line-height: 1.5;
+    }
+
+    table.custom-table th {
+      background: #1e293b;
+      color: var(--primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    table.custom-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Bottom Control Bar */
+    #controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: rgba(15, 23, 42, 0.95);
+      border-top: 1px solid var(--bg-card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #334155;
+      border-color: #475569;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    #slide-indicator {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Progress Bar -->
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <!-- Slides Viewport -->
+  <div id="slides-viewport">
+
+    <!-- Slide 1: Bìa -->
+    <div class="slide active">
+      <span class="badge badge-orange">Chuyên đề Công nghệ & Kiến trúc Phần mềm</span>
+      <h1 class="title">TÌM HIỂU VỀ GOOGLE FIREBASE<br>& HƯỚNG DẪN THIẾT LẬP DỰ ÁN</h1>
+      <p class="subtitle">Tích hợp Google Authentication, Cloud Firestore & Firebase Storage vào Ứng dụng Quản lý Tài liệu Học tập theo chuẩn Kiến trúc Cashew</p>
+      
+      <div class="grid-2" style="margin-top: 20px; max-width: 850px;">
+        <div class="card" style="border-left: 4px solid var(--primary);">
+          <div class="card-header">👥 Nhóm Thực hiện: Nhóm 11</div>
+          <div class="card-body">
+            • Ứng dụng: <strong>Study Material Manager</strong> (Flutter)<br>
+            • Kiến trúc: <strong>Cashew (Local-First Architecture)</strong><br>
+            • Trọng tâm: Phân lớp cô lập, Đồng bộ Cloud & Bảo mật
+          </div>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--secondary);">
+          <div class="card-header">🔥 Firebase Project Info</div>
+          <div class="card-body">
+            • Project ID: <code style="color: #ffb74d;">study-material-nhom11</code><br>
+            • Project Number: <code>693074823537</code><br>
+            • Region: <code>asia-southeast1 (Singapore)</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Agenda -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">02</span> Nội dung Trình bày (Agenda)</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">📌 Phần 1: Tổng quan Nền tảng</div>
+          <ul class="bullet-list">
+            <li>Google Firebase là gì? Định vị BaaS (Backend-as-a-Service).</li>
+            <li>So sánh kiến trúc Tự dựng Backend vs. Nền tảng Firebase Cloud.</li>
+            <li>Bộ 3 dịch vụ cốt lõi: Auth, Firestore, Storage.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-header">🏛️ Phần 2: Kiến trúc & Luồng Dữ liệu</div>
+          <ul class="bullet-list">
+            <li>Kiến trúc Hybrid Local-First (Drift SQLite + Firebase Cloud).</li>
+            <li>Sơ đồ luồng dữ liệu (Data Flow) Đăng nhập & Đồng bộ dữ liệu.</li>
+            <li>Tối ưu độ trễ và khả năng hoạt động offline 100%.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-header">⚙️ Phần 3: Setup với Tài khoản Nhóm</div>
+          <ul class="bullet-list">
+            <li>Cấu hình dịch vụ trên Firebase Console nhóm (ID: study-material-nhom11).</li>
+            <li>Sử dụng FlutterFire CLI tự động hóa tạo <code>firebase_options.dart</code>.</li>
+            <li>Đăng ký SHA-1 Fingerprint cho Google Sign-In trên Android & Web.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-header">🛡️ Phần 4: Code Thực tế & Bảo mật</div>
+          <ul class="bullet-list">
+            <li>Tầng Domain Service: <code>AuthService</code> & <code>FirebaseSyncService</code>.</li>
+            <li>Tầng State Provider & Giao diện Cài đặt <code>SettingsScreen</code>.</li>
+            <li>Thiết lập Firebase Security Rules bảo mật tài khoản người dùng.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Tổng quan Firebase -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">03</span> Google Firebase là gì?</h2>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-header">🚀 Nền tảng BaaS Toàn diện</div>
+          <div class="card-body">
+            Phát triển bởi Google, cung cấp toàn bộ hạ tầng Backend dưới dạng dịch vụ: Database, Auth, Storage, Analytics, Serverless Functions.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">⚡ Tối ưu cho Flutter</div>
+          <div class="card-body">
+            Bộ SDK <strong>FlutterFire</strong> chính thức được Google hỗ trợ đa nền tảng (Web, Android, iOS, Desktop) với cú pháp Dart tự nhiên và type-safe.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">🔄 Realtime & Offline</div>
+          <div class="card-body">
+            Cơ chế Snapshot Stream tự động đồng bộ thay đổi tức thời và cache dữ liệu cục bộ khi mất kết nối mạng Internet.
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top: 24px; background: rgba(26, 115, 232, 0.1); border-color: rgba(26, 115, 232, 0.3);">
+        <p style="font-size: 1.1rem; color: #93c5fd;">
+          💡 <strong>Tại sao chọn Firebase cho ứng dụng Quản lý Tài liệu?</strong> Nhóm không phải tốn thời gian xây dựng REST API, quản lý máy chủ Linux, hay bảo trì chứng chỉ SSL. Toàn bộ trọng tâm được dồn vào chuẩn hóa <strong>Kiến trúc Cashew</strong> ở Client và mang lại trải nghiệm mượt mà cho sinh viên.
+        </p>
+      </div>
+    </div>
+
+    <!-- Slide 4: So sánh -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">04</span> So sánh: Tự dựng Backend vs. Firebase BaaS</h2>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Tiêu chí Đánh giá</th>
+            <th>Tự dựng Backend (Node.js/Spring Boot + VPS)</th>
+            <th>Google Firebase BaaS (Lựa chọn của Nhóm)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Thời gian triển khai</strong></td>
+            <td>2 - 4 tuần (Viết code API, DB schema, Deploy)</td>
+            <td style="color: var(--accent-green);"><strong>Vài giờ</strong> (FlutterFire CLI cấu hình tự động)</td>
+          </tr>
+          <tr>
+            <td><strong>Vận hành & Bảo trì</strong></td>
+            <td>Cần kỹ sư DevOps vá lỗi OS, Docker, Firewall, Nginx</td>
+            <td style="color: var(--accent-green);"><strong>Google quản lý 100%</strong>, đảm bảo SLA 99.95%</td>
+          </tr>
+          <tr>
+            <td><strong>Xác thực (Authentication)</strong></td>
+            <td>Tự mã hóa bcrypt, JWT token, session, OAuth refresh</td>
+            <td style="color: var(--accent-green);"><strong>Firebase Auth tích hợp sẵn</strong> Google Sign-In đa nền tảng</td>
+          </tr>
+          <tr>
+            <td><strong>Lưu trữ tập tin lớn (PDF)</strong></td>
+            <td>Tự cấu hình FTP hoặc kết nối AWS S3 phức tạp</td>
+            <td style="color: var(--accent-green);"><strong>Firebase Cloud Storage</strong> kèm Google CDN toàn cầu</td>
+          </tr>
+          <tr>
+            <td><strong>Chi phí khởi điểm</strong></td>
+            <td>Tốn tiền thuê VPS cố định hàng tháng ($5 - $20/tháng)</td>
+            <td style="color: var(--accent-green);"><strong>0 VNĐ (Gói Spark Miễn phí)</strong>, cực kỳ hào phóng</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Slide 5: Dịch vụ Cốt lõi -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">05</span> Các Dịch vụ Firebase Cốt lõi trong Dự án</h2>
+      <div class="grid-3">
+        <div class="card" style="border-top: 4px solid #ea4335;">
+          <div class="card-header">🔐 Firebase Authentication</div>
+          <div class="card-body">
+            • Đăng nhập 1-chạm bằng tài khoản Google.<br>
+            • Chuẩn bảo mật OAuth 2.0 / OpenID Connect.<br>
+            • Cung cấp định danh duy nhất <code>User.uid</code> làm khóa phân vùng dữ liệu cá nhân của sinh viên.
+          </div>
+        </div>
+        <div class="card" style="border-top: 4px solid #ff8f00;">
+          <div class="card-header">📂 Cloud Firestore</div>
+          <div class="card-body">
+            • Cơ sở dữ liệu NoSQL dạng Document-Collection phân tán.<br>
+            • Hỗ trợ ghi theo lô (<strong>WriteBatch</strong>) cam kết toàn vẹn danh sách tài liệu và môn học.<br>
+            • Dữ liệu lưu tại: <code>/users/{uid}/documents/</code>
+          </div>
+        </div>
+        <div class="card" style="border-top: 4px solid #1a73e8;">
+          <div class="card-header">☁️ Firebase Cloud Storage</div>
+          <div class="card-body">
+            • Lưu trữ các tệp tin bài giảng dung lượng lớn (PDF, Slide, DOCX, Ảnh tóm tắt).<br>
+            • Tự động sinh đường dẫn tải xuống an toàn (Download URL) gắn với tài liệu học tập.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: Kiến trúc Cashew Hybrid -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">06</span> Kiến trúc Cashew Tích hợp Cloud (Local-First)</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">📱 Tầng Cục bộ: Drift / SQLite</div>
+          <div class="card-body">
+            • Đóng vai trò là <strong>Single Source of Truth</strong> trên thiết bị người dùng.<br>
+            • Người dùng có thể đọc, tạo, chỉnh sửa, gắn tag, tìm kiếm tài liệu mà không cần kết nối mạng.<br>
+            • Tốc độ truy vấn tức thì (Độ trễ = <strong>0ms</strong>).
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">☁️ Tầng Đám mây: Google Firebase</div>
+          <div class="card-body">
+            • Đóng vai trò là <strong>Tầng Đồng bộ & Sao lưu Phân tán</strong> (Remote Backup & Cross-Device Sync).<br>
+            • Khi có mạng Internet, người dùng kích hoạt đồng bộ để đẩy bản ghi SQLite lên Firestore và tập tin lên Storage.
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top: 20px;">
+        <div class="card-header">💎 Tuân thủ nghiêm ngặt 4 Tầng Kiến trúc Cashew</div>
+        <div class="card-body" style="font-family: monospace;">
+          [UI Screens: SettingsScreen / HomeScreen] ──▶ [State: AuthProvider / DocumentProvider]<br>
+          ──▶ [Domain Services: AuthService / FirebaseSyncService] ──▶ [Data Layer: AppDatabase & Firebase SDK]
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 7: Sơ đồ Luồng Dữ liệu -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">07</span> Sơ đồ Luồng Dữ liệu (Data Flow)</h2>
+      <pre>
+┌──────────────────┐               ┌──────────────────┐               ┌───────────────────────┐
+│   Người dùng     │               │  Ứng dụng Cashew │               │    Google Firebase    │
+│  (Sinh viên)     │               │ (Flutter Client) │               │     Cloud Platform    │
+└────────┬─────────┘               └────────┬─────────┘               └───────────┬───────────┘
+         │                                  │                                     │
+         │ 1. Nhấn "Đăng nhập Google"       │                                     │
+         ├─────────────────────────────────▶│                                     │
+         │                                  │ 2. Gọi AuthService.signIn()         │
+         │                                  ├────────────────────────────────────▶│ (Firebase Auth & OAuth)
+         │                                  │ 3. Trả về UserCredential (UID, info)│
+         │                                  │◀────────────────────────────────────┤
+         │                                  │                                     │
+         │ 4. Thêm / Sửa Tài liệu học tập   │                                     │
+         ├─────────────────────────────────▶│ (Ghi ngay vào Drift SQLite cục bộ)  │
+         │                                  │                                     │
+         │ 5. Nhấn "Đồng bộ lên Cloud"      │                                     │
+         ├─────────────────────────────────▶│ 6. FirebaseSyncService gom lô batch │
+         │                                  ├────────────────────────────────────▶│ (Cloud Firestore)
+         │                                  │ 7. Tải file tài liệu PDF            │
+         │                                  ├────────────────────────────────────▶│ (Firebase Storage)
+         │                                  │ 8. Báo hoàn tất đồng bộ thành công! │
+         │◀─────────────────────────────────┤                                     │
+      </pre>
+    </div>
+
+    <!-- Slide 8: Thông tin Setup Tài khoản Nhóm -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">08</span> Thông tin Dự án Firebase của Nhóm 11</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">📋 Thông số Định danh Dự án</div>
+          <table class="custom-table">
+            <tr>
+              <td><strong>Project Name</strong></td>
+              <td><code>Study Material Manager</code> (Nhóm 11)</td>
+            </tr>
+            <tr>
+              <td><strong>Project ID</strong></td>
+              <td><span style="color: #ffb74d; font-weight: bold;">study-material-nhom11</span></td>
+            </tr>
+            <tr>
+              <td><strong>Project Number / Sender ID</strong></td>
+              <td><code>693074823537</code></td>
+            </tr>
+            <tr>
+              <td><strong>Storage Bucket</strong></td>
+              <td><code>study-material-nhom11.firebasestorage.app</code></td>
+            </tr>
+            <tr>
+              <td><strong>Server Location</strong></td>
+              <td><code>asia-southeast1 (Singapore)</code></td>
+            </tr>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-header">📱 Ứng dụng đã đăng ký trong Project</div>
+          <ul class="bullet-list">
+            <li><strong>Flutter Web App:</strong><br>App ID: <code>1:693074823537:web:42784b0b0830f917d48ed0</code></li>
+            <li><strong>Android App:</strong><br>Package: <code>vn.nhom11.studydocs.study_material_manager</code><br>App ID: <code>1:693074823537:android:42784b0b0830f917d48ed0</code></li>
+            <li><strong>Desktop / Linux / Windows:</strong> Hỗ trợ chế độ Local-First với Cloud REST / Mock Fallback an toàn.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: Các bước Setup Console & CLI -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">09</span> Bước 1 & 2: Thiết lập Console & Công cụ CLI</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">🌐 Bước 1: Kích hoạt trên Firebase Console</div>
+          <div class="card-body">
+            1. Truy cập <a href="https://console.firebase.google.com" target="_blank" style="color: #60a5fa;">console.firebase.google.com</a>.<br>
+            2. Vào <strong>Build ▶ Authentication</strong> ▶ Tab <em>Sign-in method</em> ▶ Bật <strong>Google</strong> (Cấu hình Support Email).<br>
+            3. Vào <strong>Build ▶ Firestore Database</strong> ▶ Tạo cơ sở dữ liệu chế độ Test mode ▶ Chọn Location <em>asia-southeast1</em>.<br>
+            4. Vào <strong>Build ▶ Storage</strong> ▶ Khởi tạo bucket lưu trữ.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">💻 Bước 2: Cài đặt Bộ công cụ CLI</div>
+          <div class="card-body">
+            Cài đặt các công cụ chính thức từ Google theo tài liệu FlutterFire:
+          </div>
+          <pre>
+<span class="code-comment"># 1. Cài đặt Firebase CLI</span>
+npm install -g firebase-tools
+
+<span class="code-comment"># 2. Đăng nhập tài khoản Google của nhóm</span>
+firebase login
+
+<span class="code-comment"># 3. Kích hoạt FlutterFire CLI</span>
+dart pub global activate flutterfire_cli
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10: Bước 3 & 4: FlutterFire & SHA Fingerprint -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">10</span> Bước 3 & 4: Cấu hình Tự động & SHA Fingerprint</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">⚡ Bước 3: Chạy FlutterFire Configure</div>
+          <div class="card-body">
+            Tại thư mục dự án Flutter, thực hiện lệnh liên kết tự động:
+          </div>
+          <pre>
+cd study_material_manager
+flutterfire configure --project=study-material-nhom11
+          </pre>
+          <div class="card-body" style="font-size: 0.95rem; color: #a7f3d0;">
+            ✔ Tự động kết nối tới Project <code>study-material-nhom11</code>.<br>
+            ✔ Sinh tự động file <code>lib/firebase_options.dart</code> chứa đầy đủ API Key, AppID, SenderID cho Web, Android, iOS.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">🔑 Bước 4: Khai báo SHA-1 Fingerprint (Android)</div>
+          <div class="card-body">
+            Google Sign-In trên thiết bị Android bắt buộc mã băm chứng chỉ:
+          </div>
+          <pre>
+keytool -list -v \
+  -keystore ~/.android/debug.keystore \
+  -alias androiddebugkey \
+  -storepass android -keypass android
+          </pre>
+          <div class="card-body" style="font-size: 0.95rem;">
+            Dán SHA-1 vào: <em>Project Settings ▶ Your Apps ▶ Android ▶ Add Fingerprint</em>. Tải file <code>google-services.json</code> vào thư mục <code>android/app/</code>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11: Bước 5: Cấu hình Dependencies -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">11</span> Bước 5: Cấu hình Dependencies trong Pubspec</h2>
+      <div class="grid-2">
+        <div>
+          <pre>
+<span class="code-keyword">dependencies</span>:
+  <span class="code-keyword">flutter</span>:
+    <span class="code-func">sdk</span>: flutter
+
+  <span class="code-comment"># Firebase Core & Authentication</span>
+  <span class="code-keyword">firebase_core</span>: ^3.15.2
+  <span class="code-keyword">firebase_auth</span>: ^5.7.0
+  <span class="code-keyword">google_sign_in</span>: ^6.2.2
+
+  <span class="code-comment"># Cloud Database & Storage</span>
+  <span class="code-keyword">cloud_firestore</span>: ^5.6.12
+  <span class="code-keyword">firebase_storage</span>: ^12.4.10
+
+  <span class="code-comment"># Kiến trúc Cashew (Local Database & State)</span>
+  <span class="code-keyword">provider</span>: ^6.1.2
+  <span class="code-keyword">drift</span>: ^2.23.1
+          </pre>
+        </div>
+        <div class="card">
+          <div class="card-header">🚀 Khởi tạo trong <code>lib/main.dart</code></div>
+          <pre>
+<span class="code-keyword">void</span> <span class="code-func">main</span>() <span class="code-keyword">async</span> {
+  WidgetsFlutterBinding.<span class="code-func">ensureInitialized</span>();
+
+  <span class="code-comment">// Khởi tạo Firebase an toàn đa nền tảng</span>
+  <span class="code-keyword">await</span> Firebase.<span class="code-func">initializeApp</span>(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  <span class="code-func">runApp</span>(<span class="code-keyword">const</span> StudyMaterialApp());
+}
+          </pre>
+          <div class="card-body" style="font-size: 0.95rem; color: #94a3b8;">
+            Được bao bọc trong cơ chế dự phòng an toàn (Try-Catch fallback) để ứng dụng vẫn khởi chạy 100% mượt mà trên môi trường máy ảo Linux Desktop test.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 12: Code AuthService -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">12</span> Triển khai Tầng Domain: <code>AuthService</code></h2>
+      <div class="card">
+        <div class="card-header">📁 <code>lib/domain/services/auth_service.dart</code></div>
+        <pre>
+<span class="code-keyword">class</span> <span class="code-func">AuthService</span> {
+  <span class="code-keyword">final</span> FirebaseAuth _auth = FirebaseAuth.instance;
+  <span class="code-keyword">final</span> GoogleSignIn _googleSignIn = GoogleSignIn(scopes: [<span class="code-string">'email'</span>, <span class="code-string">'profile'</span>]);
+
+  <span class="code-comment">/// Hỗ trợ cả Web Popup và Native Mobile Google Sign-In</span>
+  Future&lt;UserCredential?&gt; <span class="code-func">signInWithGoogle</span>() <span class="code-keyword">async</span> {
+    <span class="code-keyword">if</span> (kIsWeb) {
+      <span class="code-keyword">final</span> provider = GoogleAuthProvider()..<span class="code-func">addScope</span>(<span class="code-string">'email'</span>);
+      <span class="code-keyword">return await</span> _auth.<span class="code-func">signInWithPopup</span>(provider);
+    } <span class="code-keyword">else</span> {
+      <span class="code-keyword">final</span> googleUser = <span class="code-keyword">await</span> _googleSignIn.<span class="code-func">signIn</span>();
+      <span class="code-keyword">if</span> (googleUser == <span class="code-keyword">null</span>) <span class="code-keyword">return null</span>;
+      <span class="code-keyword">final</span> googleAuth = <span class="code-keyword">await</span> googleUser.authentication;
+      <span class="code-keyword">final</span> credential = GoogleAuthProvider.<span class="code-func">credential</span>(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      <span class="code-keyword">return await</span> _auth.<span class="code-func">signInWithCredential</span>(credential);
+    }
+  }
+}
+        </pre>
+      </div>
+    </div>
+
+    <!-- Slide 13: Code FirebaseSyncService -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">13</span> Triển khai Tầng Domain: <code>FirebaseSyncService</code></h2>
+      <div class="card">
+        <div class="card-header">📁 <code>lib/domain/services/firebase_sync_service.dart</code></div>
+        <pre>
+<span class="code-keyword">class</span> <span class="code-func">FirebaseSyncService</span> {
+  <span class="code-keyword">final</span> FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  <span class="code-keyword">final</span> FirebaseStorage _storage = FirebaseStorage.instance;
+
+  <span class="code-comment">/// Cam kết nguyên khối theo WriteBatch lên Firestore</span>
+  Future&lt;<span class="code-keyword">void</span>&gt; <span class="code-func">syncDocumentsToFirestore</span>({
+    <span class="code-keyword">required</span> String userId,
+    <span class="code-keyword">required</span> List&lt;Document&gt; documents,
+    <span class="code-keyword">required</span> List&lt;Subject&gt; subjects,
+  }) <span class="code-keyword">async</span> {
+    <span class="code-keyword">final</span> batch = _firestore.<span class="code-func">batch</span>();
+    <span class="code-keyword">final</span> userDoc = _firestore.<span class="code-func">collection</span>(<span class="code-string">'users'</span>).<span class="code-func">doc</span>(userId);
+
+    <span class="code-keyword">for</span> (<span class="code-keyword">final</span> s <span class="code-keyword">in</span> subjects) {
+      batch.<span class="code-func">set</span>(userDoc.<span class="code-func">collection</span>(<span class="code-string">'subjects'</span>).<span class="code-func">doc</span>(s.subjectPk), s.toJson());
+    }
+    <span class="code-keyword">for</span> (<span class="code-keyword">final</span> d <span class="code-keyword">in</span> documents) {
+      batch.<span class="code-func">set</span>(userDoc.<span class="code-func">collection</span>(<span class="code-string">'documents'</span>).<span class="code-func">doc</span>(d.documentPk), d.toJson());
+    }
+    <span class="code-keyword">await</span> batch.<span class="code-func">commit</span>(); <span class="code-comment">// Đảm bảo ACID Atomic Sync</span>
+  }
+}
+        </pre>
+      </div>
+    </div>
+
+    <!-- Slide 14: Security Rules -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">14</span> Thiết lập Quy tắc Bảo mật (Security Rules)</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">🛡️ <code>firestore.rules</code></div>
+          <pre>
+rules_version = <span class="code-string">'2'</span>;
+service cloud.firestore {
+  match /databases/{database}/documents {
+    <span class="code-comment">// Mỗi sinh viên chỉ truy cập dữ liệu của chính mình</span>
+    match /users/{userId}/{document=**} {
+      allow read, write: <span class="code-keyword">if</span> request.auth != <span class="code-keyword">null</span> 
+                         && request.auth.uid == userId;
+    }
+  }
+}
+          </pre>
+        </div>
+        <div class="card">
+          <div class="card-header">🛡️ <code>storage.rules</code></div>
+          <pre>
+rules_version = <span class="code-string">'2'</span>;
+service firebase.storage {
+  match /b/{bucket}/o {
+    <span class="code-comment">// Tệp tin PDF chỉ tải lên/xuống theo userId khớp UID</span>
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: <span class="code-keyword">if</span> request.auth != <span class="code-keyword">null</span> 
+                         && request.auth.uid == userId;
+    }
+  }
+}
+          </pre>
+        </div>
+      </div>
+      <div class="card" style="margin-top: 16px;">
+        <div class="card-body" style="color: #6ee7b7;">
+          ✔ <strong>Bảo mật cấp trường/tài khoản:</strong> Ngăn chặn hoàn toàn việc người dùng A đọc lén hoặc ghi đè tài liệu của người dùng B, ngay cả khi biết URL hoặc cố tình gọi SDK từ client.
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 15: Chi phí & Hiệu năng -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">15</span> Đánh giá Chi phí & Hiệu năng sau Tích hợp</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">💰 Đánh giá Chi phí (Gói Spark Free)</div>
+          <ul class="bullet-list">
+            <li><strong>Google Sign-In:</strong> Hoàn toàn miễn phí, không giới hạn số tài khoản.</li>
+            <li><strong>Cloud Firestore:</strong> Miễn phí 50,000 lượt đọc và 20,000 lượt ghi / ngày.</li>
+            <li><strong>Firebase Storage:</strong> Miễn phí 5 GB lưu trữ và 1 GB băng thông tải xuống / ngày.</li>
+            <li><strong>Tổng chi phí của Nhóm:</strong> <span style="color: var(--accent-green); font-weight: bold;">0 VNĐ / Tháng</span> (Đáp ứng dư dả nhu cầu học tập).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-header">⚡ Đánh giá Hiệu năng & Trải nghiệm (UX)</div>
+          <ul class="bullet-list">
+            <li><strong>Tốc độ tức thì (0ms latency):</strong> Đọc ghi trên SQLite cục bộ, không phụ thuộc mạng.</li>
+            <li><strong>Không chặn giao diện (Non-blocking):</strong> Quá trình đồng bộ chạy Asynchronous nền tảng với thanh báo tiến độ mượt mà.</li>
+            <li><strong>Chống mất mát dữ liệu:</strong> Dễ dàng khôi phục tài liệu khi đổi điện thoại hoặc mở app trên trình duyệt Web.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 16: Tổng kết Nghiệm thu -->
+    <div class="slide">
+      <h2 class="slide-title"><span class="number">16</span> Tổng kết Nghiệm thu của Nhóm 11</h2>
+      <div class="card">
+        <div class="card-header">📋 Bảng Nghiệm thu Yêu cầu Kỹ thuật</div>
+        <ul class="bullet-list" style="font-size: 1.05rem;">
+          <li><strong>Yêu cầu 1:</strong> Tích hợp Google Authentication với Firebase Auth (Hỗ trợ cả Web & Mobile). <span style="color: var(--accent-green);">[ĐÃ ĐẠT]</span></li>
+          <li><strong>Yêu cầu 2:</strong> Tích hợp Cloud Firestore lưu trữ tài liệu & môn học theo kiến trúc NoSQL phân cấp. <span style="color: var(--accent-green);">[ĐÃ ĐẠT]</span></li>
+          <li><strong>Yêu cầu 3:</strong> Tích hợp Firebase Cloud Storage lưu trữ tệp bài giảng PDF và hình ảnh. <span style="color: var(--accent-green);">[ĐÃ ĐẠT]</span></li>
+          <li><strong>Yêu cầu 4:</strong> Chuẩn hóa Kiến trúc Cashew: Tách bạch rõ rệt UI, State, Domain Services và Database; <strong>vượt qua 21/21 Unit & Widget Tests</strong>. <span style="color: var(--accent-green);">[ĐÃ ĐẠT]</span></li>
+          <li><strong>Yêu cầu 5:</strong> Bộ tài liệu báo cáo (.docx) và Slide thuyết trình (.pptx, .html) chi tiết kèm hướng dẫn setup tài khoản nhóm. <span style="color: var(--accent-green);">[ĐÃ ĐẠT]</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Slide 17: Q&A Kết luận -->
+    <div class="slide" style="text-align: center; align-items: center;">
+      <span class="badge badge-green">Hoàn thành Dự án</span>
+      <h1 class="title" style="font-size: 3.2rem; margin-top: 20px;">CẢM ƠN THẦY CÔ & CÁC BẠN<br>ĐÃ LẮNG NGHE!</h1>
+      <p class="subtitle" style="max-width: 700px; margin: 20px auto;">
+        Đề tài: Tích hợp Google Firebase vào Hệ thống Quản lý Tài liệu Học tập theo Kiến trúc Cashew
+      </p>
+
+      <div style="display: flex; gap: 20px; justify-content: center; margin-top: 30px;">
+        <div class="card" style="padding: 16px 28px; background: rgba(255, 143, 0, 0.15); border-color: var(--primary);">
+          <strong>📦 Mã nguồn nộp bài</strong><br><code>study_material_manager.zip</code>
+        </div>
+        <div class="card" style="padding: 16px 28px; background: rgba(26, 115, 232, 0.15); border-color: var(--secondary);">
+          <strong>📊 Slide thuyết trình</strong><br><code>SLIDE_TIM_HIEU_VA_SETUP_FIREBASE.pptx</code>
+        </div>
+        <div class="card" style="padding: 16px 28px; background: rgba(16, 185, 129, 0.15); border-color: var(--accent-green);">
+          <strong>📄 Báo cáo giải trình</strong><br><code>Bao_Cao_Kien_Truc_Cashew...docx</code>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 40px; color: var(--primary); font-size: 1.6rem;">❓ MỜI THẦY CÔ VÀ CÁC BẠN ĐẶT CÂU HỎI (Q&A)</h3>
+    </div>
+
+  </div>
+
+  <!-- Bottom Control Bar -->
+  <div id="controls">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button class="btn" id="btn-prev" onclick="prevSlide()">◀ Slide Trước</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextSlide()">Slide Tiếp ▶</button>
+      <span id="slide-indicator">Slide 1 / 17</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button class="btn" onclick="toggleFullScreen()">⛶ Toàn màn hình</button>
+    </div>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progress-bar');
+    const slideIndicator = document.getElementById('slide-indicator');
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+
+    function updateSlide(index) {
+      if (index < 0 || index >= totalSlides) return;
+      slides[currentIndex].classList.remove('active');
+      currentIndex = index;
+      slides[currentIndex].classList.add('active');
+
+      const progress = ((currentIndex + 1) / totalSlides) * 100;
+      progressBar.style.width = progress + '%';
+      slideIndicator.textContent = `Slide ${currentIndex + 1} / ${totalSlides}`;
+    }
+
+    function nextSlide() {
+      if (currentIndex < totalSlides - 1) {
+        updateSlide(currentIndex + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        updateSlide(currentIndex - 1);
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          alert(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key === 'Home') {
+        updateSlide(0);
+      } else if (e.key === 'End') {
+        updateSlide(totalSlides - 1);
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullScreen();
+      }
+    });
+
+    // Touch swipe support for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) {
+        nextSlide();
+      } else if (touchEndX - touchStartX > 50) {
+        prevSlide();
+      }
+    });
+
+    updateSlide(0);
+  </script>
+</body>
+</html>

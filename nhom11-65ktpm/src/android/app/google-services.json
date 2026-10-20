@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "693074823537",
+    "project_id": "study-material-nhom11",
+    "storage_bucket": "study-material-nhom11.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:693074823537:android:42784b0b0830f917d48ed0",
+        "android_client_info": {
+          "package_name": "vn.nhom11.studydocs.study_material_manager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "693074823537-rkmoa4pun2ghhpae5v0rplsa6fi2pb5h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJhoy60qOfsNU9b0zzXZfhyMZnA9jbmOQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "693074823537-rkmoa4pun2ghhpae5v0rplsa6fi2pb5h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
