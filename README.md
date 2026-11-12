@@ -1,276 +1,332 @@
-# Hướng Dẫn Nộp Bài Tập Nhóm - Phát Triển Ứng Dụng Di Động
+# Hướng Dẫn Nộp Mã Nguồn Và Báo Cáo Đồ Án (Phát Triển Ứng Dụng Di Động)
 
-Tài liệu này quy định quy trình và tiêu chuẩn kỹ thuật về việc nộp bài tập lớn/dự án của các nhóm sinh viên trên kho lưu trữ (repository) này.
+Kho lưu trữ này được thiết lập để quản lý và thu thập mã nguồn, báo cáo đồ án của các nhóm sinh viên học phần Phát Triển Ứng Dụng Di Động (PTUDDD). Sinh viên thực hiện tham gia, phát triển và nộp bài thông qua hệ thống Git và GitHub theo đúng các quy chuẩn kỹ thuật được mô tả dưới đây.
 
 ---
 
-## 1. Quy Chuẩn Thư Mục Và Nhánh (Branch) Làm Việc
+## 1. Quy Chuẩn Đặt Tên Thư Mục Nhóm
 
-### 1.1. Cấu trúc thư mục nộp bài
+Mỗi nhóm sinh viên bắt buộc phải tạo duy nhất một thư mục riêng biệt tại cấp cao nhất (root) của kho lưu trữ.
 
-Mỗi nhóm sinh viên bắt buộc phải tạo một thư mục riêng biệt tại thư mục gốc của repository với quy tắc đặt tên như sau:
+### 1.1. Cấu trúc định danh thư mục
+- **Cú pháp quy định:** `<ten-nhom>-<ten-lop>`
+- **Ví dụ chuẩn:**
+  - Nhóm 01 lớp DHTI15A1HN: `nhom01-dhti15a1hn`
+  - Nhóm 02 lớp DHTI15A2HN: `nhom02-dhti15a2hn`
+  - Nhóm 05 lớp CNTT1: `nhom05-cntt1`
 
-- **Định dạng thư mục:** `<ten-nhom>-<ten-lop>`
-- **Quy cách:** Viết chữ thường, không dấu, các từ nối nhau bằng dấu gạch ngang (`-`).
-- **Ví dụ hợp lệ:**
-  - `nhom01-dhti15a1hn`
-  - `nhom02-dhti15a2hn`
+### 1.2. Ràng buộc kỹ thuật về tên thư mục
+- Toàn bộ ký tự viết thường (lowercase).
+- Không sử dụng ký tự tiếng Việt có dấu.
+- Không sử dụng dấu khoảng trắng (space).
+- Các thành phần được phân tách duy nhất bằng dấu gạch ngang (`-`).
+- Không sử dụng các ký tự đặc biệt khác (`@`, `#`, `$`, `%`, `&`, `_`, `/`, `\`).
 
-### 1.2. Quy định tạo nhánh code riêng của nhóm (Bắt buộc)
+---
 
-- **Nguyên tắc bắt buộc:** Mỗi nhóm sinh viên **phải tạo một nhánh riêng (dedicated branch)** để phát triển và quản trị toàn bộ mã nguồn của nhóm mình.
-- **Quy chuẩn đặt tên nhánh:**
-  - **Định dạng:** `nhom/<ten-nhom>-<ten-lop>`
-  - **Ví dụ hợp lệ:** `nhom/nhom01-dhti15a1hn`, `nhom/nhom02-dhti15a2hn`
-- **Nghiêm cấm:** Tuyệt đối **không được commit hoặc push trực tiếp lên nhánh `main`**. Nhánh `main` là nhánh tích hợp chung của toàn bộ môn học, chỉ được cập nhật khi giảng viên xem xét và duyệt Pull Request (PR) của nhóm.
+## 2. Quy Chuẩn Tạo Và Quản Lý Nhánh Riêng Biệt Cho Từng Nhóm (Branching Strategy)
 
-### 1.3. Sơ đồ cấu trúc cây thư mục mẫu
+Để đảm bảo tính độc lập và tránh xung đột mã nguồn giữa các nhóm, quy định về phân nhánh (branching) được áp dụng bắt buộc như sau:
+
+### 2.1. Quy tắc phân nhánh cốt lõi
+- **Tuyệt đối cấm commit hoặc push trực tiếp vào nhánh `main`:** Nhánh `main` là nhánh tích hợp cuối cùng của học phần, chỉ được cập nhật thông qua Pull Request sau khi giảng viên kiểm duyệt và nghiệm thu.
+- **Mỗi nhóm bắt buộc phải có một nhánh làm việc riêng:** Toàn bộ quá trình phát triển mã nguồn, tải tài liệu và cập nhật tiến độ của nhóm phải được thực hiện trên nhánh riêng của nhóm đó.
+- **Cơ chế bảo vệ nhánh (Branch Protection Rule)** đã được kích hoạt trên GitHub. Mọi thao tác `git push origin main` sẽ bị từ chối tự động với lỗi:
+  ```text
+  remote: error: GH006: Protected branch update failed for refs/heads/main.
+  remote: error: Changes must be made through a pull request.
+  To https://github.com/oanhcuongdo/project-ptuddd.git
+   ! [remote rejected] main -> main (protected branch hook declined)
+  ```
+
+### 2.2. Cú pháp định danh nhánh nhóm
+- **Cú pháp chuẩn:** `<ten-nhom>-<ten-lop>` (trùng khớp với tên thư mục của nhóm để đồng bộ quản lý).
+- **Ví dụ chuẩn:**
+  - Nhóm 01 lớp DHTI15A1HN: `nhom01-dhti15a1hn`
+  - Nhóm 02 lớp DHTI15A2HN: `nhom02-dhti15a2hn`
+  - Nhóm 05 lớp CNTT1: `nhom05-cntt1`
+
+### 2.3. Quy trình Fork và tạo nhánh nhóm
+Sinh viên không có quyền ghi (Write) trực tiếp vào kho lưu trữ gốc. Mỗi nhóm thực hiện theo mô hình Fork và Pull Request:
+1. Nhóm trưởng thực hiện **Fork** kho lưu trữ gốc `https://github.com/oanhcuongdo/project-ptuddd` về tài khoản GitHub cá nhân (nút **Fork** trên giao diện GitHub).
+2. Nhóm trưởng thêm các thành viên làm Collaborator của kho Fork (Settings → Collaborators) để cùng đẩy mã nguồn lên nhánh nhóm.
+3. Nhóm trưởng clone kho Fork, khai báo kho gốc là `upstream` và tạo nhánh riêng của nhóm:
+```bash
+# 1. Clone kho Fork của nhóm trưởng
+git clone https://github.com/<github-nhom-truong>/project-ptuddd.git
+cd project-ptuddd
+
+# 2. Khai báo kho gốc là upstream
+git remote add upstream https://github.com/oanhcuongdo/project-ptuddd.git
+
+# 3. Tạo và chuyển sang nhánh riêng của nhóm từ main mới nhất
+git checkout main
+git pull upstream main
+git checkout -b <ten-nhom>-<ten-lop>
+
+# 4. Đẩy nhánh riêng của nhóm lên kho Fork
+git push -u origin <ten-nhom>-<ten-lop>
+```
+*Ví dụ cụ thể:*
+```bash
+git checkout -b nhom01-dhti15a1hn
+git push -u origin nhom01-dhti15a1hn
+```
+*Lưu ý:* Trong mô hình này, `origin` là kho Fork của nhóm, `upstream` là kho gốc của giảng viên. Lệnh `git push` tới `upstream` bị từ chối (403) và không được sử dụng.
+
+### 2.4. Quy trình đồng bộ giữa các thành viên trong cùng một nhóm
+Các thành viên trong cùng một nhóm cộng tác trên nhánh của nhóm mình theo các bước:
+1. Lấy danh sách nhánh mới nhất từ GitHub:
+   ```bash
+   git fetch origin
+   ```
+2. Chuyển sang làm việc trên nhánh của nhóm:
+   ```bash
+   git checkout --track origin/<ten-nhom>-<ten-lop>
+   ```
+   *(Trường hợp đã có nhánh cục bộ, chỉ cần chạy: `git checkout <ten-nhom>-<ten-lop>`)*
+3. Trước khi bắt đầu viết mã hoặc thêm tệp, luôn kéo dữ liệu mới nhất của nhóm về:
+   ```bash
+   git pull origin <ten-nhom>-<ten-lop>
+   ```
+4. Đẩy kết quả công việc sau khi commit lên nhánh nhóm:
+   ```bash
+   git push origin <ten-nhom>-<ten-lop>
+   ```
+
+---
+
+## 3. Quy Chuẩn Cấu Trúc Thư Mục Của Nhóm
+
+Toàn bộ tài liệu, thông tin thành viên và mã nguồn của nhóm phải nằm trọn vẹn bên trong thư mục của nhóm mình. Cấu trúc tổ chức tệp tin yêu cầu như sau:
 
 ```text
 project-ptuddd/
-├── README.md
 ├── .gitignore
-├── nhom01-dhti15a1hn/
-│   ├── danhsachnhom.md
-│   └── src/ (hoặc toàn bộ mã nguồn của nhóm)
-└── nhom02-dhti15a2hn/
-    ├── danhsachnhom.md
-    └── src/
+├── README.md
+└── <tennhom-tenlop>/
+    ├── danhsachnhom.md        # Tệp bắt buộc: Thông tin thành viên và phân công
+    ├── README.md              # (Tùy chọn) Hướng dẫn cài đặt, chạy ứng dụng của nhóm
+    ├── docs/                  # Thư mục chứa tài liệu đặc tả, báo cáo đồ án (PDF/DOCX)
+    │   └── baocao_doan.pdf
+    └── src/                   # Thư mục chứa toàn bộ mã nguồn của dự án
+        ├── android/
+        ├── ios/
+        ├── lib/               # Mã nguồn chính (Flutter/Dart hoặc tương đương)
+        └── assets/
 ```
 
----
+### Yêu cầu bắt buộc đối với tệp tin `danhsachnhom.md`:
+- Tệp tin phải được đặt trực tiếp tại cấp cao nhất của thư mục nhóm: `<tennhom-tenlop>/danhsachnhom.md`.
+- Nội dung tệp tin phải bao gồm đầy đủ:
+  - Thông tin tên đề tài, lớp học phần.
+  - Bảng danh sách thành viên: Số thứ tự, Họ và tên, Mã sinh viên, Lớp sinh hoạt, Vai trò (Nhóm trưởng / Thành viên), Nhiệm vụ phân công, Tỷ lệ đóng góp (%), Email.
+  - Hướng dẫn thiết lập môi trường và các bước khởi chạy ứng dụng di động của nhóm.
 
-## 2. Yêu Cầu Tệp danhsachnhom.md
-
-Bên trong thư mục của mỗi nhóm, bắt buộc phải có tệp `danhsachnhom.md` khai báo thông tin các thành viên tham gia dự án theo cấu trúc bảng dưới đây:
-
+**Mẫu nội dung `danhsachnhom.md`:**
 ```markdown
 # Danh Sách Thành Viên - Nhóm [Tên Nhóm]
 
 - **Lớp học phần / Lớp sinh hoạt:** [Tên Lớp]
-- **Tên đề tài / ứng dụng:** [Tên dự án]
+- **Tên đề tài / Ứng dụng:** [Tên dự án]
 - **Giảng viên hướng dẫn:** [Tên Giảng viên]
 
 ## Bảng Thông Tin Thành Viên
 
-| STT | Họ và Tên | Mã Sinh Viên | Vai Trò | Nhiệm Vụ Đảm Nhiệm | Đánh Giá Đóng Góp (%) |
-| --- | --------- | ------------ | ------- | ------------------ | --------------------- |
-| 1   | Nguyễn Văn A | 20210001 | Trưởng nhóm | Thiết kế kiến trúc, backend | 100% |
-| 2   | Trần Thị B   | 20210002 | Thành viên  | Giao diện người dùng (UI/UX)| 100% |
-| 3   | Lê Văn C     | 20210003 | Thành viên  | Tích hợp API và kiểm thử    | 100% |
+| STT | Họ và Tên | Mã Sinh Viên | Lớp Sinh Hoạt | Vai Trò | Nhiệm Vụ Phân Công | Đóng Góp (%) | Email |
+| --- | --------- | ------------ | ------------- | ------- | ------------------- | ------------- | ----- |
+| 1   | Nguyễn Văn A | 20210001 | DHTI15A1HN | Trưởng nhóm | Thiết kế kiến trúc, backend | 100% | a@example.com |
+| 2   | Trần Thị B   | 20210002 | DHTI15A1HN | Thành viên  | Giao diện người dùng (UI/UX) | 100% | b@example.com |
 ```
 
 ---
 
-## 3. Giải Pháp Kỹ Thuật: Thiết Lập Khóa Nhánh main (Branch Protection Rule)
+## 4. Quy Định Về Quản Lý Mã Nguồn Và Tệp Tin
 
-Để ngăn chặn tình trạng các nhóm sinh viên vô tình hoặc cố ý đẩy mã nguồn trực tiếp lên nhánh `main` làm thay đổi cấu trúc chung hoặc xung đột dữ liệu, kho lưu trữ đã kích hoạt quy tắc bảo vệ nhánh (**Branch Protection Rule**) trên GitHub với các cơ chế kỹ thuật sau:
+1. **Phạm vi thao tác:**
+   - Mỗi nhóm chỉ được phép thêm mới, chỉnh sửa các tệp tin nằm trong thư mục của nhóm mình (`<tennhom-tenlop>/`).
+   - Nghiêm cấm chỉnh sửa, đổi tên hoặc xóa các tệp tin, thư mục của các nhóm khác.
+   - Không chỉnh sửa tệp tin gốc của kho lưu trữ (`README.md`, `.gitignore`), trừ trường hợp có thông báo từ giảng viên.
 
-1. **Chặn đẩy mã nguồn trực tiếp (Block Direct Push):**
-   - Toàn bộ thao tác đẩy mã nguồn trực tiếp lên nhánh `main` đều bị hệ thống máy chủ GitHub từ chối tự động.
-   - Nếu thực thi lệnh `git push origin main`, hệ thống sẽ trả về lỗi từ chối cập nhật:
-     ```text
-     remote: error: GH006: Protected branch update failed for refs/heads/main.
-     remote: error: Changes must be made through a pull request.
-     To https://github.com/oanhcuongdo/project-ptuddd.git
-      ! [remote rejected] main -> main (protected branch hook declined)
-     ```
-2. **Bắt buộc tích hợp qua Pull Request (Require Pull Request):**
-   - Mọi đóng góp mã nguồn vào nhánh `main` bắt buộc phải thông qua cơ chế Pull Request xuất phát từ nhánh riêng của nhóm (`nhom/<ten-nhom>-<ten-lop>`).
-3. **Yêu cầu phê duyệt từ Giảng viên (Require Approval):**
-   - Pull Request chỉ có thể được hợp nhất (merge) vào `main` sau khi được Giảng viên/Quản trị viên kiểm tra và phê duyệt tối thiểu 01 lượt (approving review).
-4. **Vô hiệu hóa thao tác nguy hiểm (Block Force Push & Deletion):**
-   - Nghiêm cấm các lệnh ghi đè lịch sử commit (`git push --force`) và hành vi xóa nhánh `main`, đảm bảo tính toàn vẹn và khả năng truy vết mã nguồn.
+2. **Các tệp tin tuyệt đối không đưa lên kho lưu trữ (đã được cấu hình trong `.gitignore`):**
+   - Thư mục biên dịch và thư viện: `node_modules/`, `build/`, `dist/`, `bin/`, `obj/`, `out/`.
+   - Thư mục phụ thuộc nền tảng di động: `.gradle/`, `app/build/`, `Pods/`, `.dart_tool/`, `.pub-cache/`, `.pub/`, `.packages`.
+   - Tệp nhị phân ứng dụng: `*.apk`, `*.aab`, `*.ipa`, `*.dSYM`.
+   - Tệp cấu hình bảo mật cục bộ: `.env`, `.env.*` (ngoại trừ `.env.example`), `*.keystore`, `*.jks`.
+   - Tệp bộ nhớ tạm của IDE/OS: `.vscode/`, `.idea/`, `*.swp`, `*.swo`, `.DS_Store`, `Thumbs.db`.
 
 ---
 
-## 4. Hướng Dẫn Tham Gia Và Thiết Lập Môi Trường Làm Việc
+## 5. Hướng Dẫn Cấu Hình Và Tham Gia Dự Án Dành Cho Sinh Viên
 
-Sinh viên có thể tham gia và đóng góp mã nguồn theo một trong hai mô hình dưới đây tùy thuộc vào cấu hình phân quyền của giảng viên:
+Mọi sinh viên trước khi thực hiện thao tác mã nguồn cần hoàn tất các bước chuẩn bị sau:
 
-### Mô hình 1: Quy trình Fork & Pull Request (Khuyến nghị)
+### 5.1. Chuẩn bị tài khoản GitHub
+- Mỗi sinh viên cần có một tài khoản GitHub cá nhân đang hoạt động.
+- Gửi tài khoản GitHub (Username) cho nhóm trưởng để được thêm làm Collaborator của kho Fork nhóm (xem mục 2.3).
 
-Mô hình này giúp sinh viên quản lý kho mã nguồn độc lập, tránh xung đột trực tiếp với các nhóm khác.
-
-1. **Fork repository:** Truy cập giao diện GitHub [project-ptuddd](https://github.com/oanhcuongdo/project-ptuddd) và chọn nút **Fork** để sao chép kho lưu trữ về tài khoản cá nhân hoặc tổ chức của nhóm.
-2. **Clone kho lưu trữ đã fork về máy cục bộ:**
-   ```bash
-   git clone https://github.com/<tai-khoan-github-cua-ban>/project-ptuddd.git
-   cd project-ptuddd
-   ```
-3. **Thiết lập remote upstream trỏ về kho gốc của giảng viên:**
-   ```bash
-   git remote add upstream https://github.com/oanhcuongdo/project-ptuddd.git
-   ```
-4. **Kiểm tra danh sách remote:**
-   ```bash
-   git remote -v
-   ```
-   Kết quả chuẩn gồm:
-   - `origin`: Trỏ về repository cá nhân/nhóm của sinh viên.
-   - `upstream`: Trỏ về repository gốc của giảng viên.
-
----
-
-### Mô hình 2: Quy trình Cộng Tác Trực Tiếp (Collaborator)
-
-Áp dụng khi giảng viên thêm tài khoản sinh viên vào danh sách cộng tác viên chính thức của repository:
-
-1. Chấp nhận thư mời tham gia (invitation) qua email hoặc thông báo trên GitHub.
-2. Clone trực tiếp kho lưu trữ về máy cục bộ:
-   ```bash
-   git clone https://github.com/oanhcuongdo/project-ptuddd.git
-   cd project-ptuddd
-   ```
-
----
-
-## 5. Quy Trình Commit Và Push Code Đúng Thư Mục Nhóm
-
-Để đảm bảo tính độc lập và toàn vẹn dữ liệu giữa các nhóm, sinh viên bắt buộc phải tuân thủ nghiêm ngặt các bước thao tác sau:
-
-### Bước 1: Cập nhật mã nguồn mới nhất từ kho gốc
-
-Trước khi bắt đầu phiên làm việc mới, luôn đồng bộ dữ liệu mới nhất từ nhánh `main`:
-
+### 5.2. Cấu hình định danh tác giả trên máy cục bộ
+Để lịch sử commit ghi nhận chính xác danh tính sinh viên, mở Terminal / Git Bash và thiết lập:
 ```bash
-# Đối với Mô hình Fork:
-git checkout main
-git fetch upstream
-git merge upstream/main
-git push origin main
-
-# Đối với Mô hình Collaborator:
-git checkout main
-git pull origin main
+git config --global user.name "Họ và Tên Sinh Viên"
+git config --global user.email "email_sinh_vien@example.com"
 ```
+*Lưu ý:* `email_sinh_vien@example.com` phải trùng khớp với email đã đăng ký trên tài khoản GitHub.
 
-### Bước 2: Khởi tạo hoặc chuyển sang nhánh làm việc riêng của nhóm
-
-Mỗi nhóm sinh viên bắt buộc phải làm việc trên nhánh code riêng của nhóm mình theo tiền tố `nhom/<ten-nhom>-<ten-lop>`. Tuyệt đối không thao tác trực tiếp trên nhánh `main`.
-
-#### Trường hợp A: Khởi tạo nhánh nhóm mới (Trưởng nhóm hoặc người tạo đầu tiên)
-
-Từ nhánh `main` đã được đồng bộ mới nhất, tạo nhánh mới và đẩy lên GitHub:
-
+### 5.3. Lấy mã nguồn dự án về máy cục bộ
+- **Nhóm trưởng:** thực hiện theo mục 2.3 (Fork, clone kho Fork, thêm `upstream`).
+- **Thành viên:** clone kho Fork của nhóm trưởng sau khi chấp nhận lời mời Collaborator:
 ```bash
-# 1. Tạo và chuyển sang nhánh riêng của nhóm
-git checkout -b nhom/<ten-nhom>-<ten-lop>
-
-# 2. Đẩy nhánh nhóm lên GitHub để các thành viên khác có thể tải về
-git push -u origin nhom/<ten-nhom>-<ten-lop>
+git clone https://github.com/<github-nhom-truong>/project-ptuddd.git
+cd project-ptuddd
+git checkout --track origin/<ten-nhom>-<ten-lop>
 ```
 
-#### Trường hợp B: Lấy nhánh nhóm đã có về máy (Dành cho các thành viên còn lại)
+---
 
-Khi nhánh của nhóm đã được tạo trên GitHub, các thành viên khác lấy nhánh về máy cục bộ bằng lệnh:
+## 6. Quy Chuẩn Commit Và Push Mã Nguồn Vào Đúng Thư Mục Nhóm
 
+Để đảm bảo không ảnh hưởng đến mã nguồn của nhóm khác và giữ cấu trúc kho lưu trữ chuẩn xác, sinh viên phải tuân thủ nghiêm ngặt quy trình dưới đây.
+
+### 6.1. Quy tắc an toàn bắt buộc khi thao tác tệp
+- **Chỉ làm việc bên trong thư mục nhóm:** Mọi tệp tin mới tạo hoặc sửa đổi bắt buộc phải nằm trong đường dẫn `<tennhom-tenlop>/`.
+- **Không sử dụng lệnh `git add .` ở thư mục gốc:** Thao tác này dễ vô tình đưa cả các tệp ngoài ý muốn hoặc tệp của nhóm khác vào commit.
+- **Luôn chỉ định cụ thể thư mục nhóm khi `git add`:**
+  ```bash
+  git add <tennhom-tenlop>/
+  ```
+
+### 6.2. Trình tự các bước thực hiện commit và push
+
+#### Bước 1: Chuyển sang nhánh riêng của nhóm và đồng bộ mới nhất
 ```bash
-# 1. Cập nhật danh sách nhánh từ remote
-git fetch origin
-
-# 2. Chuyển sang nhánh của nhóm
-git checkout nhom/<ten-nhom>-<ten-lop>
-
-# 3. Kéo mã nguồn mới nhất của nhóm về máy
-git pull origin nhom/<ten-nhom>-<ten-lop>
+git checkout <ten-nhom>-<ten-lop>
+git pull origin <ten-nhom>-<ten-lop>   # origin = kho Fork của nhóm
 ```
 
-### Bước 3: Đặt mã nguồn và tài liệu vào đúng thư mục nhóm
+#### Bước 2: Tạo thư mục nhóm (nếu chưa có)
+Nếu nhóm chưa có thư mục trên kho lưu trữ:
+1. Tạo thư mục:
+   ```bash
+   mkdir nhom01-dhti15a1hn
+   ```
+2. Tạo tệp `danhsachnhom.md` bên trong thư mục, điền đầy đủ và chính xác thông tin các thành viên theo mẫu tại Mục 3.
 
-1. Xác định đúng thư mục của nhóm mình: `<ten-nhom>-<ten-lop>/`.
-2. Kiểm tra tệp `danhsachnhom.md` đã có đầy đủ thông tin thành viên theo mẫu tại Mục 2.
-3. Đặt toàn bộ mã nguồn bài tập vào bên trong thư mục này.
+#### Bước 3: Thêm mã nguồn và tài liệu vào thư mục nhóm
+Đặt toàn bộ thư mục `src/`, `docs/` vào đúng vị trí:
+```text
+nhom01-dhti15a1hn/
+├── danhsachnhom.md
+├── docs/
+└── src/
+```
 
-### Bước 4: Kiểm tra trạng thái thay đổi (Bắt buộc)
+#### Bước 4: Kiểm tra trạng thái tệp tin bằng `git status`
+Trước khi đưa tệp vào staging, chạy lệnh kiểm tra:
+```bash
+git status
+```
+*Yêu cầu kiểm tra:* Danh sách tệp hiển thị ở mục `Untracked files` hoặc `Changes not staged for commit` bắt buộc chỉ bắt đầu bằng `<tennhom-tenlop>/`. Nếu xuất hiện tệp ở ngoài thư mục nhóm, phải di chuyển tệp về đúng vị trí trước khi tiếp tục.
 
-Trước khi đánh dấu tệp thay đổi (stage), chạy lệnh sau để rà soát các tệp bị ảnh hưởng:
+#### Bước 5: Đưa tệp vào khu vực theo dõi (Staging Area)
+Chỉ định rõ ràng thư mục nhóm:
+```bash
+git add nhom01-dhti15a1hn/
+```
 
+Kiểm tra lại lần nữa để đảm bảo chỉ có tệp của nhóm được stage:
 ```bash
 git status
 ```
 
-**Quy tắc an toàn:**
-- Kiểm tra danh sách tệp trong mục *Untracked files* và *Changes not staged for commit*.
-- Bắt buộc tất cả các tệp thay đổi phải nằm bên trong đường dẫn thư mục nhóm `<ten-nhom>-<ten-lop>/`.
-- Xác nhận nhánh hiện tại đang đứng là nhánh riêng của nhóm: `On branch nhom/<ten-nhom>-<ten-lop>`. Nếu đang ở nhánh `main`, phải chuyển ngay sang nhánh nhóm trước khi thực hiện các bước tiếp theo.
-- Nếu phát hiện tệp nằm ngoài thư mục nhóm hoặc tệp rác (build, cache, .env), phải xóa hoặc đưa vào `.gitignore` trước khi tiếp tục.
-
-### Bước 5: Đánh dấu tệp thay đổi (Stage) theo đúng đường dẫn thư mục nhóm
-
-**NGHIÊM CẤM:** Không sử dụng `git add .` hoặc `git add -A` tại thư mục gốc repository khi chưa kiểm tra kỹ.
-
-Chỉ đánh dấu thư mục thuộc quyền quản lý của nhóm:
-
-```bash
-git add <ten-nhom>-<ten-lop>/
-```
-
-Trường hợp vô tình đánh dấu nhầm tệp ngoài thư mục nhóm, sử dụng lệnh hủy đánh dấu:
-
+Trường hợp vô tình đánh dấu nhầm tệp nằm ngoài thư mục nhóm, hủy đánh dấu bằng lệnh:
 ```bash
 git restore --staged <duong-dan-tep-bi-nham>
 ```
 
-### Bước 6: Lưu trữ thay đổi (Commit)
-
-Thực hiện commit với thông điệp rõ ràng theo định dạng chuẩn:
-
-- **Thêm mới tính năng/mã nguồn:**
-  ```bash
-  git commit -m "feat(<ten-nhom>): bo sung module dang nhap va xac thuc"
-  ```
-- **Cập nhật danh sách nhóm / tài liệu:**
-  ```bash
-  git commit -m "docs(<ten-nhom>): cap nhat thong tin thanh vien nhom"
-  ```
-- **Sửa lỗi mã nguồn:**
-  ```bash
-  git commit -m "fix(<ten-nhom>): sua loi hien thi danh sach san pham"
-  ```
-
-### Bước 7: Đẩy mã nguồn lên nhánh riêng của nhóm trên GitHub (Push)
-
-Đẩy toàn bộ thay đổi lên nhánh riêng của nhóm trên kho lưu trữ:
-
+#### Bước 6: Thực hiện commit
+Commit với thông điệp rõ ràng, tuân thủ cấu trúc chuẩn:
 ```bash
-git push origin nhom/<ten-nhom>-<ten-lop>
+git commit -m "feat(nhom01-dhti15a1hn): nop ma nguon man hinh dang nhap va danh sach nhom"
 ```
+Cú pháp thông điệp commit: `<loại-thay-đổi>(<tennhom-tenlop>): <mô-tả-ngắn-gọn>`
+- `feat`: Thêm chức năng mới, mã nguồn mới.
+- `fix`: Sửa lỗi mã nguồn.
+- `docs`: Cập nhật tài liệu, tệp danhsachnhom.md.
 
-### Bước 8: Mở Pull Request (PR)
+#### Bước 7: Đẩy nhánh lên GitHub (Push)
+Đẩy nhánh lên kho Fork của nhóm (`origin`):
+```bash
+git push origin <ten-nhom>-<ten-lop>
+```
+*Ví dụ:* `git push origin nhom01-dhti15a1hn`
 
-1. Truy cập giao diện GitHub của repository.
-2. Hệ thống sẽ hiển thị gợi ý tạo Pull Request từ nhánh vừa push; chọn **Compare & pull request**.
-3. Cấu hình nhánh:
-   - **Base repository:** `oanhcuongdo/project-ptuddd` | **base:** `main`
-   - **Head repository:** Kho của bạn | **compare:** `nhom/<ten-nhom>-<ten-lop>`
-4. Đặt tiêu đề: `[Nộp bài] <Tên Nhóm> - <Tên Lớp>`.
+#### Bước 8: Mở Pull Request (PR) từ kho Fork về nhánh `main` của kho gốc khi nộp bài
+1. Truy cập kho Fork của nhóm trên GitHub, chọn nhánh `<ten-nhom>-<ten-lop>`.
+2. Chọn **Contribute** rồi **Open pull request** (hoặc **Compare & pull request**). Thiết lập:
+   - base repository: `oanhcuongdo/project-ptuddd`, base: `main`.
+   - head repository: kho Fork của nhóm, compare: `<ten-nhom>-<ten-lop>`.
+3. Kiểm tra mục **Files changed** (Các tệp thay đổi): Đảm bảo 100% đường dẫn tệp đều có tiền tố `<tennhom-tenlop>/...`.
+4. Đặt tiêu đề Pull Request:
+   ```text
+   [Nộp bài] <tennhom-tenlop> - <Tên đề tài>
+   ```
 5. Phần nội dung (Description): Mô tả tóm tắt các tính năng đã thực hiện và liệt kê các thành viên nộp bài.
-6. Nhấn **Create pull request**. Giảng viên sẽ tiến hành review và hợp nhất mã nguồn.
+6. Nhấn **Create pull request** để giảng viên đánh giá và phê duyệt.
 
 ---
 
-## 6. Phối Hợp Làm Việc Nội Bộ Trong Nhóm
+## 7. Phối Hợp Làm Việc Nội Bộ Trong Nhóm
 
 Đối với các nhóm có nhiều thành viên cùng phát triển đồng thời:
 
 1. **Phân chia nhánh nội bộ:**
-   - Các thành viên có thể tạo nhánh phụ từ nhánh nhóm: `feature/<ten-nhom>/<tinh-nang>` hoặc `<ten-nhom>-<ten-thanh-vien>` xuất phát từ nhánh `nhom/<ten-nhom>-<ten-lop>`.
-   - Khi hoàn thành tính năng, tiến hành merge vào nhánh chính của nhóm `nhom/<ten-nhom>-<ten-lop>` trước khi gửi Pull Request về kho gốc của giảng viên.
+   - Các thành viên có thể tạo nhánh phụ từ nhánh nhóm theo định dạng: `feature/<tennhom>/<tinh-nang>` xuất phát từ nhánh `<ten-nhom>-<ten-lop>`.
+   - Khi hoàn thành tính năng, merge vào nhánh chính của nhóm trước khi gửi Pull Request về kho gốc của giảng viên.
 2. **Quy tắc giải quyết xung đột (Conflict Resolution):**
    - Không được ghi đè mã nguồn của thành viên khác mà không trao đổi nội bộ.
    - Luôn chạy kiểm thử ứng dụng sau khi giải quyết xung đột mã nguồn.
 
 ---
 
-## 7. Các Lưu Ý Kỹ Thuật Quan Trọng
+## 8. Xử Lý Các Sự Cố Kỹ Thuật Thường Gặp
 
-1. **Phạm vi tác động:** Tuyệt đối không chỉnh sửa, di chuyển hoặc xóa tệp tin, thư mục của các nhóm khác hoặc các tệp cấu hình dùng chung ở thư mục gốc (`README.md`, `.gitignore`).
-2. **Loại trừ tệp rác (.gitignore):** Không đẩy lên repository các thư mục phụ thuộc và tệp tạm thời như:
-   - Thư mục thư viện: `node_modules/`, `Pods/`, `.gradle/`, `vendor/`
-   - Thư mục biên dịch: `build/`, `dist/`, `.dart_tool/`, `bin/`, `obj/`
-   - Tệp môi trường chứa khóa bảo mật: `.env`, `.env.local`, `keystore`, `*.jks`
-   - Tệp cấu hình IDE cục bộ: `.idea/`, `.vscode/`, `*.suo`, `*.user`
-3. **Dung lượng tệp:** Không đẩy các tệp tin có dung lượng vượt quá giới hạn của GitHub (khuyến nghị dưới 50MB/tệp).
+### 8.1. Xử lý khi lỡ thêm (add) tệp nhầm ngoài thư mục nhóm
+Nếu chạy `git status` và thấy có tệp nằm ngoài thư mục nhóm đã bị đưa vào Staging:
+```bash
+# Hủy staging tệp bị nhầm
+git restore --staged <duong-dan-tep-bi-nham>
 
+# Di chuyển tệp về đúng thư mục nhóm
+mv <duong-dan-tep> <tennhom-tenlop>/
+```
 
+### 8.2. Xử lý khi bị từ chối push (rejected - non-fast-forward)
+Khi có thành viên khác trong nhóm đã đẩy commit lên nhánh trước bạn:
+```bash
+git pull --rebase origin <ten-nhom>-<ten-lop>
+git push origin <ten-nhom>-<ten-lop>
+```
+
+### 8.3. Giữ nhánh nhóm luôn cập nhật với nhánh `main` của kho gốc
+```bash
+git checkout <ten-nhom>-<ten-lop>
+git fetch upstream
+git merge upstream/main
+git push origin <ten-nhom>-<ten-lop>
+```
+
+---
+
+## 9. Danh Sách Kiểm Tra Trước Khi Nộp Bài (Checklist)
+
+| STT | Tiêu chí kiểm tra | Yêu cầu kỹ thuật | Trạng thái |
+| :-: | :--- | :--- | :-: |
+| 1 | Nhánh làm việc riêng | Làm việc 100% trên nhánh riêng `<ten-nhom>-<ten-lop>` của kho Fork, không commit trực tiếp vào `main`. | Bắt buộc |
+| 2 | Cú pháp tên thư mục | Đúng định dạng `<tennhom-tenlop>`, toàn bộ chữ thường, không dấu, không khoảng trắng. | Bắt buộc |
+| 3 | Vị trí tệp tin | 100% tệp tin của nhóm nằm trọn vẹn trong thư mục `<tennhom-tenlop>/`. | Bắt buộc |
+| 4 | Tệp `danhsachnhom.md` | Có mặt tại thư mục gốc của nhóm, điền đầy đủ thông tin thành viên và phân công. | Bắt buộc |
+| 5 | Kiểm soát tệp tin rác | Không commit `node_modules/`, `.gradle/`, `Pods/`, `.dart_tool/`, `.env`, tệp tạm IDE, tệp nhị phân (`*.apk`, `*.ipa`). | Bắt buộc |
+| 6 | Lệnh `git add` | Luôn sử dụng `git add <tennhom-tenlop>/`, không `git add .` tại thư mục gốc. | Bắt buộc |
+| 7 | Tính toàn vẹn nhánh chung | Không sửa đổi, không xóa thư mục hoặc mã nguồn của các nhóm khác. | Bắt buộc |
+| 8 | Tiêu đề Pull Request | Đúng định dạng `[Nộp bài] <tennhom-tenlop> - <Tên đề tài>`. | Bắt buộc |
