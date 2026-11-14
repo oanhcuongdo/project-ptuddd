@@ -1,0 +1,43 @@
+name: soroban_kids_app
+description: Ứng dụng học toán Soroban tương tác cho trẻ 4-6 tuổi kết hợp AI trợ lý giọng nói.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # 1. State Management & Dependency Injection
+  flutter_riverpod: ^2.6.1
+  get_it: ^8.0.3
+  equatable: ^2.0.7
+
+  # 2. Local Storage & Preferences
+  shared_preferences: ^2.3.5
+
+  # 3. Audio & Voice Recognition
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.2.0
+  audioplayers: ^6.1.0
+
+  # 4. UI/UX, Charts & Typography
+  fl_chart: ^0.70.2
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/audio/sfx/
+    - assets/audio/voice_prompts/
+    - assets/images/mascot/
+    - assets/images/badges/
