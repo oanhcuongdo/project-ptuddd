@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import '../scoring/pronunciation_scorer.dart';
+import '../scoring/rate.dart';
 
 class User {
   final int id;
@@ -42,10 +43,11 @@ class Stats {
   final List<DayStat> last7Days;
   final Map<String, int> topErrors; // expected phoneme -> count
   final List<Map<String, Object?>> recentAttempts;
+  final Rate? rate; // null until enough attempts
 
   const Stats(this.streak, this.bestStreak, this.secondsToday, this.totalSeconds,
       this.attempts, this.avgScore, this.last7Days, this.topErrors,
-      this.recentAttempts);
+      this.recentAttempts, this.rate);
 }
 
 String dayKey(DateTime d) =>
@@ -277,6 +279,12 @@ class AppDatabase {
       GROUP BY e.expected_phoneme ORDER BY c DESC LIMIT 5''', [userId]);
     final recent = await db.query('attempts',
         where: 'user_id = ?', whereArgs: [userId], orderBy: 'id DESC', limit: 10);
+    final rateScores = await db.query('attempts',
+        columns: ['score'],
+        where: 'user_id = ?',
+        whereArgs: [userId],
+        orderBy: 'id DESC',
+        limit: rateWindow);
 
     return Stats(
       streak.current,
@@ -288,6 +296,7 @@ class AppDatabase {
       last7,
       {for (final r in errs) r['p'] as String: r['c'] as int},
       recent,
+      computeRate([for (final r in rateScores) r['score'] as int]),
     );
   }
 }

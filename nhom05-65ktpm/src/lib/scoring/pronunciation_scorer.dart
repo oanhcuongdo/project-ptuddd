@@ -2,6 +2,9 @@ import 'phonemes.dart';
 
 enum ErrorType { substitution, deletion, insertion }
 
+/// Where a score came from, shown to the learner since the two can differ.
+enum ScoreSource { azure, offline }
+
 class PhonemeError {
   final int wordIndex;
   final String word;
@@ -14,7 +17,9 @@ class PhonemeError {
       this.type, this.atWordEnd);
 
   String get describe => switch (type) {
-        ErrorType.substitution => '/${ipa(expected!)}/ → /${ipa(actual!)}/',
+        ErrorType.substitution => actual == null
+            ? '/${ipa(expected!)}/ chưa chuẩn'
+            : '/${ipa(expected!)}/ → /${ipa(actual!)}/',
         ErrorType.deletion => 'thiếu /${ipa(expected!)}/',
         ErrorType.insertion => 'thừa /${ipa(actual!)}/',
       };
@@ -36,9 +41,11 @@ class PronunciationResult {
   final double confidence;
   final List<WordResult> words;
   final List<PhonemeError> errors;
+  final ScoreSource source;
 
   const PronunciationResult(this.expectedText, this.recognizedText, this.score,
-      this.confidence, this.words, this.errors);
+      this.confidence, this.words, this.errors,
+      {this.source = ScoreSource.offline});
 }
 
 class _Ph {
