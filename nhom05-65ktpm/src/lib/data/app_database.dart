@@ -32,6 +32,13 @@ class DayStat {
   const DayStat(this.date, this.seconds);
 }
 
+class LessonStat {
+  final int attempts;
+  final double avgScore;
+  final int bestScore;
+  const LessonStat(this.attempts, this.avgScore, this.bestScore);
+}
+
 class Stats {
   final int streak;
   final int bestStreak;
@@ -42,10 +49,11 @@ class Stats {
   final List<DayStat> last7Days;
   final Map<String, int> topErrors; // expected phoneme -> count
   final List<Map<String, Object?>> recentAttempts;
+  final Map<String, LessonStat> lessons; // lesson id -> tiến độ từng bài
 
   const Stats(this.streak, this.bestStreak, this.secondsToday, this.totalSeconds,
       this.attempts, this.avgScore, this.last7Days, this.topErrors,
-      this.recentAttempts);
+      this.recentAttempts, this.lessons);
 }
 
 String dayKey(DateTime d) =>
@@ -55,7 +63,8 @@ String dayKey(DateTime d) =>
 /// not practiced yet today (the streak is still alive until midnight).
 ({int current, int best}) computeStreak(Set<String> days, DateTime today) {
   var d = DateTime(today.year, today.month, today.day);
-  if (!days.contains(dayKey(d))) d = d.subtract(const Duration(days: 1));
+  // Lùi theo lịch (không trừ 24h) để không lệch ngày khi đổi giờ DST.
+  if (!days.contains(dayKey(d))) d = DateTime(d.year, d.month, d.day - 1);
   var current = 0;
   while (days.contains(dayKey(d))) {
     current++;
@@ -249,7 +258,8 @@ class AppDatabase {
       WHERE s.user_id = ?''', [userId]);
     final streak = computeStreak(dayRows.map((r) => r['day'] as String).toSet(), now);
 
-    final from = dayKey(now.subtract(const Duration(days: 6)));
+    DateTime daysAgo(int n) => DateTime(now.year, now.month, now.day - n);
+    final from = dayKey(daysAgo(6));
     final perDay = {
       for (final r in await db.rawQuery('''
         SELECT day, SUM(duration_seconds) AS secs FROM practice_sessions
@@ -258,8 +268,7 @@ class AppDatabase {
     };
     final last7 = [
       for (var i = 6; i >= 0; i--)
-        DayStat(dayKey(now.subtract(Duration(days: i))),
-            perDay[dayKey(now.subtract(Duration(days: i)))] ?? 0),
+        DayStat(dayKey(daysAgo(i)), perDay[dayKey(daysAgo(i))] ?? 0),
     ];
 
     final total = (await db.rawQuery(
@@ -278,6 +287,11 @@ class AppDatabase {
     final recent = await db.query('attempts',
         where: 'user_id = ?', whereArgs: [userId], orderBy: 'id DESC', limit: 10);
 
+    final perLesson = await db.rawQuery('''
+      SELECT s.lesson_id AS l, COUNT(*) AS c, AVG(a.score) AS avg, MAX(a.score) AS best
+      FROM attempts a JOIN practice_sessions s ON s.id = a.session_id
+      WHERE a.user_id = ? GROUP BY s.lesson_id''', [userId]);
+
     return Stats(
       streak.current,
       streak.best,
@@ -288,6 +302,11 @@ class AppDatabase {
       last7,
       {for (final r in errs) r['p'] as String: r['c'] as int},
       recent,
+      {
+        for (final r in perLesson)
+          r['l'] as String: LessonStat(r['c'] as int, (r['avg'] as num).toDouble(),
+              r['best'] as int),
+      },
     );
   }
 }
