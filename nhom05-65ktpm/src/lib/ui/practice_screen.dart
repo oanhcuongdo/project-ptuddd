@@ -6,6 +6,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 import '../app_state.dart';
 import '../data/lessons.dart';
+import '../scoring/azure_scorer.dart';
 import '../scoring/feedback.dart';
 import '../scoring/phonemes.dart';
 import '../scoring/pronunciation_scorer.dart';
@@ -98,8 +99,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
     if (!mounted) return;
     setState(() => _heard = r.recognizedWords);
     if (!r.finalResult) return;
-    final result = scorePronunciation(_target, r.recognizedWords,
+    // TODO(F3): pass the WAV recording as `wav:` so Azure scores it.
+    final result = await scoreAttempt(_target, r.recognizedWords,
         confidence: r.hasConfidenceRating ? r.confidence : 0);
+    if (!mounted) return;
     setState(() => _result = result);
     if (r.recognizedWords.trim().isEmpty) return;
     final state = context.read<AppState>();
