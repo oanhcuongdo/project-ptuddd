@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_mode_controller.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const BuddyTalkApp());
+  final themeController = await ThemeModeController.load();
+  runApp(
+    ChangeNotifierProvider.value(
+      value: themeController,
+      child: const BuddyTalkApp(),
+    ),
+  );
 }
 
 class BuddyTalkApp extends StatelessWidget {
@@ -12,12 +21,14 @@ class BuddyTalkApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.watch<ThemeModeController>().themeMode;
+
     return MaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       home: const MainNavigationScreen(),
     );
   }
@@ -47,7 +58,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.psychology, color: AppTheme.primaryColor),
+            Icon(
+              Icons.psychology,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 8),
             Text(
               AppConstants.appName,
@@ -94,29 +108,40 @@ class DisciplineTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Card(
-            color: Colors.orange.shade50,
+            color: colorScheme.tertiaryContainer,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  const Icon(Icons.local_fire_department, size: 48, color: AppTheme.streakOrange),
+                  Icon(
+                    Icons.local_fire_department,
+                    size: 48,
+                    color: colorScheme.onTertiaryContainer,
+                  ),
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         'Chuỗi Kỷ Luật (Streak)',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         '3 ngày liên tiếp rèn luyện',
-                        style: TextStyle(color: Colors.black87),
+                        style: TextStyle(
+                          color: colorScheme.onTertiaryContainer,
+                        ),
                       ),
                     ],
                   ),
@@ -134,14 +159,20 @@ class DisciplineTab extends StatelessWidget {
             child: Column(
               children: const [
                 ListTile(
-                  leading: Icon(Icons.record_voice_over, color: AppTheme.primaryColor),
+                  leading: Icon(
+                    Icons.record_voice_over,
+                    color: AppTheme.primaryColor,
+                  ),
                   title: Text('Thực hành hội thoại 15 phút'),
                   subtitle: Text('Chủ đề: Giới thiệu bản thân & sở thích'),
                   trailing: Icon(Icons.check_box_outline_blank),
                 ),
                 Divider(),
                 ListTile(
-                  leading: Icon(Icons.menu_book, color: AppTheme.secondaryColor),
+                  leading: Icon(
+                    Icons.menu_book,
+                    color: AppTheme.secondaryColor,
+                  ),
                   title: Text('Lưu 3 từ vựng mới vào Sổ tay'),
                   subtitle: Text('Tra cứu và lưu từ mới từ phòng chat'),
                   trailing: Icon(Icons.check_box_outline_blank),
@@ -188,14 +219,14 @@ class ProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeController = context.watch<ThemeModeController>();
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircleAvatar(
-            radius: 40,
-            child: Icon(Icons.person, size: 40),
-          ),
+          const CircleAvatar(radius: 40, child: Icon(Icons.person, size: 40)),
           const SizedBox(height: 12),
           const Text(
             'Phạm Văn Hưng (Trưởng nhóm)',
@@ -203,7 +234,50 @@ class ProfileTab extends StatelessWidget {
           ),
           Text(
             '${AppConstants.groupName} - Lớp ${AppConstants.classCode}',
-            style: const TextStyle(color: Colors.grey),
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Giao diện',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<ThemeMode>(
+                        segments: const [
+                          ButtonSegment(
+                            value: ThemeMode.system,
+                            label: Text('Hệ thống'),
+                          ),
+                          ButtonSegment(
+                            value: ThemeMode.light,
+                            label: Text('Sáng'),
+                          ),
+                          ButtonSegment(
+                            value: ThemeMode.dark,
+                            label: Text('Tối'),
+                          ),
+                        ],
+                        showSelectedIcon: false,
+                        selected: {themeController.themeMode},
+                        onSelectionChanged: (selection) {
+                          themeController.setThemeMode(selection.first);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
