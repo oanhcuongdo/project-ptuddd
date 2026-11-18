@@ -1,0 +1,268 @@
+[
+  {
+    "id": "topic_001",
+    "title": "Giới thiệu bản thân",
+    "title_en": "Self Introduction",
+    "level": "A1",
+    "category": "Daily Life",
+    "description": "Học cách giới thiệu tên, tuổi, quê quán và nghề nghiệp cơ bản trong tiếng Anh.",
+    "description_en": "Learn how to introduce your name, age, hometown and basic occupation in English.",
+    "thumbnail_icon": "👋",
+    "estimated_minutes": 15,
+    "is_completed": false,
+    "conversation_starters": [
+      "Hi! My name is ... What's your name?",
+      "Nice to meet you! Where are you from?",
+      "I'm a student. What do you do for a living?",
+      "How old are you? I'm 20 years old.",
+      "I'm from Vietnam. And you?"
+    ],
+    "sample_dialogues": [
+      {
+        "speaker": "A",
+        "text": "Hi! My name is Lan. What's your name?"
+      },
+      {
+        "speaker": "B",
+        "text": "Hello Lan! I'm Tom. Nice to meet you!"
+      },
+      {
+        "speaker": "A",
+        "text": "Nice to meet you too, Tom! Where are you from?"
+      },
+      {
+        "speaker": "B",
+        "text": "I'm from the United States. How about you?"
+      },
+      {
+        "speaker": "A",
+        "text": "I'm from Vietnam. I'm a student at university."
+      },
+      {
+        "speaker": "B",
+        "text": "That's great! What subject are you studying?"
+      }
+    ],
+    "key_vocabulary": [
+      {"word": "introduce", "meaning": "giới thiệu"},
+      {"word": "occupation", "meaning": "nghề nghiệp"},
+      {"word": "hometown", "meaning": "quê hương"},
+      {"word": "university", "meaning": "trường đại học"},
+      {"word": "student", "meaning": "sinh viên"}
+    ],
+    "created_at": "2026-11-18T00:00:00Z"
+  },
+  {
+    "id": "topic_002",
+    "title": "Mua sắm hàng ngày",
+    "title_en": "Everyday Shopping",
+    "level": "A1",
+    "category": "Daily Life",
+    "description": "Thực hành các câu hỏi và trả lời khi mua sắm tại cửa hàng, chợ hoặc siêu thị.",
+    "description_en": "Practice questions and answers when shopping at a store, market or supermarket.",
+    "thumbnail_icon": "🛒",
+    "estimated_minutes": 15,
+    "is_completed": false,
+    "conversation_starters": [
+      "Excuse me, how much does this cost?",
+      "Do you have this in a different size?",
+      "Can I pay by card?",
+      "Where can I find the vegetables section?",
+      "I'd like to buy two of these, please."
+    ],
+    "sample_dialogues": [
+      {
+        "speaker": "A",
+        "text": "Excuse me, how much is this shirt?"
+      },
+      {
+        "speaker": "B",
+        "text": "It's twenty dollars."
+      },
+      {
+        "speaker": "A",
+        "text": "Do you have it in a medium size?"
+      },
+      {
+        "speaker": "B",
+        "text": "Let me check. Yes, we have medium in blue and white."
+      },
+      {
+        "speaker": "A",
+        "text": "I'll take the blue one. Can I pay by card?"
+      },
+      {
+        "speaker": "B",
+        "text": "Of course! We accept all major credit cards."
+      }
+    ],
+    "key_vocabulary": [
+      {"word": "price", "meaning": "giá cả"},
+      {"word": "size", "meaning": "kích cỡ"},
+      {"word": "discount", "meaning": "giảm giá"},
+      {"word": "receipt", "meaning": "hóa đơn"},
+      {"word": "cashier", "meaning": "thu ngân"}
+    ],
+    "created_at": "2026-11-18T00:00:00Z"
+  },
+  {
+    "id": "topic_003",
+    "title": "Du lịch và Hỏi đường",
+    "title_en": "Travel & Asking for Directions",
+    "level": "A2",
+    "category": "Travel",
+    "description": "Học cách hỏi và chỉ đường, đặt vé, và xử lý các tình huống thường gặp khi đi du lịch.",
+    "description_en": "Learn to ask and give directions, book tickets, and handle common travel situations.",
+    "thumbnail_icon": "✈️",
+    "estimated_minutes": 20,
+    "is_completed": false,
+    "conversation_starters": [
+      "Excuse me, how do I get to the train station?",
+      "Is this the right bus to downtown?",
+      "Could you recommend a good hotel nearby?",
+      "I'd like to book a round-trip ticket, please.",
+      "How far is it from here to the airport?"
+    ],
+    "sample_dialogues": [
+      {
+        "speaker": "A",
+        "text": "Excuse me, I'm looking for the City Museum. Can you help me?"
+      },
+      {
+        "speaker": "B",
+        "text": "Sure! Go straight for two blocks, then turn left at the traffic light."
+      },
+      {
+        "speaker": "A",
+        "text": "Is it far from here? Can I walk?"
+      },
+      {
+        "speaker": "B",
+        "text": "It's about a ten-minute walk. You can't miss it — it's a large white building."
+      },
+      {
+        "speaker": "A",
+        "text": "Thank you so much! Is it open on weekends?"
+      },
+      {
+        "speaker": "B",
+        "text": "Yes, it's open from 9 AM to 5 PM on Saturdays and Sundays."
+      }
+    ],
+    "key_vocabulary": [
+      {"word": "directions", "meaning": "chỉ đường"},
+      {"word": "intersection", "meaning": "ngã tư"},
+      {"word": "landmark", "meaning": "địa điểm nổi bật"},
+      {"word": "round-trip", "meaning": "khứ hồi"},
+      {"word": "departure", "meaning": "khởi hành"}
+    ],
+    "created_at": "2026-11-18T00:00:00Z"
+  },
+  {
+    "id": "topic_004",
+    "title": "Nơi làm việc và Đồng nghiệp",
+    "title_en": "Workplace & Colleagues",
+    "level": "B1",
+    "category": "Work",
+    "description": "Thực hành giao tiếp chuyên nghiệp tại nơi làm việc: trao đổi về dự án, lịch họp và hợp tác nhóm.",
+    "description_en": "Practice professional communication at work: discussing projects, meeting schedules and team collaboration.",
+    "thumbnail_icon": "💼",
+    "estimated_minutes": 25,
+    "is_completed": false,
+    "conversation_starters": [
+      "Could you update me on the project status?",
+      "Are you free for a quick meeting this afternoon?",
+      "I wanted to get your feedback on this report.",
+      "Let's brainstorm some ideas for the new campaign.",
+      "I think we need to reconsider our timeline."
+    ],
+    "sample_dialogues": [
+      {
+        "speaker": "A",
+        "text": "Good morning! Could you give me a quick update on the project?"
+      },
+      {
+        "speaker": "B",
+        "text": "Sure! We've completed the design phase and we're now starting development."
+      },
+      {
+        "speaker": "A",
+        "text": "Great progress! Are we still on track for the deadline next Friday?"
+      },
+      {
+        "speaker": "B",
+        "text": "I think so, but we might need an extra day for testing. Can we discuss this in today's meeting?"
+      },
+      {
+        "speaker": "A",
+        "text": "Absolutely. Let's schedule a team meeting at 3 PM. I'll send out the invite."
+      },
+      {
+        "speaker": "B",
+        "text": "Perfect. I'll prepare a progress report to share with everyone."
+      }
+    ],
+    "key_vocabulary": [
+      {"word": "deadline", "meaning": "thời hạn"},
+      {"word": "collaborate", "meaning": "hợp tác"},
+      {"word": "feedback", "meaning": "phản hồi"},
+      {"word": "proposal", "meaning": "đề xuất"},
+      {"word": "schedule", "meaning": "lịch trình"}
+    ],
+    "created_at": "2026-11-18T00:00:00Z"
+  },
+  {
+    "id": "topic_005",
+    "title": "Sở thích và Thời gian rảnh",
+    "title_en": "Hobbies & Free Time",
+    "level": "A2",
+    "category": "Lifestyle",
+    "description": "Chia sẻ về các hoạt động yêu thích, thể thao và cách dành thời gian rảnh để kết nối tự nhiên hơn với bạn bè.",
+    "description_en": "Share about favorite activities, sports and leisure time to connect more naturally with friends.",
+    "thumbnail_icon": "🎨",
+    "estimated_minutes": 20,
+    "is_completed": false,
+    "conversation_starters": [
+      "What do you like to do in your free time?",
+      "Have you tried any new hobbies recently?",
+      "Do you prefer indoor or outdoor activities?",
+      "What kind of music or movies do you enjoy?",
+      "I've been learning to play the guitar. Do you play any instruments?"
+    ],
+    "sample_dialogues": [
+      {
+        "speaker": "A",
+        "text": "What do you usually do on weekends?"
+      },
+      {
+        "speaker": "B",
+        "text": "I love hiking and photography. I try to explore a new trail every month. How about you?"
+      },
+      {
+        "speaker": "A",
+        "text": "That sounds amazing! I mostly read books and sometimes paint. I'm not very outdoorsy."
+      },
+      {
+        "speaker": "B",
+        "text": "Oh, painting is such a cool hobby! What kind of art do you create?"
+      },
+      {
+        "speaker": "A",
+        "text": "Mostly watercolor landscapes. I find it very relaxing after a busy week."
+      },
+      {
+        "speaker": "B",
+        "text": "I'd love to see your work sometime! Maybe we can visit an art exhibition together."
+      }
+    ],
+    "key_vocabulary": [
+      {"word": "hobby", "meaning": "sở thích"},
+      {"word": "leisure", "meaning": "thời gian nhàn rỗi"},
+      {"word": "outdoor", "meaning": "ngoài trời"},
+      {"word": "exhibition", "meaning": "triển lãm"},
+      {"word": "relaxing", "meaning": "thư giãn"}
+    ],
+    "created_at": "2026-11-18T00:00:00Z"
+  }
+]
+
