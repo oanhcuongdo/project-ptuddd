@@ -5,6 +5,7 @@ import '../app_state.dart';
 import '../data/app_database.dart';
 import '../data/lessons.dart';
 import '../scoring/phonemes.dart';
+import '../scoring/rate.dart';
 import 'practice_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -203,6 +204,14 @@ class _ProgressTab extends StatelessWidget {
           tile('Tổng phút học', _minutes(stats.totalSeconds), Icons.timer),
           tile('Lượt nói', '${stats.attempts}', Icons.mic),
           tile('Điểm TB', stats.avgScore.toStringAsFixed(0), Icons.grade),
+        ]),
+        Row(children: [
+          tile(
+              stats.rate == null
+                  ? 'Trình độ (cần $minAttemptsForRate lượt nói)'
+                  : 'Trình độ · rate ${stats.rate!.value.toStringAsFixed(0)}',
+              stats.rate?.level.label ?? '—',
+              Icons.leaderboard),
         ]),
         const SizedBox(height: 12),
         Text('Thời gian học 7 ngày qua (phút)', style: theme.textTheme.titleMedium),

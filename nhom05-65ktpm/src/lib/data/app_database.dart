@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import '../scoring/pronunciation_scorer.dart';
+import '../scoring/rate.dart';
 
 class User {
   final int id;
@@ -50,10 +51,11 @@ class Stats {
   final Map<String, int> topErrors; // expected phoneme -> count
   final List<Map<String, Object?>> recentAttempts;
   final Map<String, LessonStat> lessons; // lesson id -> tiến độ từng bài
+  final Rate? rate; // null until enough attempts
 
   const Stats(this.streak, this.bestStreak, this.secondsToday, this.totalSeconds,
       this.attempts, this.avgScore, this.last7Days, this.topErrors,
-      this.recentAttempts, this.lessons);
+      this.recentAttempts, this.lessons, this.rate);
 }
 
 String dayKey(DateTime d) =>
@@ -286,6 +288,12 @@ class AppDatabase {
       GROUP BY e.expected_phoneme ORDER BY c DESC LIMIT 5''', [userId]);
     final recent = await db.query('attempts',
         where: 'user_id = ?', whereArgs: [userId], orderBy: 'id DESC', limit: 10);
+    final rateScores = await db.query('attempts',
+        columns: ['score'],
+        where: 'user_id = ?',
+        whereArgs: [userId],
+        orderBy: 'id DESC',
+        limit: rateWindow);
 
     final perLesson = await db.rawQuery('''
       SELECT s.lesson_id AS l, COUNT(*) AS c, AVG(a.score) AS avg, MAX(a.score) AS best
@@ -307,6 +315,7 @@ class AppDatabase {
           r['l'] as String: LessonStat(r['c'] as int, (r['avg'] as num).toDouble(),
               r['best'] as int),
       },
+      computeRate([for (final r in rateScores) r['score'] as int]),
     );
   }
 }
