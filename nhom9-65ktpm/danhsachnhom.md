@@ -8,11 +8,11 @@
 
 | STT | Họ và Tên | Mã Sinh Viên | Lớp Sinh Hoạt | Vai Trò | Nhiệm Vụ Phân Công | Đóng Góp (%) | Email |
 | :-: | :--- | :---: | :---: | :---: | :--- | :---: | :--- |
-| **1** | **Phạm Văn Hưng** | **2351170598** | 65KTPM | Trưởng nhóm | Quản lý dự án, thiết kế kiến trúc hệ thống Feature-First, CSDL SQLite cục bộ kết hợp Firebase Auth và Supabase Realtime | 100% | phamvanhung21122004@gmail.com |
-| **2** | **Trịnh Trung Kiên** | **2251172396** | 65KTPM | Thành viên | Thiết kế UI/UX Material 3, lập trình Phân hệ Thử thách Kỷ luật Giao tiếp hàng ngày & Thanh trượt chọn ngày linh hoạt | 100% | trinhkien0103@gmail.com |
-| **3** | **Đỗ Việt Tiến** | **2251243452** | 65KTPM | Thành viên | Lập trình Phân hệ Kèm Online: Chat Thực chiến 1-1, tích hợp API Dịch tức thì (Translate) và gợi ý mẫu câu thông minh | 100% | tien.dv.65ktpm@gmail.com |
-| **4** | **Cao Đức Đạo** | **2351170581** | 65KTPM | Thành viên | Lập trình Phân hệ Kèm Ngoài đời (Offline Meetup): Tích hợp Google Maps SDK, gợi ý điểm hẹn an toàn và Check-in GPS xác thực | 100% | caoducdao17022005@gmail.com |
-| **5** | **Trương Tuấn Hải** | **2351170590** | 65KTPM | Thành viên | Lập trình thuật toán ghép đôi (Buddy Matching), Bảng xếp hạng cặp đôi, Dashboard Thống kê Chỉ số Tự tin & Kiểm thử | 100% | tuanhaiii2005@gmail.com |
+| **1** | **Phạm Văn Hưng** | **2351170598** | 65KTPM | Trưởng nhóm | Quản lý dự án, Phân hệ Xác thực tài khoản (Firebase Auth), Quản lý hồ sơ người dùng & CSDL Supabase trung tâm | 100% | phamvanhung21122004@gmail.com |
+| **2** | **Trịnh Trung Kiên** | **2251172396** | 65KTPM | Thành viên | Lập trình Phân hệ Kỷ luật cá nhân: Mục tiêu hàng ngày, Streak, Ma trận nhiệt Heatmap & CSDL SQLite cục bộ (Offline-First) | 100% | trinhkien0103@gmail.com |
+| **3** | **Đỗ Việt Tiến** | **2251243452** | 65KTPM | Thành viên | Lập trình Phân hệ Tìm kiếm & Ghép cặp bạn đồng hành (Buddy Matching) theo ngôn ngữ bù trừ và bộ lọc trình độ | 100% | tien.dv.65ktpm@gmail.com |
+| **4** | **Cao Đức Đạo** | **2351170581** | 65KTPM | Thành viên | Lập trình Phân hệ Gợi ý chủ đề & Mẫu câu giao tiếp tình huống (Conversation Topics): Kịch bản mẫu theo cấp độ A1-B2, gợi ý hội thoại | 100% | caoducdao17022005@gmail.com |
+| **5** | **Trương Tuấn Hải** | **2351170590** | 65KTPM | Thành viên | Lập trình Phân hệ Chat 1-1 Realtime (Supabase WebSocket), Tích hợp Dịch tức thì (Google Translate API) & Quản lý buổi luyện tập | 100% | tuanhaiii2005@gmail.com |
 
 ## Hướng Dẫn Thiết Lập Môi Trường Và Khởi Chạy Ứng Dụng
 
