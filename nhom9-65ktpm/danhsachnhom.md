@@ -8,11 +8,11 @@
 
 | STT | Họ và Tên | Mã Sinh Viên | Lớp Sinh Hoạt | Vai Trò | Nhiệm Vụ Phân Công | Đóng Góp (%) | Email |
 | :-: | :--- | :---: | :---: | :---: | :--- | :---: | :--- |
-| **1** | **Phạm Văn Hưng** | **2351170598** | 65KTPM | Trưởng nhóm | Quản lý dự án, Phân hệ Xác thực tài khoản (Firebase Auth), Quản lý hồ sơ người dùng & CSDL Supabase trung tâm | 100% | phamvanhung21122004@gmail.com |
-| **2** | **Trịnh Trung Kiên** | **2251172396** | 65KTPM | Thành viên | Lập trình Phân hệ Kỷ luật cá nhân: Mục tiêu hàng ngày, Streak, Ma trận nhiệt Heatmap & CSDL SQLite cục bộ (Offline-First) | 100% | trinhkien0103@gmail.com |
+| **1** | **Phạm Văn Hưng** | **2351170598** | 65KTPM | Trưởng nhóm | Quản lý dự án, Thiết kế CSDL (Supabase + SQLite), Firebase Auth & Hồ sơ người dùng, Phân hệ Kỷ luật (Mục tiêu hàng ngày, Streak, Heatmap), Phân hệ Chat Realtime (Chat 1-1 & Chat Nhóm học tập) | 100% | phamvanhung21122004@gmail.com |
+| **2** | **Trịnh Trung Kiên** | **2251172396** | 65KTPM | Thành viên | Thiết kế UI/UX Material 3 toàn ứng dụng, Lập trình Phân hệ Quản lý Buổi luyện tập (Practice Sessions): Tạo lịch hẹn, Đồng hồ đếm giờ học (Session Timer 15-30p), Đánh giá buổi học và Thống kê tổng giờ luyện tập | 100% | trinhkien0103@gmail.com |
 | **3** | **Đỗ Việt Tiến** | **2251243452** | 65KTPM | Thành viên | Lập trình Phân hệ Tìm kiếm & Ghép cặp bạn đồng hành (Buddy Matching) theo ngôn ngữ bù trừ và bộ lọc trình độ | 100% | tien.dv.65ktpm@gmail.com |
-| **4** | **Cao Đức Đạo** | **2351170581** | 65KTPM | Thành viên | Lập trình Phân hệ Gợi ý chủ đề & Mẫu câu giao tiếp tình huống (Conversation Topics): Kịch bản mẫu theo cấp độ A1-B2, gợi ý hội thoại | 100% | caoducdao17022005@gmail.com |
-| **5** | **Trương Tuấn Hải** | **2351170590** | 65KTPM | Thành viên | Lập trình Phân hệ Chat 1-1 Realtime (Supabase WebSocket), Tích hợp Dịch tức thì (Google Translate API) & Quản lý buổi luyện tập | 100% | tuanhaiii2005@gmail.com |
+| **4** | **Cao Đức Đạo** | **2351170581** | 65KTPM | Thành viên | Lập trình Phân hệ Gợi ý chủ đề & Kịch bản hội thoại tình huống (Conversation Topics): Kịch bản mẫu theo cấp độ A1-B2, gợi ý câu mở đầu hội thoại | 100% | caoducdao17022005@gmail.com |
+| **5** | **Trương Tuấn Hải** | **2351170590** | 65KTPM | Thành viên | Lập trình Phân hệ Trợ lý Dịch thuật tức thì (Translation Assistant) & Sổ tay từ vựng: Tích hợp API Dịch song ngữ (Trung - Việt - Anh), nút dịch nhanh trong chat, tra cứu và lưu từ mới | 100% | tuanhaiii2005@gmail.com |
 
 ## Hướng Dẫn Thiết Lập Môi Trường Và Khởi Chạy Ứng Dụng
 
