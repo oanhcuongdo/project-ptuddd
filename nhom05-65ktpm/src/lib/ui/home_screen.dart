@@ -114,11 +114,38 @@ class _LessonsTab extends StatelessWidget {
           Card(
             child: ListTile(
               title: Text(l.title),
-              subtitle: Text(l.description),
+              subtitle: _LessonSubtitle(l, stats.lessons[l.id]),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => openLesson(context, l),
             ),
           ),
+      ],
+    );
+  }
+}
+
+class _LessonSubtitle extends StatelessWidget {
+  final Lesson lesson;
+  final LessonStat? stat;
+  const _LessonSubtitle(this.lesson, this.stat);
+
+  @override
+  Widget build(BuildContext context) {
+    final s = stat;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(lesson.description),
+        const SizedBox(height: 6),
+        if (s == null)
+          Text('Chưa luyện • ${lesson.items.length} mục',
+              style: Theme.of(context).textTheme.bodySmall)
+        else ...[
+          LinearProgressIndicator(value: s.avgScore / 100),
+          const SizedBox(height: 2),
+          Text('${s.attempts} lượt • TB ${s.avgScore.round()} • cao nhất ${s.bestScore}',
+              style: Theme.of(context).textTheme.bodySmall),
+        ],
       ],
     );
   }

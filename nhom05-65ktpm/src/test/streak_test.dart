@@ -27,4 +27,10 @@ void main() {
   test('dayKey pads', () {
     expect(dayKey(DateTime(2026, 1, 5)), '2026-01-05');
   });
+
+  test('streak qua mốc nửa đêm khi giờ hiện tại sát 0h (không lệch DST)', () {
+    final late = DateTime(2026, 3, 8, 23, 59); // ngày chuyển DST ở nhiều múi giờ
+    final s = computeStreak({'2026-03-06', '2026-03-07'}, late);
+    expect(s, (current: 2, best: 2));
+  });
 }

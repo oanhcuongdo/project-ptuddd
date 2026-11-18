@@ -50,22 +50,23 @@ const _generic = Suggestion('Luyện nghe – nhắc lại',
     'Nhấn "Nghe mẫu", nói chậm từng từ rồi tăng dần tốc độ.',
     [], 'daily');
 
-/// Turns phoneme errors into at most [max] distinct, prioritized suggestions.
+/// Turns phoneme errors into at most [max] distinct suggestions, ordered by
+/// how often each error occurs (ties keep first-seen order).
 List<Suggestion> suggestionsFor(PronunciationResult r, {int max = 3}) {
-  final out = <Suggestion>[];
-  void add(Suggestion s) {
-    if (!out.contains(s) && out.length < max) out.add(s);
-  }
-
+  final count = <Suggestion, int>{}; // LinkedHashMap giữ thứ tự xuất hiện đầu tiên
   for (final e in r.errors) {
-    if (e.type == ErrorType.deletion && e.atWordEnd) {
-      add(_finalConsonant);
-    } else if (e.expected != null && _byPhoneme[e.expected] != null) {
-      add(_byPhoneme[e.expected]!);
-    }
+    final s = e.type == ErrorType.deletion && e.atWordEnd
+        ? _finalConsonant
+        : _byPhoneme[e.expected];
+    if (s != null) count[s] = (count[s] ?? 0) + 1;
   }
-  if (out.isEmpty && r.score < 90) add(_generic);
-  return out;
+  final order = count.keys.toList(); // List.sort của Dart không ổn định → tie-break theo vị trí
+  final out = [...order]..sort((a, b) {
+      final c = count[b]!.compareTo(count[a]!);
+      return c != 0 ? c : order.indexOf(a).compareTo(order.indexOf(b));
+    });
+  if (out.isEmpty && r.score < 90) out.add(_generic);
+  return out.take(max).toList();
 }
 
 String verdict(int score) => switch (score) {

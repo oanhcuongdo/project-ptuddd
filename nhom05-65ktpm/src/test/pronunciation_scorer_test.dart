@@ -86,4 +86,10 @@ void main() {
   test('ipa display', () {
     expect(ipaOfText('think'), '/θɪŋk/');
   });
+
+  test('gợi ý xếp theo tần suất lỗi, lỗi lặp nhiều nhất lên đầu', () {
+    // 1 lỗi R/L, 2 lỗi TH → bài TH phải đứng trước bài R/L.
+    final r = scorePronunciation('right think three', 'light sink tree');
+    expect(suggestionsFor(r).map((s) => s.lessonId).take(2), ['th', 'rl']);
+  });
 }
