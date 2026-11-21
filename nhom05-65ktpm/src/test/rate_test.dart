@@ -3,7 +3,22 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('no rate before the minimum attempts', () {
+    expect(computeRate(const []), isNull);
     expect(computeRate(List.filled(minAttemptsForRate - 1, 90)), isNull);
+  });
+
+  test('exact threshold at minAttemptsForRate produces valid rate', () {
+    final r = computeRate(List.filled(minAttemptsForRate, 90));
+    expect(r, isNotNull);
+    expect(r!.value, 90);
+    expect(r.attempts, minAttemptsForRate);
+    expect(r.level, Level.advanced);
+  });
+
+  test('handles perfect 100 scores across window', () {
+    final r = computeRate(List.filled(rateWindow, 100))!;
+    expect(r.value, 100);
+    expect(r.level, Level.advanced);
   });
 
   test('averages only the latest window', () {
