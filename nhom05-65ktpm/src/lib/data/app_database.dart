@@ -5,6 +5,7 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import '../scoring/pronunciation_scorer.dart';
 import '../scoring/rate.dart';
+import '../scoring/weak_sounds.dart';
 
 class User {
   final int id;
@@ -48,14 +49,14 @@ class Stats {
   final int attempts;
   final double avgScore;
   final List<DayStat> last7Days;
-  final Map<String, int> topErrors; // expected phoneme -> count
+  final List<WeakSound> weakSounds; // âm hay sai nhất (theo tỉ lệ) trong các lượt gần đây
   final List<Map<String, Object?>> recentAttempts;
   final Map<String, LessonStat> lessons; // lesson id -> tiến độ từng bài
   final Rate? rate; // null until enough attempts
   final bool practicedToday; // hôm nay đã có ít nhất một lượt nói
 
   const Stats(this.streak, this.bestStreak, this.secondsToday, this.totalSeconds,
-      this.attempts, this.avgScore, this.last7Days, this.topErrors,
+      this.attempts, this.avgScore, this.last7Days, this.weakSounds,
       this.recentAttempts, this.lessons, this.rate, this.practicedToday);
 }
 
@@ -86,6 +87,9 @@ String dayKey(DateTime d) =>
   }
   return (current: current, best: best);
 }
+
+/// Số lượt nói gần nhất dùng để tính âm hay sai.
+const weakWindow = 50;
 
 class AppDatabase {
   final Database db;
@@ -282,11 +286,15 @@ class AppDatabase {
             'SELECT COUNT(*) AS c, AVG(score) AS avg FROM attempts WHERE user_id = ?',
             [userId]))
         .single;
-    final errs = await db.rawQuery('''
-      SELECT e.expected_phoneme AS p, COUNT(*) AS c FROM phoneme_errors e
-      JOIN attempts a ON a.id = e.attempt_id
-      WHERE a.user_id = ? AND e.expected_phoneme IS NOT NULL
-      GROUP BY e.expected_phoneme ORDER BY c DESC LIMIT 5''', [userId]);
+    // Chỉ xét $weakWindow lượt nói gần nhất để phản ánh trình độ hiện tại.
+    final windowTexts = await db.rawQuery(
+        'SELECT expected_text AS t FROM attempts WHERE user_id = ? ORDER BY id DESC LIMIT $weakWindow',
+        [userId]);
+    final windowErrors = await db.rawQuery('''
+      SELECT expected_phoneme AS p FROM phoneme_errors
+      WHERE expected_phoneme IS NOT NULL AND attempt_id IN (
+        SELECT id FROM attempts WHERE user_id = ? ORDER BY id DESC LIMIT $weakWindow)''',
+        [userId]);
     final recent = await db.query('attempts',
         where: 'user_id = ?', whereArgs: [userId], orderBy: 'id DESC', limit: 10);
     final rateScores = await db.query('attempts',
@@ -309,7 +317,8 @@ class AppDatabase {
       agg['c'] as int,
       (agg['avg'] as num?)?.toDouble() ?? 0,
       last7,
-      {for (final r in errs) r['p'] as String: r['c'] as int},
+      computeWeakSounds([for (final r in windowTexts) r['t'] as String],
+          [for (final r in windowErrors) r['p'] as String]),
       recent,
       {
         for (final r in perLesson)

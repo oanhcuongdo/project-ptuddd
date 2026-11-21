@@ -5,8 +5,10 @@ import '../app_state.dart';
 import '../data/active_timer.dart';
 import '../data/app_database.dart';
 import '../data/lessons.dart';
+import '../scoring/feedback.dart';
 import '../scoring/phonemes.dart';
 import '../scoring/rate.dart';
+import '../scoring/weak_sounds.dart';
 import 'practice_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -249,14 +251,20 @@ class _ProgressTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Text('Âm hay sai nhất', style: theme.textTheme.titleMedium),
-        if (stats.topErrors.isEmpty)
-          const Padding(padding: EdgeInsets.all(8), child: Text('Chưa có dữ liệu.')),
-        for (final e in stats.topErrors.entries)
+        Text('Âm hay sai nhất (${stats.attempts < weakWindow ? 'tất cả' : '$weakWindow'} lượt gần đây)',
+            style: theme.textTheme.titleMedium),
+        if (stats.weakSounds.isEmpty)
+          const Padding(
+              padding: EdgeInsets.all(8),
+              child: Text('Chưa đủ dữ liệu (mỗi âm cần gặp ít nhất 3 lần).')),
+        for (final w in stats.weakSounds)
           ListTile(
             dense: true,
-            leading: Text('/${ipa(e.key)}/', style: theme.textTheme.titleLarge),
-            title: Text('${e.value} lần'),
+            leading: Text('/${ipa(w.phoneme)}/', style: theme.textTheme.titleLarge),
+            title: Text('Sai ${(w.rate * 100).round()}% (${w.errors}/${w.seen} lần)'),
+            subtitle: LinearProgressIndicator(value: w.rate),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showWeakSound(context, w),
           ),
         const SizedBox(height: 8),
         Text('Lịch sử gần đây', style: theme.textTheme.titleMedium),
@@ -270,6 +278,46 @@ class _ProgressTab extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Mẹo phát âm cho một âm hay sai, kèm nút nhảy sang bài luyện tương ứng.
+void _showWeakSound(BuildContext context, WeakSound w) {
+  final s = suggestionForPhoneme(w.phoneme);
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheet) => Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(s?.title ?? 'Âm /${ipa(w.phoneme)}/', style: Theme.of(sheet).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text('Bạn sai ${w.errors}/${w.seen} lần âm này.'),
+          const SizedBox(height: 8),
+          Text(s?.tip ?? 'Chưa có mẹo riêng cho âm này. Hãy nghe mẫu và nói chậm từng từ.'),
+          if (s != null && s.practiceWords.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text('Cặp từ cần phân biệt: ${s.practiceWords.join(', ')}'),
+          ],
+          if (s != null) ...[
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton(
+                onPressed: () {
+                  Navigator.pop(sheet);
+                  openLesson(context, lessonById(s.lessonId));
+                },
+                child: Text('Luyện bài "${lessonById(s.lessonId).title}"'),
+              ),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 class _SettingsTab extends StatelessWidget {

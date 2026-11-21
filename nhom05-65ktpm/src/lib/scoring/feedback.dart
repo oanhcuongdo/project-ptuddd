@@ -42,6 +42,9 @@ const _byPhoneme = <String, Suggestion>{
       ['see – she', 'sell – shell', 'sip – ship'], 'ssh'),
 };
 
+/// Mẹo + cặp từ + bài luyện cho một âm; null nếu chưa có mẹo cho âm đó.
+Suggestion? suggestionForPhoneme(String phoneme) => _byPhoneme[phoneme];
+
 const _finalConsonant = Suggestion('Phụ âm cuối',
     'Bạn đang nuốt âm cuối. Kết thúc từ bằng cách bật rõ phụ âm, đặc biệt /s/, /z/ ở số nhiều và /d/, /t/ ở quá khứ.',
     ['cat – cats', 'play – played', 'dog – dogs'], 'final');
