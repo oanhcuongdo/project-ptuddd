@@ -5,6 +5,7 @@ import '../app_state.dart';
 import '../data/active_timer.dart';
 import '../data/app_database.dart';
 import '../data/lessons.dart';
+import '../data/recommend.dart';
 import '../scoring/feedback.dart';
 import '../scoring/phonemes.dart';
 import '../scoring/rate.dart';
@@ -110,10 +111,22 @@ class _LessonsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rec = recommendLesson(stats.weakSounds, stats.lessons);
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
         _TodayCard(user, stats),
+        if (rec != null)
+          Card(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: ListTile(
+              leading: const Icon(Icons.auto_awesome),
+              title: Text('Gợi ý hôm nay: ${rec.lesson.title}'),
+              subtitle: Text(rec.reason),
+              trailing: FilledButton(
+                  onPressed: () => openLesson(context, rec.lesson), child: const Text('Luyện')),
+            ),
+          ),
         for (final l in lessons)
           Card(
             child: ListTile(
