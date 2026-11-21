@@ -11,7 +11,7 @@ AI đọc [AGENTS.md](AGENTS.md) trước khi sửa mã, rồi đọc issue đư
 | Thành phần | Giá trị / vị trí | Trạng thái |
 | --- | --- | --- |
 | Firebase project | `healthy-life-group-6` | Đã kiểm tra quyền truy cập bằng Firebase CLI của nhóm trưởng |
-| Android package/application ID | `vn.edu.nhom06.healthylife` | Đã đăng ký trong Firebase; giữ nguyên trên máy mọi thành viên |
+| Android package/application ID | `vn.edu.nhom06.healthylife` | Đã đăng ký trong Firebase cùng SHA-1/SHA-256 debug của máy nhóm trưởng |
 | Firebase Android app ID | `1:278080814801:android:ef35595c375e0d627f0ff0` | Đã tạo qua FlutterFire |
 | Firebase Web app ID | `1:278080814801:web:6d89f878b424c4297f0ff0` | Đã tạo qua FlutterFire |
 | Firebase Authentication | Email/Password, Web `localhost` | Đã bật và xác minh bằng tài khoản thử tạm |
@@ -65,6 +65,8 @@ flutter run -d chrome --web-port=5000
 Android: chạy `flutter devices`, bật USB debugging nếu dùng điện thoại, rồi `flutter run -d <device-id>`. Android Studio cần JDK/SDK tương thích với cấu hình Gradle có sẵn; chạy theo chẩn đoán flutter doctor, không commit đường dẫn máy vào `android/local.properties`.
 
 **Kết quả hiện tại phải là Hello World, không phải màn hình đăng nhập.** Chạy được khung này chưa kiểm chứng Firebase Auth, Supabase JWT/RLS hoặc luồng nghiệp vụ. Chưa có bài kiểm thử nghiệp vụ trong khung; khi thực hiện issue, thêm và chạy kiểm thử phù hợp, không ghi “tests passed” nếu chưa có test.
+
+Kiểm tra trên máy nhóm trưởng đã qua `flutter analyze --no-pub`, `flutter build web --no-pub` và `flutter build apk --debug --no-pub`. APK debug được tạo cục bộ trong `build/app/outputs/flutter-apk/`.
 
 Thành viên chỉ phát triển ứng dụng **không cần đăng nhập Firebase CLI hay Supabase CLI** và không cần quyền quản trị cloud. Firebase/Supabase xử lý đăng nhập của người dùng ứng dụng sau khi Trưởng hoàn thiện issue #1. Nếu cấu hình mới chưa xuất hiện sau pull, kiểm tra với nhóm trưởng rằng các file đã được commit/push vào nhánh nhóm; không tự tạo file giả hoặc project thay thế.
 
@@ -142,6 +144,7 @@ Chưa push, mở/merge PR hoặc deploy cloud cho đến khi tôi yêu cầu.
 - Thiếu file config sau clone: xác nhận đã nhận đúng commit trên nhánh nhóm; không tạo file FirebaseOptions rỗng để qua build.
 - Chưa nhận lệnh flutterfire: chỉ người cập nhật cấu hình mới cần Firebase CLI/FlutterFire CLI. Windows có thể dùng `& "$env:LOCALAPPDATA/Pub/Cache/bin/flutterfire.bat" ...` nếu Pub Cache bin chưa nằm trong PATH. Thành viên chạy khung không cần cài CLI này.
 - Google sign-in lỗi trên Android: kiểm tra provider, SHA của máy, Android ID và OAuth client; không tự đổi package hoặc dùng keystore người khác.
+- Android trên Windows báo `different roots` hoặc `Could not close incremental caches`: lấy bản mới của nhánh nhóm. Gradle đã tắt biên dịch Kotlin tăng dần để xử lý trường hợp thư mục repo và Pub Cache nằm trên hai ổ đĩa khác nhau. Nếu còn cache build cũ, chạy `flutter clean`, `flutter pub get`, rồi build lại trong `src`. [Tài liệu Kotlin](https://kotlinlang.org/docs/gradle-compilation-and-caches.html#incremental-compilation).
 - Web đăng nhập báo unauthorized-domain: nhóm trưởng kiểm tra authorized domains; không sửa sang Firebase project khác.
 - Supabase 401/403/RLS denied: kiểm tra publishable key/URL, Firebase JWT/claim, third-party integration và policies với Trưởng/Hà. Truy cập chưa được phép phải bị từ chối, không phải lỗi cần chữa bằng cách mở dữ liệu.
 - Chưa có bảng hoặc bucket: đó là phần issue #7 cần triển khai, không phải lý do tự tạo schema riêng trên project khác.
