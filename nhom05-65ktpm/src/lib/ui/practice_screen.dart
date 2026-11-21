@@ -5,6 +5,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import '../app_state.dart';
+import '../data/active_timer.dart';
 import '../data/lessons.dart';
 import '../scoring/azure_scorer.dart';
 import '../scoring/feedback.dart';
@@ -14,7 +15,7 @@ import '../scoring/pronunciation_scorer.dart';
 class PracticeScreen extends StatefulWidget {
   final Lesson lesson;
   final int sessionId;
-  final Stopwatch watch;
+  final ActiveTimer watch;
 
   const PracticeScreen(
       {super.key, required this.lesson, required this.sessionId, required this.watch});
@@ -75,6 +76,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   Future<void> _listen() async {
+    widget.watch.touch();
     await _tts.stop();
     setState(() {
       _heard = '';
@@ -108,10 +110,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
     final state = context.read<AppState>();
     await state.db.saveAttempt(state.user!.id, widget.sessionId, result);
     // Persist time so far in case the app is killed mid-session.
-    await state.db.endSession(widget.sessionId, widget.watch.elapsed.inSeconds);
+    await state.db.endSession(widget.sessionId, widget.watch.elapsedSeconds());
   }
 
   void _go(int delta) => setState(() {
+        widget.watch.touch();
         _index = (_index + delta) % widget.lesson.items.length;
         _heard = '';
         _result = null;
@@ -135,7 +138,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
           const SizedBox(height: 8),
           Center(
             child: TextButton.icon(
-              onPressed: () => _tts.speak(_target),
+              onPressed: () {
+                widget.watch.touch();
+                _tts.speak(_target);
+              },
               icon: const Icon(Icons.volume_up),
               label: const Text('Nghe mẫu'),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app_state.dart';
+import '../data/active_timer.dart';
 import '../data/app_database.dart';
 import '../data/lessons.dart';
 import '../scoring/phonemes.dart';
@@ -160,10 +161,10 @@ Future<void> openLesson(BuildContext context, Lesson l) async {
   while (next != null) {
     final lesson = next;
     final sessionId = await state.db.startSession(state.user!.id, lesson.id);
-    final watch = Stopwatch()..start();
+    final watch = ActiveTimer();
     final result = await nav.push<String>(MaterialPageRoute(
         builder: (_) => PracticeScreen(lesson: lesson, sessionId: sessionId, watch: watch)));
-    await state.db.endSession(sessionId, watch.elapsed.inSeconds);
+    await state.db.endSession(sessionId, watch.elapsedSeconds());
     next = result == null ? null : lessonById(result);
   }
   await state.refresh();
