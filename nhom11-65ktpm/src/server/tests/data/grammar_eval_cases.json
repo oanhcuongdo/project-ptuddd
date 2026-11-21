@@ -1,0 +1,20 @@
+[
+  {"id": "ok-01", "question": "你是学生吗？", "answer": "我是学生。", "expect_correct": true, "expect_error_types": []},
+  {"id": "ok-02", "question": "你叫什么名字？", "answer": "我叫小明。", "expect_correct": true, "expect_error_types": []},
+  {"id": "ok-03", "question": "你家有几口人？", "answer": "我家有四口人。", "expect_correct": true, "expect_error_types": []},
+  {"id": "ok-04", "question": "你昨天去哪儿了？", "answer": "我昨天去商店了。", "expect_correct": true, "expect_error_types": []},
+  {"id": "ok-05", "question": "你喜欢喝茶吗？", "answer": "我很喜欢喝茶。", "expect_correct": true, "expect_error_types": []},
+  {"id": "shi-01", "question": "你是学生吗？", "answer": "我学生。", "expect_correct": false, "expect_error_types": ["verb_usage", "missing_component"]},
+  {"id": "shi-adj-01", "question": "你好吗？", "answer": "我是很好。", "expect_correct": false, "expect_error_types": ["verb_usage", "redundant_word"]},
+  {"id": "order-time-01", "question": "你什么时候去学校？", "answer": "我去学校明天。", "expect_correct": false, "expect_error_types": ["word_order"]},
+  {"id": "order-place-01", "question": "你在哪儿学习汉语？", "answer": "我学习汉语在学校。", "expect_correct": false, "expect_error_types": ["word_order"]},
+  {"id": "order-adj-01", "question": "你有什么书？", "answer": "我有一本书中文。", "expect_correct": false, "expect_error_types": ["word_order"]},
+  {"id": "mw-01", "question": "你家有几口人？", "answer": "我家有四人。", "expect_correct": false, "expect_error_types": ["measure_word"]},
+  {"id": "mw-02", "question": "你买了什么？", "answer": "我买了三苹果。", "expect_correct": false, "expect_error_types": ["measure_word"]},
+  {"id": "bu-mei-01", "question": "你昨天去商店了吗？", "answer": "我昨天不去商店。", "expect_correct": false, "expect_error_types": ["bu_mei_confusion"]},
+  {"id": "bu-mei-02", "question": "你有哥哥吗？", "answer": "我不有哥哥。", "expect_correct": false, "expect_error_types": ["bu_mei_confusion"]},
+  {"id": "le-01", "question": "你昨天做什么了？", "answer": "我昨天看电影。", "expect_correct": false, "expect_error_types": ["missing_le"]},
+  {"id": "ma-01", "question": "我是老师。你呢？", "answer": "你是老师？", "expect_correct": false, "expect_error_types": ["missing_particle"]},
+  {"id": "de-01", "question": "这是谁的书？", "answer": "这是我书。", "expect_correct": false, "expect_error_types": ["missing_particle"]},
+  {"id": "ye-01", "question": "我是学生。你呢？", "answer": "我是也学生。", "expect_correct": false, "expect_error_types": ["word_order", "adverb_usage"]}
+]

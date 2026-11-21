@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-greetings-01",
+  "level": "HSK1",
+  "order": 1,
+  "title": "Chào hỏi cơ bản",
+  "description": "Làm quen với lời chào và một số từ dùng khi giới thiệu bản thân.",
+  "vocabulary": [
+    {
+      "id": "ni-hao",
+      "hanzi": "你好",
+      "pinyin": "nǐ hǎo",
+      "hanViet": "nhĩ hảo",
+      "meaningVi": "xin chào",
+      "example": {
+        "hanzi": "你好！",
+        "pinyin": "Nǐ hǎo!",
+        "meaningVi": "Xin chào!"
+      }
+    },
+    {
+      "id": "ni",
+      "hanzi": "你",
+      "pinyin": "nǐ",
+      "hanViet": "nhĩ",
+      "meaningVi": "bạn",
+      "example": {
+        "hanzi": "你好吗？",
+        "pinyin": "Nǐ hǎo ma?",
+        "meaningVi": "Bạn khỏe không?"
+      }
+    },
+    {
+      "id": "wo",
+      "hanzi": "我",
+      "pinyin": "wǒ",
+      "hanViet": "ngã",
+      "meaningVi": "tôi",
+      "example": {
+        "hanzi": "我是学生。",
+        "pinyin": "Wǒ shì xuésheng.",
+        "meaningVi": "Tôi là học sinh."
+      }
+    },
+    {
+      "id": "hao",
+      "hanzi": "好",
+      "pinyin": "hǎo",
+      "hanViet": "hảo",
+      "meaningVi": "tốt; khỏe",
+      "example": {
+        "hanzi": "我很好。",
+        "pinyin": "Wǒ hěn hǎo.",
+        "meaningVi": "Tôi rất khỏe."
+      }
+    },
+    {
+      "id": "shi",
+      "hanzi": "是",
+      "pinyin": "shì",
+      "hanViet": "thị",
+      "meaningVi": "là",
+      "example": {
+        "hanzi": "我是学生。",
+        "pinyin": "Wǒ shì xuésheng.",
+        "meaningVi": "Tôi là học sinh."
+      }
+    },
+    {
+      "id": "xue-sheng",
+      "hanzi": "学生",
+      "pinyin": "xuésheng",
+      "hanViet": "học sinh",
+      "meaningVi": "học sinh; sinh viên",
+      "example": {
+        "hanzi": "我是学生。",
+        "pinyin": "Wǒ shì xuésheng.",
+        "meaningVi": "Tôi là học sinh."
+      }
+    },
+    {
+      "id": "lao-shi",
+      "hanzi": "老师",
+      "pinyin": "lǎoshī",
+      "hanViet": "lão sư",
+      "meaningVi": "giáo viên",
+      "example": {
+        "hanzi": "老师好！",
+        "pinyin": "Lǎoshī hǎo!",
+        "meaningVi": "Em chào thầy/cô!"
+      }
+    },
+    {
+      "id": "xie-xie",
+      "hanzi": "谢谢",
+      "pinyin": "xièxie",
+      "hanViet": "tạ tạ",
+      "meaningVi": "cảm ơn",
+      "example": {
+        "hanzi": "谢谢你！",
+        "pinyin": "Xièxie nǐ!",
+        "meaningVi": "Cảm ơn bạn!"
+      }
+    },
+    {
+      "id": "zai-jian",
+      "hanzi": "再见",
+      "pinyin": "zàijiàn",
+      "hanViet": "tái kiến",
+      "meaningVi": "tạm biệt",
+      "example": {
+        "hanzi": "老师，再见！",
+        "pinyin": "Lǎoshī, zàijiàn!",
+        "meaningVi": "Em chào tạm biệt thầy/cô!"
+      }
+    }
+  ]
+}
