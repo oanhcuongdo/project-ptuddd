@@ -2,7 +2,7 @@
 
 ## Bắt đầu tại đây — dành cho thành viên và AI của thành viên
 
-**Đây là khung dự án cùng cấu hình dùng chung, chưa có chức năng HealthyLife.** `lib/main.dart` chỉ hiển thị Hello World. Không có bootstrap Firebase/Supabase, màn hình đăng nhập, database schema, RLS, bucket ảnh hay nghiệp vụ được triển khai trong lần chuẩn bị này. Các phần đó do từng người thực hiện theo issue, không làm thay nhau.
+**Issue #1 bổ sung màn hình đăng nhập và phiên Firebase trên Android/Web.** Ứng dụng mở màn hình đăng nhập khi chưa có phiên và hiển thị quyền truy cập Supabase sau khi đăng nhập. Schema, RLS, Storage và các màn hình nghiệp vụ thuộc các issue tiếp theo.
 
 AI đọc [AGENTS.md](AGENTS.md) trước khi sửa mã, rồi đọc issue được giao và các phần liên quan trong README. Các mục 1–11 bên dưới là **đặc tả/kế hoạch**, không phải danh sách tính năng đã hoàn thành.
 
@@ -14,15 +14,15 @@ AI đọc [AGENTS.md](AGENTS.md) trước khi sửa mã, rồi đọc issue đư
 | Android package/application ID | `vn.edu.nhom06.healthylife` | Đã đăng ký trong Firebase cùng SHA-1/SHA-256 debug của máy nhóm trưởng |
 | Firebase Android app ID | `1:278080814801:android:ef35595c375e0d627f0ff0` | Đã tạo qua FlutterFire |
 | Firebase Web app ID | `1:278080814801:web:6d89f878b424c4297f0ff0` | Đã tạo qua FlutterFire |
-| Firebase Authentication | Email/Password, Web `localhost` | Đã bật và xác minh bằng tài khoản thử tạm |
-| Cấu hình Firebase Flutter | [lib/firebase_options.dart](lib/firebase_options.dart) | File sinh tự động cho Android/Web; chưa gọi khởi tạo |
-| Cấu hình Firebase Android | [android/app/google-services.json](android/app/google-services.json) | Dùng chung, đúng package; plugin Google Services đã khai báo ở Gradle |
+| Firebase Authentication | Email/Password, Google Sign-In, Web `localhost` | Hai phương thức đã bật. Web phát triển dùng `localhost` |
+| Cấu hình Firebase Flutter | [lib/firebase_options.dart](lib/firebase_options.dart) | Dùng để khởi tạo Firebase trên Android/Web |
+| Cấu hình Firebase Android | [android/app/google-services.json](android/app/google-services.json) | Đã cập nhật OAuth client sau khi bật Google. Gradle tạo `default_web_client_id` từ file này |
 | Liên kết FlutterFire | [firebase.json](firebase.json) | Trỏ về đúng Firebase project/app của nhóm |
 | Supabase project ref | `vspyxavkdqqlpxodvqvb` | Project dùng chung của nhóm |
 | Supabase URL | `https://vspyxavkdqqlpxodvqvb.supabase.co` | Đã kiểm tra endpoint Auth phản hồi HTTP 200 với publishable key |
 | Supabase client config | [lib/core/backend_config.dart](lib/core/backend_config.dart) | Có URL, publishable key và Firebase Project ID; chỉ là hằng cấu hình |
 | Supabase Third-party Auth | Firebase project `healthy-life-group-6` | Đã xác minh JWT Firebase có role `authenticated` được chấp nhận và chữ ký sai bị từ chối |
-| Dependencies | `firebase_core`, `firebase_auth`, `supabase_flutter` | Đã thêm và khóa phiên bản trong `pubspec.lock`; mọi người chỉ cần pub get |
+| Dependencies | `firebase_core`, `firebase_auth`, `google_sign_in`, `supabase_flutter` | Phiên bản được khóa trong `pubspec.lock`. Thành viên chạy `flutter pub get` |
 | Android mạng và phiên bản | INTERNET; minSdk 24 | Cấu hình nền tảng, chưa xin camera/GPS |
 
 **Không cần xin key riêng cho mỗi người, tạo project mới hoặc đổi app ID.** Các file trên chứa định danh/cấu hình client, được dùng chung trong kho nhóm. Firebase API key và Supabase publishable key không phải khóa quản trị; bảo mật dữ liệu vẫn phải do xác thực và RLS/Storage policies thực hiện. Không thay bằng `service_role`, `sb_secret_...`, mật khẩu database hoặc private key.
@@ -64,11 +64,11 @@ flutter run -d chrome --web-port=5000
 
 Android: chạy `flutter devices`, bật USB debugging nếu dùng điện thoại, rồi `flutter run -d <device-id>`. Android Studio cần JDK/SDK tương thích với cấu hình Gradle có sẵn; chạy theo chẩn đoán flutter doctor, không commit đường dẫn máy vào `android/local.properties`.
 
-**Kết quả hiện tại phải là Hello World, không phải màn hình đăng nhập.** Chạy được khung này chưa kiểm chứng Firebase Auth, Supabase JWT/RLS hoặc luồng nghiệp vụ. Chưa có bài kiểm thử nghiệp vụ trong khung; khi thực hiện issue, thêm và chạy kiểm thử phù hợp, không ghi “tests passed” nếu chưa có test.
+**Khi chạy lần đầu**, HealthyLife hiển thị nút đăng nhập bằng Email/Password hoặc Google. Nếu Firebase đã lưu phiên trên thiết bị/trình duyệt, ứng dụng mở màn hình **Phiên đăng nhập**. Chọn **Đăng xuất** để thử tài khoản khác. Thành viên làm hồ sơ và lịch tập nối màn hình của mình vào sau phiên đăng nhập khi tích hợp.
 
 Kiểm tra trên máy nhóm trưởng đã qua `flutter analyze --no-pub`, `flutter build web --no-pub` và `flutter build apk --debug --no-pub`. APK debug được tạo cục bộ trong `build/app/outputs/flutter-apk/`.
 
-Thành viên chỉ phát triển ứng dụng **không cần đăng nhập Firebase CLI hay Supabase CLI** và không cần quyền quản trị cloud. Firebase/Supabase xử lý đăng nhập của người dùng ứng dụng sau khi Trưởng hoàn thiện issue #1. Nếu cấu hình mới chưa xuất hiện sau pull, kiểm tra với nhóm trưởng rằng các file đã được commit/push vào nhánh nhóm; không tự tạo file giả hoặc project thay thế.
+Thành viên phát triển ứng dụng dùng cấu hình client trong kho và tài khoản thử HealthyLife. Firebase CLI và Supabase CLI chỉ cần cho thành viên phụ trách quản trị cloud. Nếu chưa thấy màn hình đăng nhập, kiểm tra đang chạy bản có issue #1 trước khi thay đổi cấu hình.
 
 ### 3. Mỗi người và AI của mình bắt đầu từ đâu
 
@@ -83,11 +83,11 @@ Không cần chờ có tất cả backend mới làm UI/quy tắc. Dữ liệu g
 
 Trước khi cùng triển khai, chốt trên issue: tên bảng/cột và kiểu dữ liệu (Hà), đầu vào/đầu ra model/repository (người phụ trách module), điểm gắn màn hình/điều hướng (Trưởng). Interface nào chưa tồn tại thì trao đổi và đề xuất nhỏ trong issue, không coi bảng tên dự kiến trong đề cương là schema đã deploy. Mỗi feature có data/domain/presentation; `core/` chỉ chứa thứ thực sự dùng chung.
 
-### 4. Những việc nền tảng còn phải làm trong issues #1 và #7
+### 4. Đăng nhập, phiên và quyền Supabase trong issue #1
 
-**Trưởng — issue #1:** triển khai `Firebase.initializeApp` với `DefaultFirebaseOptions.currentPlatform` và khởi tạo Supabase bằng `supabaseUrl`/`supabasePublishableKey` trong file config. Callback `accessToken` phải lấy `FirebaseAuth.instance.currentUser?.getIdToken()` khi gửi request để không giữ JWT cũ. Đăng nhập/đăng xuất qua Firebase Auth, không dùng Supabase Auth như một nguồn tài khoản thứ hai. Chỉ khởi tạo một lần, có xử lý lỗi và trạng thái chưa đăng nhập. Chưa có đoạn triển khai này trong khung.
+**Luồng ứng dụng.** `lib/core/backend.dart` khởi tạo Firebase và Supabase. `FirebaseAuthRepository` xử lý đăng ký, đăng nhập Email/Password, đặt lại mật khẩu, đăng nhập Google và đăng xuất. `AuthGate` theo dõi phiên từ Firebase SDK. Sau khi đăng nhập, màn hình phiên yêu cầu làm mới token để kiểm tra quyền dữ liệu. Lỗi hết phiên có thông báo để người dùng đăng nhập lại. [Tài liệu Firebase Auth Flutter](https://firebase.google.com/docs/auth/flutter/password-auth).
 
-**Firebase Console:** Email/Password và authorized domain `localhost` đã sẵn sàng. Google Sign-In cần địa chỉ hỗ trợ do nhóm trưởng chọn. Chỉ thêm domain Web triển khai thật khi có địa chỉ cụ thể. [Hướng dẫn bật phương thức đăng nhập](https://firebase.google.com/docs/auth/configure-providers-cli).
+**Google Sign-In.** Flutter Web mở popup Firebase trên `localhost`. Android dùng plugin `google_sign_in` và OAuth client từ `google-services.json`. Google Sign-In, Email/Password và `localhost` đã được xác nhận trong Firebase. Khi triển khai Web sang domain khác, nhóm trưởng thêm domain đó vào authorized domains. [Hướng dẫn Firebase Google Sign-In](https://firebase.google.com/docs/auth/flutter/federated-auth).
 
 **Google trên Android từng máy:** sau khi có debug keystore, thành viên lấy SHA-1/SHA-256 của chính máy mình, gửi fingerprint cho nhóm trưởng (không gửi keystore/private key). Ví dụ PowerShell, nếu keytool có trong PATH:
 
@@ -95,15 +95,34 @@ Trước khi cùng triển khai, chốt trên issue: tên bảng/cột và kiể
 keytool -list -v -alias androiddebugkey -keystore "$env:USERPROFILE/.android/debug.keystore" -storepass android -keypass android
 ```
 
-Nếu chưa có keystore, tạo bằng quy trình build debug của Flutter/Android Studio, không tải keystore của bạn khác. Nhóm trưởng thêm SHA vào **đúng Android app hiện có** ở Firebase Console, rồi cập nhật cấu hình/OAuth nếu cần. `google-services.json` hiện tại chưa có OAuth client; cần hoàn thiện provider/SHA trước khi nghiệm thu Google trên Android. `android` trong lệnh là mật khẩu mặc định của debug keystore, không phải mật khẩu tài khoản. Không áp dụng lệnh này cho keystore release của nhóm.
+Nếu chưa có keystore, tạo qua quy trình build debug của Flutter/Android Studio. Nhóm trưởng thêm SHA vào **đúng Android app hiện có** và tải lại `google-services.json` khi OAuth thay đổi. `android` trong lệnh là mật khẩu mặc định của debug keystore. Keystore release có quy trình riêng. [Cấu hình plugin Google trên Android](https://pub.dev/packages/google_sign_in_android).
 
-**Claim Supabase:** Firebase JWT cần claim `role: authenticated`. Third-party integration đơn thuần chưa đủ cho chính sách dành cho role authenticated. Nhóm trưởng dùng Firebase Admin SDK trong môi trường quản trị tin cậy để cấp claim cho tài khoản thử nghiệm và giữ các custom claims khác. Khi hoàn thiện đăng ký, quyết định cơ chế tự cấp claim phía server cho tài khoản mới; không tự bật billing/deploy Functions khi nhóm chưa thống nhất. Không tự cấp claim từ Flutter, không sửa JWT, không dùng service_role trên client. Sau khi claim được cấp, refresh token với `getIdToken(true)` rồi thử lại; nếu cấp bất đồng bộ chưa xong thì chờ xác nhận server, không mặc định refresh một lần là đủ.
+**Quyền Supabase.** Callback `accessToken` lấy ID token của người dùng Firebase hiện tại khi Supabase gửi request. Nó từ chối request nếu người dùng đang đăng nhập chưa có claim `role: authenticated` hoặc phiên đổi trong lúc lấy token. Tài khoản mới có thể đăng nhập Firebase và thấy trạng thái chờ cấp quyền dữ liệu. Nhóm trưởng cấp claim bằng Firebase Admin SDK, giữ các claims khác của người dùng. Sau đó người dùng chọn **Kiểm tra lại quyền** để lấy token mới. Cơ chế cấp tự động trong môi trường triển khai do nhóm thống nhất sau đợt thử nghiệm. [Tích hợp Firebase Auth và Supabase](https://supabase.com/docs/guides/auth/third-party/firebase-auth).
+
+Khi cấp quyền thử, kiểm tra Firebase Project ID và UID của tài khoản trong Console, rồi từ môi trường quản trị đã xác thực dùng `getAuth().getUser(uid)` và `setCustomUserClaims(uid, {...user.customClaims, role: 'authenticated'})`. Dùng tài khoản thử, giữ thông tin quản trị ở môi trường server và dùng UID lấy từ bản ghi Firebase đã xác minh.
 
 **Hà — issue #7:** schema/migration, RLS và Storage policies còn phải viết, review và áp dụng vào đúng project. Firebase UID **là chuỗi**, nên owner_uid/user_uid dùng TEXT; RLS so với `auth.jwt()->>'sub'`, không ép sang UUID bằng `auth.uid()`. Mọi thao tác đọc/ghi phải có chính sách phù hợp, UPDATE kiểm tra cả dữ liệu cũ lẫn dữ liệu mới; Storage bảo vệ ảnh riêng tư. Không mở policy cho mọi người hoặc tắt RLS để cho app chạy. Chưa tạo bucket/schema trong lần cấu hình chung này.
 
 **Kiểm chứng đã làm:** một tài khoản Firebase tạm đăng ký và đăng nhập thành công bằng Email/Password. Sau khi cấp claim `role: authenticated` và đăng nhập lại, JWT của tài khoản đến được Supabase Data API. Yêu cầu đọc tên bảng thử chưa tồn tại nhận `PGRST205` và JWT có chữ ký sai nhận `401 PGRST301`. Tài khoản thử đã được xóa và phép thử không tạo bảng. Đây là phép thử cấu hình xác thực ở API.
 
-**Kiểm chứng còn thuộc issue #1/#7/#9:** tích hợp Flutter, cấp claim cho tài khoản thử của nhóm, kiểm tra đăng xuất không gửi token cũ và dùng ba tài khoản A/B/C để kiểm thử quyền truy cập dữ liệu/ảnh sau khi có schema. Không dùng secret key ở client để truy cập metadata tại `/rest/v1/`.
+**Cấu hình mẫu cho môi trường thử riêng.** Nhóm dùng các giá trị sẵn có trong `firebase_options.dart`, `google-services.json` và `backend_config.dart`. Nếu nhóm thống nhất thử trên một cặp Firebase–Supabase khác, sinh cấu hình Firebase cho đúng app Android/Web của cặp đó và dùng các biến client tương ứng trong `backend_config.dart`:
+
+```dart
+const firebaseProjectId = 'your-firebase-project-id';
+const supabaseUrl = 'https://your-supabase-project-ref.supabase.co';
+const supabasePublishableKey = 'sb_publishable_...';
+```
+
+**Kiểm thử.** Chạy `flutter test` để kiểm tra form đăng nhập, đăng ký, đặt lại mật khẩu, thao tác Google bị hủy, phiên hết hạn, trạng thái claim và đăng xuất. Kiểm thử callback Supabase bao gồm đổi tài khoản khi đang lấy JWT và JWT có `sub` không khớp phiên. Để thử với dịch vụ thật, chạy `flutter run -d chrome --web-port=5000` hoặc chạy trên Android có Google Play rồi:
+
+1. Đăng nhập bằng một tài khoản Firebase thử. Thử sai mật khẩu và xác nhận ứng dụng báo lỗi mà vẫn giữ ở màn hình đăng nhập.
+2. Dùng tài khoản thử chưa có claim để kiểm tra trạng thái chờ quyền. Sau khi nhóm trưởng cấp claim, chọn **Kiểm tra lại quyền** và xác nhận trạng thái đã được cấp quyền.
+3. Đăng xuất, tải lại trang hoặc mở lại app và xác nhận màn hình đăng nhập xuất hiện.
+4. Chọn **Tiếp tục với Google** để thử provider. Android cần SHA của chứng chỉ debug đã đăng ký. Dùng tài khoản thử để xác nhận phiên và thử hủy luồng.
+
+Kết quả kiểm tra issue #1 gồm 8 test Flutter, `flutter analyze`, build Web/APK debug và kiểm thử Chrome qua chính client Firebase–Supabase. Phép thử Chrome đã xác nhận đăng nhập email, chặn request khi thiếu claim, chấp nhận JWT sau khi làm mới và trả token rỗng sau đăng xuất. Tài khoản thử đã được xóa. Google đã bật và cấu hình OAuth đã kiểm tra. Luồng Google với tài khoản thật vẫn cần thử trên thiết bị/trình duyệt của nhóm.
+
+Khi nhận issue #7/#9, Hà và Trưởng kiểm tra quyền truy cập chéo A/B/C trên bảng và bucket nghiệp vụ thật.
 
 ### 5. Quy trình làm một issue và mẫu yêu cầu gửi AI
 
@@ -166,7 +185,7 @@ Nguồn kỹ thuật: [FlutterFire setup](https://firebase.google.com/docs/flutt
 Các thao tác thiết lập chỉ thực hiện trong bản Fork `trggg2185/project-ptdudd` và project thuộc `trggg2185`, không thay đổi kho của giảng viên. PR nội bộ dùng base `nhom06-65ktpm`.
 
 Đề cương cuối kỳ học phần Phát triển ứng dụng di động — Nhóm 06, 65KTPM.
-Trạng thái: khung Flutter và cấu hình client Android/Web đã chuẩn bị; chưa triển khai chức năng hoặc khởi tạo dịch vụ trong ứng dụng. Phân công và tiến độ dưới đây là kế hoạch để nhóm thực hiện theo issues.
+Trạng thái: đã triển khai đăng nhập và phiên Firebase–Supabase cho issue #1. Phân công bên dưới là kế hoạch các issue của nhóm.
 
 ## 1. GIỚI THIỆU ĐỀ TÀI
 
@@ -414,7 +433,7 @@ Giá trị của đề tài nằm ở khả năng đưa gợi ý vào lịch th�
 
 ## Cấu trúc dự án và môi trường
 
-Hiện có khung Flutter và cấu hình client Firebase/Supabase dùng chung, chưa viết giao diện/nghiệp vụ hoặc bootstrap dịch vụ. Ba thư viện Firebase Core/Auth và Supabase đã có; không thêm thư viện cảm biến khi chưa làm issue liên quan. Đọc phần “Bắt đầu tại đây” ở đầu README để thiết lập máy và nhận việc.
+Flutter có màn hình đăng nhập và khởi tạo dịch vụ cho Android/Web. Đọc phần “Bắt đầu tại đây” ở đầu README để thiết lập máy và nhận việc.
 
 ```text
 src/
@@ -422,10 +441,10 @@ src/
 ├── ios/                        # Khung iOS, cần macOS/Xcode khi triển khai
 ├── web/                        # Hồ sơ, lịch và dashboard trực tuyến
 ├── lib/
-│   ├── main.dart               # Khởi động mặc định, chưa có chức năng
+│   ├── main.dart               # Khởi động ứng dụng và mở AuthGate
 │   ├── firebase_options.dart   # Cấu hình Firebase Android/Web sinh từ FlutterFire
 │   ├── app/                    # Khởi tạo và điều hướng
-│   ├── core/backend_config.dart # Định danh và publishable config dùng chung
+│   ├── core/                   # Khởi tạo backend và cấu hình client dùng chung
 │   └── features/
 │       ├── auth/
 │       ├── profile/
@@ -440,7 +459,7 @@ src/
 │           # Mỗi feature: data/, domain/, presentation/
 ├── assets/images/
 ├── assets/icons/
-├── test/                       # Unit/widget tests sẽ bổ sung khi có logic
+├── test/                       # Widget tests và kiểm thử callback xác thực
 ├── integration_test/           # Luồng chính, quyền thiết bị và sync
 ├── supabase/
 │   ├── migrations/             # Chưa có schema/policies
@@ -471,7 +490,7 @@ flutter run -d chrome
 # Android: flutter devices, rồi flutter run -d <device-id>
 ```
 
-Hiện lệnh chạy chỉ mở khung mặc định, không gọi backend. Khi có logic mới bổ sung unit/widget tests và chạy `flutter test`; integration tests cần tài khoản thử nghiệm và Android thật. Cấu hình app client đã có, chưa tạo tài khoản người dùng thử nghiệm hoặc dữ liệu cá nhân trong lần chuẩn bị này.
+Lệnh chạy mở cổng đăng nhập và dùng Firebase/Supabase của nhóm. Xem mục 4 để chạy kiểm thử đăng nhập bằng tài khoản thử.
 
 ### Thứ tự cấu hình khi bắt đầu code
 

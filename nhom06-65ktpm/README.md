@@ -4,7 +4,7 @@
 > - [Danh sách và phân công thành viên](danhsachnhom.md)
 > - [Báo cáo Word theo mẫu](docs/HealthyLife_Nhom06_De_cuong.docx)
 >
-> Hiện là đề cương và khung Flutter, chưa viết chức năng. Các báo cáo StudyHub là bản cũ, không phải đề tài đang thực hiện.
+> Issue #1 bổ sung đăng nhập Firebase và phiên Supabase trên Android/Web. Các báo cáo StudyHub là tài liệu của đề tài trước.
 
 # Nhóm 06 — 65KTPM
 Yêu cẩu của project cuối kỳ: Sinh viên cần xây dựng một đề cương chi tiết cho Project cuối kỳ dựa trên các ứng dụng đã được phân tích và thiết kế trong suốt học kỳ. Đề cương phải thể hiện rõ mục tiêu, phạm vi, các chức năng chính và kế hoạch thực hiện của Project. Sản phẩm cuối cùng sẽ là một bản đề cương hoàn chỉnh, trình bày rõ ràng, logic và có tính khả thi.

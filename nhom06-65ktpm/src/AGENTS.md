@@ -10,7 +10,7 @@
 ## Phạm vi và hiện trạng
 
 - Chỉ sửa bên trong `nhom06-65ktpm/`. Không sửa root README/.gitignore, thư mục nhóm khác hay kho giảng viên.
-- Đây là khung Flutter và cấu hình cloud dùng chung; `main.dart` chỉ có Hello World. Không xem việc có Firebase config hoặc package là đã làm xong đăng nhập, schema, RLS hay chức năng.
+- `main.dart` khởi tạo backend và điều hướng qua AuthGate của issue #1. Các module nghiệp vụ, schema, RLS và Storage theo issue riêng.
 - Chỉ làm issue được giao; không tự thực hiện cả 12 issues. Không đánh dấu hoàn thành, cập nhật board hoặc đóng issue khi chưa có kiểm chứng và chưa được thành viên yêu cầu.
 - Người dùng phải cho phép trước khi push, mở/merge PR, đổi cấu hình cloud hay deploy. Quyền đã được người dùng cho trong cùng phiên được áp dụng, không hỏi lại vô ích.
 

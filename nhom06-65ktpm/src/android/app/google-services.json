@@ -12,7 +12,20 @@
           "package_name": "vn.edu.nhom06.healthylife"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "278080814801-8ik4d93jcdkc7iba4vidus27khqt0jeq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.edu.nhom06.healthylife",
+            "certificate_hash": "8068070382ad05550047aea87b52c95f3f1b4699"
+          }
+        },
+        {
+          "client_id": "278080814801-d8gshciej8cisamhsguu6mt52fn6e0jq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDQm5jnimBGvpQzaogNUdHDTzyiMPGNVJY"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "278080814801-d8gshciej8cisamhsguu6mt52fn6e0jq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
