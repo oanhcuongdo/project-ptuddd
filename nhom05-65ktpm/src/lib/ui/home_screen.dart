@@ -7,6 +7,7 @@ import '../data/lessons.dart';
 import '../scoring/phonemes.dart';
 import '../scoring/rate.dart';
 import 'practice_screen.dart';
+import 'goal_slider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -280,18 +281,8 @@ class _SettingsTab extends StatelessWidget {
     final u = state.user!;
     return ListView(
       children: [
-        ListTile(
-          title: const Text('Mục tiêu hằng ngày'),
-          subtitle: Text('${u.dailyGoalMinutes} phút'),
-        ),
-        Slider(
-          value: u.dailyGoalMinutes.toDouble(),
-          min: 5,
-          max: 60,
-          divisions: 11,
-          label: '${u.dailyGoalMinutes} phút',
-          onChanged: (v) => state.updateSettings(goal: v.round()),
-        ),
+        GoalSlider(
+            minutes: u.dailyGoalMinutes, onCommit: (m) => state.updateSettings(goal: m)),
         SwitchListTile(
           title: const Text('Nhắc nhở luyện tập hằng ngày'),
           value: u.reminderEnabled,
