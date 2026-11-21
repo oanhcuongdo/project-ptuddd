@@ -4,7 +4,7 @@
 - **Kế thừa:** Bài ứng dụng kỷ luật cá nhân với Flutter.
 - **Lớp học phần / định danh:** 65KTPM / nhom06-65ktpm; lớp sinh hoạt từng người chờ xác nhận.
 - **Giảng viên:** ThS. Đỗ Oanh Cường (theo mẫu, nhóm cần xác nhận).
-- **Trạng thái:** Đề cương và khung Flutter; phân công dự kiến, chưa có kết quả triển khai.
+- **Trạng thái:** Đề cương, khung Flutter và cấu hình client Firebase/Supabase chung; chưa triển khai chức năng hoặc khởi tạo backend trong ứng dụng.
 
 | STT | Họ và tên | MSSV | Lớp sinh hoạt | Vai trò | Nhiệm vụ dự kiến | Đóng góp (%) | Email |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -28,6 +28,6 @@ flutter run -d chrome
 # Hoặc flutter devices rồi flutter run -d <device-id>
 ```
 
-Chỉ chạy khung mặc định, chưa kết nối cloud; iOS cần macOS/Xcode. Hướng dẫn commit/push/merge theo thầy trong [src/README.md](src/README.md).
+Chỉ chạy khung mặc định, chưa gọi backend. Firebase Android/Web và Supabase client config đã chuẩn bị chung, không cần thành viên tạo project hoặc key mới; iOS chưa có Firebase config. Đọc phần “Bắt đầu tại đây” trong [src/README.md](src/README.md) và [hướng dẫn AI](src/AGENTS.md) để nhận issue, chốt phụ thuộc và làm đúng phạm vi. Hướng dẫn commit/push/merge theo thầy nằm trong cùng README.
 
 Đề cương hiện hành: [HealthyLife_Nhom06_De_cuong.docx](docs/HealthyLife_Nhom06_De_cuong.docx).

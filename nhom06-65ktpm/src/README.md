@@ -1,5 +1,159 @@
 # HealthyLife — Trợ lý kỷ luật và lối sống lành mạnh
 
+## Bắt đầu tại đây — dành cho thành viên và AI của thành viên
+
+**Đây là khung dự án cùng cấu hình dùng chung, chưa có chức năng HealthyLife.** `lib/main.dart` chỉ hiển thị Hello World. Không có bootstrap Firebase/Supabase, màn hình đăng nhập, database schema, RLS, bucket ảnh hay nghiệp vụ được triển khai trong lần chuẩn bị này. Các phần đó do từng người thực hiện theo issue, không làm thay nhau.
+
+AI đọc [AGENTS.md](AGENTS.md) trước khi sửa mã, rồi đọc issue được giao và các phần liên quan trong README. Các mục 1–11 bên dưới là **đặc tả/kế hoạch**, không phải danh sách tính năng đã hoàn thành.
+
+### 1. Cấu hình đã chuẩn bị chung
+
+| Thành phần | Giá trị / vị trí | Trạng thái |
+| --- | --- | --- |
+| Firebase project | `healthy-life-group-6` | Đã kiểm tra quyền truy cập bằng Firebase CLI của nhóm trưởng |
+| Android package/application ID | `vn.edu.nhom06.healthylife` | Đã đăng ký trong Firebase; giữ nguyên trên máy mọi thành viên |
+| Firebase Android app ID | `1:278080814801:android:ef35595c375e0d627f0ff0` | Đã tạo qua FlutterFire |
+| Firebase Web app ID | `1:278080814801:web:6d89f878b424c4297f0ff0` | Đã tạo qua FlutterFire |
+| Firebase Authentication | Email/Password, Web `localhost` | Đã bật và xác minh bằng tài khoản thử tạm |
+| Cấu hình Firebase Flutter | [lib/firebase_options.dart](lib/firebase_options.dart) | File sinh tự động cho Android/Web; chưa gọi khởi tạo |
+| Cấu hình Firebase Android | [android/app/google-services.json](android/app/google-services.json) | Dùng chung, đúng package; plugin Google Services đã khai báo ở Gradle |
+| Liên kết FlutterFire | [firebase.json](firebase.json) | Trỏ về đúng Firebase project/app của nhóm |
+| Supabase project ref | `vspyxavkdqqlpxodvqvb` | Project dùng chung của nhóm |
+| Supabase URL | `https://vspyxavkdqqlpxodvqvb.supabase.co` | Đã kiểm tra endpoint Auth phản hồi HTTP 200 với publishable key |
+| Supabase client config | [lib/core/backend_config.dart](lib/core/backend_config.dart) | Có URL, publishable key và Firebase Project ID; chỉ là hằng cấu hình |
+| Supabase Third-party Auth | Firebase project `healthy-life-group-6` | Đã xác minh JWT Firebase có role `authenticated` được chấp nhận và chữ ký sai bị từ chối |
+| Dependencies | `firebase_core`, `firebase_auth`, `supabase_flutter` | Đã thêm và khóa phiên bản trong `pubspec.lock`; mọi người chỉ cần pub get |
+| Android mạng và phiên bản | INTERNET; minSdk 24 | Cấu hình nền tảng, chưa xin camera/GPS |
+
+**Không cần xin key riêng cho mỗi người, tạo project mới hoặc đổi app ID.** Các file trên chứa định danh/cấu hình client, được dùng chung trong kho nhóm. Firebase API key và Supabase publishable key không phải khóa quản trị; bảo mật dữ liệu vẫn phải do xác thực và RLS/Storage policies thực hiện. Không thay bằng `service_role`, `sb_secret_...`, mật khẩu database hoặc private key.
+
+iOS chỉ có khung nền tảng, chưa được đăng ký Firebase trong lần này. Không chạy bản iOS rồi suy đoán cấu hình Android/Web bị lỗi.
+
+### 2. Lấy bài về và chạy trên máy mỗi thành viên
+
+Chuẩn bị Git, Flutter **3.47.2** (Dart **3.13.2**, ràng buộc `^3.13.2`), Chrome; Android cần Android Studio/SDK và điện thoại hoặc emulator có Google Play, Android 7/API 24 trở lên. Nếu thiếu Flutter phiên bản trên, trao đổi nhóm trước khi nâng SDK, Gradle hoặc dependencies.
+
+Lần đầu clone (đã chấp nhận quyền Collaborator):
+
+```bash
+git clone https://github.com/trggg2185/project-ptdudd.git
+cd project-ptdudd
+git fetch origin
+git checkout --track origin/nhom06-65ktpm
+```
+
+Nếu máy đã có repository và nhánh nhóm, bỏ bước clone/tạo lại nhánh:
+
+```bash
+git checkout nhom06-65ktpm
+git pull origin nhom06-65ktpm
+```
+
+Working tree phải sạch trước khi pull/chuyển nhánh; nếu còn thay đổi, lưu chúng phù hợp với nhóm, không dùng reset --hard hoặc force-push để xử lý.
+
+Sau đó từ gốc repository:
+
+```bash
+cd nhom06-65ktpm/src
+flutter --version
+flutter doctor -v
+flutter pub get
+flutter analyze
+flutter run -d chrome --web-port=5000
+```
+
+Android: chạy `flutter devices`, bật USB debugging nếu dùng điện thoại, rồi `flutter run -d <device-id>`. Android Studio cần JDK/SDK tương thích với cấu hình Gradle có sẵn; chạy theo chẩn đoán flutter doctor, không commit đường dẫn máy vào `android/local.properties`.
+
+**Kết quả hiện tại phải là Hello World, không phải màn hình đăng nhập.** Chạy được khung này chưa kiểm chứng Firebase Auth, Supabase JWT/RLS hoặc luồng nghiệp vụ. Chưa có bài kiểm thử nghiệp vụ trong khung; khi thực hiện issue, thêm và chạy kiểm thử phù hợp, không ghi “tests passed” nếu chưa có test.
+
+Thành viên chỉ phát triển ứng dụng **không cần đăng nhập Firebase CLI hay Supabase CLI** và không cần quyền quản trị cloud. Firebase/Supabase xử lý đăng nhập của người dùng ứng dụng sau khi Trưởng hoàn thiện issue #1. Nếu cấu hình mới chưa xuất hiện sau pull, kiểm tra với nhóm trưởng rằng các file đã được commit/push vào nhánh nhóm; không tự tạo file giả hoặc project thay thế.
+
+### 3. Mỗi người và AI của mình bắt đầu từ đâu
+
+| Thành viên / GitHub | Issues và thư mục phụ trách | Bắt đầu độc lập | Phối hợp / review |
+| --- | --- | --- | --- |
+| Nguyễn Thế Trưởng / `trggg2185` | [#1 Auth](https://github.com/trggg2185/project-ptdudd/issues/1), [#2 Profile](https://github.com/trggg2185/project-ptdudd/issues/2), [#3 Planner](https://github.com/trggg2185/project-ptdudd/issues/3); `auth`, `profile`, `planner` | Đọc cấu hình chung; hoàn thiện khởi tạo Firebase/Supabase, đăng nhập và giao diện trạng thái phiên | Tích hợp `main.dart`, `app/` và điều hướng chung; Đại review |
+| Phương Văn Đức / `pvduc05` | [#4 Habits](https://github.com/trggg2185/project-ptdudd/issues/4), [#5 Sleep](https://github.com/trggg2185/project-ptdudd/issues/5), [#6 Notifications](https://github.com/trggg2185/project-ptdudd/issues/6); `habits`, `sleep`, `notifications` | Làm màn hình/model, quy tắc streak và test với dữ liệu giả trong test/module | Chốt sự kiện lịch với Trưởng, repository/schema với Hà; Hà review |
+| Hàn Hoàng Hà / `HanHoangHa` | [#7 Data/sync](https://github.com/trggg2185/project-ptdudd/issues/7), [#8 Activity/GPS](https://github.com/trggg2185/project-ptdudd/issues/8), [#9 Privacy](https://github.com/trggg2185/project-ptdudd/issues/9); `activity`, migration, Storage, sync | Đề xuất schema và migration/RLS, thử SQLite/GPS bằng dữ liệu giả | Chốt UID/claim với Trưởng, hợp đồng dữ liệu với từng người; Đức review |
+| Nguyễn Đăng Đại / `nddai0710` | [#10 Recommendations](https://github.com/trggg2185/project-ptdudd/issues/10), [#11 Nutrition](https://github.com/trggg2185/project-ptdudd/issues/11), [#12 Insights/report](https://github.com/trggg2185/project-ptdudd/issues/12); `recommendations`, `nutrition`, `insights` | Danh mục có nguồn, quy tắc gợi ý và unit tests bằng fixture; màn hình camera/nhật ký | Chốt cấu trúc gợi ý với Trưởng và schema với Hà; Trưởng review |
+
+Không cần chờ có tất cả backend mới làm UI/quy tắc. Dữ liệu giả phải được ghi rõ là mock và không tạo thành cơ chế bypass xác thực/RLS. Không để bốn người cùng viết bốn lớp khởi tạo Firebase hoặc bốn bản main.dart.
+
+Trước khi cùng triển khai, chốt trên issue: tên bảng/cột và kiểu dữ liệu (Hà), đầu vào/đầu ra model/repository (người phụ trách module), điểm gắn màn hình/điều hướng (Trưởng). Interface nào chưa tồn tại thì trao đổi và đề xuất nhỏ trong issue, không coi bảng tên dự kiến trong đề cương là schema đã deploy. Mỗi feature có data/domain/presentation; `core/` chỉ chứa thứ thực sự dùng chung.
+
+### 4. Những việc nền tảng còn phải làm trong issues #1 và #7
+
+**Trưởng — issue #1:** triển khai `Firebase.initializeApp` với `DefaultFirebaseOptions.currentPlatform` và khởi tạo Supabase bằng `supabaseUrl`/`supabasePublishableKey` trong file config. Callback `accessToken` phải lấy `FirebaseAuth.instance.currentUser?.getIdToken()` khi gửi request để không giữ JWT cũ. Đăng nhập/đăng xuất qua Firebase Auth, không dùng Supabase Auth như một nguồn tài khoản thứ hai. Chỉ khởi tạo một lần, có xử lý lỗi và trạng thái chưa đăng nhập. Chưa có đoạn triển khai này trong khung.
+
+**Firebase Console:** Email/Password và authorized domain `localhost` đã sẵn sàng. Google Sign-In cần địa chỉ hỗ trợ do nhóm trưởng chọn. Chỉ thêm domain Web triển khai thật khi có địa chỉ cụ thể. [Hướng dẫn bật phương thức đăng nhập](https://firebase.google.com/docs/auth/configure-providers-cli).
+
+**Google trên Android từng máy:** sau khi có debug keystore, thành viên lấy SHA-1/SHA-256 của chính máy mình, gửi fingerprint cho nhóm trưởng (không gửi keystore/private key). Ví dụ PowerShell, nếu keytool có trong PATH:
+
+```powershell
+keytool -list -v -alias androiddebugkey -keystore "$env:USERPROFILE/.android/debug.keystore" -storepass android -keypass android
+```
+
+Nếu chưa có keystore, tạo bằng quy trình build debug của Flutter/Android Studio, không tải keystore của bạn khác. Nhóm trưởng thêm SHA vào **đúng Android app hiện có** ở Firebase Console, rồi cập nhật cấu hình/OAuth nếu cần. `google-services.json` hiện tại chưa có OAuth client; cần hoàn thiện provider/SHA trước khi nghiệm thu Google trên Android. `android` trong lệnh là mật khẩu mặc định của debug keystore, không phải mật khẩu tài khoản. Không áp dụng lệnh này cho keystore release của nhóm.
+
+**Claim Supabase:** Firebase JWT cần claim `role: authenticated`. Third-party integration đơn thuần chưa đủ cho chính sách dành cho role authenticated. Nhóm trưởng dùng Firebase Admin SDK trong môi trường quản trị tin cậy để cấp claim cho tài khoản thử nghiệm và giữ các custom claims khác. Khi hoàn thiện đăng ký, quyết định cơ chế tự cấp claim phía server cho tài khoản mới; không tự bật billing/deploy Functions khi nhóm chưa thống nhất. Không tự cấp claim từ Flutter, không sửa JWT, không dùng service_role trên client. Sau khi claim được cấp, refresh token với `getIdToken(true)` rồi thử lại; nếu cấp bất đồng bộ chưa xong thì chờ xác nhận server, không mặc định refresh một lần là đủ.
+
+**Hà — issue #7:** schema/migration, RLS và Storage policies còn phải viết, review và áp dụng vào đúng project. Firebase UID **là chuỗi**, nên owner_uid/user_uid dùng TEXT; RLS so với `auth.jwt()->>'sub'`, không ép sang UUID bằng `auth.uid()`. Mọi thao tác đọc/ghi phải có chính sách phù hợp, UPDATE kiểm tra cả dữ liệu cũ lẫn dữ liệu mới; Storage bảo vệ ảnh riêng tư. Không mở policy cho mọi người hoặc tắt RLS để cho app chạy. Chưa tạo bucket/schema trong lần cấu hình chung này.
+
+**Kiểm chứng đã làm:** một tài khoản Firebase tạm đăng ký và đăng nhập thành công bằng Email/Password. Sau khi cấp claim `role: authenticated` và đăng nhập lại, JWT của tài khoản đến được Supabase Data API. Yêu cầu đọc tên bảng thử chưa tồn tại nhận `PGRST205` và JWT có chữ ký sai nhận `401 PGRST301`. Tài khoản thử đã được xóa và phép thử không tạo bảng. Đây là phép thử cấu hình xác thực ở API.
+
+**Kiểm chứng còn thuộc issue #1/#7/#9:** tích hợp Flutter, cấp claim cho tài khoản thử của nhóm, kiểm tra đăng xuất không gửi token cũ và dùng ba tài khoản A/B/C để kiểm thử quyền truy cập dữ liệu/ảnh sau khi có schema. Không dùng secret key ở client để truy cập metadata tại `/rest/v1/`.
+
+### 5. Quy trình làm một issue và mẫu yêu cầu gửi AI
+
+Từ **gốc repository**, sau khi đồng bộ nhánh nhóm và bảo đảm working tree sạch:
+
+```bash
+git checkout nhom06-65ktpm
+git pull origin nhom06-65ktpm
+git checkout -b feature/nhom06/ten-tinh-nang
+# Thực hiện đúng issue, kiểm tra rồi:
+git status
+git add nhom06-65ktpm/
+git diff --cached
+git commit -m "feat(nhom06-65ktpm): mo ta cong viec"
+git push -u origin feature/nhom06/ten-tinh-nang
+```
+
+PR nội bộ trên Fork: base `nhom06-65ktpm`, compare nhánh tính năng. Ghi `Refs #<issue>`, mô tả, ảnh nếu đổi UI, kiểm thử đã chạy và phần chưa làm; yêu cầu reviewer đúng người trong bảng. Không tự push/open PR bằng công cụ của AI nếu thành viên chưa yêu cầu. Không mở PR về kho thầy trong công việc hằng ngày này.
+
+Board chuyển Todo → In progress khi nhận việc, In review khi có PR, Done sau review/merge/kiểm chứng. Cập nhật issue khi có tiến độ hoặc vướng mắc: **Đã làm / Tiếp theo / Vướng mắc / Link PR**. Thành viên tự đóng issue sau nghiệm thu; merge PR vào nhánh nhóm không nhất thiết tự đóng issue vì nhánh đó không phải default branch.
+
+Mẫu gửi cho AI (thay phần trong ngoặc vuông):
+
+```text
+Tôi là [họ tên / GitHub], phụ trách issue #[số] của HealthyLife nhóm 06.
+Hãy đọc nhom06-65ktpm/src/AGENTS.md, README.md trong src và nội dung issue
+trên Fork trggg2185/project-ptdudd. Kiểm tra trạng thái Git trước khi sửa.
+Chỉ triển khai phạm vi/checklist issue này và các phần liên quan cần thiết.
+Firebase/Supabase đã có cấu hình client chung; không tạo project/app mới,
+không tự đổi app ID, không tắt RLS và không thêm khóa quản trị vào Flutter.
+Nếu cần thay main/app/core hoặc schema chung, đề xuất và phối hợp người phụ trách.
+Viết kiểm thử phù hợp, ghi đã kiểm tra gì/chưa kiểm tra gì, tránh làm thay issue khác.
+Chưa push, mở/merge PR hoặc deploy cloud cho đến khi tôi yêu cầu.
+```
+
+### 6. Giữ cấu hình đồng nhất và xử lý lỗi thường gặp
+
+- Thiếu file config sau clone: xác nhận đã nhận đúng commit trên nhánh nhóm; không tạo file FirebaseOptions rỗng để qua build.
+- Chưa nhận lệnh flutterfire: chỉ người cập nhật cấu hình mới cần Firebase CLI/FlutterFire CLI. Windows có thể dùng `& "$env:LOCALAPPDATA/Pub/Cache/bin/flutterfire.bat" ...` nếu Pub Cache bin chưa nằm trong PATH. Thành viên chạy khung không cần cài CLI này.
+- Google sign-in lỗi trên Android: kiểm tra provider, SHA của máy, Android ID và OAuth client; không tự đổi package hoặc dùng keystore người khác.
+- Web đăng nhập báo unauthorized-domain: nhóm trưởng kiểm tra authorized domains; không sửa sang Firebase project khác.
+- Supabase 401/403/RLS denied: kiểm tra publishable key/URL, Firebase JWT/claim, third-party integration và policies với Trưởng/Hà. Truy cập chưa được phép phải bị từ chối, không phải lỗi cần chữa bằng cách mở dữ liệu.
+- Chưa có bảng hoặc bucket: đó là phần issue #7 cần triển khai, không phải lý do tự tạo schema riêng trên project khác.
+- iOS/Windows/macOS/Linux: chưa có FirebaseOptions cho các bản native này; ưu tiên Android/Web theo phạm vi đã chốt.
+- Xung đột main.dart, pubspec hoặc migration: trao đổi người phụ trách, giữ thay đổi của nhau; không chọn “accept all ours” hoặc “accept all theirs” mà chưa đọc.
+
+Không sửa tay `firebase_options.dart`/`google-services.json` để đổi project. Khi thực sự phải cập nhật, nhóm trưởng chạy FlutterFire từ src với project/platform/app ID hiện có, review diff rồi chia sẻ bằng commit trên Fork. Không xóa app Firebase hay rotate khóa của nhóm trong nhánh tính năng.
+
+Không chia sẻ tài khoản Google của nhóm trưởng. Cấp quyền cloud riêng theo nhu cầu nhiệm vụ khi cần, còn các thành viên khác chỉ dùng cấu hình client. Không commit `.env`, mật khẩu test, service-account JSON/private key, Firebase CLI token hoặc service_role. Giữ `pubspec.lock` để cả nhóm resolve cùng phiên bản.
+
+Nguồn kỹ thuật: [FlutterFire setup](https://firebase.google.com/docs/flutter/setup), [Firebase client API keys](https://firebase.google.com/docs/projects/api-keys), [Supabase Firebase integration và role claim](https://supabase.com/docs/guides/auth/third-party/firebase-auth), [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys).
+
 ## Quản lý tiến độ trên GitHub
 
 - [Project board HealthyLife](https://github.com/users/trggg2185/projects/2/views/2): riêng tư, chỉ liên kết kho Fork của nhóm; bốn thành viên có quyền cập nhật.
@@ -9,7 +163,7 @@
 Các thao tác thiết lập chỉ thực hiện trong bản Fork `trggg2185/project-ptdudd` và project thuộc `trggg2185`, không thay đổi kho của giảng viên. PR nội bộ dùng base `nhom06-65ktpm`.
 
 Đề cương cuối kỳ học phần Phát triển ứng dụng di động — Nhóm 06, 65KTPM.
-Trạng thái: kế hoạch phát triển và khung Flutter, chưa triển khai chức năng. Phân công và tiến độ dưới đây là đề xuất để nhóm thống nhất.
+Trạng thái: khung Flutter và cấu hình client Android/Web đã chuẩn bị; chưa triển khai chức năng hoặc khởi tạo dịch vụ trong ứng dụng. Phân công và tiến độ dưới đây là kế hoạch để nhóm thực hiện theo issues.
 
 ## 1. GIỚI THIỆU ĐỀ TÀI
 
@@ -257,7 +411,7 @@ Giá trị của đề tài nằm ở khả năng đưa gợi ý vào lịch th�
 
 ## Cấu trúc dự án và môi trường
 
-Hiện chỉ có khung Flutter, chưa viết giao diện/nghiệp vụ HealthyLife, chưa cấu hình Firebase/Supabase hoặc xin quyền thiết bị. Các chức năng trong đề cương là kế hoạch. Giữ mã khởi động Flutter, không thêm dependency cloud/cảm biến trước khi bắt đầu triển khai.
+Hiện có khung Flutter và cấu hình client Firebase/Supabase dùng chung, chưa viết giao diện/nghiệp vụ hoặc bootstrap dịch vụ. Ba thư viện Firebase Core/Auth và Supabase đã có; không thêm thư viện cảm biến khi chưa làm issue liên quan. Đọc phần “Bắt đầu tại đây” ở đầu README để thiết lập máy và nhận việc.
 
 ```text
 src/
@@ -266,8 +420,9 @@ src/
 ├── web/                        # Hồ sơ, lịch và dashboard trực tuyến
 ├── lib/
 │   ├── main.dart               # Khởi động mặc định, chưa có chức năng
+│   ├── firebase_options.dart   # Cấu hình Firebase Android/Web sinh từ FlutterFire
 │   ├── app/                    # Khởi tạo và điều hướng
-│   ├── core/                   # Thành phần chung khi thực sự phát sinh
+│   ├── core/backend_config.dart # Định danh và publishable config dùng chung
 │   └── features/
 │       ├── auth/
 │       ├── profile/
@@ -289,6 +444,9 @@ src/
 │   ├── seed/                   # Danh mục mẫu có nguồn sẽ biên soạn sau
 │   └── functions/              # Tác vụ server khi cần triển khai
 ├── pubspec.yaml
+├── pubspec.lock                # Phiên bản dependencies dùng chung
+├── firebase.json               # Liên kết Android/Web app của Firebase project
+├── AGENTS.md                   # AI đọc trước khi thực hiện issue
 └── README.md
 ```
 
@@ -310,12 +468,12 @@ flutter run -d chrome
 # Android: flutter devices, rồi flutter run -d <device-id>
 ```
 
-Hiện lệnh chạy chỉ mở khung mặc định. Khi có logic mới bổ sung unit/widget tests và chạy `flutter test`; integration tests cần dịch vụ thử nghiệm và Android thật. Không có tài khoản cloud thật hoặc dữ liệu cá nhân nào được tạo ở bước này.
+Hiện lệnh chạy chỉ mở khung mặc định, không gọi backend. Khi có logic mới bổ sung unit/widget tests và chạy `flutter test`; integration tests cần tài khoản thử nghiệm và Android thật. Cấu hình app client đã có, chưa tạo tài khoản người dùng thử nghiệm hoặc dữ liệu cá nhân trong lần chuẩn bị này.
 
 ### Thứ tự cấu hình khi bắt đầu code
 
-1. Tạo Firebase project thử nghiệm, đăng ký Android ID `vn.edu.nhom06.healthylife` và Web; cấu hình provider đăng nhập.
-2. Tạo Supabase project, kết nối third-party Firebase Auth; kiểm thử JWT/RLS bằng ba tài khoản trước các module phụ thuộc.
+1. Tái sử dụng Firebase project `healthy-life-group-6` và Android/Web app đã đăng ký; Trưởng kiểm tra provider/SHA và thực hiện issue #1. Không tạo project mới.
+2. Tái sử dụng Supabase `vspyxavkdqqlpxodvqvb` và tích hợp Firebase nhóm trưởng đã thiết lập; Trưởng/Hà hoàn thiện claim và kiểm thử JWT/RLS bằng ba tài khoản.
 3. Viết migration/Storage policies và seed danh mục có nguồn; chỉ dùng dữ liệu giả trong demo/fixture.
 4. Chọn package tương thích SDK và nền tảng; cấu hình local notifications, camera/GPS theo chức năng và quyền tối thiểu. Kiểm tra từ chối quyền, tắt quyền và ra nền.
 5. Cấu hình SQLite trên Android và adapter Web tương ứng nếu triển khai ngoại tuyến Web. Mở rộng AI/Health Connect chỉ sau khi bản chính đạt.
