@@ -320,13 +320,38 @@ git push origin <ten-nhom>-<ten-lop>
 
 ## 9. Danh Sách Kiểm Tra Trước Khi Nộp Bài (Checklist)
 
-| STT | Tiêu chí kiểm tra | Yêu cầu kỹ thuật | Trạng thái |
-| :-: | :--- | :--- | :-: |
-| 1 | Nhánh làm việc riêng | Làm việc 100% trên nhánh riêng `<ten-nhom>-<ten-lop>` của kho Fork, không commit trực tiếp vào `main`. | Bắt buộc |
-| 2 | Cú pháp tên thư mục | Đúng định dạng `<tennhom-tenlop>`, toàn bộ chữ thường, không dấu, không khoảng trắng. | Bắt buộc |
-| 3 | Vị trí tệp tin | 100% tệp tin của nhóm nằm trọn vẹn trong thư mục `<tennhom-tenlop>/`. | Bắt buộc |
-| 4 | Tệp `danhsachnhom.md` | Có mặt tại thư mục gốc của nhóm, điền đầy đủ thông tin thành viên và phân công. | Bắt buộc |
-| 5 | Kiểm soát tệp tin rác | Không commit `node_modules/`, `.gradle/`, `Pods/`, `.dart_tool/`, `.env`, tệp tạm IDE, tệp nhị phân (`*.apk`, `*.ipa`). | Bắt buộc |
-| 6 | Lệnh `git add` | Luôn sử dụng `git add <tennhom-tenlop>/`, không `git add .` tại thư mục gốc. | Bắt buộc |
-| 7 | Tính toàn vẹn nhánh chung | Không sửa đổi, không xóa thư mục hoặc mã nguồn của các nhóm khác. | Bắt buộc |
-| 8 | Tiêu đề Pull Request | Đúng định dạng `[Nộp bài] <tennhom-tenlop> - <Tên đề tài>`. | Bắt buộc |
+Sinh viên tự đối chiếu toàn bộ các tiêu chí dưới đây **trước khi mở Pull Request**. Mọi tiêu chí đều là bắt buộc — thiếu bất kỳ mục nào có thể dẫn đến Pull Request bị từ chối hoặc bị yêu cầu chỉnh sửa lại.
+
+### 9.1. Kiểm tra nhánh và kho lưu trữ
+
+| STT | Tiêu chí | Chi tiết yêu cầu |
+| :-: | :--- | :--- |
+| 1 | **Nhánh làm việc đúng** | Toàn bộ công việc được thực hiện trên nhánh riêng `<ten-nhom>-<ten-lop>` của kho Fork. Chạy `git branch` để xác nhận đang ở đúng nhánh trước mỗi lần commit. |
+| 2 | **Không commit vào `main`** | Kiểm tra bằng `git log main..HEAD` — nếu có commit lạ trên `main` của Fork, cần hoàn tác trước khi mở PR. |
+| 3 | **Kho Fork còn đồng bộ với upstream** | Chạy `git fetch upstream && git log HEAD..upstream/main --oneline` để kiểm tra. Nếu `upstream/main` có commit mới, merge vào nhánh nhóm trước khi tạo PR. |
+
+### 9.2. Kiểm tra cấu trúc thư mục và tệp tin
+
+| STT | Tiêu chí | Chi tiết yêu cầu |
+| :-: | :--- | :--- |
+| 4 | **Tên thư mục đúng cú pháp** | Đúng định dạng `<tennhom-tenlop>`: toàn bộ chữ thường, không dấu tiếng Việt, không khoảng trắng, chỉ dùng dấu gạch ngang `-`. Ví dụ: `nhom01-dhti15a1hn`. |
+| 5 | **100% tệp tin nằm trong thư mục nhóm** | Chạy `git diff --name-only main` hoặc kiểm tra tab **Files changed** trên PR — toàn bộ đường dẫn phải bắt đầu bằng `<tennhom-tenlop>/`. Không được có tệp nào nằm ngoài thư mục nhóm. |
+| 6 | **Tệp `danhsachnhom.md` đầy đủ nội dung** | Tệp phải đặt tại `<tennhom-tenlop>/danhsachnhom.md` và có đủ: tên đề tài, lớp học phần, bảng thành viên (Họ tên, MSV, vai trò, nhiệm vụ, % đóng góp, email), hướng dẫn chạy ứng dụng. Không để placeholder như `[Họ và Tên]` hay `[MSV]`. |
+| 7 | **Mã nguồn nằm đúng thư mục `src/`** | Toàn bộ mã nguồn ứng dụng di động đặt trong `<tennhom-tenlop>/src/`. Báo cáo, tài liệu đặc tả nằm trong `<tennhom-tenlop>/docs/`. |
+
+### 9.3. Kiểm tra nội dung commit và tệp tin rác
+
+| STT | Tiêu chí | Chi tiết yêu cầu |
+| :-: | :--- | :--- |
+| 8 | **Không commit tệp tin rác / nhị phân** | Kiểm tra không có các thư mục/tệp sau trong PR: `node_modules/`, `build/`, `.gradle/`, `Pods/`, `.dart_tool/`, `.pub-cache/`, `.env`, `*.apk`, `*.aab`, `*.ipa`, `.DS_Store`, `Thumbs.db`, tệp tạm IDE (`.idea/`, `.vscode/`). |
+| 9 | **Lệnh `git add` đúng phạm vi** | Không sử dụng `git add .` tại thư mục gốc. Luôn chỉ định rõ: `git add <tennhom-tenlop>/`. Kiểm tra `git status` sau khi add để đảm bảo không có tệp ngoài ý muốn vào staging. |
+| 10 | **Thông điệp commit rõ ràng** | Commit message tuân thủ cú pháp `<loại>(<tennhom-tenlop>): <mô tả>`. Không dùng thông điệp chung chung như `update`, `fix`, `a`, `abc`. |
+
+### 9.4. Kiểm tra Pull Request
+
+| STT | Tiêu chí | Chi tiết yêu cầu |
+| :-: | :--- | :--- |
+| 11 | **Hướng PR đúng** | base repository: `oanhcuongdo/project-ptuddd`, base branch: `main`. Head: kho Fork của nhóm, nhánh `<ten-nhom>-<ten-lop>`. |
+| 12 | **Tiêu đề PR đúng định dạng** | `[Nộp bài] <tennhom-tenlop> - <Tên đề tài>`. Ví dụ: `[Nộp bài] nhom01-dhti15a1hn - Ứng dụng quản lý chi tiêu cá nhân`. |
+| 13 | **Nội dung mô tả PR đầy đủ** | Phần Description ghi rõ: danh sách tính năng đã hoàn thành, danh sách thành viên tham gia nộp bài, ghi chú về hướng dẫn chạy ứng dụng (nếu có yêu cầu cấu hình đặc biệt). |
+| 14 | **Không xâm phạm tệp của nhóm khác** | Mục **Files changed** của PR không được chứa bất kỳ tệp nào thuộc thư mục của nhóm khác, `README.md` gốc, hay `.gitignore`. |
