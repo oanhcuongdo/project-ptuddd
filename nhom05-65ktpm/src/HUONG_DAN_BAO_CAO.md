@@ -50,7 +50,7 @@ lib/
   main.dart                     khởi tạo DB, thông báo, Provider
   app_state.dart                người dùng hiện tại, thống kê, lịch nhắc
   data/app_database.dart        schema + truy vấn (mục 1, 2)
-  data/lessons.dart             7 bài học theo nhóm âm khó
+  data/lessons.dart             8 bài học theo nhóm âm khó, mức độ thành thạo từng mục
   scoring/phonemes.dart         từ điển âm vị, IPA, độ giống nhau (mục 4)
   scoring/pronunciation_scorer.dart  thuật toán căn chỉnh và chấm điểm (mục 4)
   scoring/feedback.dart         mẹo và bài tập cải thiện (mục 5)
@@ -65,7 +65,7 @@ test/                           unit test (mục 7)
 
 ## Mục 1 – Thiết kế cơ sở dữ liệu
 
-**Code:** `lib/data/app_database.dart` (các câu `CREATE TABLE` ở dòng 87–120).
+**Code:** `lib/data/app_database.dart` (các câu `CREATE TABLE` trong `AppDatabase.open`).
 
 **Viết vào báo cáo:**
 - SQLite cục bộ, 4 bảng, có khóa ngoại `ON DELETE CASCADE`:
@@ -88,13 +88,13 @@ test/                           unit test (mục 7)
 ## Mục 2 – Theo dõi tiến độ: streak, thời gian, mục tiêu
 
 **Code:**
-- `computeStreak()`, `lib/data/app_database.dart:54`: tính chuỗi hiện tại và chuỗi dài nhất.
-- `startSession` / `endSession` (dòng 157–171) và `openLesson()` trong `lib/ui/home_screen.dart`: đo thời gian bằng `Stopwatch`.
-- `stats()` (dòng 195): tổng phút, phút hôm nay, 7 ngày gần nhất, điểm trung bình, các âm hay sai.
+- `computeStreak()` trong `lib/data/app_database.dart`: tính chuỗi hiện tại và chuỗi dài nhất.
+- `startSession` / `endSession` và `openLesson()` trong `lib/ui/home_screen.dart`: đo thời gian bằng `ActiveTimer` (`lib/data/active_timer.dart`).
+- `stats()`: tổng phút, phút hôm nay, 7 ngày gần nhất, điểm trung bình, các âm hay sai.
 
 **Viết vào báo cáo:**
 - **Streak:** một ngày chỉ được tính khi có ít nhất một lượt nói (không tính việc chỉ mở app). Streak đếm lùi từ hôm nay. Nếu hôm nay chưa học, đếm từ hôm qua, vì chuỗi vẫn còn đến hết ngày. App lưu cả chuỗi dài nhất.
-- **Thời gian học:** bắt đầu đếm khi vào bài, dừng khi thoát. Sau mỗi lượt nói, thời gian đã học cũng được lưu, để không mất dữ liệu nếu app bị tắt đột ngột.
+- **Thời gian học:** chỉ tính thời gian thao tác thật: mỗi khoảng nghỉ giữa hai thao tác chỉ được cộng tối đa 60 giây (`ActiveTimer`), nên để màn hình mở mà không học thì không làm đầy mục tiêu ngày. Sau mỗi lượt nói, thời gian đã học cũng được lưu, để không mất dữ liệu nếu app bị tắt đột ngột.
 - **Mục tiêu ngày:** chỉnh từ 5 đến 60 phút bằng slider. Thanh tiến độ ở trang chủ hiện "Hôm nay: x / y phút".
 
 **Hình:** `02_bai_hoc_streak.png` (thẻ streak + mục tiêu), `06_tien_do.png` (thống kê), `07_cai_dat.png` (slider mục tiêu).
@@ -103,7 +103,7 @@ test/                           unit test (mục 7)
 
 ## Mục 3 – Tích hợp API nhận dạng giọng nói
 
-**Code:** `lib/ui/practice_screen.dart`: hàm `_initStt()`, `_listen()` (dòng 83), `_onResult()`.
+**Code:** `lib/ui/practice_screen.dart`: hàm `_initStt()`, `_listen()`, `_onResult()`.
 
 **Viết vào báo cáo:**
 - Dùng package `speech_to_text`. Trên Android, package này gọi Google Speech Recognizer; trên iOS là `SFSpeechRecognizer` của Apple.
@@ -119,7 +119,7 @@ test/                           unit test (mục 7)
 
 ## Mục 4 – So sánh âm vị và chấm điểm
 
-**Code:** `lib/scoring/phonemes.dart`, `lib/scoring/pronunciation_scorer.dart:54` (`scorePronunciation`).
+**Code:** `lib/scoring/phonemes.dart`, `lib/scoring/pronunciation_scorer.dart` (`scorePronunciation`).
 
 **Viết vào báo cáo (phần trọng tâm, nên viết kỹ):**
 
@@ -150,7 +150,7 @@ test/                           unit test (mục 7)
 
 ## Mục 5 – Module phản hồi
 
-**Code:** `FeedbackView` trong `lib/ui/practice_screen.dart:192`, `lib/scoring/feedback.dart` (`suggestionsFor`, dòng 54).
+**Code:** `FeedbackView` trong `lib/ui/practice_screen.dart`, `lib/scoring/feedback.dart` (`suggestionsFor`, `suggestionForPhoneme`).
 
 **Viết vào báo cáo:**
 - **Điểm số:** vòng tròn màu (xanh ≥75, cam ≥50, đỏ <50) kèm nhận xét ("Xuất sắc!", "Tốt, gần chuẩn rồi"…).
@@ -167,14 +167,17 @@ test/                           unit test (mục 7)
 
 ## Mục 6 – Thông báo nhắc nhở và giao diện tiến độ
 
-**Code:** `lib/services/notification_service.dart:38` (`scheduleDaily`), `lib/app_state.dart` (`refresh`), tab Tiến độ trong `lib/ui/home_screen.dart`.
+**Code:** `lib/services/notification_service.dart` (`scheduleDaily`, `nextReminderTime`), `lib/app_state.dart` (`refresh`), tab Tiến độ trong `lib/ui/home_screen.dart`.
 
 **Viết vào báo cáo:**
 - Thông báo cục bộ lặp lại hằng ngày (`zonedSchedule` + `DateTimeComponents.time`). Không cần server.
-- Nội dung thay đổi theo streak: "Giữ chuỗi 5 ngày của bạn…".
+- Nội dung thay đổi theo streak: "Giữ chuỗi 5 ngày của bạn…". Lần nhắc kế tiếp luôn dùng số streak mới nhất; các lần lặp sau dùng nội dung chung để không hiện mãi một số streak cũ.
+- Nếu hôm nay đã luyện thì lần nhắc đầu tiên dời sang ngày mai; đổi người học thì hủy nhắc nhở của người cũ.
 - Người dùng bật/tắt nhắc nhở và chọn giờ nhắc. Lịch nhắc được đặt lại sau mỗi buổi học và tự khôi phục sau khi khởi động lại máy (`ScheduledNotificationBootReceiver`).
 - Đã kiểm tra trên emulator: lịch nhắc được hệ thống ghi nhận lúc 20:00 ngày hôm sau (`adb shell dumpsys alarm`).
-- Giao diện tiến độ gồm: chuỗi hiện tại và dài nhất, tổng phút, số lượt nói, điểm trung bình, biểu đồ cột 7 ngày (cột đậm khi đạt mục tiêu), top 5 âm hay sai, 10 lượt nói gần nhất.
+- Giao diện tiến độ gồm: chuỗi hiện tại và dài nhất, tổng phút, số lượt nói, điểm trung bình, trình độ (rate), 9 huy hiệu thành tích, biểu đồ cột 7 ngày có vạch mục tiêu và nhãn thứ (cột đậm khi đạt mục tiêu), biểu đồ đường điểm trung bình 14 ngày, các âm hay sai nhất, 10 lượt nói gần nhất.
+- "Âm hay sai nhất" xếp theo **tỉ lệ sai** trên 50 lượt nói gần nhất (âm gặp dưới 3 lần bị bỏ qua), nhấn vào để xem mẹo và nhảy sang bài luyện.
+- Nhấn một lượt nói trong lịch sử để xem lại phân tích chi tiết; nút "Sao chép CSV" xuất toàn bộ lịch sử để điền bảng kiểm thử ở mục 7.
 
 **Hình:** `06_tien_do.png`, `07_cai_dat.png`, ảnh thông báo trên điện thoại (nhóm tự chụp).
 
@@ -182,7 +185,7 @@ test/                           unit test (mục 7)
 
 ## Mục 7 – Kiểm thử
 
-### 7.1 Kiểm thử tự động (đã có, 18 test pass)
+### 7.1 Kiểm thử tự động (đã có)
 
 Chạy `flutter test` rồi chụp màn hình kết quả.
 
@@ -192,7 +195,11 @@ Chạy `flutter test` rồi chụp màn hình kết quả.
   - Lẫn R/L (thường gặp ở người Trung Quốc, Nhật).
   - Lẫn nguyên âm dài/ngắn /iː/–/ɪ/.
   - Câu khác hẳn phải có điểm thấp hơn nhiều so với câu gần đúng; câu rỗng được 0 điểm; xử lý chữ số; mọi từ trong bài học đều có trong từ điển.
-- `test/streak_test.dart` (5 test): streak qua ranh giới tháng, chuỗi vẫn giữ khi hôm nay chưa học, đứt chuỗi nhưng vẫn giữ kỷ lục.
+- `test/streak_test.dart` (6 test): streak qua ranh giới tháng, chuỗi vẫn giữ khi hôm nay chưa học, đứt chuỗi nhưng vẫn giữ kỷ lục.
+- `test/database_test.dart`: chạy SQLite trong bộ nhớ (`sqflite_common_ffi`): `stats()`, streak và `practicedToday`, điểm cao nhất theo mục, âm hay sai theo tỉ lệ và cửa sổ 50 lượt, xu hướng điểm, tách biệt giữa người học, xóa người học xóa lịch sử (CASCADE), dữ liệu demo.
+- `test/weak_sounds_test.dart`, `test/recommend_test.dart`, `test/lesson_mastery_test.dart`, `test/lessons_test.dart`, `test/session_summary_test.dart`, `test/achievements_test.dart`: xếp hạng âm hay sai, gợi ý bài hằng ngày, mức độ thành thạo, nội dung bài học, tổng kết phiên, huy hiệu.
+- `test/feedback_test.dart`: mọi âm dễ nhầm đều có mẹo, mẹo trỏ tới bài học có thật, lỗi âm cuối từ.
+- `test/reminder_test.dart`, `test/active_timer_test.dart`, `test/export_test.dart`: lịch nhắc nhở, đếm thời gian học thật, xuất CSV.
 
 ### 7.2 Kiểm thử trên thiết bị (đã làm trên emulator)
 
@@ -223,4 +230,5 @@ App chạy ổn, không crash, trên emulator Pixel 7 Pro. Đã kiểm tra: tạ
   - dùng từ điển CMUdict đầy đủ;
   - đồng bộ dữ liệu lên cloud (Firebase/Supabase như TH2).
 - Android cần mạng để nhận dạng, trừ khi máy đã tải gói ngôn ngữ offline.
+- Xem lại chi tiết lượt nói được chấm lại offline từ văn bản đã lưu (kết quả xác định nên khớp lúc nói); lượt chấm bằng Azure sẽ hiện kết quả offline. Hướng cải thiện: lưu JSON kết quả vào CSDL (nâng phiên bản CSDL lên 2).
 - Giờ nhắc lưu theo UTC cố định nên sẽ lệch 1 giờ ở nước có giờ mùa hè (Việt Nam không bị ảnh hưởng). Android có thể giao thông báo trễ tối đa 1 giờ (chế độ hẹn giờ không chính xác, giúp tiết kiệm pin).

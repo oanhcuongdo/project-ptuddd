@@ -22,6 +22,13 @@ flutter test         # unit test thuật toán chấm điểm và streak
 | 6 | Thông báo nhắc nhở + giao diện tiến độ | `lib/services/notification_service.dart`, tab **Tiến độ** |
 | 7 | Kiểm thử nhiều người dùng / giọng | `test/` + kịch bản thủ công bên dưới |
 
+## Tính năng tiến độ và học tập (F2, F5, F6)
+
+- **Bài học:** 8 bài, mỗi bài tối thiểu 6 mục; điểm cao nhất của từng mục, mục từ 80 điểm là thành thạo; mở bài sẽ bắt đầu từ mục đầu tiên chưa thành thạo; thẻ "Gợi ý hôm nay" chọn bài theo âm hay sai nhất (`lib/data/lessons.dart`, `lib/data/recommend.dart`).
+- **Phản hồi:** mẹo phát âm cho mọi âm dễ nhầm, kể cả nguyên âm và lỗi âm cuối từ (`lib/scoring/feedback.dart`); thẻ tổng kết phiên (`lib/data/session_summary.dart`); xem lại chi tiết từng lượt nói (`lib/ui/attempt_detail_screen.dart`).
+- **Tiến độ:** thời gian học thật (`lib/data/active_timer.dart`), âm hay sai theo tỉ lệ (`lib/scoring/weak_sounds.dart`), biểu đồ xu hướng điểm và vạch mục tiêu, huy hiệu (`lib/data/achievements.dart`), sao chép lịch sử CSV (`lib/data/export.dart`).
+- **Nhắc nhở:** bỏ qua hôm nay nếu đã luyện, nội dung streak luôn mới (`lib/services/notification_service.dart`).
+
 ## Thiết kế CSDL
 
 ```
@@ -50,9 +57,11 @@ Khóa ngoại `ON DELETE CASCADE`: xóa người học sẽ xóa toàn bộ lị
 ### Tự động – `flutter test`
 - `test/pronunciation_scorer_test.dart`: mô phỏng giọng có lỗi đặc trưng: người Việt (TH → T/S, nuốt âm cuối), V → B/W, R ↔ L, /iː/ ↔ /ɪ/. Kiểm tra phát hiện đúng âm sai, đúng bài gợi ý, câu khác hẳn bị điểm thấp hơn hẳn, xử lý chữ số, câu rỗng.
 - `test/streak_test.dart`: streak qua ranh giới tháng, giữ streak đến hết ngày, đứt chuỗi nhưng giữ kỷ lục.
+- `test/database_test.dart`: kiểm thử tầng CSDL bằng SQLite trong bộ nhớ (stats, streak, điểm theo mục, âm hay sai theo tỉ lệ, CASCADE, tách biệt người học).
+- Các test còn lại: lịch nhắc nhở, đếm thời gian học thật, huy hiệu, gợi ý bài, mức độ thành thạo, tổng kết phiên, xuất CSV, mẹo phát âm.
 
 ### Thủ công – kịch bản đề xuất
-Tạo ít nhất 3 hồ sơ người học (nam/nữ, giọng Bắc/Nam, trình độ khác nhau). Mỗi người đọc toàn bộ 7 bài và ghi vào bảng:
+Tạo ít nhất 3 hồ sơ người học (nam/nữ, giọng Bắc/Nam, trình độ khác nhau). Mỗi người đọc toàn bộ 8 bài và ghi vào bảng:
 
 | Người | Câu | Đọc chuẩn (điểm) | Cố ý đọc sai (điểm) | Âm sai app báo | Đúng/Sai |
 |-------|-----|------------------|---------------------|----------------|----------|
