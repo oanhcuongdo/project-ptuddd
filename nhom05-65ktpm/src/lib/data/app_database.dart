@@ -52,10 +52,11 @@ class Stats {
   final List<Map<String, Object?>> recentAttempts;
   final Map<String, LessonStat> lessons; // lesson id -> tiến độ từng bài
   final Rate? rate; // null until enough attempts
+  final bool practicedToday; // hôm nay đã có ít nhất một lượt nói
 
   const Stats(this.streak, this.bestStreak, this.secondsToday, this.totalSeconds,
       this.attempts, this.avgScore, this.last7Days, this.topErrors,
-      this.recentAttempts, this.lessons, this.rate);
+      this.recentAttempts, this.lessons, this.rate, this.practicedToday);
 }
 
 String dayKey(DateTime d) =>
@@ -316,6 +317,7 @@ class AppDatabase {
               r['best'] as int),
       },
       computeRate([for (final r in rateScores) r['score'] as int]),
+      dayRows.any((r) => r['day'] == dayKey(now)),
     );
   }
 }
