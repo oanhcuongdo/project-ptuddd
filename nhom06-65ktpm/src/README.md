@@ -1,5 +1,13 @@
 # HealthyLife — Trợ lý kỷ luật và lối sống lành mạnh
 
+## Quản lý tiến độ trên GitHub
+
+- [Project board HealthyLife](https://github.com/users/trggg2185/projects/2/views/2): riêng tư, chỉ liên kết kho Fork của nhóm; bốn thành viên có quyền cập nhật.
+- [12 issues giao việc](https://github.com/trggg2185/project-ptdudd/issues?q=is%3Aissue%20label%3Ahealthylife): mỗi người 3 issues, có checklist nghiệm thu, tuần dự kiến và người review chéo.
+- [Bảng phân công và hướng dẫn cập nhật](../docs/GITHUB_PROJECT.md). Chuyển Todo → In progress khi nhận việc, In review khi có PR, Done sau khi review/merge/kiểm tra; cập nhật tiến độ thực tế trong issue.
+
+Các thao tác thiết lập chỉ thực hiện trong bản Fork `trggg2185/project-ptdudd` và project thuộc `trggg2185`, không thay đổi kho của giảng viên. PR nội bộ dùng base `nhom06-65ktpm`.
+
 Đề cương cuối kỳ học phần Phát triển ứng dụng di động — Nhóm 06, 65KTPM.
 Trạng thái: kế hoạch phát triển và khung Flutter, chưa triển khai chức năng. Phân công và tiến độ dưới đây là đề xuất để nhóm thống nhất.
 
