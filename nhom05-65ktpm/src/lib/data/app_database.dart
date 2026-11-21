@@ -33,6 +33,31 @@ class DayStat {
   const DayStat(this.date, this.seconds);
 }
 
+/// The mean pronunciation score recorded on a calendar day.
+class DailyScore {
+  final String date;
+  final double averageScore;
+  final int attemptCount;
+
+  const DailyScore(this.date, this.averageScore, this.attemptCount);
+}
+
+/// A phoneme error aggregated for one learner profile.
+class PhonemeErrorStat {
+  final String phoneme;
+  final int count;
+
+  const PhonemeErrorStat(this.phoneme, this.count);
+}
+
+/// Current and all-time consecutive practice-day counts for a learner.
+class StreakStat {
+  final int current;
+  final int best;
+
+  const StreakStat(this.current, this.best);
+}
+
 class LessonStat {
   final int attempts;
   final double avgScore;
@@ -94,7 +119,7 @@ class AppDatabase {
     if (kIsWeb) databaseFactory = databaseFactoryFfiWebNoWebWorker; // web demo only
     final db = await openDatabase(
       kIsWeb ? 'english_app.db' : join(await getDatabasesPath(), 'english_app.db'),
-      version: 1,
+      version: 2,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
       onCreate: (db, _) async {
         await db.execute('''
@@ -123,6 +148,8 @@ class AppDatabase {
             recognized_text TEXT NOT NULL,
             score INTEGER NOT NULL,
             confidence REAL NOT NULL,
+            scoring_source TEXT NOT NULL DEFAULT 'offline',
+            audio_path TEXT,
             created_at TEXT NOT NULL)''');
         await db.execute('''
           CREATE TABLE phoneme_errors(
@@ -134,6 +161,21 @@ class AppDatabase {
             error_type TEXT NOT NULL)''');
         await db.execute('CREATE INDEX idx_sessions_user_day ON practice_sessions(user_id, day)');
         await db.execute('CREATE INDEX idx_attempts_user ON attempts(user_id)');
+        await db.execute('CREATE INDEX idx_attempts_user_created ON attempts(user_id, created_at)');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        // Version 2 retains all existing rows and gives old attempts a safe
+        // offline default, matching the original on-device scorer behaviour.
+        if (oldVersion < 2) {
+          await db.execute(
+            "ALTER TABLE attempts ADD COLUMN scoring_source TEXT NOT NULL DEFAULT 'offline'",
+          );
+          await db.execute('ALTER TABLE attempts ADD COLUMN audio_path TEXT');
+          await db.execute(
+            'CREATE INDEX IF NOT EXISTS idx_attempts_user_created '
+            'ON attempts(user_id, created_at)',
+          );
+        }
       },
     );
     return AppDatabase._(db);
@@ -185,8 +227,17 @@ class AppDatabase {
   }
 
   Future<void> saveAttempt(int userId, int sessionId, PronunciationResult r,
-          {DateTime? at}) =>
+          {DateTime? at,
+          String scoringSource = 'offline',
+          String? audioPath}) =>
       db.transaction((txn) async {
+        if (scoringSource != 'ai' && scoringSource != 'offline') {
+          throw ArgumentError.value(
+            scoringSource,
+            'scoringSource',
+            "must be either 'ai' or 'offline'",
+          );
+        }
         final id = await txn.insert('attempts', {
           'session_id': sessionId,
           'user_id': userId,
@@ -194,6 +245,8 @@ class AppDatabase {
           'recognized_text': r.recognizedText,
           'score': r.score,
           'confidence': r.confidence,
+          'scoring_source': scoringSource,
+          'audio_path': audioPath,
           'created_at': (at ?? DateTime.now()).toIso8601String(),
         });
         for (final e in r.errors) {
@@ -206,6 +259,98 @@ class AppDatabase {
           });
         }
       });
+
+  /// Returns daily score aggregates in the requested rolling period.
+  ///
+  /// The list only contains days with attempts; callers that need zero-value
+  /// days for a chart can fill the gaps using [dayKey].
+  Future<List<DailyScore>> dailyAverageScores(
+    int userId, {
+    int days = 7,
+    DateTime? until,
+  }) async {
+    if (days <= 0) throw ArgumentError.value(days, 'days', 'must be positive');
+    final end = until ?? DateTime.now();
+    final start = DateTime(end.year, end.month, end.day - (days - 1));
+    final rows = await db.rawQuery('''
+      SELECT substr(created_at, 1, 10) AS day,
+             AVG(score) AS average_score,
+             COUNT(*) AS attempt_count
+      FROM attempts
+      WHERE user_id = ? AND substr(created_at, 1, 10) >= ?
+                        AND substr(created_at, 1, 10) <= ?
+      GROUP BY substr(created_at, 1, 10)
+      ORDER BY day ASC
+    ''', [userId, dayKey(start), dayKey(end)]);
+    return [
+      for (final row in rows)
+        DailyScore(
+          row['day'] as String,
+          (row['average_score'] as num).toDouble(),
+          row['attempt_count'] as int,
+        ),
+    ];
+  }
+
+  /// Returns study duration per day, scoped to exactly one learner profile.
+  Future<List<DayStat>> dailyStudyDurations(
+    int userId, {
+    int days = 7,
+    DateTime? until,
+  }) async {
+    if (days <= 0) throw ArgumentError.value(days, 'days', 'must be positive');
+    final end = until ?? DateTime.now();
+    final start = DateTime(end.year, end.month, end.day - (days - 1));
+    final rows = await db.rawQuery('''
+      SELECT day, SUM(duration_seconds) AS seconds
+      FROM practice_sessions
+      WHERE user_id = ? AND day >= ? AND day <= ?
+      GROUP BY day
+      ORDER BY day ASC
+    ''', [userId, dayKey(start), dayKey(end)]);
+    return [
+      for (final row in rows)
+        DayStat(row['day'] as String, (row['seconds'] as num?)?.toInt() ?? 0),
+    ];
+  }
+
+  /// Calculates current and best streaks from distinct days with an attempt.
+  Future<StreakStat> streakForUser(int userId, {DateTime? today}) async {
+    final rows = await db.rawQuery('''
+      SELECT DISTINCT s.day
+      FROM practice_sessions s
+      INNER JOIN attempts a ON a.session_id = s.id
+      WHERE s.user_id = ?
+    ''', [userId]);
+    final value = computeStreak(
+      rows.map((row) => row['day'] as String).toSet(),
+      today ?? DateTime.now(),
+    );
+    return StreakStat(value.current, value.best);
+  }
+
+  /// Finds the most frequent expected phonemes the selected learner missed.
+  Future<List<PhonemeErrorStat>> topMispronouncedPhonemes(
+    int userId, {
+    int limit = 5,
+  }) async {
+    if (limit <= 0) throw ArgumentError.value(limit, 'limit', 'must be positive');
+    final rows = await db.rawQuery('''
+      SELECT e.expected_phoneme AS phoneme, COUNT(*) AS error_count
+      FROM phoneme_errors e
+      INNER JOIN attempts a ON a.id = e.attempt_id
+      WHERE a.user_id = ?
+        AND e.expected_phoneme IS NOT NULL
+        AND e.expected_phoneme != ''
+      GROUP BY e.expected_phoneme
+      ORDER BY error_count DESC, phoneme ASC
+      LIMIT ?
+    ''', [userId, limit]);
+    return [
+      for (final row in rows)
+        PhonemeErrorStat(row['phoneme'] as String, row['error_count'] as int),
+    ];
+  }
 
   /// Fills an empty database with one demo learner: a 6-day streak ending
   /// yesterday (practicing today makes it 7), an older 8-day best streak, and
