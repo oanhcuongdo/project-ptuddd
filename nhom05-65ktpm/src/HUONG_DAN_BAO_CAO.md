@@ -224,3 +224,10 @@ App chạy ổn, không crash, trên emulator Pixel 7 Pro. Đã kiểm tra: tạ
   - đồng bộ dữ liệu lên cloud (Firebase/Supabase như TH2).
 - Android cần mạng để nhận dạng, trừ khi máy đã tải gói ngôn ngữ offline.
 - Giờ nhắc lưu theo UTC cố định nên sẽ lệch 1 giờ ở nước có giờ mùa hè (Việt Nam không bị ảnh hưởng). Android có thể giao thông báo trễ tối đa 1 giờ (chế độ hẹn giờ không chính xác, giúp tiết kiệm pin).
+
+---
+
+## Lỗi đã phát hiện và sửa (nên đưa vào mục kiểm thử)
+
+- **Streak sai khi phiên luyện tập kéo qua nửa đêm.** Streak và trạng thái "hôm nay đã luyện" trước đây lấy ngày theo lúc *bắt đầu phiên*; phiên bắt đầu 23:58 nhưng nói sau 00:00 bị tính vào hôm trước. Nay ngày lấy theo thời điểm của *lượt nói* (`attempts.created_at`). Có kiểm thử tái hiện lỗi trong `test/streak_db_test.dart` (trước khi sửa trả về chuỗi `(2, 2)` thay vì `(1, 1)`).
+- **Thanh mục tiêu hằng ngày ghi CSDL liên tục khi kéo.** Mỗi lần thanh nhích đều ghi CSDL, tải lại thống kê và đặt lại lịch thông báo. Nay `GoalSlider` (`lib/ui/goal_slider.dart`) giữ giá trị tạm khi kéo và chỉ lưu một lần khi thả tay; có widget test trong `test/goal_slider_test.dart`.
