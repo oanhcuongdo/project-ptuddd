@@ -53,6 +53,16 @@ const lessons = <Lesson>[
     'shell',
     'She sells sea shells',
   ]),
+  Lesson('vowels', 'Các nguyên âm dễ nhầm', 'Chú ý độ mở miệng và độ tròn môi: /æ/ rộng, /e/ vừa, /ʌ/ lỏng, /ɔ/ và /oʊ/ tròn môi.', [
+    'bat',
+    'bet',
+    'cup',
+    'dog',
+    'road',
+    'book',
+    'two',
+    'The red van',
+  ]),
   Lesson('daily', 'Câu giao tiếp hằng ngày', 'Luyện ngữ điệu với câu thường dùng.', [
     'How are you today',
     'Nice to meet you',
