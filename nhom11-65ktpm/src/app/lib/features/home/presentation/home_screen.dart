@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/constants/app_constants.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -18,7 +20,7 @@ class HomeScreen extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {},
+            onPressed: () => context.push(AppConstants.loginRoute),
           ),
         ],
       ),
@@ -32,7 +34,7 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFE53935), Color(0xFFFF5252)],
+                  colors: [Color(0xFFD32F2F), Color(0xFFFF5252)],
                 ),
                 borderRadius: BorderRadius.circular(16.0),
               ),
@@ -96,6 +98,7 @@ class HomeScreen extends StatelessWidget {
                   subtitle: 'HSK 1 - HSK 2',
                   icon: Icons.map_outlined,
                   color: Colors.blue,
+                  route: AppConstants.roadmapRoute,
                 ),
                 _buildFeatureCard(
                   context,
@@ -103,6 +106,7 @@ class HomeScreen extends StatelessWidget {
                   subtitle: 'Thanh điệu & Pinyin',
                   icon: Icons.mic_none_outlined,
                   color: Colors.redAccent,
+                  route: AppConstants.pronunciationRoute,
                 ),
                 _buildFeatureCard(
                   context,
@@ -110,6 +114,7 @@ class HomeScreen extends StatelessWidget {
                   subtitle: 'Thứ tự nét chuẩn',
                   icon: Icons.brush_outlined,
                   color: Colors.purple,
+                  route: AppConstants.writingRoute,
                 ),
                 _buildFeatureCard(
                   context,
@@ -117,6 +122,7 @@ class HomeScreen extends StatelessWidget {
                   subtitle: 'Ôn tập ngắt quãng',
                   icon: Icons.style_outlined,
                   color: Colors.amber.shade800,
+                  route: AppConstants.flashcardRoute,
                 ),
                 _buildFeatureCard(
                   context,
@@ -124,6 +130,7 @@ class HomeScreen extends StatelessWidget {
                   subtitle: 'Hội thoại & Ngữ pháp',
                   icon: Icons.smart_toy_outlined,
                   color: Colors.teal,
+                  route: AppConstants.aiChatRoute,
                 ),
                 _buildFeatureCard(
                   context,
@@ -131,6 +138,7 @@ class HomeScreen extends StatelessWidget {
                   subtitle: 'Biểu đồ & Xếp hạng',
                   icon: Icons.insights_outlined,
                   color: Colors.indigo,
+                  route: AppConstants.statisticsRoute,
                 ),
               ],
             ),
@@ -146,17 +154,14 @@ class HomeScreen extends StatelessWidget {
     required String subtitle,
     required IconData icon,
     required Color color,
+    required String route,
   }) {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Tính năng: $title đang sẵn sàng!')),
-          );
-        },
+        onTap: () => context.push(route),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
