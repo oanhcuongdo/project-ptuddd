@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../app_state.dart';
 import '../data/app_database.dart';
 
-/// Lets several learners share one device, each with their own history.
+/// Lets learners share one device while keeping their profile and history separate.
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -13,91 +13,194 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  static const _colors = <int>[
+    0xFF6750A4,
+    0xFF006A60,
+    0xFF9C4146,
+    0xFF405F91,
+    0xFF795900,
+  ];
+
   late Future<List<User>> _users = context.read<AppState>().db.users();
 
-  Future<void> _create() async {
-    final ctrl = TextEditingController();
-    final name = await showDialog<String>(
+  void _reload() =>
+      setState(() => _users = context.read<AppState>().db.users());
+
+  Future<(String, int)?> _editDialog({User? user}) async {
+    final name = TextEditingController(text: user?.name ?? '');
+    var color = user?.avatarColor ?? _colors.first;
+    final result = await showDialog<(String, int)>(
       context: context,
-      builder: (c) => AlertDialog(
-        title: const Text('Người học mới'),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'Tên'),
-          onSubmitted: (v) => Navigator.pop(c, v),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(user == null ? 'New learner' : 'Edit profile'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final option in _colors)
+                    ChoiceChip(
+                      label: CircleAvatar(
+                        backgroundColor: Color(option),
+                        radius: 10,
+                      ),
+                      selected: option == color,
+                      onSelected: (_) => setDialogState(() => color = option),
+                    ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, (name.text, color)),
+              child: Text(user == null ? 'Create' : 'Save'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c), child: const Text('Hủy')),
-          FilledButton(onPressed: () => Navigator.pop(c, ctrl.text), child: const Text('Tạo')),
-        ],
       ),
     );
-    if (name == null || name.trim().isEmpty || !mounted) return;
+    name.dispose();
+    return result;
+  }
+
+  Future<void> _create() async {
+    final value = await _editDialog();
+    if (value == null || value.$1.trim().isEmpty || !mounted) return;
     final state = context.read<AppState>();
     try {
-      await state.selectUser(await state.db.createUser(name.trim()));
-    } catch (_) {
+      final user = await state.db.createUser(
+        value.$1.trim(),
+        avatarColor: value.$2,
+      );
+      await state.selectUser(user);
+      _reload();
+    } on Exception {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Tên này đã tồn tại')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Could not create profile. Check for a duplicate name.',
+            ),
+          ),
+        );
       }
     }
   }
 
-  Future<void> _delete(User u) async {
-    final ok = await showDialog<bool>(
+  Future<void> _edit(User user) async {
+    final value = await _editDialog(user: user);
+    if (value == null || value.$1.trim().isEmpty || !mounted) return;
+    final state = context.read<AppState>();
+    try {
+      final updated = await state.db.updateProfile(
+        user,
+        name: value.$1,
+        avatarColor: value.$2,
+      );
+      if (state.user?.id == user.id) await state.selectUser(updated);
+      _reload();
+    } on Exception {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Could not update profile. Check for a duplicate name.',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _delete(User user) async {
+    final accepted = await showDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
-        title: Text('Xóa "${u.name}"?'),
-        content: const Text('Toàn bộ lịch sử luyện tập của người này sẽ bị xóa.'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Delete ${user.name}?'),
+        content: const Text(
+          'This also removes this learner’s practice history.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Hủy')),
-          FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Xóa')),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
+          ),
         ],
       ),
     );
-    if (ok != true || !mounted) return;
-    final db = context.read<AppState>().db;
-    await db.deleteUser(u.id);
-    setState(() => _users = db.users());
+    if (accepted != true || !mounted) return;
+    final state = context.read<AppState>();
+    await state.db.deleteUser(user.id);
+    if (state.user?.id == user.id) await state.selectUser(null);
+    _reload();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Chọn người học')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _create,
-        icon: const Icon(Icons.person_add),
-        label: const Text('Thêm'),
-      ),
-      body: FutureBuilder(
-        future: _users,
-        builder: (context, snap) {
-          final users = snap.data;
-          if (users == null) return const Center(child: CircularProgressIndicator());
-          if (users.isEmpty) {
-            return const Center(child: Text('Chưa có người học. Nhấn "Thêm" để bắt đầu.'));
-          }
-          return ListView(
-            children: [
-              for (final u in users)
-                ListTile(
-                  leading: CircleAvatar(child: Text(u.name[0].toUpperCase())),
-                  title: Text(u.name),
-                  subtitle: Text('Mục tiêu ${u.dailyGoalMinutes} phút/ngày'),
-                  onTap: () => context.read<AppState>().selectUser(u),
-                  trailing: IconButton(
-                    tooltip: 'Xóa',
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => _delete(u),
-                  ),
-                ),
-            ],
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Choose learner')),
+    floatingActionButton: FloatingActionButton.extended(
+      onPressed: _create,
+      icon: const Icon(Icons.person_add),
+      label: const Text('Add learner'),
+    ),
+    body: FutureBuilder<List<User>>(
+      future: _users,
+      builder: (context, snapshot) {
+        final users = snapshot.data;
+        if (users == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (users.isEmpty) {
+          return const Center(
+            child: Text('No learners yet. Add a profile to begin.'),
           );
-        },
-      ),
-    );
-  }
+        }
+        return ListView(
+          children: [
+            for (final user in users)
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Color(user.avatarColor),
+                  child: Text(user.name[0].toUpperCase()),
+                ),
+                title: Text(user.name),
+                subtitle: Text('Daily goal ${user.dailyGoalMinutes} minutes'),
+                onTap: () => context.read<AppState>().selectUser(user),
+                trailing: Wrap(
+                  children: [
+                    IconButton(
+                      tooltip: 'Edit profile',
+                      icon: const Icon(Icons.edit_outlined),
+                      onPressed: () => _edit(user),
+                    ),
+                    IconButton(
+                      tooltip: 'Delete profile',
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => _delete(user),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
+    ),
+  );
 }

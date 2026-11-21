@@ -14,7 +14,10 @@ class AppState extends ChangeNotifier {
     user = u;
     stats = null;
     notifyListeners();
-    if (u == null) return;
+    if (u == null) {
+      await NotificationService.cancel();
+      return;
+    }
     if (u.reminderEnabled) await NotificationService.requestPermission();
     await refresh();
   }
@@ -27,14 +30,29 @@ class AppState extends ChangeNotifier {
     stats = await db.stats(u.id);
     notifyListeners();
     if (u.reminderEnabled) {
-      await NotificationService.scheduleDaily(u.reminderHour, u.reminderMinute, stats!.streak);
+      await NotificationService.scheduleDaily(
+        u.reminderHour,
+        u.reminderMinute,
+        stats!.streak,
+      );
     } else {
       await NotificationService.cancel();
     }
   }
 
-  Future<void> updateSettings({int? goal, bool? reminder, int? hour, int? minute}) async {
-    user = await db.updateSettings(user!, goal: goal, reminder: reminder, hour: hour, minute: minute);
+  Future<void> updateSettings({
+    int? goal,
+    bool? reminder,
+    int? hour,
+    int? minute,
+  }) async {
+    user = await db.updateSettings(
+      user!,
+      goal: goal,
+      reminder: reminder,
+      hour: hour,
+      minute: minute,
+    );
     if (reminder == true) await NotificationService.requestPermission();
     await refresh();
   }

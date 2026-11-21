@@ -9,22 +9,31 @@ import '../scoring/rate.dart';
 class User {
   final int id;
   final String name;
+  final int avatarColor;
   final int dailyGoalMinutes;
   final bool reminderEnabled;
   final int reminderHour;
   final int reminderMinute;
 
-  const User(this.id, this.name, this.dailyGoalMinutes, this.reminderEnabled,
-      this.reminderHour, this.reminderMinute);
+  const User(
+    this.id,
+    this.name,
+    this.avatarColor,
+    this.dailyGoalMinutes,
+    this.reminderEnabled,
+    this.reminderHour,
+    this.reminderMinute,
+  );
 
   factory User.fromRow(Map<String, Object?> r) => User(
-        r['id'] as int,
-        r['name'] as String,
-        r['daily_goal_minutes'] as int,
-        r['reminder_enabled'] == 1,
-        r['reminder_hour'] as int,
-        r['reminder_minute'] as int,
-      );
+    r['id'] as int,
+    r['name'] as String,
+    (r['avatar_color'] as int?) ?? 0xFF6750A4,
+    r['daily_goal_minutes'] as int,
+    r['reminder_enabled'] == 1,
+    r['reminder_hour'] as int,
+    r['reminder_minute'] as int,
+  );
 }
 
 class DayStat {
@@ -78,9 +87,19 @@ class Stats {
   final Map<String, LessonStat> lessons; // lesson id -> tiến độ từng bài
   final Rate? rate; // null until enough attempts
 
-  const Stats(this.streak, this.bestStreak, this.secondsToday, this.totalSeconds,
-      this.attempts, this.avgScore, this.last7Days, this.topErrors,
-      this.recentAttempts, this.lessons, this.rate);
+  const Stats(
+    this.streak,
+    this.bestStreak,
+    this.secondsToday,
+    this.totalSeconds,
+    this.attempts,
+    this.avgScore,
+    this.last7Days,
+    this.topErrors,
+    this.recentAttempts,
+    this.lessons,
+    this.rate,
+  );
 }
 
 String dayKey(DateTime d) =>
@@ -115,17 +134,25 @@ class AppDatabase {
   final Database db;
   AppDatabase._(this.db);
 
-  static Future<AppDatabase> open() async {
-    if (kIsWeb) databaseFactory = databaseFactoryFfiWebNoWebWorker; // web demo only
+  Future<void> close() => db.close();
+
+  static Future<AppDatabase> open({String? path, int schemaVersion = 3}) async {
+    if (kIsWeb) {
+      databaseFactory = databaseFactoryFfiWebNoWebWorker; // web demo only
+    }
     final db = await openDatabase(
-      kIsWeb ? 'english_app.db' : join(await getDatabasesPath(), 'english_app.db'),
-      version: 2,
+      path ??
+          (kIsWeb
+              ? 'english_app.db'
+              : join(await getDatabasesPath(), 'english_app.db')),
+      version: schemaVersion,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
+            avatar_color INTEGER NOT NULL DEFAULT 4284960932,
             daily_goal_minutes INTEGER NOT NULL DEFAULT 10,
             reminder_enabled INTEGER NOT NULL DEFAULT 1,
             reminder_hour INTEGER NOT NULL DEFAULT 20,
@@ -159,9 +186,13 @@ class AppDatabase {
             expected_phoneme TEXT,
             actual_phoneme TEXT,
             error_type TEXT NOT NULL)''');
-        await db.execute('CREATE INDEX idx_sessions_user_day ON practice_sessions(user_id, day)');
+        await db.execute(
+          'CREATE INDEX idx_sessions_user_day ON practice_sessions(user_id, day)',
+        );
         await db.execute('CREATE INDEX idx_attempts_user ON attempts(user_id)');
-        await db.execute('CREATE INDEX idx_attempts_user_created ON attempts(user_id, created_at)');
+        await db.execute(
+          'CREATE INDEX idx_attempts_user_created ON attempts(user_id, created_at)',
+        );
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         // Version 2 retains all existing rows and gives old attempts a safe
@@ -176,6 +207,12 @@ class AppDatabase {
             'ON attempts(user_id, created_at)',
           );
         }
+        if (oldVersion < 3) {
+          await db.execute(
+            'ALTER TABLE users ADD COLUMN avatar_color INTEGER NOT NULL '
+            'DEFAULT 4284960932',
+          );
+        }
       },
     );
     return AppDatabase._(db);
@@ -184,18 +221,46 @@ class AppDatabase {
   Future<List<User>> users() async =>
       (await db.query('users', orderBy: 'name')).map(User.fromRow).toList();
 
-  Future<User> createUser(String name) async {
+  Future<User> createUser(String name, {int avatarColor = 0xFF6750A4}) async {
     final id = await db.insert('users', {
       'name': name,
+      'avatar_color': avatarColor,
       'created_at': DateTime.now().toIso8601String(),
     });
-    return User.fromRow((await db.query('users', where: 'id = ?', whereArgs: [id])).single);
+    return User.fromRow(
+      (await db.query('users', where: 'id = ?', whereArgs: [id])).single,
+    );
   }
 
-  Future<void> deleteUser(int id) => db.delete('users', where: 'id = ?', whereArgs: [id]);
+  Future<User> updateProfile(
+    User user, {
+    String? name,
+    int? avatarColor,
+  }) async {
+    await db.update(
+      'users',
+      {
+        ...?(name == null ? null : {'name': name.trim()}),
+        ...?(avatarColor == null ? null : {'avatar_color': avatarColor}),
+      },
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+    return User.fromRow(
+      (await db.query('users', where: 'id = ?', whereArgs: [user.id])).single,
+    );
+  }
 
-  Future<User> updateSettings(User u,
-      {int? goal, bool? reminder, int? hour, int? minute}) async {
+  Future<void> deleteUser(int id) =>
+      db.delete('users', where: 'id = ?', whereArgs: [id]);
+
+  Future<User> updateSettings(
+    User u, {
+    int? goal,
+    bool? reminder,
+    int? hour,
+    int? minute,
+  }) async {
     await db.update(
       'users',
       {
@@ -207,11 +272,13 @@ class AppDatabase {
       where: 'id = ?',
       whereArgs: [u.id],
     );
-    return User.fromRow((await db.query('users', where: 'id = ?', whereArgs: [u.id])).single);
+    return User.fromRow(
+      (await db.query('users', where: 'id = ?', whereArgs: [u.id])).single,
+    );
   }
 
-  Future<int> startSession(int userId, String lessonId) {
-    final now = DateTime.now();
+  Future<int> startSession(int userId, String lessonId, {DateTime? at}) {
+    final now = at ?? DateTime.now();
     return db.insert('practice_sessions', {
       'user_id': userId,
       'lesson_id': lessonId,
@@ -222,43 +289,50 @@ class AppDatabase {
 
   Future<void> endSession(int sessionId, int seconds) async {
     if (seconds <= 0) return;
-    await db.update('practice_sessions', {'duration_seconds': seconds},
-        where: 'id = ?', whereArgs: [sessionId]);
+    await db.update(
+      'practice_sessions',
+      {'duration_seconds': seconds},
+      where: 'id = ?',
+      whereArgs: [sessionId],
+    );
   }
 
-  Future<void> saveAttempt(int userId, int sessionId, PronunciationResult r,
-          {DateTime? at,
-          String scoringSource = 'offline',
-          String? audioPath}) =>
-      db.transaction((txn) async {
-        if (scoringSource != 'ai' && scoringSource != 'offline') {
-          throw ArgumentError.value(
-            scoringSource,
-            'scoringSource',
-            "must be either 'ai' or 'offline'",
-          );
-        }
-        final id = await txn.insert('attempts', {
-          'session_id': sessionId,
-          'user_id': userId,
-          'expected_text': r.expectedText,
-          'recognized_text': r.recognizedText,
-          'score': r.score,
-          'confidence': r.confidence,
-          'scoring_source': scoringSource,
-          'audio_path': audioPath,
-          'created_at': (at ?? DateTime.now()).toIso8601String(),
-        });
-        for (final e in r.errors) {
-          await txn.insert('phoneme_errors', {
-            'attempt_id': id,
-            'word': e.word,
-            'expected_phoneme': e.expected,
-            'actual_phoneme': e.actual,
-            'error_type': e.type.name,
-          });
-        }
+  Future<void> saveAttempt(
+    int userId,
+    int sessionId,
+    PronunciationResult r, {
+    DateTime? at,
+    String scoringSource = 'offline',
+    String? audioPath,
+  }) => db.transaction((txn) async {
+    if (scoringSource != 'ai' && scoringSource != 'offline') {
+      throw ArgumentError.value(
+        scoringSource,
+        'scoringSource',
+        "must be either 'ai' or 'offline'",
+      );
+    }
+    final id = await txn.insert('attempts', {
+      'session_id': sessionId,
+      'user_id': userId,
+      'expected_text': r.expectedText,
+      'recognized_text': r.recognizedText,
+      'score': r.score,
+      'confidence': r.confidence,
+      'scoring_source': scoringSource,
+      'audio_path': audioPath,
+      'created_at': (at ?? DateTime.now()).toIso8601String(),
+    });
+    for (final e in r.errors) {
+      await txn.insert('phoneme_errors', {
+        'attempt_id': id,
+        'word': e.word,
+        'expected_phoneme': e.expected,
+        'actual_phoneme': e.actual,
+        'error_type': e.type.name,
       });
+    }
+  });
 
   /// Returns daily score aggregates in the requested rolling period.
   ///
@@ -272,7 +346,8 @@ class AppDatabase {
     if (days <= 0) throw ArgumentError.value(days, 'days', 'must be positive');
     final end = until ?? DateTime.now();
     final start = DateTime(end.year, end.month, end.day - (days - 1));
-    final rows = await db.rawQuery('''
+    final rows = await db.rawQuery(
+      '''
       SELECT substr(created_at, 1, 10) AS day,
              AVG(score) AS average_score,
              COUNT(*) AS attempt_count
@@ -281,7 +356,9 @@ class AppDatabase {
                         AND substr(created_at, 1, 10) <= ?
       GROUP BY substr(created_at, 1, 10)
       ORDER BY day ASC
-    ''', [userId, dayKey(start), dayKey(end)]);
+    ''',
+      [userId, dayKey(start), dayKey(end)],
+    );
     return [
       for (final row in rows)
         DailyScore(
@@ -301,13 +378,16 @@ class AppDatabase {
     if (days <= 0) throw ArgumentError.value(days, 'days', 'must be positive');
     final end = until ?? DateTime.now();
     final start = DateTime(end.year, end.month, end.day - (days - 1));
-    final rows = await db.rawQuery('''
+    final rows = await db.rawQuery(
+      '''
       SELECT day, SUM(duration_seconds) AS seconds
       FROM practice_sessions
       WHERE user_id = ? AND day >= ? AND day <= ?
       GROUP BY day
       ORDER BY day ASC
-    ''', [userId, dayKey(start), dayKey(end)]);
+    ''',
+      [userId, dayKey(start), dayKey(end)],
+    );
     return [
       for (final row in rows)
         DayStat(row['day'] as String, (row['seconds'] as num?)?.toInt() ?? 0),
@@ -316,12 +396,15 @@ class AppDatabase {
 
   /// Calculates current and best streaks from distinct days with an attempt.
   Future<StreakStat> streakForUser(int userId, {DateTime? today}) async {
-    final rows = await db.rawQuery('''
+    final rows = await db.rawQuery(
+      '''
       SELECT DISTINCT s.day
       FROM practice_sessions s
       INNER JOIN attempts a ON a.session_id = s.id
       WHERE s.user_id = ?
-    ''', [userId]);
+    ''',
+      [userId],
+    );
     final value = computeStreak(
       rows.map((row) => row['day'] as String).toSet(),
       today ?? DateTime.now(),
@@ -334,8 +417,11 @@ class AppDatabase {
     int userId, {
     int limit = 5,
   }) async {
-    if (limit <= 0) throw ArgumentError.value(limit, 'limit', 'must be positive');
-    final rows = await db.rawQuery('''
+    if (limit <= 0) {
+      throw ArgumentError.value(limit, 'limit', 'must be positive');
+    }
+    final rows = await db.rawQuery(
+      '''
       SELECT e.expected_phoneme AS phoneme, COUNT(*) AS error_count
       FROM phoneme_errors e
       INNER JOIN attempts a ON a.id = e.attempt_id
@@ -345,7 +431,9 @@ class AppDatabase {
       GROUP BY e.expected_phoneme
       ORDER BY error_count DESC, phoneme ASC
       LIMIT ?
-    ''', [userId, limit]);
+    ''',
+      [userId, limit],
+    );
     return [
       for (final row in rows)
         PhonemeErrorStat(row['phoneme'] as String, row['error_count'] as int),
@@ -376,7 +464,10 @@ class AppDatabase {
     ];
     final today = DateTime.now();
     // Days ago with practice: 1..6 is the current streak, 10..17 the best one.
-    final days = [for (var i = 1; i <= 6; i++) i, for (var i = 10; i <= 17; i++) i];
+    final days = [
+      for (var i = 1; i <= 6; i++) i,
+      for (var i = 10; i <= 17; i++) i,
+    ];
     var k = 0;
     for (final ago in days) {
       final start = DateTime(today.year, today.month, today.day - ago, 20, 5);
@@ -390,8 +481,12 @@ class AppDatabase {
       });
       for (var j = 0; j < 3; j++, k++) {
         final q = pairs[k % pairs.length];
-        await saveAttempt(user.id, sid, scorePronunciation(q.$2, q.$3, confidence: 0.85),
-            at: start.add(Duration(minutes: j * 2)));
+        await saveAttempt(
+          user.id,
+          sid,
+          scorePronunciation(q.$2, q.$3, confidence: 0.85),
+          at: start.add(Duration(minutes: j * 2)),
+        );
       }
     }
   }
@@ -399,18 +494,27 @@ class AppDatabase {
   Future<Stats> stats(int userId) async {
     final now = DateTime.now();
     // A day counts toward the streak only if the user made at least one attempt.
-    final dayRows = await db.rawQuery('''
+    final dayRows = await db.rawQuery(
+      '''
       SELECT DISTINCT s.day FROM practice_sessions s
       JOIN attempts a ON a.session_id = s.id
-      WHERE s.user_id = ?''', [userId]);
-    final streak = computeStreak(dayRows.map((r) => r['day'] as String).toSet(), now);
+      WHERE s.user_id = ?''',
+      [userId],
+    );
+    final streak = computeStreak(
+      dayRows.map((r) => r['day'] as String).toSet(),
+      now,
+    );
 
     DateTime daysAgo(int n) => DateTime(now.year, now.month, now.day - n);
     final from = dayKey(daysAgo(6));
     final perDay = {
-      for (final r in await db.rawQuery('''
+      for (final r in await db.rawQuery(
+        '''
         SELECT day, SUM(duration_seconds) AS secs FROM practice_sessions
-        WHERE user_id = ? AND day >= ? GROUP BY day''', [userId, from]))
+        WHERE user_id = ? AND day >= ? GROUP BY day''',
+        [userId, from],
+      ))
         r['day'] as String: (r['secs'] as int?) ?? 0,
     };
     final last7 = [
@@ -418,32 +522,47 @@ class AppDatabase {
         DayStat(dayKey(daysAgo(i)), perDay[dayKey(daysAgo(i))] ?? 0),
     ];
 
-    final total = (await db.rawQuery(
-            'SELECT SUM(duration_seconds) AS t FROM practice_sessions WHERE user_id = ?',
-            [userId]))
-        .single['t'] as int?;
+    final total =
+        (await db.rawQuery(
+              'SELECT SUM(duration_seconds) AS t FROM practice_sessions WHERE user_id = ?',
+              [userId],
+            )).single['t']
+            as int?;
     final agg = (await db.rawQuery(
-            'SELECT COUNT(*) AS c, AVG(score) AS avg FROM attempts WHERE user_id = ?',
-            [userId]))
-        .single;
-    final errs = await db.rawQuery('''
+      'SELECT COUNT(*) AS c, AVG(score) AS avg FROM attempts WHERE user_id = ?',
+      [userId],
+    )).single;
+    final errs = await db.rawQuery(
+      '''
       SELECT e.expected_phoneme AS p, COUNT(*) AS c FROM phoneme_errors e
       JOIN attempts a ON a.id = e.attempt_id
       WHERE a.user_id = ? AND e.expected_phoneme IS NOT NULL
-      GROUP BY e.expected_phoneme ORDER BY c DESC LIMIT 5''', [userId]);
-    final recent = await db.query('attempts',
-        where: 'user_id = ?', whereArgs: [userId], orderBy: 'id DESC', limit: 10);
-    final rateScores = await db.query('attempts',
-        columns: ['score'],
-        where: 'user_id = ?',
-        whereArgs: [userId],
-        orderBy: 'id DESC',
-        limit: rateWindow);
+      GROUP BY e.expected_phoneme ORDER BY c DESC LIMIT 5''',
+      [userId],
+    );
+    final recent = await db.query(
+      'attempts',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: 'id DESC',
+      limit: 10,
+    );
+    final rateScores = await db.query(
+      'attempts',
+      columns: ['score'],
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: 'id DESC',
+      limit: rateWindow,
+    );
 
-    final perLesson = await db.rawQuery('''
+    final perLesson = await db.rawQuery(
+      '''
       SELECT s.lesson_id AS l, COUNT(*) AS c, AVG(a.score) AS avg, MAX(a.score) AS best
       FROM attempts a JOIN practice_sessions s ON s.id = a.session_id
-      WHERE a.user_id = ? GROUP BY s.lesson_id''', [userId]);
+      WHERE a.user_id = ? GROUP BY s.lesson_id''',
+      [userId],
+    );
 
     return Stats(
       streak.current,
@@ -457,8 +576,11 @@ class AppDatabase {
       recent,
       {
         for (final r in perLesson)
-          r['l'] as String: LessonStat(r['c'] as int, (r['avg'] as num).toDouble(),
-              r['best'] as int),
+          r['l'] as String: LessonStat(
+            r['c'] as int,
+            (r['avg'] as num).toDouble(),
+            r['best'] as int,
+          ),
       },
       computeRate([for (final r in rateScores) r['score'] as int]),
     );
