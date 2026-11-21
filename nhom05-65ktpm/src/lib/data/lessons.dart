@@ -71,4 +71,17 @@ const lessons = <Lesson>[
   ]),
 ];
 
+/// Điểm tối thiểu của một mục để coi là đã thành thạo.
+const masteryScore = 80;
+
+/// Số mục của [l] đạt [masteryScore]. [itemBest] ánh xạ câu mẫu → điểm cao nhất.
+int masteredCount(Lesson l, Map<String, int> itemBest) =>
+    l.items.where((i) => (itemBest[i] ?? 0) >= masteryScore).length;
+
+/// Chỉ số mục đầu tiên chưa thành thạo để luyện tiếp (0 nếu đã thành thạo hết).
+int firstUnmastered(Lesson l, Map<String, int> itemBest) {
+  final i = l.items.indexWhere((t) => (itemBest[t] ?? 0) < masteryScore);
+  return i < 0 ? 0 : i;
+}
+
 Lesson lessonById(String id) => lessons.firstWhere((l) => l.id == id);

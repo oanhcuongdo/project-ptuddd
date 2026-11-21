@@ -38,7 +38,8 @@ class LessonStat {
   final int attempts;
   final double avgScore;
   final int bestScore;
-  const LessonStat(this.attempts, this.avgScore, this.bestScore);
+  final Map<String, int> itemBest; // câu mẫu -> điểm cao nhất của từng mục
+  const LessonStat(this.attempts, this.avgScore, this.bestScore, this.itemBest);
 }
 
 class Stats {
@@ -309,6 +310,15 @@ class AppDatabase {
       FROM attempts a JOIN practice_sessions s ON s.id = a.session_id
       WHERE a.user_id = ? GROUP BY s.lesson_id''', [userId]);
 
+    final perItem = await db.rawQuery('''
+      SELECT s.lesson_id AS l, a.expected_text AS t, MAX(a.score) AS best
+      FROM attempts a JOIN practice_sessions s ON s.id = a.session_id
+      WHERE a.user_id = ? GROUP BY s.lesson_id, a.expected_text''', [userId]);
+    final itemBest = <String, Map<String, int>>{};
+    for (final r in perItem) {
+      (itemBest[r['l'] as String] ??= {})[r['t'] as String] = r['best'] as int;
+    }
+
     return Stats(
       streak.current,
       streak.best,
@@ -323,7 +333,7 @@ class AppDatabase {
       {
         for (final r in perLesson)
           r['l'] as String: LessonStat(r['c'] as int, (r['avg'] as num).toDouble(),
-              r['best'] as int),
+              r['best'] as int, itemBest[r['l'] as String] ?? const {}),
       },
       computeRate([for (final r in rateScores) r['score'] as int]),
       dayRows.any((r) => r['day'] == dayKey(now)),

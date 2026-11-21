@@ -16,9 +16,16 @@ class PracticeScreen extends StatefulWidget {
   final Lesson lesson;
   final int sessionId;
   final ActiveTimer watch;
+  final Map<String, int> itemBest; // điểm cao nhất đã có của từng mục (câu mẫu → điểm)
+  final int startIndex;
 
   const PracticeScreen(
-      {super.key, required this.lesson, required this.sessionId, required this.watch});
+      {super.key,
+      required this.lesson,
+      required this.sessionId,
+      required this.watch,
+      this.itemBest = const {},
+      this.startIndex = 0});
 
   @override
   State<PracticeScreen> createState() => _PracticeScreenState();
@@ -29,7 +36,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
   final _tts = FlutterTts();
   bool _sttReady = false;
   String? _sttError;
-  int _index = 0;
+  late int _index = widget.startIndex;
+  late final Map<String, int> _best = {...widget.itemBest};
   String _heard = '';
   PronunciationResult? _result;
 
@@ -107,6 +115,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
     if (!mounted) return;
     setState(() => _result = result);
     if (r.recognizedWords.trim().isEmpty) return;
+    if (result.score > (_best[result.expectedText] ?? 0)) {
+      setState(() => _best[result.expectedText] = result.score);
+    }
     final state = context.read<AppState>();
     await state.db.saveAttempt(state.user!.id, widget.sessionId, result);
     // Persist time so far in case the app is killed mid-session.
@@ -129,7 +140,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('${_index + 1}/${widget.lesson.items.length}', style: theme.textTheme.labelLarge),
+          Text(
+              '${_index + 1}/${widget.lesson.items.length}'
+              '${_best[_target] == null ? '' : ' • cao nhất ${_best[_target]}'}'
+              '${(_best[_target] ?? 0) >= masteryScore ? ' ✅ thành thạo' : ''}',
+              style: theme.textTheme.labelLarge),
           const SizedBox(height: 12),
           Text(_target, textAlign: TextAlign.center, style: theme.textTheme.headlineMedium),
           Text(ipaOfText(_target),

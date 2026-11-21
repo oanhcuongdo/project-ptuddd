@@ -118,7 +118,9 @@ class _LessonsTab extends StatelessWidget {
             child: ListTile(
               title: Text(l.title),
               subtitle: _LessonSubtitle(l, stats.lessons[l.id]),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: _isMastered(l, stats.lessons[l.id])
+                  ? const Icon(Icons.check_circle, color: Colors.green)
+                  : const Icon(Icons.chevron_right),
               onTap: () => openLesson(context, l),
             ),
           ),
@@ -126,6 +128,9 @@ class _LessonsTab extends StatelessWidget {
     );
   }
 }
+
+bool _isMastered(Lesson l, LessonStat? s) =>
+    s != null && masteredCount(l, s.itemBest) == l.items.length;
 
 class _LessonSubtitle extends StatelessWidget {
   final Lesson lesson;
@@ -144,9 +149,11 @@ class _LessonSubtitle extends StatelessWidget {
           Text('Chưa luyện • ${lesson.items.length} mục',
               style: Theme.of(context).textTheme.bodySmall)
         else ...[
-          LinearProgressIndicator(value: s.avgScore / 100),
+          LinearProgressIndicator(value: masteredCount(lesson, s.itemBest) / lesson.items.length),
           const SizedBox(height: 2),
-          Text('${s.attempts} lượt • TB ${s.avgScore.round()} • cao nhất ${s.bestScore}',
+          Text(
+              '${masteredCount(lesson, s.itemBest)}/${lesson.items.length} mục thành thạo (≥$masteryScore) '
+              '• ${s.attempts} lượt • TB ${s.avgScore.round()}',
               style: Theme.of(context).textTheme.bodySmall),
         ],
       ],
@@ -162,14 +169,20 @@ Future<void> openLesson(BuildContext context, Lesson l) async {
   Lesson? next = l;
   while (next != null) {
     final lesson = next;
+    final itemBest = state.stats?.lessons[lesson.id]?.itemBest ?? const <String, int>{};
     final sessionId = await state.db.startSession(state.user!.id, lesson.id);
     final watch = ActiveTimer();
     final result = await nav.push<String>(MaterialPageRoute(
-        builder: (_) => PracticeScreen(lesson: lesson, sessionId: sessionId, watch: watch)));
+        builder: (_) => PracticeScreen(
+            lesson: lesson,
+            sessionId: sessionId,
+            watch: watch,
+            itemBest: itemBest,
+            startIndex: firstUnmastered(lesson, itemBest))));
     await state.db.endSession(sessionId, watch.elapsedSeconds());
+    await state.refresh(); // cập nhật điểm từng mục trước khi mở bài kế tiếp
     next = result == null ? null : lessonById(result);
   }
-  await state.refresh();
 }
 
 class _ProgressTab extends StatelessWidget {
