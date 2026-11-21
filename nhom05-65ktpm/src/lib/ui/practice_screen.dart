@@ -7,6 +7,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../app_state.dart';
 import '../data/active_timer.dart';
 import '../data/lessons.dart';
+import '../data/session_summary.dart';
 import '../scoring/azure_scorer.dart';
 import '../scoring/feedback.dart';
 import '../scoring/phonemes.dart';
@@ -38,6 +39,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   String? _sttError;
   late int _index = widget.startIndex;
   late final Map<String, int> _best = {...widget.itemBest};
+  final _summary = SessionSummary();
   String _heard = '';
   PronunciationResult? _result;
 
@@ -115,9 +117,12 @@ class _PracticeScreenState extends State<PracticeScreen> {
     if (!mounted) return;
     setState(() => _result = result);
     if (r.recognizedWords.trim().isEmpty) return;
-    if (result.score > (_best[result.expectedText] ?? 0)) {
-      setState(() => _best[result.expectedText] = result.score);
-    }
+    setState(() {
+      _summary.add(result.expectedText, result.score, widget.itemBest[result.expectedText] ?? 0);
+      if (result.score > (_best[result.expectedText] ?? 0)) {
+        _best[result.expectedText] = result.score;
+      }
+    });
     final state = context.read<AppState>();
     await state.db.saveAttempt(state.user!.id, widget.sessionId, result);
     // Persist time so far in case the app is killed mid-session.
@@ -196,6 +201,18 @@ class _PracticeScreenState extends State<PracticeScreen> {
               speak: _tts.speak,
             ),
           ],
+          if (_summary.attempts > 0)
+            Card(
+              margin: const EdgeInsets.only(top: 16),
+              child: ListTile(
+                leading: const Icon(Icons.flag_outlined),
+                title: Text('Phiên này: ${_summary.attempts} lượt • TB ${_summary.average.round()}'),
+                subtitle: _summary.newlyMastered.isEmpty
+                    ? null
+                    : Text('Mới thành thạo ${_summary.newlyMastered.length} mục: '
+                        '${_summary.newlyMastered.join(', ')}'),
+              ),
+            ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
