@@ -186,6 +186,87 @@ Future<void> openLesson(BuildContext context, Lesson l) async {
   }
 }
 
+const _chartLabelH = 16.0;
+const _chartBarH = 110.0;
+
+/// Biểu đồ đường điểm trung bình theo ngày; vạch 50/75 trùng ngưỡng màu của điểm.
+class _TrendChart extends StatelessWidget {
+  final List<DayScore> trend;
+  const _TrendChart(this.trend);
+
+  @override
+  Widget build(BuildContext context) {
+    final days = trend.where((d) => d.avg != null).toList();
+    if (days.length < 2) {
+      return const Padding(
+          padding: EdgeInsets.all(8), child: Text('Cần luyện ít nhất 2 ngày để vẽ xu hướng.'));
+    }
+    final theme = Theme.of(context);
+    return Semantics(
+      label: 'Điểm trung bình theo ngày: '
+          '${days.map((d) => '${weekdayLabel(d.date)} ${d.avg!.round()}').join(', ')}',
+      child: SizedBox(
+        height: 130,
+        width: double.infinity,
+        child: CustomPaint(
+          painter: _TrendPainter([for (final d in trend) d.avg],
+              line: theme.colorScheme.primary,
+              grid: theme.colorScheme.outlineVariant,
+              text: theme.colorScheme.onSurfaceVariant),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrendPainter extends CustomPainter {
+  final List<double?> values;
+  final Color line, grid, text;
+  _TrendPainter(this.values, {required this.line, required this.grid, required this.text});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const left = 28.0, pad = 8.0;
+    final w = size.width - left - pad;
+    double x(int i) => left + w * i / (values.length - 1);
+    double y(double v) => pad + (size.height - 2 * pad) * (1 - v.clamp(0, 100) / 100);
+
+    final gridPaint = Paint()
+      ..color = grid
+      ..strokeWidth = 1;
+    for (final g in const [50.0, 75.0, 100.0]) {
+      canvas.drawLine(Offset(left, y(g)), Offset(size.width - pad, y(g)), gridPaint);
+      final tp = TextPainter(
+          text: TextSpan(text: '${g.round()}', style: TextStyle(fontSize: 10, color: text)),
+          textDirection: TextDirection.ltr)
+        ..layout();
+      tp.paint(canvas, Offset(0, y(g) - tp.height / 2));
+    }
+
+    final path = Path();
+    final dot = Paint()..color = line;
+    var started = false;
+    for (var i = 0; i < values.length; i++) {
+      final v = values[i];
+      if (v == null) continue;
+      final p = Offset(x(i), y(v));
+      started ? path.lineTo(p.dx, p.dy) : path.moveTo(p.dx, p.dy);
+      started = true;
+      canvas.drawCircle(p, 3.5, dot);
+    }
+    canvas.drawPath(
+        path,
+        Paint()
+          ..color = line
+          ..strokeWidth = 2.5
+          ..style = PaintingStyle.stroke
+          ..strokeJoin = StrokeJoin.round);
+  }
+
+  @override
+  bool shouldRepaint(_TrendPainter old) => true;
+}
+
 class _ProgressTab extends StatelessWidget {
   final User user;
   final Stats stats;
@@ -231,39 +312,59 @@ class _ProgressTab extends StatelessWidget {
               Icons.leaderboard),
         ]),
         const SizedBox(height: 12),
-        Text('Thời gian học 7 ngày qua (phút)', style: theme.textTheme.titleMedium),
+        Text('Thời gian học 7 ngày qua (phút, vạch = mục tiêu)', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
         SizedBox(
           height: 160,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              for (final d in stats.last7Days)
-                Expanded(
-                  child: Semantics(
-                    label: '${d.date}: ${_minutes(d.seconds)} phút',
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(_minutes(d.seconds), style: theme.textTheme.labelSmall),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          height: 110 * d.seconds / maxSecs,
-                          decoration: BoxDecoration(
-                            color: d.seconds >= user.dailyGoalMinutes * 60
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.primary.withValues(alpha: 0.4),
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-                          ),
+          child: Stack(children: [
+            Positioned.fill(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (final d in stats.last7Days)
+                    Expanded(
+                      child: Semantics(
+                        label: '${weekdayLabel(d.date)} ${d.date}: ${_minutes(d.seconds)} phút',
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                                height: _chartLabelH,
+                                child: Text(_minutes(d.seconds), style: theme.textTheme.labelSmall)),
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 6),
+                              height: _chartBarH * d.seconds / maxSecs,
+                              decoration: BoxDecoration(
+                                color: d.seconds >= user.dailyGoalMinutes * 60
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.primary.withValues(alpha: 0.4),
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                              ),
+                            ),
+                            SizedBox(
+                                height: _chartLabelH,
+                                child: Text('${weekdayLabel(d.date)} ${d.date.substring(8)}',
+                                    style: theme.textTheme.labelSmall)),
+                          ],
                         ),
-                        Text(d.date.substring(8), style: theme.textTheme.labelSmall),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-            ],
-          ),
+                ],
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: _chartLabelH + _chartBarH * (user.dailyGoalMinutes * 60) / maxSecs,
+              child: Container(height: 1.5, color: theme.colorScheme.tertiary),
+            ),
+          ]),
         ),
+        const SizedBox(height: 16),
+        Text('Điểm trung bình theo ngày ($trendDays ngày gần nhất)',
+            style: theme.textTheme.titleMedium),
+        const SizedBox(height: 8),
+        _TrendChart(stats.scoreTrend),
         const SizedBox(height: 16),
         Text('Âm hay sai nhất (${stats.attempts < weakWindow ? 'tất cả' : '$weakWindow'} lượt gần đây)',
             style: theme.textTheme.titleMedium),

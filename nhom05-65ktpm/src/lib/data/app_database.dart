@@ -34,6 +34,16 @@ class DayStat {
   const DayStat(this.date, this.seconds);
 }
 
+/// Điểm trung bình của một ngày; [avg] null nếu hôm đó không luyện.
+class DayScore {
+  final String date;
+  final double? avg;
+  const DayScore(this.date, this.avg);
+}
+
+/// Số ngày hiển thị trên biểu đồ xu hướng điểm.
+const trendDays = 14;
+
 class LessonStat {
   final int attempts;
   final double avgScore;
@@ -55,11 +65,17 @@ class Stats {
   final Map<String, LessonStat> lessons; // lesson id -> tiến độ từng bài
   final Rate? rate; // null until enough attempts
   final bool practicedToday; // hôm nay đã có ít nhất một lượt nói
+  final List<DayScore> scoreTrend; // [trendDays] ngày gần nhất, cũ → mới
 
   const Stats(this.streak, this.bestStreak, this.secondsToday, this.totalSeconds,
       this.attempts, this.avgScore, this.last7Days, this.weakSounds,
-      this.recentAttempts, this.lessons, this.rate, this.practicedToday);
+      this.recentAttempts, this.lessons, this.rate, this.practicedToday,
+      this.scoreTrend);
 }
+
+/// Nhãn thứ trong tuần theo kiểu Việt Nam: T2…T7, CN.
+String weekdayLabel(String date) =>
+    const ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'][DateTime.parse(date).weekday - 1];
 
 String dayKey(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -280,6 +296,18 @@ class AppDatabase {
         DayStat(dayKey(daysAgo(i)), perDay[dayKey(daysAgo(i))] ?? 0),
     ];
 
+    final trendFrom = dayKey(daysAgo(trendDays - 1));
+    final perDayScore = {
+      for (final r in await db.rawQuery('''
+        SELECT substr(created_at, 1, 10) AS d, AVG(score) AS avg FROM attempts
+        WHERE user_id = ? AND substr(created_at, 1, 10) >= ? GROUP BY d''', [userId, trendFrom]))
+        r['d'] as String: (r['avg'] as num).toDouble(),
+    };
+    final scoreTrend = [
+      for (var i = trendDays - 1; i >= 0; i--)
+        DayScore(dayKey(daysAgo(i)), perDayScore[dayKey(daysAgo(i))]),
+    ];
+
     final total = (await db.rawQuery(
             'SELECT SUM(duration_seconds) AS t FROM practice_sessions WHERE user_id = ?',
             [userId]))
@@ -338,6 +366,7 @@ class AppDatabase {
       },
       computeRate([for (final r in rateScores) r['score'] as int]),
       dayRows.any((r) => r['day'] == dayKey(now)),
+      scoreTrend,
     );
   }
 }

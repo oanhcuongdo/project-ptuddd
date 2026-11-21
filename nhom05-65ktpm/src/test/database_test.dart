@@ -101,6 +101,21 @@ void main() {
     expect((await db.stats(other.id)).attempts, 0);
   });
 
+  test('xu hướng điểm: đủ $trendDays ngày, ngày không luyện là null, ngày luyện có trung bình', () async {
+    await speak('th', 'think', 'think', confidence: 0); // 100
+    await speak('th', 'think', 'think', confidence: 0); // 100
+    final t = (await db.stats(user.id)).scoreTrend;
+    expect(t, hasLength(trendDays));
+    expect(t.last.date, dayKey(DateTime.now()));
+    expect(t.last.avg, 100);
+    expect(t.take(trendDays - 1).every((d) => d.avg == null), isTrue);
+  });
+
+  test('nhãn thứ trong tuần', () {
+    expect(weekdayLabel('2026-11-23'), 'T2'); // thứ Hai
+    expect(weekdayLabel('2026-11-29'), 'CN'); // Chủ nhật
+  });
+
   test('dữ liệu demo: streak hiện tại 6, kỷ lục 8, đủ lượt để có rate', () async {
     await db.deleteUser(user.id); // seed chỉ chạy khi CSDL chưa có người học
     await db.seedDemoIfEmpty();
