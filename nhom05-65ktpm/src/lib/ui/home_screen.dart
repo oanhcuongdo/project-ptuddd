@@ -9,6 +9,7 @@ import '../scoring/feedback.dart';
 import '../scoring/phonemes.dart';
 import '../scoring/rate.dart';
 import '../scoring/weak_sounds.dart';
+import 'attempt_detail_screen.dart';
 import 'practice_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -287,6 +288,15 @@ class _ProgressTab extends StatelessWidget {
             title: Text(a['expected_text'] as String),
             subtitle: Text('Nghe được: "${a['recognized_text']}"'),
             trailing: Text('${a['score']}', style: theme.textTheme.titleMedium),
+            onTap: () async {
+              final next = await Navigator.of(context).push<String>(MaterialPageRoute(
+                  builder: (_) => AttemptDetailScreen(
+                      expected: a['expected_text'] as String,
+                      recognized: a['recognized_text'] as String,
+                      confidence: (a['confidence'] as num).toDouble(),
+                      at: DateTime.parse(a['created_at'] as String))));
+              if (next != null && context.mounted) openLesson(context, lessonById(next));
+            },
           ),
       ],
     );
