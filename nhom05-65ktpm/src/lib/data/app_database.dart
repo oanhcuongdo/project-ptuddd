@@ -254,11 +254,12 @@ class AppDatabase {
 
   Future<Stats> stats(int userId) async {
     final now = DateTime.now();
-    // A day counts toward the streak only if the user made at least one attempt.
+    // Một ngày chỉ tính vào streak nếu có ít nhất một lượt nói. Lấy ngày theo
+    // thời điểm của lượt nói (không phải lúc bắt đầu phiên) để phiên kéo qua
+    // nửa đêm không bị tính nhầm sang hôm trước.
     final dayRows = await db.rawQuery('''
-      SELECT DISTINCT s.day FROM practice_sessions s
-      JOIN attempts a ON a.session_id = s.id
-      WHERE s.user_id = ?''', [userId]);
+      SELECT DISTINCT substr(created_at, 1, 10) AS day FROM attempts
+      WHERE user_id = ?''', [userId]);
     final streak = computeStreak(dayRows.map((r) => r['day'] as String).toSet(), now);
 
     DateTime daysAgo(int n) => DateTime(now.year, now.month, now.day - n);

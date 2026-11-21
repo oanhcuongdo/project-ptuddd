@@ -34,4 +34,27 @@ void main() {
     await db.startSession(user.id, 'th');
     expect((await db.stats(user.id)).streak, 0);
   });
+
+  test('phiên bắt đầu trước nửa đêm nhưng nói sau nửa đêm: ngày tính theo lượt nói', () async {
+    final now = DateTime.now();
+    DateTime at(int daysAgo, int h, int m) =>
+        DateTime(now.year, now.month, now.day - daysAgo, h, m);
+    Future<int> session(DateTime start) => db.db.insert('practice_sessions', {
+          'user_id': user.id,
+          'lesson_id': 'th',
+          'day': dayKey(start),
+          'started_at': start.toIso8601String(),
+        });
+
+    // Hôm kia: một phiên bình thường.
+    final s1 = await session(at(2, 20, 0));
+    await db.saveAttempt(user.id, s1, scorePronunciation('think', 'think'), at: at(2, 20, 5));
+    // Phiên bắt đầu 23:58 hôm qua nhưng lượt nói xảy ra lúc 00:03 hôm nay.
+    final s2 = await session(at(1, 23, 58));
+    await db.saveAttempt(user.id, s2, scorePronunciation('think', 'think'), at: at(0, 0, 3));
+
+    // Ngày có lượt nói: hôm kia và hôm nay (hôm qua không nói) → mỗi chuỗi dài 1.
+    final s = await db.stats(user.id);
+    expect((s.streak, s.bestStreak), (1, 1));
+  });
 }
