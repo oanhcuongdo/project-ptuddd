@@ -274,6 +274,10 @@ class AppDatabase {
     }
   }
 
+  /// Toàn bộ lượt nói của người học, cũ nhất trước (dùng để xuất CSV).
+  Future<List<Map<String, Object?>>> allAttempts(int userId) =>
+      db.query('attempts', where: 'user_id = ?', whereArgs: [userId], orderBy: 'id');
+
   Future<Stats> stats(int userId) async {
     final now = DateTime.now();
     // A day counts toward the streak only if the user made at least one attempt.

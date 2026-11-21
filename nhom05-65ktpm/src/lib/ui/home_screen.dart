@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:provider/provider.dart';
 
 import '../app_state.dart';
 import '../data/achievements.dart';
 import '../data/active_timer.dart';
 import '../data/app_database.dart';
+import '../data/export.dart';
 import '../data/lessons.dart';
 import '../data/recommend.dart';
 import '../scoring/feedback.dart';
@@ -437,7 +439,22 @@ class _ProgressTab extends StatelessWidget {
             onTap: () => _showWeakSound(context, w),
           ),
         const SizedBox(height: 8),
-        Text('Lịch sử gần đây', style: theme.textTheme.titleMedium),
+        Row(children: [
+          Expanded(child: Text('Lịch sử gần đây', style: theme.textTheme.titleMedium)),
+          TextButton.icon(
+            icon: const Icon(Icons.copy, size: 18),
+            label: const Text('Sao chép CSV'),
+            onPressed: () async {
+              final db = context.read<AppState>().db;
+              final csv = attemptsToCsv(await db.allAttempts(user.id));
+              await Clipboard.setData(ClipboardData(text: csv));
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Đã sao chép toàn bộ lịch sử (CSV)')));
+              }
+            },
+          ),
+        ]),
         for (final a in stats.recentAttempts)
           ListTile(
             dense: true,

@@ -1,4 +1,5 @@
 import 'package:english_pronunciation_app/data/app_database.dart';
+import 'package:english_pronunciation_app/data/export.dart';
 import 'package:english_pronunciation_app/scoring/pronunciation_scorer.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -114,6 +115,17 @@ void main() {
   test('nhãn thứ trong tuần', () {
     expect(weekdayLabel('2026-11-23'), 'T2'); // thứ Hai
     expect(weekdayLabel('2026-11-29'), 'CN'); // Chủ nhật
+  });
+
+  test('allAttempts: cũ nhất trước, chỉ của người học đó, xuất CSV đủ dòng', () async {
+    final other = await db.createUser('Khac');
+    await speak('th', 'think', 'sink');
+    await speak('rl', 'right', 'right');
+    final sid = await db.startSession(other.id, 'th');
+    await db.saveAttempt(other.id, sid, scorePronunciation('three', 'three'));
+    final rows = await db.allAttempts(user.id);
+    expect(rows.map((r) => r['expected_text']), ['think', 'right']);
+    expect(attemptsToCsv(rows).trim().split('\n'), hasLength(3)); // tiêu đề + 2 lượt
   });
 
   test('dữ liệu demo: streak hiện tại 6, kỷ lục 8, đủ lượt để có rate', () async {
