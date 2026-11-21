@@ -96,10 +96,11 @@ class AppDatabase {
   final Database db;
   AppDatabase._(this.db);
 
-  static Future<AppDatabase> open() async {
+  /// [path] chỉ dùng cho kiểm thử (vd. `inMemoryDatabasePath`).
+  static Future<AppDatabase> open({String? path}) async {
     if (kIsWeb) databaseFactory = databaseFactoryFfiWebNoWebWorker; // web demo only
     final db = await openDatabase(
-      kIsWeb ? 'english_app.db' : join(await getDatabasesPath(), 'english_app.db'),
+      path ?? (kIsWeb ? 'english_app.db' : join(await getDatabasesPath(), 'english_app.db')),
       version: 1,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
       onCreate: (db, _) async {
