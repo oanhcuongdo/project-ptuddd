@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app_state.dart';
+import '../data/achievements.dart';
 import '../data/active_timer.dart';
 import '../data/app_database.dart';
 import '../data/lessons.dart';
@@ -199,6 +200,41 @@ Future<void> openLesson(BuildContext context, Lesson l) async {
   }
 }
 
+/// Huy hiệu đã mở (nổi bật) và chưa mở (mờ); nhấn giữ để xem điều kiện.
+class _Badges extends StatelessWidget {
+  final List<Achievement> items;
+  const _Badges(this.items);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final done = items.where((a) => a.unlocked).length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Huy hiệu ($done/${items.length})', style: theme.textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 4, children: [
+          for (final a in items)
+            Tooltip(
+              message: a.description,
+              child: Semantics(
+                label: '${a.title}: ${a.unlocked ? 'đã mở' : 'chưa mở'}. ${a.description}',
+                excludeSemantics: true,
+                child: Chip(
+                  avatar: Icon(a.unlocked ? Icons.emoji_events : Icons.lock_outline,
+                      size: 18, color: a.unlocked ? Colors.amber.shade700 : theme.disabledColor),
+                  label: Text(a.title,
+                      style: a.unlocked ? null : TextStyle(color: theme.disabledColor)),
+                ),
+              ),
+            ),
+        ]),
+      ],
+    );
+  }
+}
+
 const _chartLabelH = 16.0;
 const _chartBarH = 110.0;
 
@@ -324,6 +360,12 @@ class _ProgressTab extends StatelessWidget {
               stats.rate?.level.label ?? '—',
               Icons.leaderboard),
         ]),
+        const SizedBox(height: 12),
+        _Badges(achievements(
+            bestStreak: stats.bestStreak,
+            attempts: stats.attempts,
+            lessonStats: stats.lessons,
+            rate: stats.rate)),
         const SizedBox(height: 12),
         Text('Thời gian học 7 ngày qua (phút, vạch = mục tiêu)', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
