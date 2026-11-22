@@ -8,11 +8,16 @@ import '../../../../core/components/app_button.dart';
 import '../../../../core/components/app_error_text.dart';
 import '../../../../core/components/app_text_field.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../components/auth_divider.dart';
 import '../components/auth_footer_link.dart';
 import '../components/google_sign_in_button.dart';
 import '../providers/auth_provider.dart';
+import '../styles/auth_styles.dart';
 
-/// Màn hình Đăng nhập — chỉ lắp ghép từ Layout + Components, không viết style trực tiếp
+/// Màn hình Đăng nhập Responsive:
+/// - Mobile (Android): 1 cột gọn đẹp
+/// - Web (Chrome): 2 cột 
+/// Thứ tự: Form Email/Mật khẩu + nút Đăng nhập ở trên, nút Google ở dưới.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -50,13 +55,28 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _handleForgotPassword() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Tính năng đặt lại mật khẩu đang được phát triển.'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
 
     return AuthLayout(
-      title: 'Đăng nhập tài khoản',
-      subtitle: 'Rèn luyện kỷ luật giao tiếp mỗi ngày cùng BuddyTalk',
+      cardTitle: 'Đăng nhập vào BuddyTalk',
+      subtitle: 'Giữ vững kỷ luật – Vượt rào cản ngôn ngữ',
+      footer: AuthFooterLink(
+        prefixText: 'Chưa có tài khoản?',
+        actionText: 'Đăng ký ngay',
+        onPressed: auth.isLoading
+            ? null
+            : () => Navigator.of(context).pushNamed(AuthRoutes.register),
+      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -65,36 +85,47 @@ class _LoginScreenState extends State<LoginScreen> {
             AppTextField(
               controller: _emailController,
               label: 'Email',
+              hintText: 'tenban@buddytalk.vn',
+              prefixIcon: Icons.mail_outline_rounded,
               keyboardType: TextInputType.emailAddress,
               validator: (v) =>
                   (v == null || !v.contains('@')) ? 'Email không hợp lệ' : null,
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
             AppTextField(
               controller: _passwordController,
               label: 'Mật khẩu',
+              hintText: 'Nhập mật khẩu',
+              prefixIcon: Icons.lock_outline_rounded,
               obscureText: true,
               validator: (v) => (v == null || v.length < 6)
                   ? 'Mật khẩu tối thiểu 6 ký tự'
                   : null,
             ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: auth.isLoading ? null : _handleForgotPassword,
+                child: const Text(
+                  'Quên mật khẩu?',
+                  style: AuthStyles.linkAction,
+                ),
+              ),
+            ),
             AppErrorText(message: auth.errorMessage),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.sm),
             AppButton(
               label: 'Đăng nhập',
+              trailingIcon: Icons.arrow_forward_rounded,
               isLoading: auth.isLoading,
               onPressed: _handleEmailLogin,
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 20),
+            const AuthDivider(text: 'hoặc tiếp tục với'),
+            const SizedBox(height: 20),
             GoogleSignInButton(
               isLoading: auth.isLoading,
               onPressed: _handleGoogleLogin,
-            ),
-            AuthFooterLink(
-              label: 'Chưa có tài khoản? Đăng ký ngay',
-              onPressed: auth.isLoading
-                  ? null
-                  : () => Navigator.of(context).pushNamed(AuthRoutes.register),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import '../app_router.dart';
+import '../guards/auth_guard.dart';
 import '../../layouts/main_layout.dart';
 import '../route_helper.dart';
 import 'auth_routes.dart';
@@ -8,7 +9,10 @@ import 'auth_routes.dart';
 void registerAllRoutes() {
   AppRouter.register((settings) {
     if (settings.name == AppRouter.initialRoute) {
-      return RouteHelper.buildPage(settings, const MainLayout());
+      return RouteHelper.buildPage(
+        settings,
+        const AuthGuard(child: MainLayout()),
+      );
     }
     return null;
   });
