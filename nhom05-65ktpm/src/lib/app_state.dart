@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 import 'data/app_database.dart';
+import 'services/firebase_backend.dart';
 import 'services/notification_service.dart';
 
 class AppState extends ChangeNotifier {
@@ -29,6 +32,22 @@ class AppState extends ChangeNotifier {
     if (u == null) return;
     stats = await db.stats(u.id);
     notifyListeners();
+    if (FirebaseRuntime.enabled &&
+        auth.FirebaseAuth.instance.currentUser != null) {
+      final uid = auth.FirebaseAuth.instance.currentUser!.uid;
+      final rate = stats!.rate;
+      if (rate != null) {
+        try {
+          await FirebaseFirestore.instance.collection('users').doc(uid).update({
+            'rate': rate.value,
+            'rateLevel': rate.level.label,
+            'attemptCount': rate.attempts,
+          });
+        } on FirebaseException {
+          // A transient network/rules error must not block local practice.
+        }
+      }
+    }
     if (u.reminderEnabled) {
       await NotificationService.scheduleDaily(
         u.reminderHour,
