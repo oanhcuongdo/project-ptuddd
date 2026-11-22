@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_theme.dart';
-import 'main_navigation_screen.dart';
+import 'router/app_router.dart';
 
 class BuddyTalkApp extends StatelessWidget {
   const BuddyTalkApp({super.key});
@@ -15,7 +15,8 @@ class BuddyTalkApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: const MainNavigationScreen(),
+      initialRoute: AppRouter.initialRoute,
+      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }
