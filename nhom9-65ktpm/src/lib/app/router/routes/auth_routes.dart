@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../features/auth_profile/presentation/screens/login_screen.dart';
+import '../../../features/auth_profile/presentation/screens/register_screen.dart';
 import '../route_helper.dart';
 
 /// Đường dẫn phân hệ Xác thực & Hồ sơ người dùng (Phạm Văn Hưng)
@@ -15,9 +17,9 @@ class AuthRoutes {
   static Route<dynamic>? onGenerateRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
       case login:
-        return RouteHelper.pendingPage(routeSettings, 'Đăng nhập');
+        return RouteHelper.buildPage(routeSettings, const LoginScreen());
       case register:
-        return RouteHelper.pendingPage(routeSettings, 'Đăng ký tài khoản');
+        return RouteHelper.buildPage(routeSettings, const RegisterScreen());
       case profile:
         return RouteHelper.pendingPage(routeSettings, 'Hồ sơ cá nhân');
       case editProfile:
