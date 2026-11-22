@@ -7,7 +7,7 @@ import '../../features/buddy_matching/presentation/screens/buddy_matching_tab.da
 import '../../features/chat/presentation/screens/chat_rooms_tab.dart';
 import '../../features/discipline/presentation/screens/discipline_tab.dart';
 
-/// Khung bố cục chính của toàn ứng dụng (tương đương MainLayout bên Web).
+/// Khung bố cục chính của toàn ứng dụng.
 /// Chứa AppBar trên cùng, vùng nội dung ở giữa và thanh NavigationBar dưới đáy.
 class MainLayout extends StatefulWidget {
   final int initialIndex;
