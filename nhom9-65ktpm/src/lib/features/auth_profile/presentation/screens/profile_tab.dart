@@ -1,30 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../../../core/constants/app_constants.dart';
+import '../../../../app/router/routes/auth_routes.dart';
+import '../../../../core/components/app_button.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../components/profile_header.dart';
+import '../providers/auth_provider.dart';
 
+/// Tab Hồ sơ — lắp ghép từ ProfileHeader + AppButton
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircleAvatar(
-            radius: 40,
-            child: Icon(Icons.person, size: 40),
-          ),
-          SizedBox(height: 12),
-          Text(
-            'Phạm Văn Hưng (Trưởng nhóm)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            '${AppConstants.groupName} - Lớp ${AppConstants.classCode}',
-            style: TextStyle(color: Colors.grey),
-          ),
-        ],
+    final auth = context.watch<AuthProvider>();
+    final profile = auth.currentProfile;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ProfileHeader(profile: profile),
+            const SizedBox(height: AppSpacing.xl),
+            if (profile == null)
+              AppButton(
+                label: 'Đăng nhập / Đăng ký',
+                icon: Icons.login,
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(AuthRoutes.login),
+              )
+            else
+              OutlinedButton.icon(
+                onPressed: auth.signOut,
+                icon: const Icon(Icons.logout),
+                label: const Text('Đăng xuất'),
+              ),
+          ],
+        ),
       ),
     );
   }
