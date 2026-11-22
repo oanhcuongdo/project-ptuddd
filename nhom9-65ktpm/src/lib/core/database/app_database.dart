@@ -4,8 +4,8 @@ import 'package:sqflite/sqflite.dart';
 import 'database_tables.dart';
 
 /// Quản lý CSDL SQLite cục bộ theo triết lý Offline-First cho BuddyTalk.
-/// Lưu bộ đệm nhiệm vụ kỷ luật (Streak/Heatmap), sổ tay từ vựng,
-/// tiến độ chủ đề và lịch sử buổi luyện tập ngay trên thiết bị Android.
+/// Lưu bộ đệm mục tiêu hàng ngày, check-in kỷ luật (Streak/Heatmap),
+/// sổ tay từ vựng, tiến độ chủ đề và lịch sử buổi luyện tập ngay trên máy Android.
 class AppDatabase {
   AppDatabase._internal();
   static final AppDatabase instance = AppDatabase._internal();
@@ -26,11 +26,25 @@ class AppDatabase {
       path,
       version: DatabaseTables.localDbVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    // 1. Bảng nhật ký kỷ luật hàng ngày (Streak & Ma trận Heatmap)
+    // 1. Bảng mục tiêu rèn luyện hàng ngày
+    await db.execute('''
+      CREATE TABLE ${DatabaseTables.localDailyGoals} (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        target_minutes INTEGER NOT NULL DEFAULT 15,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        is_synced INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
+    // 2. Bảng nhật ký kỷ luật hàng ngày (Streak & Ma trận Heatmap)
     await db.execute('''
       CREATE TABLE ${DatabaseTables.localQuestLogs} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +60,7 @@ class AppDatabase {
       )
     ''');
 
-    // 2. Bảng Sổ tay từ vựng cá nhân (Vocabulary Notebook)
+    // 3. Bảng Sổ tay từ vựng cá nhân (Vocabulary Notebook - Hải)
     await db.execute('''
       CREATE TABLE ${DatabaseTables.localVocabNotebook} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,14 +76,16 @@ class AppDatabase {
       )
     ''');
 
-    // 3. Bảng lịch sử buổi luyện tập (Practice Sessions - Kiên)
+    // 4. Bảng lịch sử buổi luyện tập (Practice Sessions - Kiên)
     await db.execute('''
       CREATE TABLE ${DatabaseTables.localPracticeSessions} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id TEXT NOT NULL,
-        buddy_id TEXT,
+        conversation_id TEXT,
         topic_id TEXT,
         duration_minutes INTEGER NOT NULL DEFAULT 15,
+        scheduled_at TEXT,
+        status TEXT NOT NULL DEFAULT 'completed',
         notes TEXT DEFAULT '',
         rating INTEGER,
         completed_at TEXT NOT NULL,
@@ -77,7 +93,7 @@ class AppDatabase {
       )
     ''');
 
-    // 4. Bảng theo dõi trạng thái hoàn thành chủ đề hội thoại (Đạo)
+    // 5. Bảng theo dõi trạng thái hoàn thành chủ đề hội thoại (Đạo)
     await db.execute('''
       CREATE TABLE ${DatabaseTables.localTopicProgress} (
         topic_id TEXT PRIMARY KEY,
@@ -87,8 +103,54 @@ class AppDatabase {
     ''');
   }
 
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${DatabaseTables.localDailyGoals} (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          target_minutes INTEGER NOT NULL DEFAULT 15,
+          is_active INTEGER NOT NULL DEFAULT 1,
+          is_synced INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL
+        )
+      ''');
+    }
+  }
+
   // ===========================================================================
-  // CÁC HÀM CRUD CƠ BẢN CHO PHÂN HỆ KỶ LUẬT (STREAK & HEATMAP)
+  // CÁC HÀM CRUD CHO MỤC TIÊU HÀNG NGÀY (DAILY GOALS)
+  // ===========================================================================
+
+  Future<int> insertDailyGoal({
+    required String userId,
+    required String title,
+    int targetMinutes = 15,
+  }) async {
+    final db = await database;
+    return db.insert(DatabaseTables.localDailyGoals, {
+      'user_id': userId,
+      'title': title,
+      'target_minutes': targetMinutes,
+      'is_active': 1,
+      'is_synced': 0,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getDailyGoals(String userId) async {
+    final db = await database;
+    return db.query(
+      DatabaseTables.localDailyGoals,
+      where: 'user_id = ? AND is_active = 1',
+      whereArgs: [userId],
+      orderBy: 'created_at DESC',
+    );
+  }
+
+  // ===========================================================================
+  // CÁC HÀM CRUD CHO PHÂN HỆ KỶ LUẬT (STREAK & HEATMAP)
   // ===========================================================================
 
   /// Lưu hoặc cập nhật check-in kỷ luật cho một ngày (logDate dạng 'YYYY-MM-DD')
@@ -144,16 +206,13 @@ class AppDatabase {
 
     if (rows.isEmpty) return 0;
 
-    final completedDates = rows
-        .map((r) => r['log_date'] as String)
-        .toSet();
+    final completedDates = rows.map((r) => r['log_date'] as String).toSet();
 
     int streak = 0;
     DateTime cursor = DateTime.now();
     String formatDate(DateTime d) =>
         '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-    // Nếu hôm nay chưa check-in, bắt đầu đếm từ hôm qua để không mất chuỗi trong ngày
     if (!completedDates.contains(formatDate(cursor))) {
       cursor = cursor.subtract(const Duration(days: 1));
     }
@@ -166,7 +225,7 @@ class AppDatabase {
   }
 
   // ===========================================================================
-  // CÁC HÀM CRUD CƠ BẢN CHO SỔ TAY TỪ VỰNG (VOCABULARY NOTEBOOK)
+  // CÁC HÀM CRUD CHO SỔ TAY TỪ VỰNG (VOCABULARY NOTEBOOK)
   // ===========================================================================
 
   Future<int> insertVocab({
