@@ -7,10 +7,13 @@ class NotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
   static const _reminderId = 1;
   static const _details = NotificationDetails(
-    android: AndroidNotificationDetails('daily_reminder', 'Nhắc luyện tập',
-        channelDescription: 'Nhắc nhở luyện phát âm hằng ngày',
-        importance: Importance.high,
-        priority: Priority.high),
+    android: AndroidNotificationDetails(
+      'daily_reminder',
+      'Nhắc luyện tập',
+      channelDescription: 'Nhắc nhở luyện phát âm hằng ngày',
+      importance: Importance.high,
+      priority: Priority.high,
+    ),
     iOS: DarwinNotificationDetails(),
   );
 
@@ -28,10 +31,14 @@ class NotificationService {
   static Future<void> requestPermission() async {
     if (kIsWeb) return;
     await _plugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.requestNotificationsPermission();
     await _plugin
-        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >()
         ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
@@ -59,5 +66,25 @@ class NotificationService {
 
   static Future<void> cancel() async {
     if (!kIsWeb) await _plugin.cancel(id: _reminderId);
+  }
+
+  /// Shows a foreground FCM notification while preserving the daily reminder.
+  static Future<void> showMessage(String title, String body) async {
+    if (kIsWeb) return;
+    await _plugin.show(
+      id: DateTime.now().millisecondsSinceEpoch.remainder(1 << 31),
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'group_updates',
+          'Group updates',
+          channelDescription: 'Study group submissions and comments',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
   }
 }
