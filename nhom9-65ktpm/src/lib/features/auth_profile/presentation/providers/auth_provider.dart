@@ -32,12 +32,22 @@ class AuthProvider extends ChangeNotifier {
     required String displayName,
     required String email,
     required String password,
+    String? avatarUrl,
+    String nativeLang = 'vi',
+    String targetLang = 'en',
+    String proficiencyLevel = 'A2',
+    int dailyGoalMinutes = 20,
   }) async {
     return _runAuthAction(
       () => _repository.registerWithEmail(
         displayName: displayName,
         email: email,
         password: password,
+        avatarUrl: avatarUrl,
+        nativeLang: nativeLang,
+        targetLang: targetLang,
+        proficiencyLevel: proficiencyLevel,
+        dailyGoalMinutes: dailyGoalMinutes,
       ),
     );
   }
@@ -51,6 +61,13 @@ class AuthProvider extends ChangeNotifier {
     _currentProfile = null;
     _errorMessage = null;
     notifyListeners();
+  }
+
+  void clearError() {
+    if (_errorMessage != null) {
+      _errorMessage = null;
+      notifyListeners();
+    }
   }
 
   Future<bool> _runAuthAction(Future<ProfileModel> Function() action) async {

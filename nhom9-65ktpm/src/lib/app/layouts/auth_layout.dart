@@ -7,11 +7,12 @@ import '../../features/auth_profile/presentation/components/auth_web_hero.dart';
 import '../../features/auth_profile/presentation/styles/auth_styles.dart';
 
 /// Khung bố cục Responsive cho phân hệ Xác thực:
-/// - Android / Mobile (< 850px): 1 cột căn giữa (Header logo trên, Form dưới).
-/// - Chrome / Desktop (>= 850px): 2 cột  
+/// - Android / Mobile (< 850px): 1 cột căn giữa (tuỳ chọn hiện BrandHeader trên Login, ẩn trên Register 2 bước).
+/// - Chrome / Desktop (>= 850px): 2 cột kiểu Facebook (Cột trái Hero thương hiệu, Cột phải thẻ Form trắng).
 class AuthLayout extends StatelessWidget {
   final String subtitle;
   final String? cardTitle;
+  final bool showMobileBrandHeader;
   final Widget child;
   final Widget? footer;
 
@@ -19,6 +20,7 @@ class AuthLayout extends StatelessWidget {
     super.key,
     required this.subtitle,
     this.cardTitle,
+    this.showMobileBrandHeader = true,
     required this.child,
     this.footer,
   });
@@ -45,8 +47,8 @@ class AuthLayout extends StatelessWidget {
               child: Center(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop ? 40 : 22,
-                    vertical: isDesktop ? AppSpacing.xxl : AppSpacing.xl,
+                    horizontal: isDesktop ? 40 : 20,
+                    vertical: isDesktop ? AppSpacing.xxl : AppSpacing.lg,
                   ),
                   child: isDesktop
                       ? _buildDesktopLayout(isDark)
@@ -70,8 +72,10 @@ class AuthLayout extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AuthBrandHeader(tagline: subtitle),
-          const SizedBox(height: 28),
+          if (showMobileBrandHeader) ...[
+            AuthBrandHeader(tagline: subtitle),
+            const SizedBox(height: 28),
+          ],
           child,
           if (footer != null) ...[
             const SizedBox(height: AppSpacing.xl),
@@ -102,7 +106,7 @@ class AuthLayout extends StatelessWidget {
           SizedBox(
             width: AuthStyles.desktopCardWidth,
             child: Container(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(30),
               decoration: AuthStyles.webCardDecoration(isDark),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -115,11 +119,11 @@ class AuthLayout extends StatelessWidget {
                         color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 20),
                   ],
                   child,
                   if (footer != null) ...[
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.lg),
                     footer!,
                   ],
                 ],
