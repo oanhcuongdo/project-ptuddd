@@ -40,7 +40,13 @@ class AppButton extends StatelessWidget {
             Icon(icon, size: 20),
             const SizedBox(width: 8),
           ],
-          Text(label),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
           if (trailingIcon != null) ...[
             const SizedBox(width: 8),
             Icon(trailingIcon, size: 20),

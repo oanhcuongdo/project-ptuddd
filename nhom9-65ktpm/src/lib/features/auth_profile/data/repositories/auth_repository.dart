@@ -45,11 +45,16 @@ class AuthRepository {
     );
   }
 
-  /// Đăng ký tài khoản mới bằng Email & Mật khẩu
+  /// Đăng ký tài khoản mới kèm hồ sơ ngôn ngữ, avatar & mục tiêu kỷ luật hàng ngày
   Future<ProfileModel> registerWithEmail({
     required String displayName,
     required String email,
     required String password,
+    String? avatarUrl,
+    String nativeLang = 'vi',
+    String targetLang = 'en',
+    String proficiencyLevel = 'A2',
+    int dailyGoalMinutes = 20,
   }) async {
     final auth = _requireFirebaseAuth();
     final credential = await auth.createUserWithEmailAndPassword(
@@ -65,7 +70,11 @@ class AuthRepository {
       providerAccountId: fbUser.uid,
       displayName: displayName.trim(),
       email: fbUser.email,
-      avatarUrl: fbUser.photoURL,
+      avatarUrl: avatarUrl ?? fbUser.photoURL,
+      nativeLang: nativeLang,
+      targetLang: targetLang,
+      proficiencyLevel: proficiencyLevel,
+      dailyGoalMinutes: dailyGoalMinutes,
     );
   }
 
@@ -105,7 +114,6 @@ class AuthRepository {
     await _googleSignIn.signOut();
   }
 
-  /// Đồng bộ tài khoản Firebase vào 3 bảng `users`, `user_accounts`, `profiles` trên Supabase
   Future<ProfileModel> _syncToSupabase({
     required String firebaseUid,
     required String provider,
@@ -114,21 +122,27 @@ class AuthRepository {
     String? email,
     String? phoneNumber,
     String? avatarUrl,
+    String nativeLang = 'vi',
+    String targetLang = 'en',
+    String proficiencyLevel = 'A2',
+    int dailyGoalMinutes = 20,
     bool isVerified = false,
   }) async {
     final client = SupabaseConfig.clientOrNull;
 
-    // Nếu chưa cấu hình Supabase key, trả về hồ sơ cục bộ để app vẫn test UI mượt
     if (client == null) {
       return ProfileModel(
         userId: firebaseUid,
         displayName: displayName,
         avatarUrl: avatarUrl,
+        nativeLang: nativeLang,
+        targetLang: targetLang,
+        proficiencyLevel: proficiencyLevel,
+        dailyGoalMinutes: dailyGoalMinutes,
         isOnline: true,
       );
     }
 
-    // 1. Tra cứu xem tài khoản đăng nhập này đã tồn tại trong `user_accounts` chưa
     final existingAccount = await client
         .from(DatabaseTables.userAccounts)
         .select('user_id')
@@ -146,7 +160,6 @@ class AuthRepository {
           .eq('provider', provider)
           .eq('provider_account_id', providerAccountId);
     } else {
-      // 2. Tạo user gốc mới trong `users`
       final createdUser = await client
           .from(DatabaseTables.users)
           .insert({'status': 'active', 'role': 'user'})
@@ -155,7 +168,6 @@ class AuthRepository {
 
       internalUserId = createdUser['id'].toString();
 
-      // 3. Tạo bản ghi phương thức đăng nhập trong `user_accounts`
       await client.from(DatabaseTables.userAccounts).insert({
         'user_id': internalUserId,
         'provider': provider,
@@ -166,11 +178,14 @@ class AuthRepository {
         'is_verified': isVerified,
       });
 
-      // 4. Tạo hồ sơ công khai 1-1 trong `profiles`
       await client.from(DatabaseTables.profiles).insert({
         'user_id': internalUserId,
         'display_name': displayName,
         'avatar_url': avatarUrl,
+        'native_lang': nativeLang,
+        'target_lang': targetLang,
+        'proficiency_level': proficiencyLevel,
+        'daily_goal_minutes': dailyGoalMinutes,
         'is_online': true,
       });
     }

@@ -5,14 +5,15 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../styles/auth_styles.dart';
 
-/// Component nút "Tiếp tục với Google" dạng bo tròn có logo G 4 màu sắc nét
-/// Chạy chuẩn trên cả Chrome Web lẫn Android (không phụ thuộc file ảnh ngoài).
+/// Component nút Google dạng bo tròn có logo G 4 màu sắc nét
 class GoogleSignInButton extends StatelessWidget {
+  final String label;
   final bool isLoading;
   final VoidCallback onPressed;
 
   const GoogleSignInButton({
     super.key,
+    this.label = 'Tiếp tục với Google',
     required this.isLoading,
     required this.onPressed,
   });
@@ -27,17 +28,20 @@ class GoogleSignInButton extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(999),
           onTap: isLoading ? null : onPressed,
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _GoogleLogoIcon(size: 20),
-              SizedBox(width: 12),
-              Text(
-                'Tiếp tục với Google',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+              const _GoogleLogoIcon(size: 20),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
             ],
@@ -79,19 +83,15 @@ class _GoogleLogoPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.butt;
 
-    // Đỏ (phần trên)
     paint.color = const Color(0xFFEA4335);
     canvas.drawArc(rect, -math.pi * 0.78, math.pi * 0.56, false, paint);
 
-    // Vàng (bên trái)
     paint.color = const Color(0xFFFBBC05);
     canvas.drawArc(rect, math.pi * 0.78, math.pi * 0.44, false, paint);
 
-    // Xanh lá (phần dưới)
     paint.color = const Color(0xFF34A853);
     canvas.drawArc(rect, math.pi * 0.22, math.pi * 0.56, false, paint);
 
-    // Xanh dương (bên phải + thanh ngang chữ G)
     paint.color = const Color(0xFF4285F4);
     canvas.drawArc(rect, -math.pi * 0.02, math.pi * 0.26, false, paint);
 
