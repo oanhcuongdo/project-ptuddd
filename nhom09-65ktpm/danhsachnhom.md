@@ -1,41 +1,41 @@
-﻿# Danh SÃ¡ch ThÃ nh ViÃªn - NhÃ³m 9
+# Danh Sách Thành Viên - Nhóm 09
 
-- **Lá»›p há»c pháº§n / Lá»›p sinh hoáº¡t:** 65KTPM
-- **TÃªn Ä‘á» tÃ i / á»¨ng dá»¥ng:** á»¨ng Dá»¥ng Ká»· Luáº­t CÃ¡ NhÃ¢n Cáº£i Thiá»‡n Ká»¹ NÄƒng Giao Tiáº¿p VÃ  VÆ°á»£t RÃ o Cáº£n NgÃ´n Ngá»¯ (BuddyTalk)
-- **Giáº£ng viÃªn hÆ°á»›ng dáº«n:** ThS. Äá»— CÆ°á»ng Oanh
+- **Lớp học phần / Lớp sinh hoạt:** 65KTPM
+- **Tên đề tài / Ứng dụng:** Ứng Dụng Kỷ Luật Cá Nhân Cải Thiện Kỹ Năng Giao Tiếp Và Vượt Rào Cản Ngôn Ngữ (BuddyTalk)
+- **Giảng viên hướng dẫn:** ThS. Đỗ Cường Oanh
 
-## Báº£ng ThÃ´ng Tin ThÃ nh ViÃªn
+## Bảng Thông Tin Thành Viên
 
-| STT | Há» vÃ  TÃªn | MÃ£ Sinh ViÃªn | Lá»›p Sinh Hoáº¡t | Vai TrÃ² | Nhiá»‡m Vá»¥ PhÃ¢n CÃ´ng | ÄÃ³ng GÃ³p (%) | Email |
+| STT | Họ và Tên | Mã Sinh Viên | Lớp Sinh Hoạt | Vai Trò | Nhiệm Vụ Phân Công | Đóng Góp (%) | Email |
 | :-: | :--- | :---: | :---: | :---: | :--- | :---: | :--- |
-| **1** | **Pháº¡m VÄƒn HÆ°ng** | **2351170598** | 65KTPM | TrÆ°á»Ÿng nhÃ³m | Quáº£n lÃ½ dá»± Ã¡n, Thiáº¿t káº¿ CSDL (Supabase + SQLite), Firebase Auth & Há»“ sÆ¡ ngÆ°á»i dÃ¹ng, PhÃ¢n há»‡ Ká»· luáº­t (Má»¥c tiÃªu hÃ ng ngÃ y, Streak, Heatmap), PhÃ¢n há»‡ Chat Realtime (Chat 1-1 & Chat NhÃ³m há»c táº­p) | 100% | phamvanhung21122004@gmail.com |
-| **2** | **Trá»‹nh Trung KiÃªn** | **2251172396** | 65KTPM | ThÃ nh viÃªn | Thiáº¿t káº¿ UI/UX Material 3 toÃ n á»©ng dá»¥ng, Láº­p trÃ¬nh PhÃ¢n há»‡ Quáº£n lÃ½ Buá»•i luyá»‡n táº­p (Practice Sessions): Táº¡o lá»‹ch háº¹n, Äá»“ng há»“ Ä‘áº¿m giá» há»c (Session Timer 15-30p), ÄÃ¡nh giÃ¡ buá»•i há»c vÃ  Thá»‘ng kÃª tá»•ng giá» luyá»‡n táº­p | 100% | trinhkien0103@gmail.com |
-| **3** | **Äá»— Viá»‡t Tiáº¿n** | **2251243452** | 65KTPM | ThÃ nh viÃªn | Láº­p trÃ¬nh PhÃ¢n há»‡ TÃ¬m kiáº¿m & GhÃ©p cáº·p báº¡n Ä‘á»“ng hÃ nh (Buddy Matching) theo ngÃ´n ngá»¯ bÃ¹ trá»« vÃ  bá»™ lá»c trÃ¬nh Ä‘á»™ | 100% | tien.dv.65ktpm@gmail.com |
-| **4** | **Cao Äá»©c Äáº¡o** | **2351170581** | 65KTPM | ThÃ nh viÃªn | Láº­p trÃ¬nh PhÃ¢n há»‡ Gá»£i Ã½ chá»§ Ä‘á» & Ká»‹ch báº£n há»™i thoáº¡i tÃ¬nh huá»‘ng (Conversation Topics): Ká»‹ch báº£n máº«u theo cáº¥p Ä‘á»™ A1-B2, gá»£i Ã½ cÃ¢u má»Ÿ Ä‘áº§u há»™i thoáº¡i | 100% | caoducdao17022005@gmail.com |
-| **5** | **TrÆ°Æ¡ng Tuáº¥n Háº£i** | **2351170590** | 65KTPM | ThÃ nh viÃªn | Láº­p trÃ¬nh PhÃ¢n há»‡ Trá»£ lÃ½ Dá»‹ch thuáº­t tá»©c thÃ¬ (Translation Assistant) & Sá»• tay tá»« vá»±ng: TÃ­ch há»£p API Dá»‹ch song ngá»¯ (Trung - Viá»‡t - Anh), nÃºt dá»‹ch nhanh trong chat, tra cá»©u vÃ  lÆ°u tá»« má»›i | 100% | tuanhaiii2005@gmail.com |
+| **1** | **Phạm Văn Hưng** | **2351170598** | 65KTPM | Trưởng nhóm | Quản lý dự án, Thiết kế CSDL (Supabase Cloud 100% Online), Firebase Auth & Hồ sơ người dùng, Phân hệ Kỷ luật (Mục tiêu hàng ngày, Streak, Heatmap), Phân hệ Chat Realtime (Chat 1-1 & Chat Nhóm học tập) | 100% | phamvanhung21122004@gmail.com |
+| **2** | **Trịnh Trung Kiên** | **2251172396** | 65KTPM | Thành viên | Thiết kế UI/UX Material 3 toàn ứng dụng, Lập trình Phân hệ Quản lý Buổi luyện tập (Practice Sessions): Tạo lịch hẹn, Đồng hồ đếm giờ học (Session Timer 15-30p), Đánh giá buổi học và Thống kê tổng giờ luyện tập | 100% | trinhkien0103@gmail.com |
+| **3** | **Đỗ Việt Tiến** | **2251243452** | 65KTPM | Thành viên | Lập trình Phân hệ Tìm kiếm & Ghép cặp bạn đồng hành (Buddy Matching) theo ngôn ngữ bù trừ và bộ lọc trình độ | 100% | tien.dv.65ktpm@gmail.com |
+| **4** | **Cao Đức Đạo** | **2351170581** | 65KTPM | Thành viên | Lập trình Phân hệ Gợi ý chủ đề & Kịch bản hội thoại tình huống (Conversation Topics): Kịch bản mẫu theo cấp độ A1-B2, gợi ý câu mở đầu hội thoại | 100% | caoducdao17022005@gmail.com |
+| **5** | **Trương Tuấn Hải** | **2351170590** | 65KTPM | Thành viên | Lập trình Phân hệ Trợ lý Dịch thuật tức thì (Translation Assistant) & Sổ tay từ vựng: Tích hợp API Dịch song ngữ (Trung - Việt - Anh), nút dịch nhanh trong chat, tra cứu và lưu từ mới | 100% | tuanhaiii2005@gmail.com |
 
-## HÆ°á»›ng Dáº«n Thiáº¿t Láº­p MÃ´i TrÆ°á»ng VÃ  Khá»Ÿi Cháº¡y á»¨ng Dá»¥ng
+## Hướng Dẫn Thiết Lập Môi Trường Và Khởi Chạy Ứng Dụng
 
-### 1. YÃªu cáº§u mÃ´i trÆ°á»ng
-- Flutter SDK: PhiÃªn báº£n 3.x trá»Ÿ lÃªn
-- Dart SDK: PhiÃªn báº£n 3.x trá»Ÿ lÃªn
-- TrÃ¬nh soáº¡n tháº£o / IDE: Visual Studio Code hoáº·c Android Studio (Ä‘Ã£ cÃ i Flutter & Dart extension)
-- Thiáº¿t bá»‹ cháº¡y thá»­ nghiá»‡m: MÃ¡y áº£o Android Emulator / Thiáº¿t bá»‹ tháº­t Android (Android 8.0+) hoáº·c Windows Desktop
+### 1. Yêu cầu môi trường
+- Flutter SDK: Phiên bản 3.x trở lên
+- Dart SDK: Phiên bản 3.x trở lên
+- Trình soạn thảo / IDE: Visual Studio Code hoặc Android Studio (đã cài Flutter & Dart extension)
+- Thiết bị chạy thử nghiệm: Máy ảo Android Emulator / Thiết bị thật Android (Android 8.0+) hoặc Windows Desktop
 
-### 2. CÃ¡c bÆ°á»›c cÃ i Ä‘áº·t vÃ  khá»Ÿi cháº¡y á»©ng dá»¥ng
+### 2. Các bước cài đặt và khởi chạy ứng dụng
 ```bash
-# 1. Di chuyá»ƒn vÃ o thÆ° má»¥c mÃ£ nguá»“n á»©ng dá»¥ng
+# 1. Di chuyển vào thư mục mã nguồn ứng dụng
 cd nhom09-65ktpm/src
 
-# 2. CÃ i Ä‘áº·t cÃ¡c gÃ³i phá»¥ thuá»™c (Dependencies)
+# 2. Cài đặt các gói phụ thuộc (Dependencies)
 flutter pub get
 
-# 3. Kiá»ƒm tra mÃ£ nguá»“n (Äáº£m báº£o 0 lá»—i)
+# 3. Kiểm tra mã nguồn (Đảm bảo 0 lỗi)
 flutter analyze
 
-# 4. Cháº¡y kiá»ƒm thá»­ tá»± Ä‘á»™ng (Unit Tests)
+# 4. Chạy kiểm thử tự động (Unit Tests)
 flutter test
 
-# 5. Khá»Ÿi cháº¡y á»©ng dá»¥ng
-flutter run
+# 5. Tạo file .env từ .env.example và khởi chạy ứng dụng
+flutter run -d chrome --web-port=5000 --dart-define-from-file=.env
 ```
