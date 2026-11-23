@@ -1,78 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../auth_profile/presentation/providers/auth_provider.dart';
 
+/// Tab Kỷ luật cá nhân — đọc dữ liệu thật từ hồ sơ Supabase (không fix cứng số liệu giả)
 class DisciplineTab extends StatelessWidget {
   const DisciplineTab({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<AuthProvider>().currentProfile;
+    final streak = profile?.streakCount ?? 0;
+    final goalMinutes = profile?.dailyGoalMinutes ?? 0;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Card(
-            color: Colors.orange.shade50,
-            child: const Padding(
-              padding: EdgeInsets.all(16.0),
+            color: AppColors.streakBg,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.local_fire_department,
                     size: 48,
-                    color: AppTheme.streakOrange,
+                    color: AppColors.streakOrange,
                   ),
-                  SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Chuỗi Kỷ Luật (Streak)',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                  const SizedBox(width: AppSpacing.lg),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Chuỗi Kỷ Luật (Streak)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '3 ngày liên tiếp rèn luyện',
-                        style: TextStyle(color: Colors.black87),
-                      ),
-                    ],
+                        Text(
+                          '$streak ngày liên tiếp • Mục tiêu $goalMinutes phút/ngày',
+                          style: const TextStyle(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           const Text(
             'Mục tiêu hôm nay',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           const Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Icon(
-                    Icons.record_voice_over,
-                    color: AppTheme.primaryColor,
-                  ),
-                  title: Text('Thực hành hội thoại 15 phút'),
-                  subtitle: Text('Chủ đề: Giới thiệu bản thân & sở thích'),
-                  trailing: Icon(Icons.check_box_outline_blank),
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Center(
+                child: Text(
+                  'Chưa có mục tiêu nào. Dữ liệu sẽ được tải trực tiếp từ bảng daily_goals trên Supabase.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.textMuted),
                 ),
-                Divider(),
-                ListTile(
-                  leading: Icon(
-                    Icons.menu_book,
-                    color: AppTheme.secondaryColor,
-                  ),
-                  title: Text('Lưu 3 từ vựng mới vào Sổ tay'),
-                  subtitle: Text('Tra cứu và lưu từ mới từ phòng chat'),
-                  trailing: Icon(Icons.check_box_outline_blank),
-                ),
-              ],
+              ),
             ),
           ),
         ],

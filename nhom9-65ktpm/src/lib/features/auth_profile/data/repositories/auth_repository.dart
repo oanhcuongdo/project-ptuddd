@@ -1,12 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../core/database/database_tables.dart';
 import '../../../../core/network/supabase_config.dart';
 import '../models/profile_model.dart';
 
-/// Lớp xử lý xác thực (Firebase Auth) và đồng bộ hồ sơ lên Supabase
+/// Lớp xử lý xác thực (Firebase Auth) và đồng bộ 100% trực tuyến lên Supabase
 /// theo kiến trúc 3 bảng: `users` -> `user_accounts` (1-N) & `profiles` (1-1).
 class AuthRepository {
   AuthRepository({GoogleSignIn? googleSignIn})
@@ -17,8 +18,8 @@ class AuthRepository {
   FirebaseAuth _requireFirebaseAuth() {
     if (Firebase.apps.isEmpty) {
       throw StateError(
-        'Chưa cấu hình Firebase (google-services.json). '
-        'Vui lòng khởi tạo Firebase trước khi đăng nhập.',
+        'Chưa cấu hình Firebase. Vui lòng điền biến FIREBASE_* trong .env '
+        'và chạy lại với --dart-define-from-file=.env.',
       );
     }
     return FirebaseAuth.instance;
@@ -51,10 +52,10 @@ class AuthRepository {
     required String email,
     required String password,
     String? avatarUrl,
-    String nativeLang = 'vi',
-    String targetLang = 'en',
-    String proficiencyLevel = 'A2',
-    int dailyGoalMinutes = 20,
+    required String nativeLang,
+    required String targetLang,
+    required String proficiencyLevel,
+    required int dailyGoalMinutes,
   }) async {
     final auth = _requireFirebaseAuth();
     final credential = await auth.createUserWithEmailAndPassword(
@@ -78,28 +79,35 @@ class AuthRepository {
     );
   }
 
-  /// Đăng nhập một chạm bằng tài khoản Google (Firebase Auth + Google Sign-In)
+  /// Đăng nhập một chạm bằng tài khoản Google (chạy mượt cả Chrome Web & Android)
   Future<ProfileModel> signInWithGoogle() async {
     final auth = _requireFirebaseAuth();
-    final googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) {
-      throw StateError('Người dùng đã hủy đăng nhập Google.');
+    late final UserCredential userCredential;
+
+    if (kIsWeb) {
+      // Trên Chrome Web: dùng popup chuẩn của Firebase Auth (không cần thêm meta client-id)
+      userCredential = await auth.signInWithPopup(GoogleAuthProvider());
+    } else {
+      // Trên Android / iOS: dùng native GoogleSignIn
+      final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        throw StateError('Người dùng đã hủy đăng nhập Google.');
+      }
+      final googleAuth = await googleUser.authentication;
+      final oauthCredential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      userCredential = await auth.signInWithCredential(oauthCredential);
     }
 
-    final googleAuth = await googleUser.authentication;
-    final oauthCredential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final userCredential = await auth.signInWithCredential(oauthCredential);
     final fbUser = userCredential.user!;
 
     return _syncToSupabase(
       firebaseUid: fbUser.uid,
       provider: 'google',
       providerAccountId: fbUser.uid,
-      displayName: fbUser.displayName ?? 'Người dùng BuddyTalk',
+      displayName: fbUser.displayName ?? fbUser.email ?? 'BuddyTalk User',
       email: fbUser.email,
       avatarUrl: fbUser.photoURL,
       isVerified: true,
@@ -111,9 +119,12 @@ class AuthRepository {
     if (Firebase.apps.isNotEmpty) {
       await FirebaseAuth.instance.signOut();
     }
-    await _googleSignIn.signOut();
+    if (!kIsWeb) {
+      await _googleSignIn.signOut();
+    }
   }
 
+  /// Đồng bộ trực tiếp lên CSDL trực tuyến Supabase (không dùng dữ liệu cục bộ/giả lập)
   Future<ProfileModel> _syncToSupabase({
     required String firebaseUid,
     required String provider,
@@ -124,24 +135,11 @@ class AuthRepository {
     String? avatarUrl,
     String nativeLang = 'vi',
     String targetLang = 'en',
-    String proficiencyLevel = 'A2',
-    int dailyGoalMinutes = 20,
+    String proficiencyLevel = 'A1',
+    int dailyGoalMinutes = 15,
     bool isVerified = false,
   }) async {
-    final client = SupabaseConfig.clientOrNull;
-
-    if (client == null) {
-      return ProfileModel(
-        userId: firebaseUid,
-        displayName: displayName,
-        avatarUrl: avatarUrl,
-        nativeLang: nativeLang,
-        targetLang: targetLang,
-        proficiencyLevel: proficiencyLevel,
-        dailyGoalMinutes: dailyGoalMinutes,
-        isOnline: true,
-      );
-    }
+    final client = SupabaseConfig.client;
 
     final existingAccount = await client
         .from(DatabaseTables.userAccounts)
