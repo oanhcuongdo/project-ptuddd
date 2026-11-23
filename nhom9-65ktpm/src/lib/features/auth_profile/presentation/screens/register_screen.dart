@@ -10,7 +10,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../components/avatar_picker.dart';
 import '../components/daily_goal_selector.dart';
-import '../components/google_sign_in_button.dart';
 import '../components/language_preference_selector.dart';
 import '../components/password_strength_bar.dart';
 import '../components/register_step_header.dart';
@@ -18,7 +17,7 @@ import '../components/terms_checkbox.dart';
 import '../providers/auth_provider.dart';
 
 /// Màn hình Đăng ký 2 bước chuẩn bản mẫu:
-/// - Bước 1 / 2: Thông tin tài khoản + Thanh đo độ mạnh mật khẩu + Điều khoản + Google
+/// - Bước 1 / 2: Thông tin tài khoản + Thanh đo độ mạnh mật khẩu + Điều khoản
 /// - Bước 2 / 2: Thiết lập hồ sơ & Kỷ luật (Avatar, Ngôn ngữ, Trình độ, Mục tiêu 15/20/30p)
 /// Responsive: 1 cột trên Android, 2 cột kiểu Facebook trên Chrome Web.
 class RegisterScreen extends StatefulWidget {
@@ -115,16 +114,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           proficiencyLevel: _proficiencyLevel,
           dailyGoalMinutes: _dailyGoalMinutes,
         );
-    if (mounted && ok) {
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        AppRouter.initialRoute,
-        (_) => false,
-      );
-    }
-  }
-
-  Future<void> _handleGoogleRegister() async {
-    final ok = await context.read<AuthProvider>().signInWithGoogle();
     if (mounted && ok) {
       Navigator.of(context).pushNamedAndRemoveUntil(
         AppRouter.initialRoute,
@@ -234,12 +223,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             trailingIcon: Icons.arrow_forward_rounded,
             isLoading: auth.isLoading,
             onPressed: _goToStep2,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          GoogleSignInButton(
-            label: 'Đăng ký nhanh với Google',
-            isLoading: auth.isLoading,
-            onPressed: _handleGoogleRegister,
           ),
         ],
       ),

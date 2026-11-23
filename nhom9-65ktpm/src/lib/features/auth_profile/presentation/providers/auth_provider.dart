@@ -57,10 +57,15 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await _repository.signOut();
-    _currentProfile = null;
-    _errorMessage = null;
-    notifyListeners();
+    final userId = _currentProfile?.userId;
+    try {
+      await _repository.signOut(userId: userId);
+    } finally {
+      _currentProfile = null;
+      _errorMessage = null;
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void clearError() {

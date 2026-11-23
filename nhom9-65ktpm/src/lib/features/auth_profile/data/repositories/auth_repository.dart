@@ -85,8 +85,18 @@ class AuthRepository {
     late final UserCredential userCredential;
 
     if (kIsWeb) {
-      // Trên Chrome Web: dùng popup chuẩn của Firebase Auth (không cần thêm meta client-id)
-      userCredential = await auth.signInWithPopup(GoogleAuthProvider());
+      // Ép Google luôn mở màn hình chọn tài khoản (tránh tự động đăng nhập lại Gmail cũ sau khi đăng xuất)
+      final googleProvider = GoogleAuthProvider()
+        ..setCustomParameters({'prompt': 'select_account'});
+      try {
+        userCredential = await auth.signInWithPopup(googleProvider);
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'popup-closed-by-user' ||
+            e.code == 'cancelled-popup-request') {
+          throw StateError('Bạn đã đóng cửa sổ chọn tài khoản Google.');
+        }
+        rethrow;
+      }
     } else {
       // Trên Android / iOS: dùng native GoogleSignIn
       final googleUser = await _googleSignIn.signIn();
@@ -114,8 +124,17 @@ class AuthRepository {
     );
   }
 
-  /// Đăng xuất khỏi Firebase và Google
-  Future<void> signOut() async {
+  /// Đăng xuất hoàn toàn khỏi Firebase, Google và cập nhật trạng thái offline trên Supabase
+  Future<void> signOut({String? userId}) async {
+    if (userId != null && SupabaseConfig.isConfigured) {
+      try {
+        await SupabaseConfig.client
+            .from(DatabaseTables.profiles)
+            .update({'is_online': false}).eq('user_id', userId);
+      } catch (_) {
+        // Không chặn luồng đăng xuất nếu mất mạng
+      }
+    }
     if (Firebase.apps.isNotEmpty) {
       await FirebaseAuth.instance.signOut();
     }

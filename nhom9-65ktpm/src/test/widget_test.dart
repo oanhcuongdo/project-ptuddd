@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 import 'package:buddytalk/app/buddytalk_app.dart';
+import 'package:buddytalk/app/layouts/main_layout.dart';
 import 'package:buddytalk/app/router/routes/index.dart';
+import 'package:buddytalk/features/auth_profile/presentation/providers/auth_provider.dart';
 
 void main() {
   setUpAll(() {
@@ -29,7 +32,7 @@ void main() {
     expect(find.text('Bước 1 / 2'), findsOneWidget);
     expect(find.text('Tạo tài khoản BuddyTalk'), findsOneWidget);
     expect(find.text('Độ mạnh mật khẩu'), findsOneWidget);
-    expect(find.text('Đăng ký nhanh với Google'), findsOneWidget);
+    expect(find.text('Đăng ký nhanh với Google'), findsNothing);
 
     // Nhập thông tin Bước 1 và bấm sang Bước 2 / 2
     await tester.enterText(find.byType(TextFormField).at(0), 'Phạm Văn Hưng');
@@ -61,5 +64,46 @@ void main() {
       find.text('Duy trì chuỗi kỷ luật (Streak) và Ma trận nhiệt mỗi ngày'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('MainLayout hiển thị Sidebar NavLink + Header + Outlet trên Chrome & Mobile', (
+    tester,
+  ) async {
+    // 1. Chrome Desktop (1280x900)
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AuthProvider>(
+        create: (_) => AuthProvider(),
+        child: const MaterialApp(home: MainLayout()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Kiểm tra Sidebar + Header + Outlet mặc định (Kỷ luật)
+    expect(find.text('BuddyTalk'), findsOneWidget);
+    expect(find.text('Kỷ luật cá nhân'), findsOneWidget);
+    expect(find.text('Chuỗi Kỷ Luật (Streak)'), findsOneWidget);
+
+    // Chuyển NavLink sang "Trò chuyện" -> Header & Outlet cập nhật tương ứng
+    await tester.tap(find.text('Trò chuyện'));
+    await tester.pumpAndSettle();
+    expect(find.text('Trò chuyện Realtime'), findsOneWidget);
+    expect(
+      find.text('Phân Hệ Chat Realtime (Chat 1-1 & Chat Nhóm Học Tập)'),
+      findsOneWidget,
+    );
+
+    // Thử thu gọn Sidebar bằng nút << ngang hàng với logo BuddyTalk
+    await tester.tap(find.byTooltip('Thu gọn menu'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Mở rộng menu'), findsOneWidget);
+
+    // 2. Chuyển sang Mobile (390x900) — đảm bảo không tràn layout
+    tester.view.physicalSize = const Size(390, 900);
+    await tester.pumpAndSettle();
+    expect(find.byType(NavigationBar), findsOneWidget);
   });
 }
