@@ -11,6 +11,7 @@ class ProfileModel {
   final int streakCount;
   final int bestStreak;
   final bool isOnline;
+  final bool onboardingCompleted;
 
   const ProfileModel({
     required this.userId,
@@ -24,6 +25,7 @@ class ProfileModel {
     this.streakCount = 0,
     this.bestStreak = 0,
     this.isOnline = false,
+    this.onboardingCompleted = false,
   });
 
   factory ProfileModel.fromMap(Map<String, dynamic> map) {
@@ -39,6 +41,7 @@ class ProfileModel {
       streakCount: (map['streak_count'] as num?)?.toInt() ?? 0,
       bestStreak: (map['best_streak'] as num?)?.toInt() ?? 0,
       isOnline: map['is_online'] as bool? ?? false,
+      onboardingCompleted: map['onboarding_completed'] as bool? ?? false,
     );
   }
 
@@ -55,6 +58,7 @@ class ProfileModel {
       'streak_count': streakCount,
       'best_streak': bestStreak,
       'is_online': isOnline,
+      'onboarding_completed': onboardingCompleted,
     };
   }
 }
