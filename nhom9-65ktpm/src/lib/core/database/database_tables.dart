@@ -1,6 +1,8 @@
-/// Hằng số tên bảng cho CSDL Supabase Cloud (14 bảng chuẩn 3NF) và SQLite cục bộ.
-/// Cả 5 thành viên dùng chung file này để tránh sai tên bảng khi truy vấn.
+/// Hằng số tên 14 bảng trên CSDL trực tuyến Supabase Cloud (PostgreSQL).
+/// Toàn bộ dữ liệu ứng dụng lưu trực tuyến trên Supabase, không dùng DB cục bộ.
 class DatabaseTables {
+  DatabaseTables._();
+
   // === 001: Auth, Tài khoản đa phương thức & Hồ sơ (Hưng) ===
   static const String users = 'users';
   static const String userAccounts = 'user_accounts';
@@ -22,14 +24,4 @@ class DatabaseTables {
   static const String userTopicProgress = 'user_topic_progress';
   static const String practiceSessions = 'practice_sessions';
   static const String vocabNotebook = 'vocab_notebook';
-
-  // === Tên file & 5 bảng SQLite cục bộ (Offline-First) ===
-  static const String localDbName = 'buddytalk_local.db';
-  static const int localDbVersion = 2;
-
-  static const String localDailyGoals = 'local_daily_goals';
-  static const String localQuestLogs = 'local_quest_logs';
-  static const String localVocabNotebook = 'local_vocab_notebook';
-  static const String localPracticeSessions = 'local_practice_sessions';
-  static const String localTopicProgress = 'local_topic_progress';
 }

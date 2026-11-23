@@ -1,12 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Quản lý khởi tạo và kết nối Supabase Cloud Database & Realtime WebSocket.
+/// Quản lý khởi tạo và kết nối CSDL trực tuyến Supabase (PostgreSQL + Realtime).
 ///
-/// Truyền cấu hình bảo mật khi chạy ứng dụng bằng:
-/// `flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`
+/// Chạy ứng dụng kèm file môi trường `.env`:
+/// `flutter run -d chrome --dart-define-from-file=.env`
 class SupabaseConfig {
-  static const String supabaseUrl = String.fromEnvironment(
+  SupabaseConfig._();
+
+  static const String _rawSupabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
     defaultValue: '',
   );
@@ -16,23 +18,33 @@ class SupabaseConfig {
     defaultValue: '',
   );
 
+  /// Tự chuẩn hóa URL gốc của Supabase (bỏ `/rest/v1/` nếu copy từ mục Data API)
+  static String get supabaseUrl {
+    var url = _rawSupabaseUrl.trim();
+    if (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    if (url.endsWith('/rest/v1')) {
+      url = url.substring(0, url.length - '/rest/v1'.length);
+    }
+    return url;
+  }
+
   static bool _isInitialized = false;
 
-  /// Kiểm tra cấu hình Supabase đã được cung cấp đầy đủ chưa
   static bool get isConfigured =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
-  /// Kiểm tra Supabase Client đã sẵn sàng dùng hay chưa
   static bool get isInitialized => _isInitialized;
 
-  /// Khởi tạo Supabase an toàn (không làm crash app khi chạy chế độ Offline-First)
+  /// Khởi tạo kết nối Supabase trực tuyến từ biến môi trường `.env`
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
     if (!isConfigured) {
       debugPrint(
-        '[SupabaseConfig] Chưa cấu hình SUPABASE_URL / SUPABASE_ANON_KEY. '
-        'Ứng dụng sẽ chạy ở chế độ Offline-First (SQLite cục bộ).',
+        '[SupabaseConfig] Thiếu SUPABASE_URL hoặc SUPABASE_ANON_KEY trong .env. '
+        'Hãy chạy với cờ --dart-define-from-file=.env để kết nối CSDL trực tuyến.',
       );
       return;
     }
@@ -42,10 +54,17 @@ class SupabaseConfig {
       publishableKey: supabaseAnonKey,
     );
     _isInitialized = true;
-    debugPrint('[SupabaseConfig] Kết nối Supabase Cloud thành công.');
+    debugPrint('[SupabaseConfig] Kết nối Supabase thành công: $supabaseUrl');
   }
 
-  /// Trả về SupabaseClient khi đã khởi tạo (trả về null nếu đang chạy Offline)
-  static SupabaseClient? get clientOrNull =>
-      _isInitialized ? Supabase.instance.client : null;
+  /// Trả về SupabaseClient bắt buộc đã kết nối (không trả dữ liệu giả lập)
+  static SupabaseClient get client {
+    if (!_isInitialized) {
+      throw StateError(
+        'Chưa kết nối CSDL Supabase. Hãy kiểm tra file .env và chạy lại với '
+        '--dart-define-from-file=.env.',
+      );
+    }
+    return Supabase.instance.client;
+  }
 }

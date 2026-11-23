@@ -20,13 +20,8 @@ dependencies:
   firebase_auth: ^4.19.0
   google_sign_in: ^6.2.1
 
-  # CSDL Đám mây & Realtime WebSocket (Supabase)
+  # CSDL Đám mây & Realtime WebSocket (Supabase - 100% Online)
   supabase_flutter: ^2.5.0
-
-  # CSDL Cục bộ Offline-First (SQLite)
-  sqflite: ^2.3.3+1
-  path_provider: ^2.1.3
-  path: ^1.9.0
 
   # Dịch thuật tức thì (Trung - Việt - Anh)
   translator: ^1.0.3+1

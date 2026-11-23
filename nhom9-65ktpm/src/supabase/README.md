@@ -1,6 +1,6 @@
 # Hướng Dẫn Thiết Lập Cơ Sở Dữ Liệu Supabase (BuddyTalk — Nhóm 09)
 
-Cơ sở dữ liệu đám mây của BuddyTalk sử dụng **Supabase (PostgreSQL + Realtime)** kết hợp với **Firebase Authentication** (xử lý đăng nhập Google / SĐT / Email) và **SQLite cục bộ (`sqflite`)** cho chế độ Offline-First.
+Toàn bộ dữ liệu của BuddyTalk được lưu trữ **100% trực tuyến** trên **Supabase (PostgreSQL + Realtime)** kết hợp với **Firebase Authentication** (xử lý đăng nhập Google / SĐT / Email).
 
 ## Thứ tự chạy các file Migration trên Supabase Dashboard
 
@@ -12,8 +12,8 @@ Mở **Supabase Dashboard $\rightarrow$ SQL Editor $\rightarrow$ New query**, d�
 4. `migrations/004_topics_sessions.sql` — Tạo `conversation_topics`, `user_topic_progress`, `practice_sessions`, `vocab_notebook`.
 5. `migrations/005_indexes_triggers.sql` — Tạo Index tối ưu tìm kiếm & Trigger tự cập nhật `updated_at`, `last_message`.
 6. `migrations/006_rls_and_realtime.sql` — Bật Row Level Security (RLS) & Realtime cho phòng Chat / Ghép cặp.
-7. `migrations/007_seed_data.sql` — *(Tùy chọn)* Nạp dữ liệu mẫu để cả 5 thành viên test ứng dụng ngay.
+7. `migrations/007_seed_data.sql` — *(Tùy chọn)* Nạp dữ liệu mẫu ban đầu.
 
 ## Lưu ý bảo mật
-- Cấu hình URL và Anon Key theo mẫu tại `../.env.example`.
+- Tạo file `.env` cục bộ từ `../.env.example` và chạy ứng dụng với `--dart-define-from-file=.env`.
 - Tuyệt đối không commit file `.env` chứa khóa thật lên GitHub.
