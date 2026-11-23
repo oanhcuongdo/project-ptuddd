@@ -3,8 +3,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:buddytalk/app/buddytalk_app.dart';
 import 'package:buddytalk/app/layouts/main_layout.dart';
+import 'package:buddytalk/app/router/guards/auth_guard.dart';
 import 'package:buddytalk/app/router/routes/index.dart';
+import 'package:buddytalk/features/auth_profile/data/models/profile_model.dart';
+import 'package:buddytalk/features/auth_profile/data/repositories/auth_repository.dart';
 import 'package:buddytalk/features/auth_profile/presentation/providers/auth_provider.dart';
+
+class _FakeRestoredAuthRepository extends AuthRepository {
+  @override
+  bool get canRestoreSession => true;
+
+  @override
+  Future<ProfileModel?> restoreSession() async {
+    return const ProfileModel(
+      userId: 'u-restored',
+      displayName: 'Phạm Văn Hưng',
+      targetLang: 'en',
+      proficiencyLevel: 'B1',
+      streakCount: 5,
+      dailyGoalMinutes: 20,
+    );
+  }
+}
 
 void main() {
   setUpAll(() {
@@ -105,5 +125,26 @@ void main() {
     tester.view.physicalSize = const Size(390, 900);
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsOneWidget);
+  });
+
+  testWidgets('AuthGuard tự động khôi phục phiên đăng nhập sau khi F5', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AuthProvider>(
+        create: (_) => AuthProvider(repository: _FakeRestoredAuthRepository()),
+        child: const MaterialApp(home: AuthGuard(child: MainLayout())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Không bị đẩy về Login mà vào thẳng MainLayout kèm tên & Streak đã khôi phục
+    expect(find.text('BuddyTalk'), findsOneWidget);
+    expect(find.text('Phạm Văn Hưng'), findsOneWidget);
+    expect(find.text('5 ngày'), findsOneWidget);
   });
 }
