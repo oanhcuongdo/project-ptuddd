@@ -55,6 +55,24 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _openRegister() async {
+    final registeredEmail =
+        await Navigator.of(context).pushNamed(AuthRoutes.register);
+    if (!mounted) return;
+    if (registeredEmail is String && registeredEmail.isNotEmpty) {
+      _emailController.text = registeredEmail;
+      _passwordController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color(0xFF047857),
+          content: Text(
+            'Đăng ký thành công! Vui lòng đăng nhập để thiết lập hồ sơ cá nhân.',
+          ),
+        ),
+      );
+    }
+  }
+
   void _handleForgotPassword() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -73,9 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
       footer: AuthFooterLink(
         prefixText: 'Chưa có tài khoản?',
         actionText: 'Đăng ký ngay',
-        onPressed: auth.isLoading
-            ? null
-            : () => Navigator.of(context).pushNamed(AuthRoutes.register),
+        onPressed: auth.isLoading ? null : _openRegister,
       ),
       child: Form(
         key: _formKey,

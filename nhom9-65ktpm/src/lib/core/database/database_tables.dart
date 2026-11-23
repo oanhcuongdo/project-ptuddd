@@ -1,13 +1,14 @@
-/// Hằng số tên 14 bảng trên CSDL trực tuyến Supabase Cloud (PostgreSQL).
+/// Hằng số tên 15 bảng trên CSDL trực tuyến Supabase Cloud (PostgreSQL).
 /// Toàn bộ dữ liệu ứng dụng lưu trực tuyến trên Supabase, không dùng DB cục bộ.
 class DatabaseTables {
   DatabaseTables._();
 
-  // === 001: Auth, Tài khoản đa phương thức & Hồ sơ (Hưng) ===
+  // === 001 & 008: Auth, Tài khoản đa phương thức, Hồ sơ & Ngôn ngữ cấp phép (Hưng) ===
   static const String users = 'users';
   static const String userAccounts = 'user_accounts';
   static const String profiles = 'profiles';
   static const String userReports = 'user_reports';
+  static const String languages = 'languages';
 
   // === 002: Kỷ luật cá nhân — Streak & Heatmap (Hưng) ===
   static const String dailyGoals = 'daily_goals';

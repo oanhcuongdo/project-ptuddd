@@ -5,10 +5,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../core/database/database_tables.dart';
 import '../../../../core/network/supabase_config.dart';
+import '../models/language_model.dart';
 import '../models/profile_model.dart';
 
 /// Lớp xử lý xác thực (Firebase Auth) và đồng bộ 100% trực tuyến lên Supabase
-/// theo kiến trúc 3 bảng: `users` -> `user_accounts` (1-N) & `profiles` (1-1).
+/// theo kiến trúc: `users` -> `user_accounts` (1-N), `profiles` (1-1), `languages`.
 class AuthRepository {
   AuthRepository({GoogleSignIn? googleSignIn})
       : _googleSignIn = googleSignIn ?? GoogleSignIn();
@@ -107,43 +108,39 @@ class AuthRepository {
       firebaseUid: fbUser.uid,
       provider: 'email',
       providerAccountId: fbUser.uid,
-      displayName: fbUser.displayName ?? email.split('@').first,
+      displayName: fbUser.displayName ?? email.trim().split('@').first,
       email: fbUser.email,
       avatarUrl: fbUser.photoURL,
     );
   }
 
-  /// Đăng ký tài khoản mới kèm hồ sơ ngôn ngữ, avatar & mục tiêu kỷ luật hàng ngày
-  Future<ProfileModel> registerWithEmail({
-    required String displayName,
+  /// Đăng ký tài khoản mới chỉ với Email & Mật khẩu:
+  /// tạo tài khoản Firebase + khởi tạo hồ sơ chưa setup (`onboarding_completed = false`),
+  /// sau đó đăng xuất ngay để người dùng quay về màn Đăng nhập.
+  Future<void> registerWithEmail({
     required String email,
     required String password,
-    String? avatarUrl,
-    required String nativeLang,
-    required String targetLang,
-    required String proficiencyLevel,
-    required int dailyGoalMinutes,
   }) async {
     final auth = _requireFirebaseAuth();
+    final trimmedEmail = email.trim();
     final credential = await auth.createUserWithEmailAndPassword(
-      email: email.trim(),
+      email: trimmedEmail,
       password: password,
     );
     final fbUser = credential.user!;
-    await fbUser.updateDisplayName(displayName.trim());
 
-    return _syncToSupabase(
+    await _syncToSupabase(
       firebaseUid: fbUser.uid,
       provider: 'email',
       providerAccountId: fbUser.uid,
-      displayName: displayName.trim(),
-      email: fbUser.email,
-      avatarUrl: avatarUrl ?? fbUser.photoURL,
-      nativeLang: nativeLang,
-      targetLang: targetLang,
-      proficiencyLevel: proficiencyLevel,
-      dailyGoalMinutes: dailyGoalMinutes,
+      displayName: '',
+      email: fbUser.email ?? trimmedEmail,
+      onboardingCompleted: false,
+      isOnline: false,
     );
+
+    // Đăng xuất ngay để chuyển về màn Đăng nhập bắt người dùng đăng nhập lại
+    await auth.signOut();
   }
 
   /// Đăng nhập một chạm bằng tài khoản Google (chạy mượt cả Chrome Web & Android)
@@ -165,7 +162,6 @@ class AuthRepository {
         rethrow;
       }
     } else {
-      // Trên Android / iOS: dùng native GoogleSignIn
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw StateError('Người dùng đã hủy đăng nhập Google.');
@@ -189,6 +185,59 @@ class AuthRepository {
       avatarUrl: fbUser.photoURL,
       isVerified: true,
     );
+  }
+
+  /// Tải danh sách ngôn ngữ được Admin cấp phép (`is_active = true`) trực tiếp từ Supabase
+  Future<List<LanguageModel>> fetchAllowedLanguages() async {
+    final client = SupabaseConfig.client;
+    final rows = await client
+        .from(DatabaseTables.languages)
+        .select()
+        .eq('is_active', true)
+        .order('sort_order', ascending: true);
+
+    return rows
+        .map<LanguageModel>((row) => LanguageModel.fromMap(row))
+        .toList();
+  }
+
+  /// Lưu kết quả thiết lập hồ sơ (Onboarding) lên bảng `profiles` trên Supabase
+  Future<ProfileModel> completeOnboarding({
+    required String userId,
+    required String displayName,
+    String? avatarUrl,
+    String? nativeLang,
+    required String targetLang,
+    required String proficiencyLevel,
+    required int dailyGoalMinutes,
+  }) async {
+    final client = SupabaseConfig.client;
+    final payload = <String, dynamic>{
+      'display_name': displayName.trim(),
+      'avatar_url': avatarUrl,
+      'target_lang': targetLang,
+      'proficiency_level': proficiencyLevel,
+      'daily_goal_minutes': dailyGoalMinutes,
+      'onboarding_completed': true,
+      'is_online': true,
+    };
+    if (nativeLang != null) {
+      payload['native_lang'] = nativeLang;
+    }
+
+    final updated = await client
+        .from(DatabaseTables.profiles)
+        .update(payload)
+        .eq('user_id', userId)
+        .select()
+        .single();
+
+    if (Firebase.apps.isNotEmpty && FirebaseAuth.instance.currentUser != null) {
+      await FirebaseAuth.instance.currentUser!
+          .updateDisplayName(displayName.trim());
+    }
+
+    return ProfileModel.fromMap(updated);
   }
 
   /// Đăng xuất hoàn toàn khỏi Firebase, Google và cập nhật trạng thái offline trên Supabase
@@ -224,6 +273,8 @@ class AuthRepository {
     String proficiencyLevel = 'A1',
     int dailyGoalMinutes = 15,
     bool isVerified = false,
+    bool onboardingCompleted = false,
+    bool isOnline = true,
   }) async {
     final client = SupabaseConfig.client;
 
@@ -243,6 +294,9 @@ class AuthRepository {
           .update({'last_login_at': DateTime.now().toIso8601String()})
           .eq('provider', provider)
           .eq('provider_account_id', providerAccountId);
+      await client
+          .from(DatabaseTables.profiles)
+          .update({'is_online': isOnline}).eq('user_id', internalUserId);
     } else {
       final createdUser = await client
           .from(DatabaseTables.users)
@@ -270,7 +324,8 @@ class AuthRepository {
         'target_lang': targetLang,
         'proficiency_level': proficiencyLevel,
         'daily_goal_minutes': dailyGoalMinutes,
-        'is_online': true,
+        'onboarding_completed': onboardingCompleted,
+        'is_online': isOnline,
       });
     }
 
