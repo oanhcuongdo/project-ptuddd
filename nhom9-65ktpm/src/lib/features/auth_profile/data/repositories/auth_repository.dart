@@ -15,6 +15,10 @@ class AuthRepository {
 
   final GoogleSignIn _googleSignIn;
 
+  /// Kiểm tra Firebase và Supabase đã sẵn sàng để khôi phục phiên chưa
+  bool get canRestoreSession =>
+      Firebase.apps.isNotEmpty && SupabaseConfig.isConfigured;
+
   FirebaseAuth _requireFirebaseAuth() {
     if (Firebase.apps.isEmpty) {
       throw StateError(
@@ -23,6 +27,69 @@ class AuthRepository {
       );
     }
     return FirebaseAuth.instance;
+  }
+
+  /// Khôi phục phiên đăng nhập khi F5 / mở lại ứng dụng từ Refresh Token của Firebase
+  /// rồi tải lại hồ sơ người dùng từ Supabase.
+  Future<ProfileModel?> restoreSession() async {
+    if (!canRestoreSession) return null;
+
+    final auth = FirebaseAuth.instance;
+    final fbUser = auth.currentUser ??
+        await auth.authStateChanges().first.timeout(
+              const Duration(seconds: 5),
+              onTimeout: () => null,
+            );
+
+    if (fbUser == null) return null;
+
+    try {
+      // Đảm bảo ID Token còn hiệu lực (Firebase tự dùng Refresh Token cấp mới nếu hết hạn)
+      await fbUser.getIdToken();
+    } on FirebaseAuthException {
+      await auth.signOut();
+      return null;
+    }
+
+    final client = SupabaseConfig.client;
+    final account = await client
+        .from(DatabaseTables.userAccounts)
+        .select('user_id, provider, provider_account_id')
+        .eq('firebase_uid', fbUser.uid)
+        .maybeSingle();
+
+    if (account != null) {
+      final userId = account['user_id'].toString();
+      await client
+          .from(DatabaseTables.profiles)
+          .update({'is_online': true}).eq('user_id', userId);
+
+      final profileMap = await client
+          .from(DatabaseTables.profiles)
+          .select()
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (profileMap != null) {
+        return ProfileModel.fromMap(profileMap);
+      }
+    }
+
+    // Tự đồng bộ lại nếu Firebase còn phiên nhưng chưa có bản ghi tương ứng trên Supabase
+    final isGoogle = fbUser.providerData.any(
+      (info) => info.providerId == 'google.com',
+    );
+    return _syncToSupabase(
+      firebaseUid: fbUser.uid,
+      provider: isGoogle ? 'google' : 'email',
+      providerAccountId: fbUser.uid,
+      displayName: fbUser.displayName ??
+          fbUser.email?.split('@').first ??
+          'BuddyTalk User',
+      email: fbUser.email,
+      avatarUrl: fbUser.photoURL,
+      isVerified: fbUser.emailVerified || isGoogle,
+    );
   }
 
   /// Đăng nhập bằng Email & Mật khẩu qua Firebase Auth

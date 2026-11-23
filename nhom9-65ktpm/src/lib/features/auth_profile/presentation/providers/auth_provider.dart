@@ -5,19 +5,42 @@ import '../../data/repositories/auth_repository.dart';
 
 /// Quản lý trạng thái đăng nhập (Auth State) cho toàn ứng dụng
 class AuthProvider extends ChangeNotifier {
-  AuthProvider({AuthRepository? repository})
-      : _repository = repository ?? AuthRepository();
+  AuthProvider({AuthRepository? repository, bool autoRestore = true})
+      : _repository = repository ?? AuthRepository() {
+    if (autoRestore && _repository.canRestoreSession) {
+      _isInitializing = true;
+      restoreSession();
+    }
+  }
 
   final AuthRepository _repository;
 
   ProfileModel? _currentProfile;
+  bool _isInitializing = false;
   bool _isLoading = false;
   String? _errorMessage;
 
   ProfileModel? get currentProfile => _currentProfile;
   bool get isAuthenticated => _currentProfile != null;
+  bool get isInitializing => _isInitializing;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  /// Khôi phục phiên đăng nhập đã lưu (khi bấm F5 hoặc mở lại app)
+  Future<void> restoreSession() async {
+    _isInitializing = true;
+    notifyListeners();
+
+    try {
+      _currentProfile = await _repository.restoreSession();
+    } catch (e) {
+      debugPrint('[AuthProvider] Khong the khoi phuc phien: $e');
+      _currentProfile = null;
+    } finally {
+      _isInitializing = false;
+      notifyListeners();
+    }
+  }
 
   Future<bool> signInWithEmail({
     required String email,
