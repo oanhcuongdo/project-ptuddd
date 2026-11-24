@@ -10,6 +10,7 @@ import 'package:buddytalk/features/auth_profile/data/models/profile_model.dart';
 import 'package:buddytalk/features/auth_profile/data/repositories/auth_repository.dart';
 import 'package:buddytalk/features/auth_profile/presentation/providers/auth_provider.dart';
 import 'package:buddytalk/features/chat/data/models/conversation_model.dart';
+import 'package:buddytalk/features/chat/data/models/room_join_request.dart';
 import 'package:buddytalk/features/chat/data/repositories/chat_repository.dart';
 import 'package:buddytalk/features/chat/presentation/providers/chat_provider.dart';
 import 'package:buddytalk/features/chat/presentation/screens/chat_rooms_tab.dart';
@@ -75,6 +76,7 @@ class _FakeAuthRepository extends AuthRepository {
 
 class _FakeChatRepository extends ChatRepository {
   bool _joined = false;
+  String? _approvalRoomStatus;
   final List<ConversationModel> _createdRooms = [];
 
   @override
@@ -103,6 +105,23 @@ class _FakeChatRepository extends ChatRepository {
         managerName: 'Nguyễn Minh Anh',
         memberCount: _joined ? 4 : 3,
         isJoined: _joined,
+        membershipStatus: _joined ? 'approved' : null,
+      );
+
+  ConversationModel _approvalRoom() => ConversationModel(
+        id: 'room-approval',
+        type: 'group',
+        name: 'Nhóm Luyện IELTS Chuyên Sâu',
+        description: 'Cần quản lý duyệt trước khi vào phòng.',
+        level: 'B2',
+        targetLang: 'en',
+        maxMembers: 15,
+        requireApproval: true,
+        createdBy: 'u-owner-2',
+        managerName: 'Trịnh Trung Kiên',
+        memberCount: 5,
+        isJoined: _approvalRoomStatus == 'approved',
+        membershipStatus: _approvalRoomStatus,
       );
 
   @override
@@ -120,7 +139,7 @@ class _FakeChatRepository extends ChatRepository {
     String? targetLang,
     String? level,
   }) async {
-    return [..._createdRooms, _sampleRoom()];
+    return [..._createdRooms, _sampleRoom(), _approvalRoom()];
   }
 
   @override
@@ -132,6 +151,7 @@ class _FakeChatRepository extends ChatRepository {
     String? level,
     required String targetLang,
     int? maxMembers,
+    bool requireApproval = false,
   }) async {
     final created = ConversationModel(
       id: 'room-new-${_createdRooms.length + 1}',
@@ -141,10 +161,12 @@ class _FakeChatRepository extends ChatRepository {
       level: level,
       targetLang: targetLang,
       maxMembers: maxMembers,
+      requireApproval: requireApproval,
       createdBy: createdBy,
       managerName: managerName,
       memberCount: 1,
       isJoined: true,
+      membershipStatus: 'approved',
       myRole: 'owner',
     );
     _createdRooms.add(created);
@@ -155,8 +177,13 @@ class _FakeChatRepository extends ChatRepository {
   Future<void> joinRoom({
     required String conversationId,
     required String userId,
+    bool requireApproval = false,
   }) async {
-    _joined = true;
+    if (conversationId == 'room-approval') {
+      _approvalRoomStatus = requireApproval ? 'pending' : 'approved';
+    } else {
+      _joined = true;
+    }
   }
 
   @override
@@ -164,8 +191,18 @@ class _FakeChatRepository extends ChatRepository {
     required String conversationId,
     required String userId,
   }) async {
-    _joined = false;
+    if (conversationId == 'room-approval') {
+      _approvalRoomStatus = null;
+    } else {
+      _joined = false;
+    }
   }
+
+  @override
+  Future<List<RoomJoinRequest>> fetchPendingRequests(
+    String conversationId,
+  ) async =>
+      const [];
 }
 
 void main() {
@@ -334,14 +371,21 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Chuyển sang tab Khám phá phòng học
-    await tester.tap(find.text('Khám phá (1)'));
+    // Chuyển sang tab Khám phá phòng học (gồm 1 phòng mở + 1 phòng cần kiểm duyệt)
+    await tester.tap(find.text('Khám phá (2)'));
     await tester.pumpAndSettle();
 
     expect(find.text('CLB Luyện Tiếng Anh Giao Tiếp'), findsOneWidget);
     expect(find.text('Quản lý: Nguyễn Minh Anh'), findsOneWidget);
     expect(find.text('Tham gia'), findsOneWidget);
-    expect(find.text('Hiển thị 1–1 trong tổng số 1 phòng'), findsOneWidget);
+    expect(find.text('Xin tham gia'), findsOneWidget);
+    expect(find.text('Cần duyệt'), findsOneWidget);
+    expect(find.text('Hiển thị 1–2 trong tổng số 2 phòng'), findsOneWidget);
+
+    // Bấm Xin tham gia ở phòng cần duyệt -> chuyển sang Chờ duyệt
+    await tester.tap(find.text('Xin tham gia'));
+    await tester.pumpAndSettle();
+    expect(find.text('Chờ duyệt'), findsOneWidget);
 
     // Thử chuyển chế độ Danh sách <-> Lưới
     await tester.tap(find.text('Danh sách'));

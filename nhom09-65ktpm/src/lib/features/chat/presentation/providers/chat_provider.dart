@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../auth_profile/data/models/language_model.dart';
 import '../../data/models/conversation_model.dart';
+import '../../data/models/room_join_request.dart';
 import '../../data/repositories/chat_repository.dart';
 
 /// Quản lý trạng thái danh sách Phòng Chat của tôi, Khám phá phòng nhóm & Bộ lọc.
@@ -124,6 +125,7 @@ class ChatProvider extends ChangeNotifier {
     String? level,
     required String targetLang,
     int? maxMembers,
+    bool requireApproval = false,
   }) async {
     _isCreating = true;
     _errorMessage = null;
@@ -138,6 +140,7 @@ class ChatProvider extends ChangeNotifier {
         level: level,
         targetLang: targetLang,
         maxMembers: maxMembers,
+        requireApproval: requireApproval,
       );
       await loadRooms(createdBy);
       return created;
@@ -154,6 +157,7 @@ class ChatProvider extends ChangeNotifier {
   Future<bool> joinRoom({
     required String conversationId,
     required String userId,
+    bool requireApproval = false,
   }) async {
     _busyRoomId = conversationId;
     _errorMessage = null;
@@ -163,6 +167,7 @@ class ChatProvider extends ChangeNotifier {
       await _repository.joinRoom(
         conversationId: conversationId,
         userId: userId,
+        requireApproval: requireApproval,
       );
       await loadRooms(userId);
       return true;
@@ -173,6 +178,48 @@ class ChatProvider extends ChangeNotifier {
     } finally {
       _busyRoomId = null;
       notifyListeners();
+    }
+  }
+
+  Future<List<RoomJoinRequest>> fetchPendingRequests(String conversationId) {
+    return _repository.fetchPendingRequests(conversationId);
+  }
+
+  Future<bool> approveJoinRequest({
+    required String conversationId,
+    required String targetUserId,
+    required String currentUserId,
+  }) async {
+    try {
+      await _repository.approveJoinRequest(
+        conversationId: conversationId,
+        targetUserId: targetUserId,
+      );
+      await loadRooms(currentUserId);
+      return true;
+    } catch (e) {
+      _errorMessage = 'Không thể duyệt thành viên: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> rejectJoinRequest({
+    required String conversationId,
+    required String targetUserId,
+    required String currentUserId,
+  }) async {
+    try {
+      await _repository.rejectJoinRequest(
+        conversationId: conversationId,
+        targetUserId: targetUserId,
+      );
+      await loadRooms(currentUserId);
+      return true;
+    } catch (e) {
+      _errorMessage = 'Không thể từ chối yêu cầu: $e';
+      notifyListeners();
+      return false;
     }
   }
 
