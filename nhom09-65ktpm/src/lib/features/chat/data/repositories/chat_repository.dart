@@ -148,6 +148,48 @@ class ChatRepository {
     }).toList();
   }
 
+  /// Tạo phòng học nhóm mới trên bảng `conversations` và tự thêm người tạo làm `owner`
+  Future<ConversationModel> createGroupRoom({
+    required String createdBy,
+    required String name,
+    required String description,
+    required String topicCategory,
+    required String level,
+    required String targetLang,
+    required int maxMembers,
+  }) async {
+    final client = SupabaseConfig.client;
+
+    final created = await client
+        .from(DatabaseTables.conversations)
+        .insert({
+          'type': 'group',
+          'name': name.trim(),
+          'description': description.trim(),
+          'topic_category': topicCategory.trim(),
+          'level': level,
+          'target_lang': targetLang,
+          'max_members': maxMembers,
+          'created_by': createdBy,
+        })
+        .select()
+        .single();
+
+    final roomId = created['id'].toString();
+    await client.from(DatabaseTables.conversationMembers).insert({
+      'conversation_id': roomId,
+      'user_id': createdBy,
+      'role': 'owner',
+    });
+
+    return ConversationModel.fromMap(
+      created,
+      memberCount: 1,
+      isJoined: true,
+      myRole: 'owner',
+    );
+  }
+
   /// Tham gia một phòng học nhóm trên Supabase
   Future<void> joinRoom({
     required String conversationId,

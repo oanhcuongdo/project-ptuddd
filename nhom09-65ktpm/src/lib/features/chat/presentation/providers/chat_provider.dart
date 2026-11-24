@@ -16,6 +16,7 @@ class ChatProvider extends ChangeNotifier {
   List<LanguageModel> _languages = const [];
 
   bool _isLoading = false;
+  bool _isCreating = false;
   String? _busyRoomId;
   String? _errorMessage;
 
@@ -27,6 +28,7 @@ class ChatProvider extends ChangeNotifier {
   List<ConversationModel> get discoverRooms => _discoverRooms;
   List<LanguageModel> get languages => _languages;
   bool get isLoading => _isLoading;
+  bool get isCreating => _isCreating;
   String? get busyRoomId => _busyRoomId;
   String? get errorMessage => _errorMessage;
   String get searchQuery => _searchQuery;
@@ -110,6 +112,41 @@ class ChatProvider extends ChangeNotifier {
       _errorMessage = 'Lỗi lọc danh sách phòng nhóm: $e';
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<ConversationModel?> createGroupRoom({
+    required String createdBy,
+    required String name,
+    required String description,
+    required String topicCategory,
+    required String level,
+    required String targetLang,
+    required int maxMembers,
+  }) async {
+    _isCreating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final created = await _repository.createGroupRoom(
+        createdBy: createdBy,
+        name: name,
+        description: description,
+        topicCategory: topicCategory,
+        level: level,
+        targetLang: targetLang,
+        maxMembers: maxMembers,
+      );
+      await loadRooms(createdBy);
+      return created;
+    } catch (e) {
+      _errorMessage = 'Không thể tạo phòng nhóm: $e';
+      notifyListeners();
+      return null;
+    } finally {
+      _isCreating = false;
       notifyListeners();
     }
   }

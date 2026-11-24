@@ -8,6 +8,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../auth_profile/presentation/providers/auth_provider.dart';
 import '../../data/models/conversation_model.dart';
 import '../components/chat_room_card.dart';
+import '../components/create_room_dialog.dart';
 import '../providers/chat_provider.dart';
 import '../styles/chat_styles.dart';
 
@@ -40,6 +41,24 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
         context.read<ChatProvider>().loadRooms(userId);
       }
     });
+  }
+
+  Future<void> _openCreateRoomDialog(ChatProvider chat, String userId) async {
+    final created = await showDialog<ConversationModel>(
+      context: context,
+      builder: (_) => CreateRoomDialog(
+        createdBy: userId,
+        languages: chat.languages,
+      ),
+    );
+    if (!mounted || created == null) return;
+    setState(() => _activeTab = 0);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF047857),
+        content: Text('Đã tạo phòng "${created.name}" thành công!'),
+      ),
+    );
   }
 
   void _openRoomPlaceholder(ConversationModel room) {
@@ -107,12 +126,33 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
             ],
           ),
         ),
-        IconButton.outlined(
-          onPressed: (chat.isLoading || userId == null)
-              ? null
-              : () => chat.loadRooms(userId),
-          tooltip: 'Tải lại danh sách phòng',
-          icon: const Icon(Icons.refresh_rounded, size: 20),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            FilledButton.icon(
+              onPressed: (chat.isLoading || userId == null)
+                  ? null
+                  : () => _openCreateRoomDialog(chat, userId),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+              ),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Tạo phòng nhóm'),
+            ),
+            IconButton.outlined(
+              onPressed: (chat.isLoading || userId == null)
+                  ? null
+                  : () => chat.loadRooms(userId),
+              tooltip: 'Tải lại danh sách phòng',
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+            ),
+          ],
         ),
       ],
     );
