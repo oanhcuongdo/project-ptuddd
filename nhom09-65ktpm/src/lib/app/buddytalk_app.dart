@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_theme.dart';
 import '../features/auth_profile/presentation/providers/auth_provider.dart';
+import '../features/chat/presentation/providers/chat_provider.dart';
 import 'router/app_router.dart';
 
 class BuddyTalkApp extends StatelessWidget {
@@ -15,6 +16,9 @@ class BuddyTalkApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(),
+        ),
+        ChangeNotifierProvider<ChatProvider>(
+          create: (_) => ChatProvider(),
         ),
       ],
       child: MaterialApp(

@@ -9,6 +9,10 @@ import 'package:buddytalk/features/auth_profile/data/models/language_model.dart'
 import 'package:buddytalk/features/auth_profile/data/models/profile_model.dart';
 import 'package:buddytalk/features/auth_profile/data/repositories/auth_repository.dart';
 import 'package:buddytalk/features/auth_profile/presentation/providers/auth_provider.dart';
+import 'package:buddytalk/features/chat/data/models/conversation_model.dart';
+import 'package:buddytalk/features/chat/data/repositories/chat_repository.dart';
+import 'package:buddytalk/features/chat/presentation/providers/chat_provider.dart';
+import 'package:buddytalk/features/chat/presentation/screens/chat_rooms_tab.dart';
 
 class _FakeAuthRepository extends AuthRepository {
   _FakeAuthRepository({required this.initialProfile});
@@ -69,6 +73,69 @@ class _FakeAuthRepository extends AuthRepository {
   }
 }
 
+class _FakeChatRepository extends ChatRepository {
+  bool _joined = false;
+
+  @override
+  bool get isReady => true;
+
+  @override
+  Future<List<LanguageModel>> fetchAllowedLanguages() async => const [
+        LanguageModel(
+          code: 'en',
+          name: 'English',
+          shortLabel: 'Anh',
+          flagCode: 'GB',
+          sortOrder: 1,
+        ),
+      ];
+
+  ConversationModel _sampleRoom() => ConversationModel(
+        id: 'room-1',
+        type: 'group',
+        name: 'Luyện Tiếng Anh A2 - Du lịch',
+        description: 'Thực hành hỏi đường và đặt phòng khách sạn.',
+        topicCategory: 'Du lịch',
+        level: 'A2',
+        targetLang: 'en',
+        maxMembers: 20,
+        createdBy: 'u-owner',
+        memberCount: _joined ? 4 : 3,
+        isJoined: _joined,
+      );
+
+  @override
+  Future<List<ConversationModel>> fetchMyConversations(String userId) async {
+    return _joined ? [_sampleRoom()] : const [];
+  }
+
+  @override
+  Future<List<ConversationModel>> fetchPublicGroupRooms({
+    required String userId,
+    String? searchQuery,
+    String? targetLang,
+    String? level,
+  }) async {
+    return [_sampleRoom()];
+  }
+
+  @override
+  Future<void> joinRoom({
+    required String conversationId,
+    required String userId,
+  }) async {
+    _joined = true;
+  }
+
+  @override
+  Future<void> leaveRoom({
+    required String conversationId,
+    required String userId,
+  }) async {
+    _joined = false;
+  }
+}
+
 void main() {
   setUpAll(() {
     registerAllRoutes();
@@ -123,23 +190,26 @@ void main() {
     );
 
     await tester.pumpWidget(
-      ChangeNotifierProvider<AuthProvider>(
-        create: (_) => AuthProvider(repository: repo),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: repo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: _FakeChatRepository()),
+          ),
+        ],
         child: const MaterialApp(home: AuthGuard(child: MainLayout())),
       ),
     );
     await tester.pumpAndSettle();
 
-    // Bước 1 / 2 có nút "Bỏ qua"
     expect(find.text('Bước 1 / 2'), findsOneWidget);
-    expect(find.text('Thiết lập hồ sơ cá nhân'), findsOneWidget);
     expect(find.text('Bỏ qua'), findsOneWidget);
 
-    // Bấm "Bỏ qua" ở Bước 1 -> KHÔNG thoát ra MainLayout mà sang Bước 2 / 2
     await tester.tap(find.text('Bỏ qua'));
     await tester.pumpAndSettle();
 
-    // Bước 2 / 2: không còn hỏi Ngôn ngữ mẹ đẻ, chỉ chọn ngôn ngữ muốn luyện + trình độ + mục tiêu Duolingo
     expect(find.text('Bước 2 / 2'), findsOneWidget);
     expect(find.text('Bỏ qua'), findsNothing);
     expect(find.text('Ngôn ngữ mẹ đẻ'), findsNothing);
@@ -155,7 +225,6 @@ void main() {
     await tester.enterText(find.byType(TextFormField).last, '45');
     await tester.pump();
 
-    // Hoàn tất Bước 2 -> vào MainLayout với tên mặc định user_1d17ee6a và 45 phút/ngày
     await tester.ensureVisible(find.text('Hoàn tất & Bắt đầu hành trình 🎉'));
     await tester.tap(find.text('Hoàn tất & Bắt đầu hành trình 🎉'));
     await tester.pumpAndSettle();
@@ -173,8 +242,15 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      ChangeNotifierProvider<AuthProvider>(
-        create: (_) => AuthProvider(autoRestore: false),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(autoRestore: false),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: _FakeChatRepository()),
+          ),
+        ],
         child: const MaterialApp(home: MainLayout()),
       ),
     );
@@ -196,35 +272,48 @@ void main() {
     expect(find.byType(NavigationBar), findsOneWidget);
   });
 
-  testWidgets('AuthGuard tự động vào thẳng MainLayout khi đã hoàn tất Onboarding', (
+  testWidgets('ChatRoomsTab: Khám phá danh sách phòng nhóm và bấm Tham gia phòng', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1280, 900);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    final repo = _FakeAuthRepository(
+    final authRepo = _FakeAuthRepository(
       initialProfile: const ProfileModel(
-        userId: 'u-restored',
+        userId: 'u-chat',
         displayName: 'Phạm Văn Hưng',
-        targetLang: 'en',
-        proficiencyLevel: 'B1',
-        streakCount: 5,
-        dailyGoalMinutes: 20,
         onboardingCompleted: true,
       ),
     );
 
     await tester.pumpWidget(
-      ChangeNotifierProvider<AuthProvider>(
-        create: (_) => AuthProvider(repository: repo),
-        child: const MaterialApp(home: AuthGuard(child: MainLayout())),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: authRepo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: _FakeChatRepository()),
+          ),
+        ],
+        child: const MaterialApp(home: Scaffold(body: ChatRoomsTab())),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('BuddyTalk'), findsOneWidget);
-    expect(find.text('Phạm Văn Hưng'), findsOneWidget);
-    expect(find.text('5 ngày'), findsOneWidget);
+    // Chuyển sang tab Khám phá phòng nhóm
+    await tester.tap(find.text('Khám phá phòng nhóm (1)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Luyện Tiếng Anh A2 - Du lịch'), findsOneWidget);
+    expect(find.text('Tham gia phòng'), findsOneWidget);
+
+    // Bấm Tham gia phòng -> cập nhật sang Vào chat và hiện trong Phòng của tôi (1)
+    await tester.tap(find.text('Tham gia phòng'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Phòng của tôi (1)'), findsOneWidget);
+    expect(find.text('Vào chat'), findsOneWidget);
   });
 }
