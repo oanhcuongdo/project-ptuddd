@@ -10,6 +10,7 @@ import '../components/chat_filter_panel.dart';
 import '../components/chat_pagination_bar.dart';
 import '../components/chat_room_card.dart';
 import '../components/create_room_dialog.dart';
+import '../components/pending_requests_dialog.dart';
 import '../providers/chat_provider.dart';
 import '../styles/chat_styles.dart';
 import 'chat_room_view.dart';
@@ -462,6 +463,19 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
     );
   }
 
+  Future<void> _openPendingRequests(
+    ConversationModel room,
+    String userId,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => PendingRequestsDialog(
+        room: room,
+        currentUserId: userId,
+      ),
+    );
+  }
+
   Widget _buildCard(
     ChatProvider chat,
     ConversationModel room,
@@ -473,12 +487,25 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
       isListMode: isListMode,
       isBusy: chat.busyRoomId == room.id,
       onOpen: () => setState(() => _openedRoom = room),
+      onManageRequests: userId == null
+          ? null
+          : () => _openPendingRequests(room, userId),
       onJoin: () async {
         if (userId == null) return;
-        final ok = await chat.joinRoom(conversationId: room.id, userId: userId);
+        final ok = await chat.joinRoom(
+          conversationId: room.id,
+          userId: userId,
+          requireApproval: room.requireApproval,
+        );
         if (mounted && ok) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Đã tham gia phòng "${room.name}"!')),
+            SnackBar(
+              content: Text(
+                room.requireApproval
+                    ? 'Đã gửi yêu cầu xin tham gia "${room.name}" — vui lòng chờ quản lý duyệt!'
+                    : 'Đã tham gia phòng "${room.name}"!',
+              ),
+            ),
           );
         }
       },

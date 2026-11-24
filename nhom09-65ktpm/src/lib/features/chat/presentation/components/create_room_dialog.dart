@@ -44,6 +44,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
   bool _requireLevel = false;
   String? _selectedLevel;
   bool _limitMembers = false;
+  bool _requireApproval = false;
   String? _localError;
 
   @override
@@ -86,6 +87,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
           level: _requireLevel ? _selectedLevel : null,
           targetLang: _selectedLang!,
           maxMembers: maxMembers,
+          requireApproval: _requireApproval,
         );
 
     if (mounted && created != null) {
@@ -322,6 +324,35 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                     },
                   ),
                 ],
+                const SizedBox(height: AppSpacing.lg),
+                const Text(
+                  'Chế độ tham gia phòng',
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _RadioChoiceTile(
+                        label: 'Vào ngay',
+                        selected: !_requireApproval,
+                        onTap: () => setState(() => _requireApproval = false),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: _RadioChoiceTile(
+                        label: 'Cần kiểm duyệt',
+                        selected: _requireApproval,
+                        onTap: () => setState(() => _requireApproval = true),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _descController,

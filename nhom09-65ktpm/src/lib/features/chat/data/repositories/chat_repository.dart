@@ -2,8 +2,9 @@ import '../../../../core/database/database_tables.dart';
 import '../../../../core/network/supabase_config.dart';
 import '../../../auth_profile/data/models/language_model.dart';
 import '../models/conversation_model.dart';
+import '../models/room_join_request.dart';
 
-/// Lớp truy xuất 100% trực tuyến trên Supabase cho danh sách Phòng Chat & Thành viên phòng.
+/// Lớp truy xuất 100% trực tuyến trên Supabase cho danh sách Phòng Chat, Thành viên & Kiểm duyệt.
 class ChatRepository {
   bool get isReady => SupabaseConfig.isConfigured;
 
@@ -20,7 +21,6 @@ class ChatRepository {
         .toList();
   }
 
-  /// Lấy map `user_id -> display_name` từ bảng `profiles` để hiển thị tên người quản lý / đối tác
   Future<Map<String, String>> _fetchProfileNames(Iterable<String> userIds) async {
     final ids = userIds.where((id) => id.isNotEmpty).toSet().toList();
     if (ids.isEmpty) return const {};
@@ -38,19 +38,23 @@ class ChatRepository {
     return map;
   }
 
-  /// Tải tất cả phòng người dùng đã tham gia (Chat 1-1 và Nhóm học tập)
+  /// Tải tất cả phòng người dùng đã là thành viên chính thức (`status = 'approved'`)
   Future<List<ConversationModel>> fetchMyConversations(String userId) async {
     final client = SupabaseConfig.client;
 
     final myMemberships = await client
         .from(DatabaseTables.conversationMembers)
-        .select('conversation_id, role')
+        .select('conversation_id, role, status')
         .eq('user_id', userId);
 
-    if (myMemberships.isEmpty) return const [];
+    final approvedMemberships = myMemberships
+        .where((row) => (row['status'] as String? ?? 'approved') == 'approved')
+        .toList();
+
+    if (approvedMemberships.isEmpty) return const [];
 
     final roleByConv = <String, String>{};
-    for (final row in myMemberships) {
+    for (final row in approvedMemberships) {
       roleByConv[row['conversation_id'].toString()] =
           row['role'] as String? ?? 'member';
     }
@@ -64,17 +68,24 @@ class ChatRepository {
 
     final allMembers = await client
         .from(DatabaseTables.conversationMembers)
-        .select('conversation_id, user_id')
+        .select('conversation_id, user_id, status')
         .inFilter('conversation_id', convIds);
 
-    final countMap = <String, int>{};
+    final approvedCountMap = <String, int>{};
+    final pendingCountMap = <String, int>{};
     final partnerByDirectConv = <String, String>{};
+
     for (final m in allMembers) {
       final cid = m['conversation_id'].toString();
       final uid = m['user_id'].toString();
-      countMap[cid] = (countMap[cid] ?? 0) + 1;
-      if (uid != userId) {
-        partnerByDirectConv[cid] = uid;
+      final status = m['status'] as String? ?? 'approved';
+      if (status == 'pending') {
+        pendingCountMap[cid] = (pendingCountMap[cid] ?? 0) + 1;
+      } else {
+        approvedCountMap[cid] = (approvedCountMap[cid] ?? 0) + 1;
+        if (uid != userId) {
+          partnerByDirectConv[cid] = uid;
+        }
       }
     }
 
@@ -97,8 +108,10 @@ class ChatRepository {
       }
       return ConversationModel.fromMap(
         row,
-        memberCount: countMap[id] ?? 1,
+        memberCount: approvedCountMap[id] ?? 1,
+        pendingCount: pendingCountMap[id] ?? 0,
         isJoined: true,
+        membershipStatus: 'approved',
         myRole: roleByConv[id],
         resolvedName: resolvedName,
         managerName: profileNames[creatorId] ?? 'Quản trị phòng',
@@ -106,7 +119,7 @@ class ChatRepository {
     }).toList();
   }
 
-  /// Tải danh sách phòng học nhóm công khai để người dùng tìm kiếm & tham gia
+  /// Tải danh sách phòng học nhóm công khai kèm trạng thái tham gia / chờ duyệt
   Future<List<ConversationModel>> fetchPublicGroupRooms({
     required String userId,
     String? searchQuery,
@@ -136,16 +149,25 @@ class ChatRepository {
     final convIds = convRows.map<String>((r) => r['id'].toString()).toList();
     final members = await client
         .from(DatabaseTables.conversationMembers)
-        .select('conversation_id, user_id, role')
+        .select('conversation_id, user_id, role, status')
         .inFilter('conversation_id', convIds);
 
-    final countMap = <String, int>{};
+    final approvedCountMap = <String, int>{};
+    final pendingCountMap = <String, int>{};
     final myRoleMap = <String, String>{};
+    final myStatusMap = <String, String>{};
+
     for (final m in members) {
       final cid = m['conversation_id'].toString();
-      countMap[cid] = (countMap[cid] ?? 0) + 1;
+      final status = m['status'] as String? ?? 'approved';
+      if (status == 'pending') {
+        pendingCountMap[cid] = (pendingCountMap[cid] ?? 0) + 1;
+      } else {
+        approvedCountMap[cid] = (approvedCountMap[cid] ?? 0) + 1;
+      }
       if (m['user_id'].toString() == userId) {
         myRoleMap[cid] = m['role'] as String? ?? 'member';
+        myStatusMap[cid] = status;
       }
     }
 
@@ -155,17 +177,20 @@ class ChatRepository {
     return convRows.map<ConversationModel>((row) {
       final id = row['id'].toString();
       final creatorId = row['created_by'].toString();
+      final myStatus = myStatusMap[id];
       return ConversationModel.fromMap(
         row,
-        memberCount: countMap[id] ?? 0,
-        isJoined: myRoleMap.containsKey(id),
+        memberCount: approvedCountMap[id] ?? 0,
+        pendingCount: pendingCountMap[id] ?? 0,
+        isJoined: myStatus == 'approved',
+        membershipStatus: myStatus,
         myRole: myRoleMap[id],
         managerName: profileNames[creatorId] ?? 'Quản trị phòng',
       );
     }).toList();
   }
 
-  /// Tạo phòng học nhóm mới trên bảng `conversations` và tự thêm người quản lý làm `owner`
+  /// Tạo phòng học nhóm mới (hỗ trợ chọn Vào ngay hoặc Cần kiểm duyệt)
   Future<ConversationModel> createGroupRoom({
     required String createdBy,
     required String managerName,
@@ -174,6 +199,7 @@ class ChatRepository {
     String? level,
     required String targetLang,
     int? maxMembers,
+    bool requireApproval = false,
   }) async {
     final client = SupabaseConfig.client;
 
@@ -186,6 +212,7 @@ class ChatRepository {
           'level': level,
           'target_lang': targetLang,
           'max_members': maxMembers,
+          'require_approval': requireApproval,
           'created_by': createdBy,
         })
         .select()
@@ -196,21 +223,24 @@ class ChatRepository {
       'conversation_id': roomId,
       'user_id': createdBy,
       'role': 'owner',
+      'status': 'approved',
     });
 
     return ConversationModel.fromMap(
       created,
       memberCount: 1,
       isJoined: true,
+      membershipStatus: 'approved',
       myRole: 'owner',
       managerName: managerName,
     );
   }
 
-  /// Tham gia một phòng học nhóm trên Supabase
+  /// Tham gia phòng (vào thẳng nếu mở, hoặc gửi yêu cầu `pending` nếu phòng cần duyệt)
   Future<void> joinRoom({
     required String conversationId,
     required String userId,
+    bool requireApproval = false,
   }) async {
     await SupabaseConfig.client
         .from(DatabaseTables.conversationMembers)
@@ -218,10 +248,11 @@ class ChatRepository {
           'conversation_id': conversationId,
           'user_id': userId,
           'role': 'member',
+          'status': requireApproval ? 'pending' : 'approved',
         }, onConflict: 'conversation_id,user_id');
   }
 
-  /// Rời khỏi một phòng học nhóm trên Supabase
+  /// Rời phòng hoặc hủy yêu cầu xin tham gia đang chờ duyệt
   Future<void> leaveRoom({
     required String conversationId,
     required String userId,
@@ -231,5 +262,66 @@ class ChatRepository {
         .delete()
         .eq('conversation_id', conversationId)
         .eq('user_id', userId);
+  }
+
+  /// Lấy danh sách yêu cầu xin vào phòng đang chờ duyệt (dành cho Người quản lý phòng)
+  Future<List<RoomJoinRequest>> fetchPendingRequests(
+    String conversationId,
+  ) async {
+    final client = SupabaseConfig.client;
+    final rows = await client
+        .from(DatabaseTables.conversationMembers)
+        .select('user_id, joined_at')
+        .eq('conversation_id', conversationId)
+        .eq('status', 'pending')
+        .order('joined_at', ascending: true);
+
+    if (rows.isEmpty) return const [];
+
+    final userIds = rows.map<String>((r) => r['user_id'].toString()).toList();
+    final profiles = await client
+        .from(DatabaseTables.profiles)
+        .select('user_id, display_name, avatar_url, proficiency_level')
+        .inFilter('user_id', userIds);
+
+    final profileMap = <String, Map<String, dynamic>>{};
+    for (final p in profiles) {
+      profileMap[p['user_id'].toString()] = p;
+    }
+
+    return rows.map<RoomJoinRequest>((r) {
+      final uid = r['user_id'].toString();
+      final p = profileMap[uid];
+      final rawName = (p?['display_name'] as String?)?.trim() ?? '';
+      return RoomJoinRequest(
+        userId: uid,
+        displayName: rawName.isNotEmpty ? rawName : 'Người dùng',
+        avatarUrl: p?['avatar_url'] as String?,
+        proficiencyLevel: p?['proficiency_level'] as String? ?? 'A1',
+        requestedAt: r['joined_at'] != null
+            ? DateTime.tryParse(r['joined_at'].toString())
+            : null,
+      );
+    }).toList();
+  }
+
+  /// Người quản lý phòng duyệt thành viên vào phòng
+  Future<void> approveJoinRequest({
+    required String conversationId,
+    required String targetUserId,
+  }) async {
+    await SupabaseConfig.client
+        .from(DatabaseTables.conversationMembers)
+        .update({'status': 'approved'})
+        .eq('conversation_id', conversationId)
+        .eq('user_id', targetUserId);
+  }
+
+  /// Người quản lý phòng từ chối yêu cầu xin vào phòng
+  Future<void> rejectJoinRequest({
+    required String conversationId,
+    required String targetUserId,
+  }) async {
+    await leaveRoom(conversationId: conversationId, userId: targetUserId);
   }
 }

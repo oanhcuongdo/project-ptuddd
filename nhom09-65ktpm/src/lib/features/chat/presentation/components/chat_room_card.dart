@@ -14,6 +14,7 @@ class ChatRoomCard extends StatelessWidget {
   final VoidCallback onJoin;
   final VoidCallback onOpen;
   final VoidCallback? onLeave;
+  final VoidCallback? onManageRequests;
 
   const ChatRoomCard({
     super.key,
@@ -23,6 +24,7 @@ class ChatRoomCard extends StatelessWidget {
     required this.onJoin,
     required this.onOpen,
     this.onLeave,
+    this.onManageRequests,
   });
 
   (IconData, Color, Color) _langIconStyle() {
@@ -114,6 +116,12 @@ class ChatRoomCard extends StatelessWidget {
                         textColor: room.hasLevelRequirement
                             ? const Color(0xFFB45309)
                             : const Color(0xFF047857),
+                      ),
+                    if (room.isGroup && room.requireApproval)
+                      const _TagPill(
+                        text: 'Cần duyệt',
+                        bgColor: Color(0xFFF3E8FF),
+                        textColor: Color(0xFF7E22CE),
                       ),
                   ],
                 ),
@@ -268,6 +276,30 @@ class ChatRoomCard extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (room.isOwner &&
+            room.isGroup &&
+            room.pendingCount > 0 &&
+            onManageRequests != null) ...[
+          OutlinedButton.icon(
+            onPressed: isBusy ? null : onManageRequests,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF7E22CE),
+              side: const BorderSide(color: Color(0xFFD8B4FE)),
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            icon: const Icon(Icons.how_to_reg_rounded, size: 15),
+            label: Text('Duyệt (${room.pendingCount})'),
+          ),
+          const SizedBox(width: 6),
+        ],
         if (room.isJoined && room.isGroup && onLeave != null) ...[
           IconButton(
             onPressed: isBusy ? null : onLeave,
@@ -299,6 +331,26 @@ class ChatRoomCard extends StatelessWidget {
             ),
             child: const Text('Vào chat'),
           )
+        else if (room.isPending)
+          OutlinedButton.icon(
+            onPressed: isBusy ? null : onLeave,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFB45309),
+              backgroundColor: const Color(0xFFFFFBEB),
+              side: const BorderSide(color: Color(0xFFFCD34D)),
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            icon: const Icon(Icons.hourglass_top_rounded, size: 15),
+            label: const Text('Chờ duyệt'),
+          )
         else
           OutlinedButton(
             onPressed: (isBusy || room.isFull) ? null : onJoin,
@@ -321,7 +373,11 @@ class ChatRoomCard extends StatelessWidget {
                     height: 15,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(room.isFull ? 'Đã đầy' : 'Tham gia'),
+                : Text(
+                    room.isFull
+                        ? 'Đã đầy'
+                        : (room.requireApproval ? 'Xin tham gia' : 'Tham gia'),
+                  ),
           ),
       ],
     );
