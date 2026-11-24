@@ -376,5 +376,25 @@ void main() {
 
     expect(find.text('Phòng của tôi (2)'), findsOneWidget);
     expect(find.text('Phòng Luyện Nói IELTS'), findsOneWidget);
+
+    // Bấm Vào chat -> mở giao diện phòng chat bên trong Outlet
+    await tester.tap(find.text('Vào chat').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bắt đầu luyện'), findsOneWidget);
+    expect(find.byTooltip('Gợi ý chủ đề & câu mở đầu'), findsOneWidget);
+
+    // Thử nhập tin nhắn preview trên giao diện phòng chat rồi quay lại danh sách
+    await tester.enterText(
+      find.byType(TextField).last,
+      'Hello everyone!',
+    );
+    await tester.tap(find.byTooltip('Gửi tin nhắn'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hello everyone!'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Quay lại danh sách phòng'));
+    await tester.pumpAndSettle();
+    expect(find.text('Phòng của tôi (2)'), findsOneWidget);
   });
 }

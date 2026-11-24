@@ -11,6 +11,7 @@ import '../components/chat_room_card.dart';
 import '../components/create_room_dialog.dart';
 import '../providers/chat_provider.dart';
 import '../styles/chat_styles.dart';
+import 'chat_room_view.dart';
 
 /// Màn hình Danh sách Phòng Chat (Đợt 1):
 /// - Tab 1: Phòng của tôi (Chat 1-1 & Nhóm đã tham gia)
@@ -26,6 +27,7 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
   final _searchController = TextEditingController();
   int _activeTab = 0; // 0: Phòng của tôi, 1: Khám phá phòng nhóm
   String? _loadedForUserId;
+  ConversationModel? _openedRoom;
 
   @override
   void dispose() {
@@ -61,14 +63,8 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
     );
   }
 
-  void _openRoomPlaceholder(ConversationModel room) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Đã sẵn sàng vào phòng "${room.name}" — khung nhắn tin Realtime sẽ mở ở đợt tiếp theo.',
-        ),
-      ),
-    );
+  void _openRoom(ConversationModel room) {
+    setState(() => _openedRoom = room);
   }
 
   @override
@@ -76,6 +72,25 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
     final userId = context.watch<AuthProvider>().currentProfile?.userId;
     final chat = context.watch<ChatProvider>();
     _ensureLoaded(userId);
+
+    if (_openedRoom != null) {
+      return ChatRoomView(
+        room: _openedRoom!,
+        onBack: () => setState(() => _openedRoom = null),
+        onLeaveRoom: userId == null
+            ? null
+            : () async {
+                final roomId = _openedRoom!.id;
+                final ok = await chat.leaveRoom(
+                  conversationId: roomId,
+                  userId: userId,
+                );
+                if (mounted && ok) {
+                  setState(() => _openedRoom = null);
+                }
+              },
+      );
+    }
 
     final rooms = _activeTab == 0 ? chat.myRooms : chat.discoverRooms;
 
@@ -330,7 +345,7 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
     return ChatRoomCard(
       room: room,
       isBusy: chat.busyRoomId == room.id,
-      onOpen: () => _openRoomPlaceholder(room),
+      onOpen: () => _openRoom(room),
       onJoin: () async {
         if (userId == null) return;
         final ok = await chat.joinRoom(conversationId: room.id, userId: userId);
