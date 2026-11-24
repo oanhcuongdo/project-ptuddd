@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../notifications/presentation/providers/notification_provider.dart';
 import '../../data/models/conversation_model.dart';
 import '../../data/models/room_join_request.dart';
 import '../providers/chat_provider.dart';
@@ -78,6 +79,13 @@ class _PendingRequestsDialogState extends State<PendingRequestsDialog> {
         _requests = _requests.where((r) => r.userId != req.userId).toList();
       }
     });
+    if (ok) {
+      try {
+        await context
+            .read<NotificationProvider>()
+            .refresh(widget.currentUserId);
+      } catch (_) {}
+    }
   }
 
   @override

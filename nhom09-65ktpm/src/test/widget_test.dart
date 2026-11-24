@@ -14,6 +14,10 @@ import 'package:buddytalk/features/chat/data/models/room_join_request.dart';
 import 'package:buddytalk/features/chat/data/repositories/chat_repository.dart';
 import 'package:buddytalk/features/chat/presentation/providers/chat_provider.dart';
 import 'package:buddytalk/features/chat/presentation/screens/chat_rooms_tab.dart';
+import 'package:buddytalk/features/notifications/data/models/notification_model.dart';
+import 'package:buddytalk/features/notifications/data/repositories/notification_repository.dart';
+import 'package:buddytalk/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class _FakeAuthRepository extends AuthRepository {
   _FakeAuthRepository({required this.initialProfile});
@@ -205,6 +209,61 @@ class _FakeChatRepository extends ChatRepository {
       const [];
 }
 
+class _FakeNotificationRepository extends NotificationRepository {
+  void Function(NotificationModel)? _onNew;
+
+  List<NotificationModel> _items = [
+    NotificationModel(
+      id: 'notif-1',
+      userId: 'u-manager',
+      actorId: 'u-requester',
+      type: 'room_join_request',
+      title: 'Yêu cầu tham gia phòng mới',
+      body: 'Nguyễn Minh Anh xin tham gia phòng "Nhóm Luyện IELTS Chuyên Sâu".',
+      referenceId: 'room-approval',
+      isRead: false,
+      createdAt: DateTime.now(),
+    ),
+  ];
+
+  void emitRealtime(NotificationModel notification) {
+    _items = [notification, ..._items];
+    _onNew?.call(notification);
+  }
+
+  @override
+  bool get isReady => true;
+
+  @override
+  Future<List<NotificationModel>> fetchNotifications(String userId) async {
+    return _items.where((n) => n.userId == userId).toList();
+  }
+
+  @override
+  Future<void> markAsRead(String notificationId) async {
+    _items = _items
+        .map((n) => n.id == notificationId ? n.copyWith(isRead: true) : n)
+        .toList();
+  }
+
+  @override
+  Future<void> markAllAsRead(String userId) async {
+    _items = _items.map((n) => n.copyWith(isRead: true)).toList();
+  }
+
+  @override
+  RealtimeChannel? subscribeToUserNotifications({
+    required String userId,
+    required void Function(NotificationModel notification) onNewNotification,
+  }) {
+    _onNew = onNewNotification;
+    return null;
+  }
+
+  @override
+  Future<void> unsubscribe(RealtimeChannel channel) async {}
+}
+
 void main() {
   setUpAll(() {
     registerAllRoutes();
@@ -267,6 +326,11 @@ void main() {
           ChangeNotifierProvider<ChatProvider>(
             create: (_) => ChatProvider(repository: _FakeChatRepository()),
           ),
+          ChangeNotifierProvider<NotificationProvider>(
+            create: (_) => NotificationProvider(
+              repository: _FakeNotificationRepository(),
+            ),
+          ),
         ],
         child: const MaterialApp(home: AuthGuard(child: MainLayout())),
       ),
@@ -318,6 +382,11 @@ void main() {
           ),
           ChangeNotifierProvider<ChatProvider>(
             create: (_) => ChatProvider(repository: _FakeChatRepository()),
+          ),
+          ChangeNotifierProvider<NotificationProvider>(
+            create: (_) => NotificationProvider(
+              repository: _FakeNotificationRepository(),
+            ),
           ),
         ],
         child: const MaterialApp(home: MainLayout()),
@@ -451,5 +520,85 @@ void main() {
     await tester.tap(find.byTooltip('Quay lại danh sách phòng'));
     await tester.pumpAndSettle();
     expect(find.text('Phòng của tôi (2)'), findsOneWidget);
+  });
+
+  testWidgets('NotificationBellButton xổ dropdown kiểu Facebook & tự đồng bộ phòng khi nhận duyệt Realtime', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final authRepo = _FakeAuthRepository(
+      initialProfile: const ProfileModel(
+        userId: 'u-manager',
+        displayName: 'Phạm Văn Hưng',
+        onboardingCompleted: true,
+      ),
+    );
+    final chatRepo = _FakeChatRepository();
+    final notifRepo = _FakeNotificationRepository();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: authRepo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: chatRepo),
+          ),
+          ChangeNotifierProvider<NotificationProvider>(
+            create: (_) => NotificationProvider(repository: notifRepo),
+          ),
+        ],
+        child: const MaterialApp(home: AuthGuard(child: MainLayout())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Badge số lượng chưa đọc = 1 hiển thị cạnh chuông thông báo
+    expect(find.byTooltip('Thông báo'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+
+    // Bấm vào chuông -> xổ dropdown kiểu Facebook (Tất cả / Chưa đọc)
+    await tester.tap(find.byTooltip('Thông báo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Thông báo'), findsOneWidget);
+    expect(find.text('Tất cả'), findsOneWidget);
+    expect(find.text('Chưa đọc (1)'), findsOneWidget);
+    expect(find.text('Xem & Duyệt'), findsOneWidget);
+    expect(find.text('Đọc tất cả'), findsOneWidget);
+
+    // Đánh dấu đọc tất cả -> xóa badge đỏ & chuyển tab Chưa đọc sẽ báo đã đọc hết
+    await tester.tap(find.text('Đọc tất cả'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Đọc tất cả'), findsNothing);
+    await tester.tap(find.text('Chưa đọc'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bạn đã đọc hết thông báo.'), findsOneWidget);
+
+    // Giả lập nhận sự kiện Realtime được duyệt phòng -> badge nhảy lên 1 ngay lập tức
+    notifRepo.emitRealtime(
+      NotificationModel(
+        id: 'notif-2',
+        userId: 'u-manager',
+        type: 'room_join_approved',
+        title: 'Đã được duyệt vào phòng học',
+        body: 'Quản lý phòng đã duyệt bạn vào phòng.',
+        referenceId: 'room-approval',
+        isRead: false,
+        createdAt: DateTime.now(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Chưa đọc (1)'), findsOneWidget);
+
+    // Bấm lại vào chuông để đóng dropdown
+    await tester.tap(find.byTooltip('Thông báo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tất cả'), findsNothing);
   });
 }
