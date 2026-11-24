@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../features/auth_profile/data/models/profile_model.dart';
 import '../../../features/auth_profile/presentation/providers/auth_provider.dart';
+import '../../../features/notifications/presentation/components/notification_bell_button.dart';
 import '../styles/main_layout_styles.dart';
 import 'nav_item.dart';
 
@@ -31,7 +32,9 @@ class MainHeader extends StatelessWidget {
 
     return Container(
       height: MainLayoutStyles.headerHeight,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      padding: EdgeInsets.symmetric(
+        horizontal: showMenuButton ? AppSpacing.md : AppSpacing.xl,
+      ),
       decoration: MainLayoutStyles.headerDecoration,
       child: Row(
         children: [
@@ -44,7 +47,7 @@ class MainHeader extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.xs),
           ],
           Expanded(
             child: Column(
@@ -64,10 +67,12 @@ class MainHeader extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           if (profile != null) ...[
             _StreakStatusPill(streakCount: profile.streakCount),
-            const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: AppSpacing.sm),
+            const NotificationBellButton(),
+            const SizedBox(width: AppSpacing.sm),
           ],
           _UserAccountMenu(
             profile: profile,
@@ -192,21 +197,9 @@ class _UserAccountMenu extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircleAvatar(
-              radius: 17,
-              backgroundColor: MainLayoutStyles.navActiveBg,
-              backgroundImage:
-                  hasNetworkAvatar ? NetworkImage(avatarUrl) : null,
-              child: hasNetworkAvatar
-                  ? null
-                  : Text(
-                      _initials(displayName),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
-                    ),
+            _HeaderAvatar(
+              avatarUrl: hasNetworkAvatar ? avatarUrl : null,
+              initials: _initials(displayName),
             ),
             const SizedBox(width: AppSpacing.sm),
             ConstrainedBox(
@@ -236,6 +229,51 @@ class _UserAccountMenu extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Avatar Header có fallback chữ cái đầu sạch đẹp khi ảnh Google bị lỗi tải trên Web.
+class _HeaderAvatar extends StatelessWidget {
+  final String? avatarUrl;
+  final String initials;
+
+  const _HeaderAvatar({
+    required this.avatarUrl,
+    required this.initials,
+  });
+
+  Widget _buildInitials() {
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: const BoxDecoration(
+        color: MainLayoutStyles.navActiveBg,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initials,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (avatarUrl == null) return _buildInitials();
+    return ClipOval(
+      child: Image.network(
+        avatarUrl!,
+        width: 34,
+        height: 34,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildInitials(),
       ),
     );
   }

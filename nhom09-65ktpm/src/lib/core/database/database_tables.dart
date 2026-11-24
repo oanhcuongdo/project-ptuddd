@@ -14,11 +14,12 @@ class DatabaseTables {
   static const String dailyGoals = 'daily_goals';
   static const String userQuestLogs = 'user_quest_logs';
 
-  // === 003: Ghép cặp Buddy (Tiến) & Chat 1-1 / Chat Nhóm (Hưng) ===
+  // === 003 & 011: Ghép cặp Buddy (Tiến), Chat 1-1 / Nhóm & Thông báo Realtime (Hưng) ===
   static const String buddyMatches = 'buddy_matches';
   static const String conversations = 'conversations';
   static const String conversationMembers = 'conversation_members';
   static const String messages = 'messages';
+  static const String notifications = 'notifications';
 
   // === 004: Chủ đề (Đạo), Buổi luyện tập (Kiên) & Sổ tay từ vựng (Hải) ===
   static const String conversationTopics = 'conversation_topics';

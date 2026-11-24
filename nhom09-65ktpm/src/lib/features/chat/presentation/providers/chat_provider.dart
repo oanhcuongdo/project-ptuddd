@@ -36,16 +36,18 @@ class ChatProvider extends ChangeNotifier {
   String? get selectedLang => _selectedLang;
   String? get selectedLevel => _selectedLevel;
 
-  Future<void> loadRooms(String userId) async {
+  Future<void> loadRooms(String userId, {bool silent = false}) async {
     if (!_repository.isReady) {
       _errorMessage = 'Chưa kết nối Supabase. Hãy chạy app kèm file .env.';
       notifyListeners();
       return;
     }
 
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    if (!silent) {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       final results = await Future.wait([
@@ -66,7 +68,9 @@ class ChatProvider extends ChangeNotifier {
       _discoverRooms = results[1] as List<ConversationModel>;
       _languages = results[2] as List<LanguageModel>;
     } catch (e) {
-      _errorMessage = 'Không thể tải danh sách phòng chat: $e';
+      if (!silent) {
+        _errorMessage = 'Không thể tải danh sách phòng chat: $e';
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
