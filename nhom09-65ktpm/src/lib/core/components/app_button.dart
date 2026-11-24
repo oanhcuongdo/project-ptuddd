@@ -55,13 +55,23 @@ class AppButton extends StatelessWidget {
       );
     }
 
-    return DecoratedBox(
-      decoration: onPressed != null && !isLoading
-          ? AuthStyles.primaryButtonShadow
-          : const BoxDecoration(),
-      child: FilledButton(
-        onPressed: isLoading ? null : onPressed,
-        child: content,
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: DecoratedBox(
+        decoration: onPressed != null && !isLoading
+            ? AuthStyles.primaryButtonShadow
+            : const BoxDecoration(),
+        child: FilledButton(
+          onPressed: isLoading ? null : onPressed,
+          style: FilledButton.styleFrom(
+            textStyle: const TextStyle(
+              fontSize: 15.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          child: content,
+        ),
       ),
     );
   }

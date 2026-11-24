@@ -184,18 +184,17 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                     _InfoChip(
                       icon: Icons.translate_rounded,
                       label:
-                          '${widget.room.targetLang.toUpperCase()} • ${widget.room.level}',
+                          '${widget.room.targetLang.toUpperCase()} • ${widget.room.levelLabel}',
                     ),
-                  if (widget.room.topicCategory.isNotEmpty)
+                  if (widget.room.isGroup && widget.room.managerName.isNotEmpty)
                     _InfoChip(
-                      icon: Icons.topic_outlined,
-                      label: widget.room.topicCategory,
+                      icon: Icons.verified_user_outlined,
+                      label: 'Quản lý: ${widget.room.managerName}',
                     ),
                   if (widget.room.isGroup)
                     _InfoChip(
                       icon: Icons.people_outline_rounded,
-                      label:
-                          '${widget.room.memberCount}/${widget.room.maxMembers} thành viên',
+                      label: widget.room.memberSummary,
                     ),
                 ],
               ),

@@ -24,9 +24,13 @@ class ChatRoomHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitleParts = <String>[
-      if (room.isGroup) '${room.targetLang.toUpperCase()} • ${room.level}' else 'Chat 1-1',
-      if (room.isGroup && room.topicCategory.isNotEmpty) room.topicCategory,
-      if (room.isGroup) '${room.memberCount}/${room.maxMembers} thành viên',
+      if (room.isGroup)
+        '${room.targetLang.toUpperCase()} • ${room.levelLabel}'
+      else
+        'Chat 1-1',
+      if (room.isGroup && room.managerName.isNotEmpty)
+        'Quản lý: ${room.managerName}',
+      if (room.isGroup) room.memberSummary,
     ];
 
     return Container(

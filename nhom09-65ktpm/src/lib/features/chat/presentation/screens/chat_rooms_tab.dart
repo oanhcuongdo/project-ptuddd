@@ -2,20 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/components/app_error_text.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth_profile/presentation/providers/auth_provider.dart';
 import '../../data/models/conversation_model.dart';
+import '../components/chat_filter_panel.dart';
+import '../components/chat_pagination_bar.dart';
 import '../components/chat_room_card.dart';
 import '../components/create_room_dialog.dart';
 import '../providers/chat_provider.dart';
 import '../styles/chat_styles.dart';
 import 'chat_room_view.dart';
 
-/// Màn hình Danh sách Phòng Chat (Đợt 1):
-/// - Tab 1: Phòng của tôi (Chat 1-1 & Nhóm đã tham gia)
-/// - Tab 2: Khám phá phòng nhóm (tìm theo tên, lọc ngôn ngữ từ DB & trình độ A1–B2, Tham gia/Rời phòng)
+/// Màn hình Danh sách & Khám phá Phòng học Realtime:
+/// - Thanh tiêu đề + chuyển tab Phòng của tôi / Khám phá + nút "+ Tạo phòng mới"
+/// - Khung lọc nhanh (Tìm kiếm, chip Ngôn ngữ từ DB, Trình độ, Chủ đề)
+/// - Thanh công cụ Sắp xếp, Số phòng/trang, chuyển chế độ Lưới / Danh sách & Phân trang
 class ChatRoomsTab extends StatefulWidget {
   const ChatRoomsTab({super.key});
 
@@ -25,9 +27,20 @@ class ChatRoomsTab extends StatefulWidget {
 
 class _ChatRoomsTabState extends State<ChatRoomsTab> {
   final _searchController = TextEditingController();
-  int _activeTab = 0; // 0: Phòng của tôi, 1: Khám phá phòng nhóm
+
+  int _activeTab = 0; // 0: Phòng của tôi, 1: Khám phá phòng học
   String? _loadedForUserId;
   ConversationModel? _openedRoom;
+
+  // Bộ lọc & phân trang hiển thị
+  String _searchText = '';
+  String? _selectedLang;
+  String? _selectedLevel;
+  bool _onlyAvailable = false;
+  String _sortBy = 'popular'; // popular | newest
+  int _pageSize = 6;
+  int _currentPage = 1;
+  bool _isGridView = true;
 
   @override
   void dispose() {
@@ -45,16 +58,24 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
     });
   }
 
-  Future<void> _openCreateRoomDialog(ChatProvider chat, String userId) async {
+  Future<void> _openCreateRoomDialog(
+    ChatProvider chat,
+    String userId,
+    String managerName,
+  ) async {
     final created = await showDialog<ConversationModel>(
       context: context,
       builder: (_) => CreateRoomDialog(
         createdBy: userId,
+        managerName: managerName,
         languages: chat.languages,
       ),
     );
     if (!mounted || created == null) return;
-    setState(() => _activeTab = 0);
+    setState(() {
+      _activeTab = 0;
+      _currentPage = 1;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: const Color(0xFF047857),
@@ -63,13 +84,40 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
     );
   }
 
-  void _openRoom(ConversationModel room) {
-    setState(() => _openedRoom = room);
+  List<ConversationModel> _filterAndSort(List<ConversationModel> source) {
+    final q = _searchText.trim().toLowerCase();
+    final filtered = source.where((room) {
+      if (_selectedLang != null && room.targetLang != _selectedLang) {
+        return false;
+      }
+      if (_selectedLevel == ChatFilterPanel.noLevelFilterValue) {
+        if (room.hasLevelRequirement) return false;
+      } else if (_selectedLevel != null && room.level != _selectedLevel) {
+        return false;
+      }
+      if (_onlyAvailable && room.isFull) {
+        return false;
+      }
+      if (q.isNotEmpty) {
+        final hay =
+            '${room.name} ${room.managerName} ${room.targetLang} ${room.description}'
+                .toLowerCase();
+        if (!hay.contains(q)) return false;
+      }
+      return true;
+    }).toList();
+
+    if (_sortBy == 'popular') {
+      filtered.sort((a, b) => b.memberCount.compareTo(a.memberCount));
+    }
+    return filtered;
   }
 
   @override
   Widget build(BuildContext context) {
-    final userId = context.watch<AuthProvider>().currentProfile?.userId;
+    final profile = context.watch<AuthProvider>().currentProfile;
+    final userId = profile?.userId;
+    final managerName = profile?.displayName ?? '';
     final chat = context.watch<ChatProvider>();
     _ensureLoaded(userId);
 
@@ -92,80 +140,239 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
       );
     }
 
-    final rooms = _activeTab == 0 ? chat.myRooms : chat.discoverRooms;
+    final rawRooms = _activeTab == 0 ? chat.myRooms : chat.discoverRooms;
+    final filtered = _filterAndSort(rawRooms);
+    final totalItems = filtered.length;
+    final totalPages = totalItems == 0 ? 1 : (totalItems / _pageSize).ceil();
+    final safePage = _currentPage.clamp(1, totalPages);
+    final startIdx = (safePage - 1) * _pageSize;
+    final endIdx = (startIdx + _pageSize).clamp(0, totalItems);
+    final pageRooms = totalItems == 0
+        ? const <ConversationModel>[]
+        : filtered.sublist(startIdx, endIdx);
 
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Align(
+      alignment: Alignment.topCenter,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1180),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeaderAndActions(chat, userId, managerName, rawRooms.length),
+              const SizedBox(height: AppSpacing.lg),
+              ChatFilterPanel(
+                searchController: _searchController,
+                languages: chat.languages,
+                selectedLang: _selectedLang,
+                selectedLevel: _selectedLevel,
+                onlyAvailable: _onlyAvailable,
+                onSearchChanged: (val) => setState(() {
+                  _searchText = val;
+                  _currentPage = 1;
+                }),
+                onLangSelected: (lang) => setState(() {
+                  _selectedLang = lang;
+                  _currentPage = 1;
+                }),
+                onLevelSelected: (lvl) => setState(() {
+                  _selectedLevel = lvl;
+                  _currentPage = 1;
+                }),
+                onOnlyAvailableChanged: (val) => setState(() {
+                  _onlyAvailable = val;
+                  _currentPage = 1;
+                }),
+              ),
+              AppErrorText(message: chat.errorMessage),
+              const SizedBox(height: AppSpacing.lg),
+              _buildListToolbar(
+                totalItems: totalItems,
+                startDisplay: totalItems == 0 ? 0 : startIdx + 1,
+                endDisplay: endIdx,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _buildRoomsSection(chat, pageRooms, userId),
+              if (totalItems > 0) ...[
+                const SizedBox(height: AppSpacing.lg),
+                ChatPaginationBar(
+                  currentPage: safePage,
+                  totalPages: totalPages,
+                  onPageChanged: (p) => setState(() => _currentPage = p),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderAndActions(
+    ChatProvider chat,
+    String? userId,
+    String managerName,
+    int totalInTab,
+  ) {
+    final title = _activeTab == 0 ? 'Phòng của tôi' : 'Khám phá phòng học';
+    final subtitle = _activeTab == 0
+        ? 'Các phòng Chat 1-1 và phòng học nhóm bạn đã tham gia ($totalInTab phòng)'
+        : 'Lọc nhanh theo ngôn ngữ và trình độ trong kho $totalInTab phòng học';
+
+    return SizedBox(
+      width: double.infinity,
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: AppSpacing.md,
+        runSpacing: AppSpacing.md,
         children: [
-          _buildTopTabBar(chat, userId),
-          if (_activeTab == 1) ...[
-            const SizedBox(height: AppSpacing.lg),
-            _buildFilterBar(chat, userId),
-          ],
-          AppErrorText(message: chat.errorMessage),
-          const SizedBox(height: AppSpacing.lg),
-          Expanded(
-            child: _buildRoomList(chat, rooms, userId),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: ChatStyles.pageTitle),
+              const SizedBox(height: 4),
+              Text(subtitle, style: ChatStyles.pageSubtitle),
+            ],
+          ),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: ChatStyles.controlBoxDecoration,
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: [
+                    _TabChip(
+                      label: 'Phòng của tôi (${chat.myRooms.length})',
+                      isActive: _activeTab == 0,
+                      onTap: () => setState(() {
+                        _activeTab = 0;
+                        _currentPage = 1;
+                      }),
+                    ),
+                    _TabChip(
+                      label: 'Khám phá (${chat.discoverRooms.length})',
+                      isActive: _activeTab == 1,
+                      onTap: () => setState(() {
+                        _activeTab = 1;
+                        _currentPage = 1;
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+              FilledButton.icon(
+                onPressed: (chat.isLoading || userId == null)
+                    ? null
+                    : () => _openCreateRoomDialog(chat, userId, managerName),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: const Text('Tạo phòng mới'),
+              ),
+              IconButton.outlined(
+                onPressed: (chat.isLoading || userId == null)
+                    ? null
+                    : () => chat.loadRooms(userId),
+                tooltip: 'Tải lại danh sách phòng',
+                style: IconButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                icon: const Icon(Icons.refresh_rounded, size: 19),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTopTabBar(ChatProvider chat, String? userId) {
+  Widget _buildListToolbar({
+    required int totalItems,
+    required int startDisplay,
+    required int endDisplay,
+  }) {
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.sm,
       children: [
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: ChatStyles.tabContainerDecoration,
-          child: Wrap(
-            spacing: 4,
-            runSpacing: 4,
-            children: [
-              _SegmentButton(
-                label: 'Phòng của tôi (${chat.myRooms.length})',
-                isActive: _activeTab == 0,
-                onTap: () => setState(() => _activeTab = 0),
-              ),
-              _SegmentButton(
-                label: 'Khám phá phòng nhóm (${chat.discoverRooms.length})',
-                isActive: _activeTab == 1,
-                onTap: () => setState(() => _activeTab = 1),
-              ),
-            ],
-          ),
+        Text(
+          totalItems == 0
+              ? 'Không tìm thấy phòng nào'
+              : 'Hiển thị $startDisplay–$endDisplay trong tổng số $totalItems phòng',
+          style: ChatStyles.metaText,
         ),
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            FilledButton.icon(
-              onPressed: (chat.isLoading || userId == null)
-                  ? null
-                  : () => _openCreateRoomDialog(chat, userId),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-              ),
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Tạo phòng nhóm'),
+            _ToolbarDropdown<String>(
+              value: _sortBy,
+              items: const [
+                DropdownMenuItem(value: 'popular', child: Text('Phổ biến nhất')),
+                DropdownMenuItem(value: 'newest', child: Text('Mới nhất')),
+              ],
+              onChanged: (v) {
+                if (v != null) setState(() => _sortBy = v);
+              },
             ),
-            IconButton.outlined(
-              onPressed: (chat.isLoading || userId == null)
-                  ? null
-                  : () => chat.loadRooms(userId),
-              tooltip: 'Tải lại danh sách phòng',
-              icon: const Icon(Icons.refresh_rounded, size: 20),
+            _ToolbarDropdown<int>(
+              value: _pageSize,
+              items: const [
+                DropdownMenuItem(value: 6, child: Text('6 phòng / trang')),
+                DropdownMenuItem(value: 12, child: Text('12 phòng / trang')),
+                DropdownMenuItem(value: 24, child: Text('24 phòng / trang')),
+              ],
+              onChanged: (v) {
+                if (v != null) {
+                  setState(() {
+                    _pageSize = v;
+                    _currentPage = 1;
+                  });
+                }
+              },
+            ),
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: ChatStyles.controlBoxDecoration,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _ViewToggleBtn(
+                    icon: Icons.grid_view_rounded,
+                    label: 'Lưới',
+                    isActive: _isGridView,
+                    onTap: () => setState(() => _isGridView = true),
+                  ),
+                  _ViewToggleBtn(
+                    icon: Icons.view_list_rounded,
+                    label: 'Danh sách',
+                    isActive: !_isGridView,
+                    onTap: () => setState(() => _isGridView = false),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -173,132 +380,43 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
     );
   }
 
-  Widget _buildFilterBar(ChatProvider chat, String? userId) {
-    return Wrap(
-      spacing: AppSpacing.md,
-      runSpacing: AppSpacing.sm,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        SizedBox(
-          width: 280,
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Tìm tên phòng học nhóm...',
-              prefixIcon: const Icon(Icons.search_rounded, size: 20),
-              isDense: true,
-              filled: true,
-              fillColor: AppColors.surfaceWhite,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.divider),
-              ),
-            ),
-            onSubmitted: (val) {
-              if (userId != null) {
-                chat.applyFilters(userId: userId, searchQuery: val);
-              }
-            },
-          ),
-        ),
-        DropdownButtonHideUnderline(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: ChatStyles.tabContainerDecoration,
-            child: DropdownButton<String?>(
-              value: chat.selectedLang,
-              hint: const Text('Ngôn ngữ: Tất cả'),
-              items: [
-                const DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text('Ngôn ngữ: Tất cả'),
-                ),
-                ...chat.languages.map(
-                  (lang) => DropdownMenuItem<String?>(
-                    value: lang.code,
-                    child: Text('${lang.flagCode} ${lang.shortLabel}'),
-                  ),
-                ),
-              ],
-              onChanged: (val) {
-                if (userId == null) return;
-                chat.applyFilters(
-                  userId: userId,
-                  targetLang: val,
-                  clearLang: val == null,
-                );
-              },
-            ),
-          ),
-        ),
-        DropdownButtonHideUnderline(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: ChatStyles.tabContainerDecoration,
-            child: DropdownButton<String?>(
-              value: chat.selectedLevel,
-              hint: const Text('Trình độ: Tất cả'),
-              items: [
-                const DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text('Trình độ: Tất cả'),
-                ),
-                ...AppConstants.proficiencyLevels.map(
-                  (lvl) => DropdownMenuItem<String?>(
-                    value: lvl,
-                    child: Text('Trình độ: $lvl'),
-                  ),
-                ),
-              ],
-              onChanged: (val) {
-                if (userId == null) return;
-                chat.applyFilters(
-                  userId: userId,
-                  level: val,
-                  clearLevel: val == null,
-                );
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRoomList(
+  Widget _buildRoomsSection(
     ChatProvider chat,
     List<ConversationModel> rooms,
     String? userId,
   ) {
     if (chat.isLoading && rooms.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 64),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
     if (rooms.isEmpty) {
-      return Center(
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+        decoration: ChatStyles.cardDecoration,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
               Icons.forum_outlined,
-              size: 48,
+              size: 46,
               color: AppColors.textMuted,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               _activeTab == 0
-                  ? 'Bạn chưa tham gia phòng trò chuyện nào.'
+                  ? 'Bạn chưa tham gia phòng học nào.'
                   : 'Chưa có phòng học nhóm nào phù hợp bộ lọc.',
               style: ChatStyles.roomTitle,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xs),
-            Text(
-              _activeTab == 0
-                  ? 'Chuyển sang tab "Khám phá phòng nhóm" để chọn phòng bạn thích và tham gia ngay.'
-                  : 'Dữ liệu được tải trực tiếp từ bảng conversations trên Supabase.',
+            const Text(
+              'Bấm "+ Tạo phòng mới" hoặc chuyển sang tab Khám phá để tham gia phòng ngay.',
               style: ChatStyles.roomDescription,
               textAlign: TextAlign.center,
             ),
@@ -307,31 +425,38 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
       );
     }
 
+    if (!_isGridView) {
+      return Column(
+        children: rooms
+            .map(
+              (room) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: _buildCard(chat, room, userId, isListMode: true),
+              ),
+            )
+            .toList(),
+      );
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 760;
-        if (!isWide) {
-          return ListView.separated(
-            itemCount: rooms.length,
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (_, index) => _buildCard(chat, rooms[index], userId),
-          );
-        }
+        final cols = constraints.maxWidth >= 1060
+            ? 3
+            : (constraints.maxWidth >= 660 ? 2 : 1);
+        const spacing = AppSpacing.lg;
+        final cardWidth = (constraints.maxWidth - spacing * (cols - 1)) / cols;
 
-        final cardWidth = (constraints.maxWidth - AppSpacing.lg) / 2;
-        return SingleChildScrollView(
-          child: Wrap(
-            spacing: AppSpacing.lg,
-            runSpacing: AppSpacing.lg,
-            children: rooms
-                .map(
-                  (room) => SizedBox(
-                    width: cardWidth,
-                    child: _buildCard(chat, room, userId),
-                  ),
-                )
-                .toList(),
-          ),
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: rooms
+              .map(
+                (room) => SizedBox(
+                  width: cardWidth,
+                  child: _buildCard(chat, room, userId, isListMode: false),
+                ),
+              )
+              .toList(),
         );
       },
     );
@@ -340,12 +465,14 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
   Widget _buildCard(
     ChatProvider chat,
     ConversationModel room,
-    String? userId,
-  ) {
+    String? userId, {
+    required bool isListMode,
+  }) {
     return ChatRoomCard(
       room: room,
+      isListMode: isListMode,
       isBusy: chat.busyRoomId == room.id,
-      onOpen: () => _openRoom(room),
+      onOpen: () => setState(() => _openedRoom = room),
       onJoin: () async {
         if (userId == null) return;
         final ok = await chat.joinRoom(conversationId: room.id, userId: userId);
@@ -362,12 +489,12 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
   }
 }
 
-class _SegmentButton extends StatelessWidget {
+class _TabChip extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
 
-  const _SegmentButton({
+  const _TabChip({
     required this.label,
     required this.isActive,
     required this.onTap,
@@ -379,7 +506,7 @@ class _SegmentButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
@@ -391,6 +518,88 @@ class _SegmentButton extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: isActive ? Colors.white : AppColors.textSecondary,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolbarDropdown<T> extends StatelessWidget {
+  final T value;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?> onChanged;
+
+  const _ToolbarDropdown({
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 34,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: ChatStyles.controlBoxDecoration,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          isDense: true,
+          style: const TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+}
+
+class _ViewToggleBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _ViewToggleBtn({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(7),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFFEEF2FF) : Colors.transparent,
+          borderRadius: BorderRadius.circular(7),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isActive ? AppColors.primary : AppColors.textMuted,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: isActive ? AppColors.primary : AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );

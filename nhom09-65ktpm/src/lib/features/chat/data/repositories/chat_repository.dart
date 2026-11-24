@@ -20,6 +20,24 @@ class ChatRepository {
         .toList();
   }
 
+  /// Lấy map `user_id -> display_name` từ bảng `profiles` để hiển thị tên người quản lý / đối tác
+  Future<Map<String, String>> _fetchProfileNames(Iterable<String> userIds) async {
+    final ids = userIds.where((id) => id.isNotEmpty).toSet().toList();
+    if (ids.isEmpty) return const {};
+
+    final rows = await SupabaseConfig.client
+        .from(DatabaseTables.profiles)
+        .select('user_id, display_name')
+        .inFilter('user_id', ids);
+
+    final map = <String, String>{};
+    for (final p in rows) {
+      final name = (p['display_name'] as String?)?.trim() ?? '';
+      map[p['user_id'].toString()] = name.isNotEmpty ? name : 'Người dùng';
+    }
+    return map;
+  }
+
   /// Tải tất cả phòng người dùng đã tham gia (Chat 1-1 và Nhóm học tập)
   Future<List<ConversationModel>> fetchMyConversations(String userId) async {
     final client = SupabaseConfig.client;
@@ -60,28 +78,21 @@ class ChatRepository {
       }
     }
 
-    // Lấy tên hiển thị đối tác cho các phòng Chat 1-1
-    final partnerIds = partnerByDirectConv.values.toSet().toList();
-    final partnerNames = <String, String>{};
-    if (partnerIds.isNotEmpty) {
-      final profiles = await client
-          .from(DatabaseTables.profiles)
-          .select('user_id, display_name')
-          .inFilter('user_id', partnerIds);
-      for (final p in profiles) {
-        partnerNames[p['user_id'].toString()] =
-            p['display_name'] as String? ?? 'Buddy';
-      }
-    }
+    final creatorIds = convRows.map<String>((r) => r['created_by'].toString());
+    final profileNames = await _fetchProfileNames([
+      ...creatorIds,
+      ...partnerByDirectConv.values,
+    ]);
 
     return convRows.map<ConversationModel>((row) {
       final id = row['id'].toString();
       final type = row['type'] as String? ?? 'group';
+      final creatorId = row['created_by'].toString();
       String? resolvedName;
       if (type == 'direct') {
         final partnerId = partnerByDirectConv[id];
         resolvedName = partnerId != null
-            ? (partnerNames[partnerId] ?? 'Bạn đồng hành')
+            ? (profileNames[partnerId] ?? 'Bạn đồng hành')
             : 'Bạn đồng hành';
       }
       return ConversationModel.fromMap(
@@ -90,6 +101,7 @@ class ChatRepository {
         isJoined: true,
         myRole: roleByConv[id],
         resolvedName: resolvedName,
+        managerName: profileNames[creatorId] ?? 'Quản trị phòng',
       );
     }).toList();
   }
@@ -137,26 +149,31 @@ class ChatRepository {
       }
     }
 
+    final creatorIds = convRows.map<String>((r) => r['created_by'].toString());
+    final profileNames = await _fetchProfileNames(creatorIds);
+
     return convRows.map<ConversationModel>((row) {
       final id = row['id'].toString();
+      final creatorId = row['created_by'].toString();
       return ConversationModel.fromMap(
         row,
         memberCount: countMap[id] ?? 0,
         isJoined: myRoleMap.containsKey(id),
         myRole: myRoleMap[id],
+        managerName: profileNames[creatorId] ?? 'Quản trị phòng',
       );
     }).toList();
   }
 
-  /// Tạo phòng học nhóm mới trên bảng `conversations` và tự thêm người tạo làm `owner`
+  /// Tạo phòng học nhóm mới trên bảng `conversations` và tự thêm người quản lý làm `owner`
   Future<ConversationModel> createGroupRoom({
     required String createdBy,
+    required String managerName,
     required String name,
     required String description,
-    required String topicCategory,
-    required String level,
+    String? level,
     required String targetLang,
-    required int maxMembers,
+    int? maxMembers,
   }) async {
     final client = SupabaseConfig.client;
 
@@ -166,7 +183,6 @@ class ChatRepository {
           'type': 'group',
           'name': name.trim(),
           'description': description.trim(),
-          'topic_category': topicCategory.trim(),
           'level': level,
           'target_lang': targetLang,
           'max_members': maxMembers,
@@ -187,6 +203,7 @@ class ChatRepository {
       memberCount: 1,
       isJoined: true,
       myRole: 'owner',
+      managerName: managerName,
     );
   }
 

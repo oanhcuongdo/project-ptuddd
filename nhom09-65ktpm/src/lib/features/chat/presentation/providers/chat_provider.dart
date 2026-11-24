@@ -118,12 +118,12 @@ class ChatProvider extends ChangeNotifier {
 
   Future<ConversationModel?> createGroupRoom({
     required String createdBy,
+    required String managerName,
     required String name,
     required String description,
-    required String topicCategory,
-    required String level,
+    String? level,
     required String targetLang,
-    required int maxMembers,
+    int? maxMembers,
   }) async {
     _isCreating = true;
     _errorMessage = null;
@@ -132,9 +132,9 @@ class ChatProvider extends ChangeNotifier {
     try {
       final created = await _repository.createGroupRoom(
         createdBy: createdBy,
+        managerName: managerName,
         name: name,
         description: description,
-        topicCategory: topicCategory,
         level: level,
         targetLang: targetLang,
         maxMembers: maxMembers,
