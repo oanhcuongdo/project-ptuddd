@@ -94,13 +94,13 @@ class _FakeChatRepository extends ChatRepository {
   ConversationModel _sampleRoom() => ConversationModel(
         id: 'room-1',
         type: 'group',
-        name: 'Luyện Tiếng Anh A2 - Du lịch',
-        description: 'Thực hành hỏi đường và đặt phòng khách sạn.',
-        topicCategory: 'Du lịch',
+        name: 'CLB Luyện Tiếng Anh Giao Tiếp',
+        description: 'Thực hành phản xạ giao tiếp 20 phút mỗi tối.',
         level: 'A2',
         targetLang: 'en',
         maxMembers: 20,
         createdBy: 'u-owner',
+        managerName: 'Nguyễn Minh Anh',
         memberCount: _joined ? 4 : 3,
         isJoined: _joined,
       );
@@ -126,23 +126,23 @@ class _FakeChatRepository extends ChatRepository {
   @override
   Future<ConversationModel> createGroupRoom({
     required String createdBy,
+    required String managerName,
     required String name,
     required String description,
-    required String topicCategory,
-    required String level,
+    String? level,
     required String targetLang,
-    required int maxMembers,
+    int? maxMembers,
   }) async {
     final created = ConversationModel(
       id: 'room-new-${_createdRooms.length + 1}',
       type: 'group',
       name: name.trim(),
       description: description.trim(),
-      topicCategory: topicCategory.trim(),
       level: level,
       targetLang: targetLang,
       maxMembers: maxMembers,
       createdBy: createdBy,
+      managerName: managerName,
       memberCount: 1,
       isJoined: true,
       myRole: 'owner',
@@ -334,50 +334,61 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Chuyển sang tab Khám phá phòng nhóm
-    await tester.tap(find.text('Khám phá phòng nhóm (1)'));
+    // Chuyển sang tab Khám phá phòng học
+    await tester.tap(find.text('Khám phá (1)'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Luyện Tiếng Anh A2 - Du lịch'), findsOneWidget);
-    expect(find.text('Tham gia phòng'), findsOneWidget);
+    expect(find.text('CLB Luyện Tiếng Anh Giao Tiếp'), findsOneWidget);
+    expect(find.text('Quản lý: Nguyễn Minh Anh'), findsOneWidget);
+    expect(find.text('Tham gia'), findsOneWidget);
+    expect(find.text('Hiển thị 1–1 trong tổng số 1 phòng'), findsOneWidget);
 
-    // Bấm Tham gia phòng -> cập nhật sang Vào chat và hiện trong Phòng của tôi (1)
-    await tester.tap(find.text('Tham gia phòng'));
+    // Thử chuyển chế độ Danh sách <-> Lưới
+    await tester.tap(find.text('Danh sách'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lưới'));
+    await tester.pumpAndSettle();
+
+    // Bấm Tham gia -> cập nhật sang Vào chat và hiện trong Phòng của tôi (1)
+    await tester.tap(find.text('Tham gia'));
     await tester.pumpAndSettle();
 
     expect(find.text('Phòng của tôi (1)'), findsOneWidget);
     expect(find.text('Vào chat'), findsOneWidget);
 
-    // Mở hộp thoại + Tạo phòng nhóm mới và tạo phòng thành công
-    await tester.tap(find.text('Tạo phòng nhóm'));
+    // Mở hộp thoại + Tạo phòng mới (Không yêu cầu trình độ & Không giới hạn thành viên)
+    await tester.tap(find.text('Tạo phòng mới'));
     await tester.pumpAndSettle();
 
     expect(find.text('Tạo phòng học nhóm mới'), findsOneWidget);
+    expect(find.text('Người quản lý phòng: Phạm Văn Hưng'), findsOneWidget);
+    expect(find.text('Không yêu cầu'), findsOneWidget);
+    expect(find.text('Không giới hạn'), findsOneWidget);
+
     await tester.enterText(
       find.byType(TextFormField).at(0),
-      'Phòng Luyện Nói IELTS',
+      'Phòng Luyện Nói Tự Do',
     );
-    await tester.enterText(find.byType(TextFormField).at(1), 'Phỏng vấn');
 
-    // Chọn ngôn ngữ & trình độ
+    // Chọn ngôn ngữ
     await tester.tap(find.byType(DropdownButtonFormField<String>).at(0));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('GB Anh').last);
+    await tester.tap(find.text('GB English').last);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(DropdownButtonFormField<String>).at(1));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('B2').last);
-    await tester.pumpAndSettle();
-
-    await tester.enterText(find.byType(TextFormField).at(2), '15');
+    // Tạo phòng với mặc định Không yêu cầu trình độ & Không giới hạn thành viên
+    await tester.ensureVisible(find.text('Tạo phòng nhóm ngay'));
     await tester.tap(find.text('Tạo phòng nhóm ngay'));
     await tester.pumpAndSettle();
 
     expect(find.text('Phòng của tôi (2)'), findsOneWidget);
-    expect(find.text('Phòng Luyện Nói IELTS'), findsOneWidget);
+    expect(find.text('Phòng Luyện Nói Tự Do'), findsOneWidget);
+    expect(find.text('Mọi trình độ'), findsOneWidget);
+    expect(find.text('1 thành viên • Không giới hạn'), findsOneWidget);
+    expect(find.text('Quản lý: Phạm Văn Hưng'), findsOneWidget);
 
     // Bấm Vào chat -> mở giao diện phòng chat bên trong Outlet
+    await tester.ensureVisible(find.text('Vào chat').first);
     await tester.tap(find.text('Vào chat').first);
     await tester.pumpAndSettle();
 

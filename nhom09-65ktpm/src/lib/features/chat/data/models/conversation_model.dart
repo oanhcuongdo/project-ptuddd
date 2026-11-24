@@ -4,11 +4,15 @@ class ConversationModel {
   final String type;
   final String name;
   final String description;
-  final String topicCategory;
-  final String level;
+
+  /// `null` nghĩa là phòng không yêu cầu trình độ (mọi trình độ đều tham gia được)
+  final String? level;
   final String targetLang;
-  final int maxMembers;
+
+  /// `null` nghĩa là phòng không giới hạn số lượng thành viên
+  final int? maxMembers;
   final String createdBy;
+  final String managerName;
   final String lastMessageText;
   final DateTime? lastMessageAt;
   final int memberCount;
@@ -20,11 +24,11 @@ class ConversationModel {
     required this.type,
     required this.name,
     this.description = '',
-    this.topicCategory = '',
-    this.level = 'A1',
+    this.level,
     this.targetLang = 'en',
-    this.maxMembers = 20,
+    this.maxMembers,
     required this.createdBy,
+    this.managerName = '',
     this.lastMessageText = '',
     this.lastMessageAt,
     this.memberCount = 0,
@@ -33,7 +37,17 @@ class ConversationModel {
   });
 
   bool get isGroup => type == 'group';
-  bool get isFull => isGroup && memberCount >= maxMembers;
+  bool get isUnlimited => maxMembers == null;
+  bool get hasLevelRequirement => level != null && level!.trim().isNotEmpty;
+  bool get isFull =>
+      isGroup && maxMembers != null && memberCount >= maxMembers!;
+
+  String get levelLabel =>
+      hasLevelRequirement ? level!.toUpperCase() : 'Mọi trình độ';
+
+  String get memberSummary => maxMembers == null
+      ? '$memberCount thành viên • Không giới hạn'
+      : '$memberCount/$maxMembers thành viên';
 
   factory ConversationModel.fromMap(
     Map<String, dynamic> map, {
@@ -41,18 +55,20 @@ class ConversationModel {
     bool isJoined = false,
     String? myRole,
     String? resolvedName,
+    String? managerName,
   }) {
     final rawName = (map['name'] as String?)?.trim() ?? '';
+    final rawLevel = (map['level'] as String?)?.trim();
     return ConversationModel(
       id: map['id'].toString(),
       type: map['type'] as String? ?? 'group',
       name: resolvedName ?? (rawName.isNotEmpty ? rawName : 'Phòng trò chuyện'),
       description: map['description'] as String? ?? '',
-      topicCategory: map['topic_category'] as String? ?? '',
-      level: map['level'] as String? ?? 'A1',
+      level: (rawLevel == null || rawLevel.isEmpty) ? null : rawLevel,
       targetLang: map['target_lang'] as String? ?? 'en',
-      maxMembers: (map['max_members'] as num?)?.toInt() ?? 20,
+      maxMembers: (map['max_members'] as num?)?.toInt(),
       createdBy: map['created_by'].toString(),
+      managerName: managerName ?? '',
       lastMessageText: map['last_message_text'] as String? ?? '',
       lastMessageAt: map['last_message_at'] != null
           ? DateTime.tryParse(map['last_message_at'].toString())

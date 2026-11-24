@@ -68,17 +68,17 @@ class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          minimumSize: const Size.fromHeight(54),
+          minimumSize: const Size(0, 42),
           shape: const StadiumBorder(),
           textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size(0, 40),
           shape: const StadiumBorder(),
           side: const BorderSide(color: AppColors.divider, width: 1.2),
         ),
