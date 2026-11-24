@@ -10,6 +10,7 @@ import 'package:buddytalk/features/auth_profile/data/models/profile_model.dart';
 import 'package:buddytalk/features/auth_profile/data/repositories/auth_repository.dart';
 import 'package:buddytalk/features/auth_profile/presentation/providers/auth_provider.dart';
 import 'package:buddytalk/features/chat/data/models/conversation_model.dart';
+import 'package:buddytalk/features/chat/data/models/message_model.dart';
 import 'package:buddytalk/features/chat/data/models/room_join_request.dart';
 import 'package:buddytalk/features/chat/data/repositories/chat_repository.dart';
 import 'package:buddytalk/features/chat/presentation/providers/chat_provider.dart';
@@ -82,6 +83,13 @@ class _FakeChatRepository extends ChatRepository {
   bool _joined = false;
   String? _approvalRoomStatus;
   final List<ConversationModel> _createdRooms = [];
+  final Map<String, List<MessageModel>> _messagesByRoom = {};
+  void Function(MessageModel)? _onNewMessage;
+
+  void emitRealtimeMessage(MessageModel msg) {
+    _messagesByRoom.putIfAbsent(msg.conversationId, () => []).add(msg);
+    _onNewMessage?.call(msg);
+  }
 
   @override
   bool get isReady => true;
@@ -207,6 +215,53 @@ class _FakeChatRepository extends ChatRepository {
     String conversationId,
   ) async =>
       const [];
+
+  @override
+  Future<List<MessageModel>> fetchMessages(
+    String conversationId, {
+    int limit = 100,
+  }) async =>
+      List<MessageModel>.from(_messagesByRoom[conversationId] ?? const []);
+
+  @override
+  Future<MessageModel> sendMessage({
+    required String conversationId,
+    required String senderId,
+    required String senderName,
+    String? senderAvatarUrl,
+    required String content,
+  }) async {
+    final list = _messagesByRoom.putIfAbsent(conversationId, () => []);
+    final saved = MessageModel(
+      id: 'msg-${list.length + 1}',
+      conversationId: conversationId,
+      senderId: senderId,
+      senderName: senderName,
+      senderAvatarUrl: senderAvatarUrl,
+      content: content.trim(),
+      createdAt: DateTime.now(),
+    );
+    list.add(saved);
+    return saved;
+  }
+
+  @override
+  Future<({String name, String? avatarUrl})> fetchSenderProfile(
+    String userId,
+  ) async =>
+      (name: 'Trịnh Trung Kiên', avatarUrl: null);
+
+  @override
+  RealtimeChannel? subscribeToRoomMessages({
+    required String conversationId,
+    required void Function(MessageModel message) onNewMessage,
+  }) {
+    _onNewMessage = onNewMessage;
+    return null;
+  }
+
+  @override
+  Future<void> unsubscribeChannel(RealtimeChannel channel) async {}
 }
 
 class _FakeNotificationRepository extends NotificationRepository {
@@ -425,6 +480,8 @@ void main() {
       ),
     );
 
+    final chatRepo = _FakeChatRepository();
+
     await tester.pumpWidget(
       MultiProvider(
         providers: [
@@ -432,7 +489,7 @@ void main() {
             create: (_) => AuthProvider(repository: authRepo),
           ),
           ChangeNotifierProvider<ChatProvider>(
-            create: (_) => ChatProvider(repository: _FakeChatRepository()),
+            create: (_) => ChatProvider(repository: chatRepo),
           ),
         ],
         child: const MaterialApp(home: Scaffold(body: ChatRoomsTab())),
@@ -508,7 +565,7 @@ void main() {
     expect(find.text('Bắt đầu luyện'), findsOneWidget);
     expect(find.byTooltip('Gợi ý chủ đề & câu mở đầu'), findsOneWidget);
 
-    // Thử nhập tin nhắn preview trên giao diện phòng chat rồi quay lại danh sách
+    // Gửi tin nhắn thật vào repository & nhận tin nhắn Realtime từ người khác
     await tester.enterText(
       find.byType(TextField).last,
       'Hello everyone!',
@@ -516,6 +573,20 @@ void main() {
     await tester.tap(find.byTooltip('Gửi tin nhắn'));
     await tester.pumpAndSettle();
     expect(find.text('Hello everyone!'), findsOneWidget);
+
+    chatRepo.emitRealtimeMessage(
+      MessageModel(
+        id: 'msg-rt-1',
+        conversationId: 'room-1',
+        senderId: 'u-other',
+        senderName: 'Trịnh Trung Kiên',
+        content: 'Hi! Ready to practice?',
+        createdAt: DateTime.now(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Hi! Ready to practice?'), findsOneWidget);
+    expect(find.textContaining('Trịnh Trung Kiên'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Quay lại danh sách phòng'));
     await tester.pumpAndSettle();

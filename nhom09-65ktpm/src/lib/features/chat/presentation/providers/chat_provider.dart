@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../auth_profile/data/models/language_model.dart';
 import '../../data/models/conversation_model.dart';
+import '../../data/models/message_model.dart';
 import '../../data/models/room_join_request.dart';
 import '../../data/repositories/chat_repository.dart';
 
@@ -25,6 +27,15 @@ class ChatProvider extends ChangeNotifier {
   String? _selectedLang;
   String? _selectedLevel;
 
+  // Trạng thái tin nhắn Realtime của phòng đang mở
+  String? _activeRoomId;
+  List<MessageModel> _roomMessages = const [];
+  bool _isLoadingMessages = false;
+  bool _isSendingMessage = false;
+  String? _messageError;
+  RealtimeChannel? _roomChannel;
+  final Map<String, ({String name, String? avatarUrl})> _senderCache = {};
+
   List<ConversationModel> get myRooms => _myRooms;
   List<ConversationModel> get discoverRooms => _discoverRooms;
   List<LanguageModel> get languages => _languages;
@@ -35,6 +46,11 @@ class ChatProvider extends ChangeNotifier {
   String get searchQuery => _searchQuery;
   String? get selectedLang => _selectedLang;
   String? get selectedLevel => _selectedLevel;
+
+  List<MessageModel> get roomMessages => _roomMessages;
+  bool get isLoadingMessages => _isLoadingMessages;
+  bool get isSendingMessage => _isSendingMessage;
+  String? get messageError => _messageError;
 
   Future<void> loadRooms(String userId, {bool silent = false}) async {
     if (!_repository.isReady) {
@@ -250,5 +266,151 @@ class ChatProvider extends ChangeNotifier {
       _busyRoomId = null;
       notifyListeners();
     }
+  }
+
+  // ==================== TIN NHẮN REALTIME TRONG PHÒNG ====================
+
+  /// Tải lịch sử tin nhắn từ Supabase & mở kênh WebSocket lắng nghe tin nhắn mới
+  Future<void> openRoomMessages(String conversationId) async {
+    _detachRoomChannel();
+    _activeRoomId = conversationId;
+    _roomMessages = const [];
+    _messageError = null;
+
+    if (!_repository.isReady) {
+      _messageError = 'Chưa kết nối Supabase.';
+      notifyListeners();
+      return;
+    }
+
+    _isLoadingMessages = true;
+    notifyListeners();
+
+    try {
+      final fetched = await _repository.fetchMessages(conversationId);
+      if (_activeRoomId != conversationId) return;
+
+      for (final msg in fetched) {
+        _senderCache[msg.senderId] = (
+          name: msg.senderName,
+          avatarUrl: msg.senderAvatarUrl,
+        );
+      }
+      _roomMessages = fetched;
+
+      _roomChannel = _repository.subscribeToRoomMessages(
+        conversationId: conversationId,
+        onNewMessage: _handleRealtimeMessage,
+      );
+    } catch (e) {
+      if (_activeRoomId != conversationId) return;
+      _messageError = 'Không thể tải lịch sử tin nhắn: $e';
+    } finally {
+      if (_activeRoomId == conversationId) {
+        _isLoadingMessages = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  void _handleRealtimeMessage(MessageModel incoming) {
+    if (incoming.conversationId != _activeRoomId) return;
+    if (_roomMessages.any((m) => m.id == incoming.id)) return;
+
+    final cached = _senderCache[incoming.senderId];
+    final enriched = cached != null
+        ? incoming.copyWith(
+            senderName: cached.name,
+            senderAvatarUrl: cached.avatarUrl,
+          )
+        : incoming;
+
+    _roomMessages = [..._roomMessages, enriched];
+    notifyListeners();
+
+    if (cached == null) {
+      _resolveSenderAndPatch(incoming.id, incoming.senderId);
+    }
+  }
+
+  Future<void> _resolveSenderAndPatch(String messageId, String senderId) async {
+    try {
+      final info = await _repository.fetchSenderProfile(senderId);
+      _senderCache[senderId] = info;
+      _roomMessages = _roomMessages
+          .map(
+            (m) => m.id == messageId
+                ? m.copyWith(
+                    senderName: info.name,
+                    senderAvatarUrl: info.avatarUrl,
+                  )
+                : m,
+          )
+          .toList();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Gửi tin nhắn mới vào Supabase & hiển thị ngay trên khung chat
+  Future<bool> sendMessage({
+    required String conversationId,
+    required String senderId,
+    required String senderName,
+    String? senderAvatarUrl,
+    required String content,
+  }) async {
+    final trimmed = content.trim();
+    if (trimmed.isEmpty) return false;
+
+    _isSendingMessage = true;
+    _messageError = null;
+    notifyListeners();
+
+    try {
+      _senderCache[senderId] = (name: senderName, avatarUrl: senderAvatarUrl);
+      final saved = await _repository.sendMessage(
+        conversationId: conversationId,
+        senderId: senderId,
+        senderName: senderName,
+        senderAvatarUrl: senderAvatarUrl,
+        content: trimmed,
+      );
+
+      if (_activeRoomId == conversationId &&
+          !_roomMessages.any((m) => m.id == saved.id)) {
+        _roomMessages = [..._roomMessages, saved];
+      }
+      return true;
+    } catch (e) {
+      _messageError = 'Không thể gửi tin nhắn: $e';
+      return false;
+    } finally {
+      _isSendingMessage = false;
+      notifyListeners();
+    }
+  }
+
+  /// Đóng kết nối WebSocket khi rời khỏi phòng chat
+  void closeRoomMessages() {
+    _detachRoomChannel();
+    _activeRoomId = null;
+    _roomMessages = const [];
+    _messageError = null;
+    _isLoadingMessages = false;
+    _isSendingMessage = false;
+  }
+
+  void _detachRoomChannel() {
+    final ch = _roomChannel;
+    _roomChannel = null;
+    if (ch != null) {
+      _repository.unsubscribeChannel(ch);
+    }
+  }
+
+  @override
+  void dispose() {
+    _detachRoomChannel();
+    super.dispose();
   }
 }
