@@ -6,8 +6,9 @@ import '../../data/models/conversation_model.dart';
 import '../styles/chat_styles.dart';
 import 'room_streak_badge.dart';
 
-/// Thẻ hiển thị 1 Phòng học (Lưới & Danh sách) — gồm Ngôn ngữ, Yêu cầu trình độ,
-/// Người quản lý phòng, mô tả, số thành viên (giới hạn hoặc không giới hạn) & nút hành động.
+/// Thẻ Phòng học thiết kế theo phong cách Cover minh họa + Tông Xanh Ngọc hiện đại:
+/// - Ảnh bìa gradient riêng theo ngôn ngữ kèm badge số thành viên & chuỗi lửa TikTok
+/// - Thông tin phòng, người quản lý, yêu cầu trình độ/kiểm duyệt & nút hành động bo tròn
 class ChatRoomCard extends StatelessWidget {
   final ConversationModel room;
   final bool isBusy;
@@ -28,95 +29,241 @@ class ChatRoomCard extends StatelessWidget {
     this.onManageRequests,
   });
 
-  (IconData, Color, Color) _langIconStyle() {
+  ({
+    IconData icon,
+    String coverWord,
+    List<Color> gradient,
+    Color accent,
+    Color softBg,
+  }) _themeForRoom() {
     if (!room.isGroup) {
       return (
-        Icons.person_outline_rounded,
-        const Color(0xFF0284C7),
-        const Color(0xFFE0F2FE),
+        icon: Icons.person_outline_rounded,
+        coverWord: '1-1 Chat',
+        gradient: const [Color(0xFF0F766E), Color(0xFF0284C7)],
+        accent: const Color(0xFF0284C7),
+        softBg: const Color(0xFFE0F2FE),
       );
     }
     switch (room.targetLang.toLowerCase()) {
       case 'en':
         return (
-          Icons.groups_rounded,
-          const Color(0xFF4F46E5),
-          const Color(0xFFEEF2FF),
+          icon: Icons.headset_mic_rounded,
+          coverWord: 'English',
+          gradient: const [Color(0xFF0F766E), Color(0xFF0D9488), Color(0xFF2DD4BF)],
+          accent: ChatStyles.tealPrimary,
+          softBg: ChatStyles.tealSoftBg,
         );
       case 'ja':
         return (
-          Icons.translate_rounded,
-          const Color(0xFFE11D48),
-          const Color(0xFFFFE4E6),
+          icon: Icons.translate_rounded,
+          coverWord: '日本語',
+          gradient: const [Color(0xFF115E59), Color(0xFF0E7490), Color(0xFF38BDF8)],
+          accent: const Color(0xFF0E7490),
+          softBg: const Color(0xFFECFEFF),
         );
       case 'ko':
         return (
-          Icons.forum_outlined,
-          const Color(0xFF9333EA),
-          const Color(0xFFF3E8FF),
+          icon: Icons.forum_rounded,
+          coverWord: '한국어',
+          gradient: const [Color(0xFF134E4A), Color(0xFF0D9488), Color(0xFF34D399)],
+          accent: const Color(0xFF059669),
+          softBg: const Color(0xFFECFDF5),
         );
       case 'zh':
         return (
-          Icons.language_rounded,
-          const Color(0xFFD97706),
-          const Color(0xFFFEF3C7),
+          icon: Icons.language_rounded,
+          coverWord: '中文',
+          gradient: const [Color(0xFF0F766E), Color(0xFF15803D), Color(0xFF4ADE80)],
+          accent: const Color(0xFF15803D),
+          softBg: const Color(0xFFF0FDF4),
         );
       default:
         return (
-          Icons.menu_book_outlined,
-          const Color(0xFF0D9488),
-          const Color(0xFFCCFBF1),
+          icon: Icons.menu_book_rounded,
+          coverWord: room.targetLang.toUpperCase(),
+          gradient: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
+          accent: ChatStyles.tealPrimary,
+          softBg: ChatStyles.tealSoftBg,
         );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final (icon, iconColor, iconBg) = _langIconStyle();
+    final theme = _themeForRoom();
 
     if (isListMode) {
-      return _buildListTile(icon, iconColor, iconBg);
+      return _buildListTile(theme);
     }
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      clipBehavior: Clip.antiAlias,
       decoration: ChatStyles.cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(10),
+          // Ảnh bìa minh họa đầu thẻ (giống mockup, dùng tông Xanh Ngọc)
+          SizedBox(
+            height: 108,
+            width: double.infinity,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: theme.gradient,
+                    ),
+                  ),
                 ),
-                child: Icon(icon, color: iconColor, size: 20),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Wrap(
+                Positioned(
+                  left: -18,
+                  bottom: -24,
+                  child: Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.12),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: -12,
+                  top: -20,
+                  child: Icon(
+                    theme.icon,
+                    size: 92,
+                    color: Colors.white.withValues(alpha: 0.13),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    theme.coverWord,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white.withValues(alpha: 0.92),
+                      letterSpacing: 0.5,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.22),
+                          blurRadius: 12,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Góc trái trên: Đốm lửa phòng (nếu đã tham gia) hoặc nhãn Ngôn ngữ
+                Positioned(
+                  left: 10,
+                  top: 10,
+                  child: room.isJoined
+                      ? RoomStreakBadge(room: room, compact: true)
+                      : Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.35),
+                            ),
+                          ),
+                          child: Text(
+                            room.isGroup
+                                ? room.targetLang.toUpperCase()
+                                : '1-1',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                ),
+                // Góc phải trên: Pill tối mờ hiển thị số thành viên (giống mockup)
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A).withValues(alpha: 0.58),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            color: room.memberCount > 0
+                                ? const Color(0xFF4ADE80)
+                                : AppColors.border,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          '${room.memberCount} thành viên',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Phần nội dung bên dưới ảnh bìa
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(theme.icon, size: 17, color: theme.accent),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        room.name,
+                        style: ChatStyles.roomTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Wrap(
                   spacing: 6,
                   runSpacing: 4,
                   children: [
-                    _TagPill(
-                      text: room.isGroup
-                          ? room.targetLang.toUpperCase()
-                          : 'Chat 1-1',
-                      bgColor: const Color(0xFFEEF2FF),
-                      textColor: AppColors.primary,
-                    ),
                     if (room.isGroup)
                       _TagPill(
                         text: room.levelLabel,
                         bgColor: room.hasLevelRequirement
                             ? const Color(0xFFFEF3C7)
-                            : const Color(0xFFECFDF5),
+                            : ChatStyles.tealSoftBg,
                         textColor: room.hasLevelRequirement
                             ? const Color(0xFFB45309)
-                            : const Color(0xFF047857),
+                            : ChatStyles.tealDark,
                       ),
                     if (room.isGroup && room.requireApproval)
                       const _TagPill(
@@ -126,99 +273,81 @@ class ChatRoomCard extends StatelessWidget {
                       ),
                   ],
                 ),
-              ),
-              if (room.isJoined) ...[
-                RoomStreakBadge(room: room, compact: true),
-                const SizedBox(width: 6),
-              ],
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: room.memberCount > 0
-                      ? const Color(0xFF16A34A)
-                      : AppColors.border,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            room.name,
-            style: ChatStyles.roomTitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (room.isGroup && room.managerName.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(
-                  Icons.verified_user_outlined,
-                  size: 13.5,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
+                if (room.isGroup && room.managerName.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.verified_user_outlined,
+                        size: 13.5,
+                        color: ChatStyles.tealPrimary,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          'Quản lý: ${room.managerName}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 6),
+                SizedBox(
+                  height: 36,
                   child: Text(
-                    'Quản lý: ${room.managerName}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                    maxLines: 1,
+                    room.isJoined && room.lastMessageText.isNotEmpty
+                        ? room.lastMessageText
+                        : (room.description.isNotEmpty
+                            ? room.description
+                            : 'Không gian luyện giao tiếp trực tuyến thân thiện trên BuddyTalk.'),
+                    style: ChatStyles.roomDescription,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(height: 10),
+                const Divider(height: 1, color: AppColors.divider),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    if (room.isGroup)
+                      Expanded(
+                        child: Text(
+                          room.memberSummary,
+                          style: ChatStyles.metaText,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      )
+                    else
+                      const Spacer(),
+                    const SizedBox(width: 6),
+                    _buildActionControls(),
+                  ],
+                ),
               ],
             ),
-          ],
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 38,
-            child: Text(
-              room.isJoined && room.lastMessageText.isNotEmpty
-                  ? room.lastMessageText
-                  : (room.description.isNotEmpty
-                      ? room.description
-                      : 'Không gian luyện giao tiếp trực tuyến thân thiện trên BuddyTalk.'),
-              style: ChatStyles.roomDescription,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          const Divider(height: 1, color: AppColors.divider),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              if (room.isGroup) ...[
-                const Icon(
-                  Icons.people_outline_rounded,
-                  size: 16,
-                  color: AppColors.textMuted,
-                ),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Text(
-                    room.memberSummary,
-                    style: ChatStyles.metaText,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ] else
-                const Spacer(),
-              _buildActionControls(),
-            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildListTile(IconData icon, Color iconColor, Color iconBg) {
+  Widget _buildListTile(
+    ({
+      IconData icon,
+      String coverWord,
+      List<Color> gradient,
+      Color accent,
+      Color softBg,
+    }) theme,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -228,13 +357,13 @@ class ChatRoomCard extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(10),
+              gradient: LinearGradient(colors: theme.gradient),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: iconColor, size: 20),
+            child: Icon(theme.icon, color: Colors.white, size: 21),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -251,8 +380,8 @@ class ChatRoomCard extends StatelessWidget {
                       text: room.isGroup
                           ? '${room.targetLang.toUpperCase()} • ${room.levelLabel}'
                           : 'Chat 1-1',
-                      bgColor: const Color(0xFFEEF2FF),
-                      textColor: AppColors.primary,
+                      bgColor: ChatStyles.tealSoftBg,
+                      textColor: ChatStyles.tealDark,
                     ),
                     if (room.isJoined)
                       RoomStreakBadge(room: room, compact: true),
@@ -292,17 +421,17 @@ class ChatRoomCard extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFF7E22CE),
               side: const BorderSide(color: Color(0xFFD8B4FE)),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              minimumSize: const Size(0, 34),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(999),
               ),
               textStyle: const TextStyle(
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            icon: const Icon(Icons.how_to_reg_rounded, size: 15),
+            icon: const Icon(Icons.how_to_reg_rounded, size: 14),
             label: Text('Duyệt (${room.pendingCount})'),
           ),
           const SizedBox(width: 6),
@@ -318,25 +447,32 @@ class ChatRoomCard extends StatelessWidget {
               color: AppColors.textMuted,
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 2),
         ],
         if (room.isJoined)
           FilledButton(
             onPressed: isBusy ? null : onOpen,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: ChatStyles.tealPrimary,
               foregroundColor: Colors.white,
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              minimumSize: const Size(0, 34),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(999),
               ),
               textStyle: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            child: const Text('Vào chat'),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Vào chat'),
+                SizedBox(width: 4),
+                Icon(Icons.arrow_forward_rounded, size: 14),
+              ],
+            ),
           )
         else if (room.isPending)
           OutlinedButton.icon(
@@ -345,45 +481,60 @@ class ChatRoomCard extends StatelessWidget {
               foregroundColor: const Color(0xFFB45309),
               backgroundColor: const Color(0xFFFFFBEB),
               side: const BorderSide(color: Color(0xFFFCD34D)),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              minimumSize: const Size(0, 34),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(999),
               ),
               textStyle: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            icon: const Icon(Icons.hourglass_top_rounded, size: 15),
+            icon: const Icon(Icons.hourglass_top_rounded, size: 14),
             label: const Text('Chờ duyệt'),
           )
         else
-          OutlinedButton(
+          FilledButton(
             onPressed: (isBusy || room.isFull) ? null : onJoin,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textPrimary,
-              side: const BorderSide(color: AppColors.border),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            style: FilledButton.styleFrom(
+              backgroundColor: ChatStyles.tealPrimary,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFFE2E8F0),
+              minimumSize: const Size(0, 34),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(999),
               ),
               textStyle: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
               ),
             ),
             child: isBusy
                 ? const SizedBox(
-                    width: 15,
-                    height: 15,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
-                : Text(
-                    room.isFull
-                        ? 'Đã đầy'
-                        : (room.requireApproval ? 'Xin tham gia' : 'Tham gia'),
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        room.isFull
+                            ? 'Đã đầy'
+                            : (room.requireApproval
+                                ? 'Xin tham gia'
+                                : 'Tham gia'),
+                      ),
+                      if (!room.isFull) ...[
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_forward_rounded, size: 14),
+                      ],
+                    ],
                   ),
           ),
       ],
@@ -413,7 +564,7 @@ class _TagPill extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 11.5,
+          fontSize: 11,
           fontWeight: FontWeight.w700,
           color: textColor,
         ),

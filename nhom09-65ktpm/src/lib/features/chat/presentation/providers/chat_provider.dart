@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../auth_profile/data/models/language_model.dart';
 import '../../data/models/conversation_model.dart';
 import '../../data/models/message_model.dart';
+import '../../data/models/online_member_model.dart';
 import '../../data/models/room_join_request.dart';
 import '../../data/repositories/chat_repository.dart';
 
@@ -17,6 +18,7 @@ class ChatProvider extends ChangeNotifier {
   List<ConversationModel> _myRooms = const [];
   List<ConversationModel> _discoverRooms = const [];
   List<LanguageModel> _languages = const [];
+  List<OnlineMemberModel> _onlineMembers = const [];
 
   bool _isLoading = false;
   bool _isCreating = false;
@@ -39,6 +41,7 @@ class ChatProvider extends ChangeNotifier {
   List<ConversationModel> get myRooms => _myRooms;
   List<ConversationModel> get discoverRooms => _discoverRooms;
   List<LanguageModel> get languages => _languages;
+  List<OnlineMemberModel> get onlineMembers => _onlineMembers;
   bool get isLoading => _isLoading;
   bool get isCreating => _isCreating;
   String? get busyRoomId => _busyRoomId;
@@ -78,11 +81,13 @@ class ChatProvider extends ChangeNotifier {
           _repository.fetchAllowedLanguages()
         else
           Future.value(_languages),
+        _repository.fetchOnlineMembers(excludeUserId: userId),
       ]);
 
       _myRooms = results[0] as List<ConversationModel>;
       _discoverRooms = results[1] as List<ConversationModel>;
       _languages = results[2] as List<LanguageModel>;
+      _onlineMembers = results[3] as List<OnlineMemberModel>;
     } catch (e) {
       if (!silent) {
         _errorMessage = 'Không thể tải danh sách phòng chat: $e';

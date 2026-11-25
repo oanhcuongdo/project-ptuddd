@@ -49,24 +49,28 @@ class MainHeader extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.xs),
           ],
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  currentItem.headerTitle,
-                  style: MainLayoutStyles.headerTitle,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  currentItem.headerSubtitle,
-                  style: MainLayoutStyles.headerSubtitle,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
+          if (currentItem.headerTitle.isNotEmpty)
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    currentItem.headerTitle,
+                    style: MainLayoutStyles.headerTitle,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (currentItem.headerSubtitle.isNotEmpty)
+                    Text(
+                      currentItem.headerSubtitle,
+                      style: MainLayoutStyles.headerSubtitle,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            )
+          else
+            const Spacer(),
           const SizedBox(width: AppSpacing.sm),
           if (profile != null) ...[
             _StreakStatusPill(streakCount: profile.streakCount),

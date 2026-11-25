@@ -107,12 +107,13 @@ class _ChatPaginationBarState extends State<ChatPaginationBar> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: isActive
-                            ? AppColors.primary
+                            ? ChatStyles.tealPrimary
                             : AppColors.surfaceWhite,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color:
-                              isActive ? AppColors.primary : AppColors.divider,
+                          color: isActive
+                              ? ChatStyles.tealPrimary
+                              : AppColors.divider,
                         ),
                       ),
                       child: Text(
