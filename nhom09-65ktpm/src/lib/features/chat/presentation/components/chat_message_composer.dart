@@ -9,12 +9,14 @@ class ChatMessageComposer extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
   final VoidCallback onSuggestTopicTap;
+  final bool isSending;
 
   const ChatMessageComposer({
     super.key,
     required this.controller,
     required this.onSend,
     required this.onSuggestTopicTap,
+    this.isSending = false,
   });
 
   @override
@@ -71,13 +73,22 @@ class ChatMessageComposer extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           IconButton.filled(
-            onPressed: onSend,
+            onPressed: isSending ? null : onSend,
             tooltip: 'Gửi tin nhắn',
             style: IconButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
-            icon: const Icon(Icons.send_rounded, size: 19),
+            icon: isSending
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.send_rounded, size: 19),
           ),
         ],
       ),

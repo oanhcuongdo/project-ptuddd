@@ -1,8 +1,11 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../../core/database/database_tables.dart';
 import '../../../../core/network/supabase_config.dart';
 import '../../../auth_profile/data/models/language_model.dart';
 import '../../../notifications/data/repositories/notification_repository.dart';
 import '../models/conversation_model.dart';
+import '../models/message_model.dart';
 import '../models/room_join_request.dart';
 
 /// Lớp truy xuất 100% trực tuyến trên Supabase cho danh sách Phòng Chat, Thành viên & Kiểm duyệt.
@@ -440,5 +443,125 @@ class ChatRepository {
     } catch (_) {
       // Không chặn thao tác duyệt/từ chối nếu bảng notifications chưa tồn tại
     }
+  }
+
+  // ==================== TIN NHẮN REALTIME (BẢNG MESSAGES) ====================
+
+  /// Tải lịch sử tin nhắn mới nhất của một phòng chat từ bảng `messages`
+  Future<List<MessageModel>> fetchMessages(
+    String conversationId, {
+    int limit = 100,
+  }) async {
+    final client = SupabaseConfig.client;
+    final rows = await client
+        .from(DatabaseTables.messages)
+        .select('id, conversation_id, sender_id, content, created_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', ascending: false)
+        .limit(limit);
+
+    if (rows.isEmpty) return const [];
+
+    final senderIds =
+        rows.map<String>((r) => r['sender_id'].toString()).toSet().toList();
+    final senderProfiles = await _fetchSenderProfiles(senderIds);
+
+    return rows.reversed.map<MessageModel>((r) {
+      final sid = r['sender_id'].toString();
+      final info = senderProfiles[sid];
+      return MessageModel.fromMap(
+        r,
+        senderName: info?.name,
+        senderAvatarUrl: info?.avatarUrl,
+      );
+    }).toList();
+  }
+
+  /// Gửi tin nhắn mới: lưu thẳng vào bảng `messages` trên Supabase Cloud
+  Future<MessageModel> sendMessage({
+    required String conversationId,
+    required String senderId,
+    required String senderName,
+    String? senderAvatarUrl,
+    required String content,
+  }) async {
+    final inserted = await SupabaseConfig.client
+        .from(DatabaseTables.messages)
+        .insert({
+          'conversation_id': conversationId,
+          'sender_id': senderId,
+          'content': content.trim(),
+        })
+        .select('id, conversation_id, sender_id, content, created_at')
+        .single();
+
+    return MessageModel.fromMap(
+      inserted,
+      senderName: senderName,
+      senderAvatarUrl: senderAvatarUrl,
+    );
+  }
+
+  /// Tra cứu tên & avatar người gửi cho tin nhắn mới nhận qua Realtime WebSocket
+  Future<({String name, String? avatarUrl})> fetchSenderProfile(
+    String userId,
+  ) async {
+    final map = await _fetchSenderProfiles([userId]);
+    return map[userId] ?? (name: 'Thành viên', avatarUrl: null);
+  }
+
+  Future<Map<String, ({String name, String? avatarUrl})>> _fetchSenderProfiles(
+    List<String> userIds,
+  ) async {
+    if (userIds.isEmpty) return const {};
+    final rows = await SupabaseConfig.client
+        .from(DatabaseTables.profiles)
+        .select('user_id, display_name, avatar_url')
+        .inFilter('user_id', userIds);
+
+    final result = <String, ({String name, String? avatarUrl})>{};
+    for (final row in rows) {
+      final uid = row['user_id'].toString();
+      final rawName = (row['display_name'] as String?)?.trim() ?? '';
+      result[uid] = (
+        name: rawName.isNotEmpty ? rawName : 'Thành viên',
+        avatarUrl: row['avatar_url'] as String?,
+      );
+    }
+    return result;
+  }
+
+  /// Mở kênh WebSocket Supabase Realtime lắng nghe tin nhắn mới trong phòng
+  RealtimeChannel? subscribeToRoomMessages({
+    required String conversationId,
+    required void Function(MessageModel message) onNewMessage,
+  }) {
+    if (!isReady) return null;
+
+    final channel =
+        SupabaseConfig.client.channel('room_messages:$conversationId');
+    channel
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: DatabaseTables.messages,
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'conversation_id',
+            value: conversationId,
+          ),
+          callback: (payload) {
+            if (payload.newRecord.isEmpty) return;
+            onNewMessage(MessageModel.fromMap(payload.newRecord));
+          },
+        )
+        .subscribe();
+
+    return channel;
+  }
+
+  Future<void> unsubscribeChannel(RealtimeChannel channel) async {
+    if (!isReady) return;
+    await SupabaseConfig.client.removeChannel(channel);
   }
 }
