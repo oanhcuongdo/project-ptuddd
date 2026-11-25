@@ -13,16 +13,18 @@ class ChatRoomHeader extends StatelessWidget {
   final ConversationModel room;
   final VoidCallback onBack;
   final bool showBackButton;
+  final bool isInfoPanelOpen;
+  final VoidCallback onToggleInfoPanel;
   final VoidCallback onStartSessionTap;
-  final VoidCallback? onLeaveRoom;
 
   const ChatRoomHeader({
     super.key,
     required this.room,
     required this.onBack,
     this.showBackButton = true,
+    this.isInfoPanelOpen = false,
+    required this.onToggleInfoPanel,
     required this.onStartSessionTap,
-    this.onLeaveRoom,
   });
 
   @override
@@ -154,18 +156,33 @@ class ChatRoomHeader extends StatelessWidget {
             icon: const Icon(Icons.timer_outlined, size: 16),
             label: const Text('Bắt đầu luyện'),
           ),
-          if (room.isGroup && onLeaveRoom != null) ...[
-            const SizedBox(width: 4),
-            IconButton(
-              onPressed: onLeaveRoom,
-              tooltip: 'Rời phòng',
-              icon: const Icon(
-                Icons.exit_to_app_rounded,
-                color: AppColors.textMuted,
-                size: 20,
+          const SizedBox(width: 6),
+          IconButton(
+            onPressed: onToggleInfoPanel,
+            tooltip: 'Thông tin phòng',
+            style: IconButton.styleFrom(
+              backgroundColor: isInfoPanelOpen
+                  ? ChatStyles.tealSoftBg
+                  : Colors.transparent,
+              foregroundColor: isInfoPanelOpen
+                  ? ChatStyles.tealPrimary
+                  : AppColors.textSecondary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: isInfoPanelOpen
+                      ? ChatStyles.tealBorder
+                      : Colors.transparent,
+                ),
               ),
             ),
-          ],
+            icon: Icon(
+              isInfoPanelOpen
+                  ? Icons.view_sidebar_rounded
+                  : Icons.view_sidebar_outlined,
+              size: 21,
+            ),
+          ),
         ],
       ),
     );

@@ -13,6 +13,7 @@ import 'package:buddytalk/features/chat/data/models/conversation_model.dart';
 import 'package:buddytalk/features/chat/data/models/message_model.dart';
 import 'package:buddytalk/features/chat/data/models/online_member_model.dart';
 import 'package:buddytalk/features/chat/data/models/room_join_request.dart';
+import 'package:buddytalk/features/chat/data/models/room_member_model.dart';
 import 'package:buddytalk/features/chat/data/repositories/chat_repository.dart';
 import 'package:buddytalk/features/chat/presentation/providers/chat_provider.dart';
 import 'package:buddytalk/features/chat/presentation/screens/chat_rooms_tab.dart';
@@ -303,6 +304,46 @@ class _FakeChatRepository extends ChatRepository {
       incrementedToday: true,
     );
   }
+
+  final List<RoomMemberModel> _roomMembers = [
+    const RoomMemberModel(
+      userId: 'u-chat',
+      displayName: 'Phạm Văn Hưng',
+      proficiencyLevel: 'B2',
+      role: 'owner',
+    ),
+    const RoomMemberModel(
+      userId: 'u-other',
+      displayName: 'Trịnh Trung Kiên',
+      proficiencyLevel: 'B1',
+      role: 'member',
+    ),
+  ];
+
+  @override
+  Future<List<RoomMemberModel>> fetchRoomMembers(String conversationId) async =>
+      List<RoomMemberModel>.from(_roomMembers);
+
+  @override
+  Future<void> updateMemberRole({
+    required String conversationId,
+    required String targetUserId,
+    required String newRole,
+    required String actorId,
+    required String roomName,
+  }) async {
+    for (var i = 0; i < _roomMembers.length; i++) {
+      if (_roomMembers[i].userId == targetUserId) {
+        _roomMembers[i] = _roomMembers[i].copyWith(role: newRole);
+      }
+    }
+  }
+
+  @override
+  Future<void> updateRoomDescription({
+    required String conversationId,
+    required String description,
+  }) async {}
 }
 
 class _FakeNotificationRepository extends NotificationRepository {
@@ -645,10 +686,33 @@ void main() {
     expect(find.text('Hi! Ready to practice?'), findsOneWidget);
     expect(find.textContaining('Trịnh Trung Kiên'), findsOneWidget);
 
-    // Chuyển nhanh sang phòng khác ngay ở cột trái "Tin nhắn"
+    // Chuyển nhanh sang phòng khác ngay ở cột trái "Không gian học"
     await tester.tap(find.text('Phòng Luyện Nói Tự Do').first);
     await tester.pumpAndSettle();
     expect(find.text('Bắt đầu cuộc trò chuyện nào!'), findsOneWidget);
+
+    // Bấm nút Thông tin phòng bên góc phải (kiểu Zalo) -> mở bảng Thông tin phòng & phân quyền Phó phòng
+    await tester.tap(find.byTooltip('Thông tin phòng'));
+    await tester.pumpAndSettle();
+    expect(find.text('Thông tin phòng'), findsOneWidget);
+    expect(find.text('Chủ phòng'), findsOneWidget);
+    expect(find.text('Thành viên phòng (2)'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Tùy chọn thành viên'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Phân làm Trợ giảng'));
+    await tester.pumpAndSettle();
+    expect(find.text('Trợ giảng'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Rời phòng'),
+      200,
+      scrollable: find.descendant(
+        of: find.byType(ListView).last,
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(find.text('Rời phòng'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Quay lại danh sách phòng'));
     await tester.pumpAndSettle();

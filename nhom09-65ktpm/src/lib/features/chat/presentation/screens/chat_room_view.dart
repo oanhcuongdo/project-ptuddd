@@ -9,6 +9,7 @@ import '../../data/models/message_model.dart';
 import '../components/chat_conversation_sidebar.dart';
 import '../components/chat_message_composer.dart';
 import '../components/chat_room_header.dart';
+import '../components/chat_room_info_panel.dart';
 import '../providers/chat_provider.dart';
 import '../styles/chat_room_styles.dart';
 import '../styles/chat_styles.dart';
@@ -39,6 +40,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
   final _scrollController = ScrollController();
   late final ChatProvider _chatProvider;
   int _lastMessageCount = 0;
+  bool _showInfoPanel = false;
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _chatProvider.openRoomMessages(widget.room.id);
+      _chatProvider.loadRoomMembers(widget.room.id);
     });
   }
 
@@ -59,6 +62,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _chatProvider.openRoomMessages(widget.room.id);
+        _chatProvider.loadRoomMembers(widget.room.id);
       });
     }
   }
@@ -164,6 +168,40 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final showConversationList = constraints.maxWidth >= 820;
+          final canDockInfoPanel = constraints.maxWidth >= 1060;
+
+          void handleToggleInfoPanel() {
+            _chatProvider.loadRoomMembers(liveRoom.id);
+            if (canDockInfoPanel) {
+              setState(() => _showInfoPanel = !_showInfoPanel);
+            } else {
+              showDialog<void>(
+                context: context,
+                builder: (_) => Dialog(
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: SizedBox(
+                    width: 320,
+                    height: 600,
+                    child: ChatRoomInfoPanel(
+                      room: liveRoom,
+                      currentUserId: currentUserId,
+                      messages: messages,
+                      onClose: () => Navigator.of(context).pop(),
+                      onLeaveRoom: widget.onLeaveRoom == null
+                          ? null
+                          : () {
+                              Navigator.of(context).pop();
+                              widget.onLeaveRoom?.call();
+                            },
+                    ),
+                  ),
+                ),
+              );
+            }
+          }
 
           return ClipRRect(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -187,11 +225,12 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                         ChatRoomHeader(
                           room: liveRoom,
                           showBackButton: !showConversationList,
+                          isInfoPanelOpen: canDockInfoPanel && _showInfoPanel,
+                          onToggleInfoPanel: handleToggleInfoPanel,
                           onBack: widget.onBack,
                           onStartSessionTap: () => _showComingSoon(
                             'Đồng hồ bấm giờ buổi luyện tập',
                           ),
-                          onLeaveRoom: widget.onLeaveRoom,
                         ),
                         if (chat.messageError != null)
                           Container(
@@ -260,6 +299,14 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                       ],
                     ),
                   ),
+                  if (canDockInfoPanel && _showInfoPanel)
+                    ChatRoomInfoPanel(
+                      room: liveRoom,
+                      currentUserId: currentUserId,
+                      messages: messages,
+                      onClose: () => setState(() => _showInfoPanel = false),
+                      onLeaveRoom: widget.onLeaveRoom,
+                    ),
                 ],
               ),
             ),
@@ -349,6 +396,10 @@ class _ChatRoomViewState extends State<ChatRoomView> {
     List<MessageModel> messages,
     String? currentUserId,
   ) {
+    final roleByUserId = <String, String>{
+      for (final m in _chatProvider.roomMembers) m.userId: m.role,
+    };
+
     return ListView.separated(
       controller: _scrollController,
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -357,6 +408,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       itemBuilder: (_, index) {
         final msg = messages[index];
         final isMine = currentUserId != null && msg.senderId == currentUserId;
+        final senderRole = roleByUserId[msg.senderId];
 
         return Align(
           alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
@@ -380,9 +432,41 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                         : CrossAxisAlignment.start,
                     children: [
                       if (!isMine) ...[
-                        Text(
-                          '${msg.senderName} • ${_formatTime(msg.createdAt)}',
-                          style: ChatRoomStyles.roomHeaderMeta,
+                        Wrap(
+                          spacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              '${msg.senderName} • ${_formatTime(msg.createdAt)}',
+                              style: ChatRoomStyles.roomHeaderMeta,
+                            ),
+                            if (senderRole == 'owner' ||
+                                senderRole == 'co_owner')
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 1.5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: senderRole == 'owner'
+                                      ? const Color(0xFFFEF3C7)
+                                      : const Color(0xFFE0F2FE),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: Text(
+                                  senderRole == 'owner'
+                                      ? 'Chủ phòng'
+                                      : 'Trợ giảng',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: senderRole == 'owner'
+                                        ? const Color(0xFFB45309)
+                                        : const Color(0xFF0369A1),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                       ],

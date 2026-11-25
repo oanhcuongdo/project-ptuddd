@@ -8,6 +8,7 @@ import '../models/conversation_model.dart';
 import '../models/message_model.dart';
 import '../models/online_member_model.dart';
 import '../models/room_join_request.dart';
+import '../models/room_member_model.dart';
 
 /// Lớp truy xuất 100% trực tuyến trên Supabase cho danh sách Phòng Chat, Thành viên & Kiểm duyệt.
 class ChatRepository {
@@ -364,20 +365,32 @@ class ChatRepository {
       if (room == null) return;
 
       final ownerId = room['created_by'].toString();
-      if (ownerId == requesterId) return;
-
       final names = await _fetchProfileNames([requesterId]);
       final requesterName = names[requesterId] ?? 'Một thành viên';
       final roomName = (room['name'] as String?)?.trim() ?? 'phòng học';
 
-      await _notifications.createNotification(
-        userId: ownerId,
-        actorId: requesterId,
-        type: 'room_join_request',
-        title: 'Yêu cầu tham gia phòng mới',
-        body: '$requesterName vừa xin tham gia phòng "$roomName".',
-        referenceId: conversationId,
-      );
+      // Gửi thông báo cho cả Chủ phòng và các Phó phòng (Trợ giảng)
+      final managerRows = await SupabaseConfig.client
+          .from(DatabaseTables.conversationMembers)
+          .select('user_id')
+          .eq('conversation_id', conversationId)
+          .inFilter('role', ['owner', 'co_owner']);
+
+      final recipientIds = <String>{
+        ownerId,
+        ...managerRows.map<String>((r) => r['user_id'].toString()),
+      }..remove(requesterId);
+
+      for (final managerId in recipientIds) {
+        await _notifications.createNotification(
+          userId: managerId,
+          actorId: requesterId,
+          type: 'room_join_request',
+          title: 'Yêu cầu tham gia phòng mới',
+          body: '$requesterName vừa xin tham gia phòng "$roomName".',
+          referenceId: conversationId,
+        );
+      }
     } catch (_) {
       // Không chặn luồng xin tham gia nếu bảng notifications chưa được tạo
     }
@@ -725,5 +738,101 @@ class ChatRepository {
       // Không chặn luồng gửi tin nhắn nếu migration 012 chưa được chạy
       return null;
     }
+  }
+
+  // ==================== THÀNH VIÊN & PHÂN QUYỀN PHÓ PHÒNG ====================
+
+  /// Lấy danh sách tất cả thành viên chính thức trong phòng (Chủ phòng -> Phó phòng -> Thành viên)
+  Future<List<RoomMemberModel>> fetchRoomMembers(String conversationId) async {
+    final client = SupabaseConfig.client;
+
+    List<dynamic> rows;
+    try {
+      rows = await client
+          .from(DatabaseTables.conversationMembers)
+          .select(
+            'user_id, role, status, streak_count, last_chat_date, joined_at',
+          )
+          .eq('conversation_id', conversationId)
+          .order('joined_at', ascending: true);
+    } catch (_) {
+      rows = await client
+          .from(DatabaseTables.conversationMembers)
+          .select('user_id, role, status, joined_at')
+          .eq('conversation_id', conversationId)
+          .order('joined_at', ascending: true);
+    }
+
+    final approved = rows
+        .where((r) => (r['status'] as String? ?? 'approved') == 'approved')
+        .toList();
+    if (approved.isEmpty) return const [];
+
+    final userIds =
+        approved.map<String>((r) => r['user_id'].toString()).toList();
+    final profiles = await client
+        .from(DatabaseTables.profiles)
+        .select('user_id, display_name, avatar_url, proficiency_level')
+        .inFilter('user_id', userIds);
+
+    final profileMap = <String, Map<String, dynamic>>{};
+    for (final p in profiles) {
+      profileMap[p['user_id'].toString()] = p;
+    }
+
+    final members = approved
+        .map<RoomMemberModel>(
+          (r) => RoomMemberModel.fromRow(r, profileMap[r['user_id'].toString()]),
+        )
+        .toList();
+
+    members.sort((a, b) {
+      final roleCmp = a.roleSortOrder.compareTo(b.roleSortOrder);
+      if (roleCmp != 0) return roleCmp;
+      return b.effectiveStreak.compareTo(a.effectiveStreak);
+    });
+    return members;
+  }
+
+  /// Chủ phòng bổ nhiệm / gỡ quyền Phó phòng (Trợ giảng) & gửi thông báo Realtime
+  Future<void> updateMemberRole({
+    required String conversationId,
+    required String targetUserId,
+    required String newRole,
+    required String actorId,
+    required String roomName,
+  }) async {
+    await SupabaseConfig.client
+        .from(DatabaseTables.conversationMembers)
+        .update({'role': newRole})
+        .eq('conversation_id', conversationId)
+        .eq('user_id', targetUserId);
+
+    try {
+      final isPromoted = newRole == 'co_owner';
+      await _notifications.createNotification(
+        userId: targetUserId,
+        actorId: actorId,
+        type: isPromoted ? 'room_join_approved' : 'system',
+        title: isPromoted
+            ? 'Bạn được bổ nhiệm làm Trợ giảng'
+            : 'Cập nhật vai trò phòng học',
+        body: isPromoted
+            ? 'Chủ phòng đã phân bạn làm Trợ giảng tại "$roomName". Bạn có thể hỗ trợ duyệt thành viên và cập nhật nội quy!'
+            : 'Vai trò của bạn tại phòng "$roomName" đã chuyển về Thành viên.',
+        referenceId: conversationId,
+      );
+    } catch (_) {}
+  }
+
+  /// Chủ phòng hoặc Phó phòng cập nhật mô tả / nội quy phòng học
+  Future<void> updateRoomDescription({
+    required String conversationId,
+    required String description,
+  }) async {
+    await SupabaseConfig.client
+        .from(DatabaseTables.conversations)
+        .update({'description': description.trim()})
+        .eq('id', conversationId);
   }
 }
