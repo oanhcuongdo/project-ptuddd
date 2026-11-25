@@ -262,6 +262,27 @@ class _FakeChatRepository extends ChatRepository {
 
   @override
   Future<void> unsubscribeChannel(RealtimeChannel channel) async {}
+
+  @override
+  Future<
+      ({
+        int streakCount,
+        int bestStreak,
+        DateTime lastChatDate,
+        bool incrementedToday,
+      })?> recordRoomChatStreak({
+    required String conversationId,
+    required String userId,
+  }) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return (
+      streakCount: 1,
+      bestStreak: 1,
+      lastChatDate: today,
+      incrementedToday: true,
+    );
+  }
 }
 
 class _FakeNotificationRepository extends NotificationRepository {
@@ -450,11 +471,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('BuddyTalk'), findsOneWidget);
-    expect(find.text('Kỷ luật cá nhân'), findsOneWidget);
-
-    await tester.tap(find.text('Trò chuyện'));
-    await tester.pumpAndSettle();
     expect(find.text('Trò chuyện Realtime'), findsOneWidget);
+    expect(find.text('Kỷ luật'), findsNothing);
+
+    await tester.tap(find.text('Bạn đồng hành'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tìm bạn đồng hành'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Thu gọn menu'));
     await tester.pumpAndSettle();
@@ -637,7 +659,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Thông báo'), findsOneWidget);
-    expect(find.text('Tất cả'), findsOneWidget);
     expect(find.text('Chưa đọc (1)'), findsOneWidget);
     expect(find.text('Xem & Duyệt'), findsOneWidget);
     expect(find.text('Đọc tất cả'), findsOneWidget);
@@ -670,6 +691,80 @@ void main() {
     // Bấm lại vào chuông để đóng dropdown
     await tester.tap(find.byTooltip('Thông báo'));
     await tester.pumpAndSettle();
-    expect(find.text('Tất cả'), findsNothing);
+    expect(find.text('Chưa đọc (1)'), findsNothing);
+  });
+
+  testWidgets('Chuỗi lửa riêng từng phòng chat (kiểu TikTok: ban đầu 0, nhắn lên 1, quên 1 ngày mất về 0)', (
+    tester,
+  ) async {
+    // 1. Kiểm tra logic chuỗi riêng từng phòng: nhắn hôm nay -> sáng lửa; hôm qua -> chờ giữ lửa; quên 1 ngày -> về 0
+    final today = DateTime(2026, 11, 25);
+    final activeRoom = ConversationModel(
+      id: 'r1',
+      type: 'group',
+      name: 'CLB Tiếng Anh',
+      createdBy: 'u1',
+      roomStreakCount: 5,
+      bestStreak: 5,
+      lastChatDate: today,
+    );
+    final atRiskRoom = activeRoom.copyWith(
+      lastChatDate: today.subtract(const Duration(days: 1)),
+    );
+    final lostRoom = activeRoom.copyWith(
+      lastChatDate: today.subtract(const Duration(days: 2)),
+    );
+
+    expect(activeRoom.effectiveRoomStreak(today), 5);
+    expect(activeRoom.isStreakLitToday(today), isTrue);
+    expect(atRiskRoom.effectiveRoomStreak(today), 5);
+    expect(atRiskRoom.isStreakAtRisk(today), isTrue);
+    expect(lostRoom.effectiveRoomStreak(today), 0);
+    expect(lostRoom.isStreakLost(today), isTrue);
+
+    // 2. Kiểm tra trên giao diện phòng chat: mới vào là "0 ngày", nhắn 1 tin lập tức lên "1 ngày"
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final authRepo = _FakeAuthRepository(
+      initialProfile: const ProfileModel(
+        userId: 'u-streak',
+        displayName: 'Phạm Văn Hưng',
+        onboardingCompleted: true,
+      ),
+    );
+    final chatRepo = _FakeChatRepository();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: authRepo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: chatRepo),
+          ),
+        ],
+        child: const MaterialApp(home: Scaffold(body: ChatRoomsTab())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Tham gia phòng rồi bấm Vào chat
+    await tester.tap(find.text('Khám phá (2)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tham gia'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Vào chat'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('0 ngày'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).last, 'Hello!');
+    await tester.tap(find.byTooltip('Gửi tin nhắn'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 ngày'), findsOneWidget);
   });
 }

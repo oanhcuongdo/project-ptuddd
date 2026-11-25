@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../data/models/conversation_model.dart';
 import '../styles/chat_styles.dart';
+import 'room_streak_badge.dart';
 
 /// Thẻ hiển thị 1 Phòng học (Lưới & Danh sách) — gồm Ngôn ngữ, Yêu cầu trình độ,
 /// Người quản lý phòng, mô tả, số thành viên (giới hạn hoặc không giới hạn) & nút hành động.
@@ -126,6 +127,10 @@ class ChatRoomCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (room.isJoined) ...[
+                RoomStreakBadge(room: room, compact: true),
+                const SizedBox(width: 6),
+              ],
               Container(
                 width: 8,
                 height: 8,
@@ -249,6 +254,8 @@ class ChatRoomCard extends StatelessWidget {
                       bgColor: const Color(0xFFEEF2FF),
                       textColor: AppColors.primary,
                     ),
+                    if (room.isJoined)
+                      RoomStreakBadge(room: room, compact: true),
                   ],
                 ),
                 const SizedBox(height: 4),
