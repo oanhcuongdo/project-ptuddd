@@ -92,9 +92,13 @@ class ChatRoomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = _themeForRoom();
+    final customPresetGradient = ChatStyles.gradientForCoverKey(room.coverUrl);
+    final coverGradient = customPresetGradient ?? theme.gradient;
+    final hasCustomImage =
+        room.coverUrl != null && room.coverUrl!.startsWith('http');
 
     if (isListMode) {
-      return _buildListTile(theme);
+      return _buildListTile(theme, coverGradient);
     }
 
     return Container(
@@ -103,7 +107,7 @@ class ChatRoomCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ảnh bìa minh họa đầu thẻ (giống mockup, dùng tông Xanh Ngọc)
+          // Ảnh bìa minh họa đầu thẻ (hỗ trợ ảnh URL, nền preset hoặc mặc định theo ngôn ngữ)
           SizedBox(
             height: 108,
             width: double.infinity,
@@ -115,48 +119,58 @@ class ChatRoomCard extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: theme.gradient,
+                      colors: coverGradient,
                     ),
                   ),
                 ),
-                Positioned(
-                  left: -18,
-                  bottom: -24,
-                  child: Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.12),
+                if (hasCustomImage)
+                  Image.network(
+                    room.coverUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                if (hasCustomImage)
+                  Container(color: Colors.black.withValues(alpha: 0.24)),
+                if (!hasCustomImage) ...[
+                  Positioned(
+                    left: -18,
+                    bottom: -24,
+                    child: Container(
+                      width: 96,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.12),
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  right: -12,
-                  top: -20,
-                  child: Icon(
-                    theme.icon,
-                    size: 92,
-                    color: Colors.white.withValues(alpha: 0.13),
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    theme.coverWord,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white.withValues(alpha: 0.92),
-                      letterSpacing: 0.5,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.22),
-                          blurRadius: 12,
-                        ),
-                      ],
+                  Positioned(
+                    right: -12,
+                    top: -20,
+                    child: Icon(
+                      theme.icon,
+                      size: 92,
+                      color: Colors.white.withValues(alpha: 0.13),
                     ),
                   ),
-                ),
+                  Center(
+                    child: Text(
+                      theme.coverWord,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white.withValues(alpha: 0.92),
+                        letterSpacing: 0.5,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.22),
+                            blurRadius: 12,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 // Góc trái trên: Đốm lửa phòng (nếu đã tham gia) hoặc nhãn Ngôn ngữ
                 Positioned(
                   left: 10,
@@ -265,6 +279,12 @@ class ChatRoomCard extends StatelessWidget {
                             ? const Color(0xFFB45309)
                             : ChatStyles.tealDark,
                       ),
+                    if (room.roomFocus != null && room.roomFocus!.isNotEmpty)
+                      _TagPill(
+                        text: room.roomFocus!,
+                        bgColor: const Color(0xFFE0F2FE),
+                        textColor: const Color(0xFF0369A1),
+                      ),
                     if (room.isGroup && room.requireApproval)
                       const _TagPill(
                         text: 'Cần duyệt',
@@ -347,6 +367,7 @@ class ChatRoomCard extends StatelessWidget {
       Color accent,
       Color softBg,
     }) theme,
+    List<Color> coverGradient,
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -360,7 +381,7 @@ class ChatRoomCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: theme.gradient),
+              gradient: LinearGradient(colors: coverGradient),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(theme.icon, color: Colors.white, size: 21),

@@ -151,6 +151,8 @@ class ChatProvider extends ChangeNotifier {
     required String targetLang,
     int? maxMembers,
     bool requireApproval = false,
+    String? coverUrl,
+    String? roomFocus,
   }) async {
     _isCreating = true;
     _errorMessage = null;
@@ -166,6 +168,8 @@ class ChatProvider extends ChangeNotifier {
         targetLang: targetLang,
         maxMembers: maxMembers,
         requireApproval: requireApproval,
+        coverUrl: coverUrl,
+        roomFocus: roomFocus,
       );
       await loadRooms(createdBy);
       return created;

@@ -75,4 +75,51 @@ class ChatStyles {
   );
 
   static const double cardRadius = AppSpacing.radiusLg;
+
+  /// Danh sách định hướng kỹ năng dài hạn cho phòng học nhóm
+  static const List<String> roomFocusOptions = [
+    'Giao tiếp tự do',
+    'IELTS / Chứng chỉ',
+    'Phát âm',
+    'Công sở',
+    'Du lịch',
+  ];
+
+  /// Bộ ảnh bìa Gradient có sẵn cho người tạo phòng chọn nhanh
+  static const List<({String key, String label, List<Color> colors})>
+      coverPresets = [
+    (
+      key: 'preset:teal',
+      label: 'Xanh ngọc',
+      colors: [Color(0xFF0F766E), Color(0xFF0D9488), Color(0xFF2DD4BF)],
+    ),
+    (
+      key: 'preset:ocean',
+      label: 'Đại dương',
+      colors: [Color(0xFF0C4A6E), Color(0xFF0284C7), Color(0xFF38BDF8)],
+    ),
+    (
+      key: 'preset:forest',
+      label: 'Rừng xanh',
+      colors: [Color(0xFF14532D), Color(0xFF15803D), Color(0xFF4ADE80)],
+    ),
+    (
+      key: 'preset:sunset',
+      label: 'Hoàng hôn',
+      colors: [Color(0xFF9A3412), Color(0xFFEA580C), Color(0xFFFBBF24)],
+    ),
+    (
+      key: 'preset:midnight',
+      label: 'Xanh đêm',
+      colors: [Color(0xFF1E293B), Color(0xFF334155), Color(0xFF0D9488)],
+    ),
+  ];
+
+  static List<Color>? gradientForCoverKey(String? coverUrl) {
+    if (coverUrl == null || !coverUrl.startsWith('preset:')) return null;
+    for (final preset in coverPresets) {
+      if (preset.key == coverUrl) return preset.colors;
+    }
+    return null;
+  }
 }

@@ -15,6 +15,13 @@ class ConversationModel {
 
   /// `true` => Cần người quản lý duyệt mới được vào phòng; `false` => Vào trực tiếp
   final bool requireApproval;
+
+  /// Link ảnh bìa (https://...) hoặc mã màu nền có sẵn (`preset:teal`, `preset:ocean`...)
+  final String? coverUrl;
+
+  /// Định hướng dài hạn của CLB (VD: Giao tiếp tự do, IELTS / Chứng chỉ, Phát âm...)
+  final String? roomFocus;
+
   final String createdBy;
   final String managerName;
   final String lastMessageText;
@@ -41,6 +48,8 @@ class ConversationModel {
     this.targetLang = 'en',
     this.maxMembers,
     this.requireApproval = false,
+    this.coverUrl,
+    this.roomFocus,
     required this.createdBy,
     this.managerName = '',
     this.lastMessageText = '',
@@ -116,6 +125,8 @@ class ConversationModel {
       targetLang: targetLang,
       maxMembers: maxMembers,
       requireApproval: requireApproval,
+      coverUrl: coverUrl,
+      roomFocus: roomFocus,
       createdBy: createdBy,
       managerName: managerName,
       lastMessageText: lastMessageText ?? this.lastMessageText,
@@ -164,6 +175,8 @@ class ConversationModel {
   }) {
     final rawName = (map['name'] as String?)?.trim() ?? '';
     final rawLevel = (map['level'] as String?)?.trim();
+    final rawCover = (map['cover_url'] as String?)?.trim();
+    final rawFocus = (map['room_focus'] as String?)?.trim();
     return ConversationModel(
       id: map['id'].toString(),
       type: map['type'] as String? ?? 'group',
@@ -173,6 +186,8 @@ class ConversationModel {
       targetLang: map['target_lang'] as String? ?? 'en',
       maxMembers: (map['max_members'] as num?)?.toInt(),
       requireApproval: map['require_approval'] as bool? ?? false,
+      coverUrl: (rawCover == null || rawCover.isEmpty) ? null : rawCover,
+      roomFocus: (rawFocus == null || rawFocus.isEmpty) ? null : rawFocus,
       createdBy: map['created_by'].toString(),
       managerName: managerName ?? '',
       lastMessageText: map['last_message_text'] as String? ?? '',
