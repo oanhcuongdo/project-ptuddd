@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../data/models/conversation_model.dart';
 import '../styles/chat_room_styles.dart';
+import 'room_streak_badge.dart';
 
 /// Thanh đầu trang bên trong Phòng Chat:
 /// Nút quay lại, thông tin phòng (ngôn ngữ, trình độ, số thành viên) và nút slot Timer / Rời phòng.
@@ -84,6 +85,8 @@ class ChatRoomHeader extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: AppSpacing.sm),
+          RoomStreakBadge(room: room),
           const SizedBox(width: AppSpacing.sm),
           OutlinedButton.icon(
             onPressed: onStartSessionTap,

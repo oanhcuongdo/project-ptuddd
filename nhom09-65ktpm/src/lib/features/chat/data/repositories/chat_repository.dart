@@ -51,10 +51,20 @@ class ChatRepository {
   Future<List<ConversationModel>> fetchMyConversations(String userId) async {
     final client = SupabaseConfig.client;
 
-    final myMemberships = await client
-        .from(DatabaseTables.conversationMembers)
-        .select('conversation_id, role, status')
-        .eq('user_id', userId);
+    List<dynamic> myMemberships;
+    try {
+      myMemberships = await client
+          .from(DatabaseTables.conversationMembers)
+          .select(
+            'conversation_id, role, status, streak_count, best_streak, last_chat_date',
+          )
+          .eq('user_id', userId);
+    } catch (_) {
+      myMemberships = await client
+          .from(DatabaseTables.conversationMembers)
+          .select('conversation_id, role, status')
+          .eq('user_id', userId);
+    }
 
     final approvedMemberships = myMemberships
         .where((row) => (row['status'] as String? ?? 'approved') == 'approved')
@@ -63,9 +73,15 @@ class ChatRepository {
     if (approvedMemberships.isEmpty) return const [];
 
     final roleByConv = <String, String>{};
+    final streakByConv = <String, ({int count, int best, DateTime? lastDate})>{};
     for (final row in approvedMemberships) {
-      roleByConv[row['conversation_id'].toString()] =
-          row['role'] as String? ?? 'member';
+      final cid = row['conversation_id'].toString();
+      roleByConv[cid] = row['role'] as String? ?? 'member';
+      streakByConv[cid] = (
+        count: (row['streak_count'] as num?)?.toInt() ?? 0,
+        best: (row['best_streak'] as num?)?.toInt() ?? 0,
+        lastDate: ConversationModel.parseDateOnly(row['last_chat_date']),
+      );
     }
     final convIds = roleByConv.keys.toList();
 
@@ -108,6 +124,7 @@ class ChatRepository {
       final id = row['id'].toString();
       final type = row['type'] as String? ?? 'group';
       final creatorId = row['created_by'].toString();
+      final streakInfo = streakByConv[id];
       String? resolvedName;
       if (type == 'direct') {
         final partnerId = partnerByDirectConv[id];
@@ -124,6 +141,9 @@ class ChatRepository {
         myRole: roleByConv[id],
         resolvedName: resolvedName,
         managerName: profileNames[creatorId] ?? 'Quản trị phòng',
+        roomStreakCount: streakInfo?.count ?? 0,
+        bestStreak: streakInfo?.best ?? 0,
+        lastChatDate: streakInfo?.lastDate,
       );
     }).toList();
   }
@@ -156,15 +176,26 @@ class ChatRepository {
     if (convRows.isEmpty) return const [];
 
     final convIds = convRows.map<String>((r) => r['id'].toString()).toList();
-    final members = await client
-        .from(DatabaseTables.conversationMembers)
-        .select('conversation_id, user_id, role, status')
-        .inFilter('conversation_id', convIds);
+    List<dynamic> members;
+    try {
+      members = await client
+          .from(DatabaseTables.conversationMembers)
+          .select(
+            'conversation_id, user_id, role, status, streak_count, best_streak, last_chat_date',
+          )
+          .inFilter('conversation_id', convIds);
+    } catch (_) {
+      members = await client
+          .from(DatabaseTables.conversationMembers)
+          .select('conversation_id, user_id, role, status')
+          .inFilter('conversation_id', convIds);
+    }
 
     final approvedCountMap = <String, int>{};
     final pendingCountMap = <String, int>{};
     final myRoleMap = <String, String>{};
     final myStatusMap = <String, String>{};
+    final myStreakMap = <String, ({int count, int best, DateTime? lastDate})>{};
 
     for (final m in members) {
       final cid = m['conversation_id'].toString();
@@ -177,6 +208,11 @@ class ChatRepository {
       if (m['user_id'].toString() == userId) {
         myRoleMap[cid] = m['role'] as String? ?? 'member';
         myStatusMap[cid] = status;
+        myStreakMap[cid] = (
+          count: (m['streak_count'] as num?)?.toInt() ?? 0,
+          best: (m['best_streak'] as num?)?.toInt() ?? 0,
+          lastDate: ConversationModel.parseDateOnly(m['last_chat_date']),
+        );
       }
     }
 
@@ -187,6 +223,7 @@ class ChatRepository {
       final id = row['id'].toString();
       final creatorId = row['created_by'].toString();
       final myStatus = myStatusMap[id];
+      final streakInfo = myStreakMap[id];
       return ConversationModel.fromMap(
         row,
         memberCount: approvedCountMap[id] ?? 0,
@@ -195,6 +232,9 @@ class ChatRepository {
         membershipStatus: myStatus,
         myRole: myRoleMap[id],
         managerName: profileNames[creatorId] ?? 'Quản trị phòng',
+        roomStreakCount: streakInfo?.count ?? 0,
+        bestStreak: streakInfo?.best ?? 0,
+        lastChatDate: streakInfo?.lastDate,
       );
     }).toList();
   }
@@ -563,5 +603,84 @@ class ChatRepository {
   Future<void> unsubscribeChannel(RealtimeChannel channel) async {
     if (!isReady) return;
     await SupabaseConfig.client.removeChannel(channel);
+  }
+
+  /// Cập nhật chuỗi lửa riêng của người dùng trong 1 phòng chat (kiểu TikTok):
+  /// - Ban đầu = 0; nhắn 1 tin hôm nay -> +1
+  /// - Đã nhắn hôm nay -> giữ nguyên (không +1 lặp lại trong ngày)
+  /// - Quên từ 1 ngày trọn vẹn trở lên -> mất chuỗi, bắt đầu lại từ 1
+  Future<({int streakCount, int bestStreak, DateTime lastChatDate, bool incrementedToday})?>
+      recordRoomChatStreak({
+    required String conversationId,
+    required String userId,
+  }) async {
+    try {
+      final client = SupabaseConfig.client;
+      final row = await client
+          .from(DatabaseTables.conversationMembers)
+          .select('streak_count, best_streak, last_chat_date')
+          .eq('conversation_id', conversationId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (row == null) return null;
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final todayKey = '${today.year.toString().padLeft(4, '0')}-'
+          '${today.month.toString().padLeft(2, '0')}-'
+          '${today.day.toString().padLeft(2, '0')}';
+
+      final currentStreak = (row['streak_count'] as num?)?.toInt() ?? 0;
+      final currentBest = (row['best_streak'] as num?)?.toInt() ?? 0;
+      final lastDate = ConversationModel.parseDateOnly(row['last_chat_date']);
+
+      int nextStreak;
+      bool incrementedToday;
+
+      if (lastDate == null) {
+        nextStreak = 1;
+        incrementedToday = true;
+      } else {
+        final diff = today.difference(lastDate).inDays;
+        if (diff <= 0) {
+          // Đã thắp lửa trong phòng hôm nay rồi
+          nextStreak = currentStreak > 0 ? currentStreak : 1;
+          incrementedToday = false;
+        } else if (diff == 1) {
+          // Nhắn nối tiếp ngày hôm qua -> +1 chuỗi!
+          nextStreak = currentStreak + 1;
+          incrementedToday = true;
+        } else {
+          // Quên ít nhất 1 ngày trọn vẹn -> mất chuỗi, bắt đầu lại từ 1
+          nextStreak = 1;
+          incrementedToday = true;
+        }
+      }
+
+      final nextBest = nextStreak > currentBest ? nextStreak : currentBest;
+
+      if (incrementedToday || currentStreak == 0) {
+        await client
+            .from(DatabaseTables.conversationMembers)
+            .update({
+              'streak_count': nextStreak,
+              'best_streak': nextBest,
+              'last_chat_date': todayKey,
+            })
+            .eq('conversation_id', conversationId)
+            .eq('user_id', userId);
+      }
+
+      return (
+        streakCount: nextStreak,
+        bestStreak: nextBest,
+        lastChatDate: today,
+        incrementedToday: incrementedToday,
+      );
+    } catch (_) {
+      // Không chặn luồng gửi tin nhắn nếu migration 012 chưa được chạy
+      return null;
+    }
   }
 }

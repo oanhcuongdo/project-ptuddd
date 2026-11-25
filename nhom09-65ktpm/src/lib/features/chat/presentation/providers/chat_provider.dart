@@ -351,8 +351,9 @@ class ChatProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  /// Gửi tin nhắn mới vào Supabase & hiển thị ngay trên khung chat
-  Future<bool> sendMessage({
+  /// Gửi tin nhắn mới vào Supabase, hiển thị ngay trên khung chat
+  /// và tự động thắp lửa / cộng chuỗi Streak riêng của phòng (kiểu TikTok).
+  Future<({bool ok, int? roomStreak, bool streakIncrementedToday})> sendMessage({
     required String conversationId,
     required String senderId,
     required String senderName,
@@ -360,7 +361,9 @@ class ChatProvider extends ChangeNotifier {
     required String content,
   }) async {
     final trimmed = content.trim();
-    if (trimmed.isEmpty) return false;
+    if (trimmed.isEmpty) {
+      return (ok: false, roomStreak: null, streakIncrementedToday: false);
+    }
 
     _isSendingMessage = true;
     _messageError = null;
@@ -380,14 +383,67 @@ class ChatProvider extends ChangeNotifier {
           !_roomMessages.any((m) => m.id == saved.id)) {
         _roomMessages = [..._roomMessages, saved];
       }
-      return true;
+
+      final streakUpdate = await _repository.recordRoomChatStreak(
+        conversationId: conversationId,
+        userId: senderId,
+      );
+
+      _patchRoomAfterMessage(
+        conversationId: conversationId,
+        lastMessageText: trimmed,
+        lastMessageAt: saved.createdAt,
+        streakCount: streakUpdate?.streakCount,
+        bestStreak: streakUpdate?.bestStreak,
+        lastChatDate: streakUpdate?.lastChatDate,
+      );
+
+      return (
+        ok: true,
+        roomStreak: streakUpdate?.streakCount,
+        streakIncrementedToday: streakUpdate?.incrementedToday ?? false,
+      );
     } catch (e) {
       _messageError = 'Không thể gửi tin nhắn: $e';
-      return false;
+      return (ok: false, roomStreak: null, streakIncrementedToday: false);
     } finally {
       _isSendingMessage = false;
       notifyListeners();
     }
+  }
+
+  void _patchRoomAfterMessage({
+    required String conversationId,
+    required String lastMessageText,
+    required DateTime lastMessageAt,
+    int? streakCount,
+    int? bestStreak,
+    DateTime? lastChatDate,
+  }) {
+    ConversationModel patch(ConversationModel r) {
+      if (r.id != conversationId) return r;
+      return r.copyWith(
+        lastMessageText: lastMessageText,
+        lastMessageAt: lastMessageAt,
+        roomStreakCount: streakCount,
+        bestStreak: bestStreak,
+        lastChatDate: lastChatDate,
+      );
+    }
+
+    _myRooms = _myRooms.map(patch).toList();
+    _discoverRooms = _discoverRooms.map(patch).toList();
+  }
+
+  /// Lấy bản cập nhật mới nhất của 1 phòng từ bộ nhớ Provider (gồm chuỗi lửa mới nhất)
+  ConversationModel findRoomOrFallback(ConversationModel fallback) {
+    for (final r in _myRooms) {
+      if (r.id == fallback.id) return r;
+    }
+    for (final r in _discoverRooms) {
+      if (r.id == fallback.id) return r;
+    }
+    return fallback;
   }
 
   /// Đóng kết nối WebSocket khi rời khỏi phòng chat

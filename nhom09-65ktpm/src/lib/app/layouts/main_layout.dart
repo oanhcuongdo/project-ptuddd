@@ -5,7 +5,6 @@ import '../../features/auth_profile/presentation/providers/auth_provider.dart';
 import '../../features/auth_profile/presentation/screens/profile_tab.dart';
 import '../../features/buddy_matching/presentation/screens/buddy_matching_tab.dart';
 import '../../features/chat/presentation/screens/chat_rooms_tab.dart';
-import '../../features/discipline/presentation/screens/discipline_tab.dart';
 import 'components/main_header.dart';
 import 'components/main_nav_sidebar.dart';
 import 'components/nav_item.dart';
@@ -39,14 +38,14 @@ class _MainLayoutState extends State<MainLayout> {
 
   static const List<MainNavItem> _navItems = [
     MainNavItem(
-      id: 'discipline',
-      label: 'Kỷ luật',
-      headerTitle: 'Kỷ luật cá nhân',
-      headerSubtitle: 'Theo dõi mục tiêu hàng ngày, chuỗi Streak và tiến độ học',
+      id: 'chat',
+      label: 'Trò chuyện',
+      headerTitle: 'Trò chuyện Realtime',
+      headerSubtitle: 'Nhắn tin 1-1 và phòng học nhóm kèm chuỗi lửa từng phòng',
       section: 'Không gian học',
-      icon: Icons.check_circle_outline_rounded,
-      selectedIcon: Icons.check_circle_rounded,
-      page: DisciplineTab(),
+      icon: Icons.chat_bubble_outline_rounded,
+      selectedIcon: Icons.chat_bubble_rounded,
+      page: ChatRoomsTab(),
     ),
     MainNavItem(
       id: 'buddy',
@@ -59,20 +58,10 @@ class _MainLayoutState extends State<MainLayout> {
       page: BuddyMatchingTab(),
     ),
     MainNavItem(
-      id: 'chat',
-      label: 'Trò chuyện',
-      headerTitle: 'Trò chuyện Realtime',
-      headerSubtitle: 'Nhắn tin 1-1 và phòng học nhóm tích hợp dịch thuật tức thì',
-      section: 'Không gian học',
-      icon: Icons.chat_bubble_outline_rounded,
-      selectedIcon: Icons.chat_bubble_rounded,
-      page: ChatRoomsTab(),
-    ),
-    MainNavItem(
       id: 'profile',
       label: 'Hồ sơ',
       headerTitle: 'Hồ sơ cá nhân',
-      headerSubtitle: 'Quản lý thông tin tài khoản, ngôn ngữ và mục tiêu kỷ luật',
+      headerSubtitle: 'Quản lý thông tin tài khoản, ngôn ngữ và mục tiêu học tập',
       section: 'Tài khoản',
       icon: Icons.person_outline_rounded,
       selectedIcon: Icons.person_rounded,

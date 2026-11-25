@@ -93,7 +93,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
         profile.displayName.trim().isNotEmpty ? profile.displayName : 'Bạn';
 
     _messageController.clear();
-    final ok = await _chatProvider.sendMessage(
+    final result = await _chatProvider.sendMessage(
       conversationId: widget.room.id,
       senderId: profile.userId,
       senderName: senderName,
@@ -101,10 +101,24 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       content: text,
     );
 
-    if (!ok && mounted) {
+    if (!result.ok && mounted) {
       _messageController.text = text;
       _messageController.selection = TextSelection.collapsed(
         offset: text.length,
+      );
+      return;
+    }
+
+    if (result.ok && mounted && result.streakIncrementedToday && result.roomStreak != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.streakOrange,
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            '🔥 Chuỗi phòng "${widget.room.name}" đã lên ${result.roomStreak} ngày!',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
       );
     }
   }
@@ -119,6 +133,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
   @override
   Widget build(BuildContext context) {
     final chat = context.watch<ChatProvider>();
+    final liveRoom = chat.findRoomOrFallback(widget.room);
     final currentUserId =
         context.watch<AuthProvider>().currentProfile?.userId;
     final messages = chat.roomMessages;
@@ -139,7 +154,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
           child: Column(
             children: [
               ChatRoomHeader(
-                room: widget.room,
+                room: liveRoom,
                 onBack: widget.onBack,
                 onStartSessionTap: () =>
                     _showComingSoon('Đồng hồ bấm giờ buổi luyện tập'),
