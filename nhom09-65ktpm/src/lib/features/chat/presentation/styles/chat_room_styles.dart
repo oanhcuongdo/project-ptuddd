@@ -2,17 +2,25 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'chat_styles.dart';
 
-/// Style dùng riêng cho giao diện bên trong Phòng Chat (Header, Khung tin nhắn, Composer)
+/// Style dùng riêng cho giao diện bên trong Phòng Chat (đồng bộ tông Xanh Ngọc)
 class ChatRoomStyles {
   ChatRoomStyles._();
 
-  static const BoxDecoration shellDecoration = BoxDecoration(
+  static final BoxDecoration shellDecoration = BoxDecoration(
     color: AppColors.surfaceWhite,
-    borderRadius: BorderRadius.all(Radius.circular(AppSpacing.radiusLg)),
-    border: Border.fromBorderSide(
+    borderRadius: const BorderRadius.all(Radius.circular(AppSpacing.radiusLg)),
+    border: const Border.fromBorderSide(
       BorderSide(color: AppColors.divider, width: 1),
     ),
+    boxShadow: [
+      BoxShadow(
+        color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+        blurRadius: 16,
+        offset: const Offset(0, 6),
+      ),
+    ],
   );
 
   static const BoxDecoration headerDecoration = BoxDecoration(
@@ -31,20 +39,34 @@ class ChatRoomStyles {
 
   static BoxDecoration messageBubble({required bool isMine}) {
     return BoxDecoration(
-      color: isMine ? AppColors.primary : AppColors.surfaceWhite,
+      gradient: isMine
+          ? const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [ChatStyles.tealPrimary, ChatStyles.tealDark],
+            )
+          : null,
+      color: isMine ? null : AppColors.surfaceWhite,
       borderRadius: BorderRadius.only(
-        topLeft: const Radius.circular(16),
-        topRight: const Radius.circular(16),
-        bottomLeft: Radius.circular(isMine ? 16 : 4),
-        bottomRight: Radius.circular(isMine ? 4 : 16),
+        topLeft: const Radius.circular(18),
+        topRight: const Radius.circular(18),
+        bottomLeft: Radius.circular(isMine ? 18 : 4),
+        bottomRight: Radius.circular(isMine ? 4 : 18),
       ),
-      border: isMine ? null : Border.all(color: AppColors.divider),
+      border: isMine ? null : Border.all(color: const Color(0xFFE2ECEE)),
+      boxShadow: [
+        BoxShadow(
+          color: const Color(0xFF0F172A).withValues(alpha: isMine ? 0.08 : 0.03),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
     );
   }
 
   static const TextStyle roomHeaderTitle = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w800,
     color: AppColors.textPrimary,
   );
 

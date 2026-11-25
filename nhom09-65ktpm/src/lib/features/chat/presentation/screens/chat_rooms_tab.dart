@@ -127,6 +127,7 @@ class _ChatRoomsTabState extends State<ChatRoomsTab> {
     if (_openedRoom != null) {
       return ChatRoomView(
         room: _openedRoom!,
+        onSelectRoom: (nextRoom) => setState(() => _openedRoom = nextRoom),
         onBack: () => setState(() => _openedRoom = null),
         onLeaveRoom: userId == null
             ? null
