@@ -122,6 +122,9 @@ const _similar = [
   {'G', 'K'}, {'B', 'P'}, {'AA', 'AO', 'AH'}, {'OW', 'AO'}, {'ER', 'AH'},
 ];
 
+/// Mọi âm nằm trong ít nhất một nhóm dễ nhầm; mỗi âm này phải có mẹo phát âm.
+final confusablePhonemes = {for (final g in _similar) ...g};
+
 double substitutionCost(String a, String b) {
   if (a == b) return 0;
   return _similar.any((g) => g.contains(a) && g.contains(b)) ? 0.5 : 1;

@@ -14,7 +14,10 @@ class AppState extends ChangeNotifier {
     user = u;
     stats = null;
     notifyListeners();
-    if (u == null) return;
+    if (u == null) {
+      await NotificationService.cancel(); // đã đổi người học thì không nhắc cho người cũ nữa
+      return;
+    }
     if (u.reminderEnabled) await NotificationService.requestPermission();
     await refresh();
   }
@@ -27,7 +30,8 @@ class AppState extends ChangeNotifier {
     stats = await db.stats(u.id);
     notifyListeners();
     if (u.reminderEnabled) {
-      await NotificationService.scheduleDaily(u.reminderHour, u.reminderMinute, stats!.streak);
+      await NotificationService.scheduleDaily(u.reminderHour, u.reminderMinute, stats!.streak,
+          practicedToday: stats!.practicedToday);
     } else {
       await NotificationService.cancel();
     }
