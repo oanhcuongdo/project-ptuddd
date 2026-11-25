@@ -67,6 +67,10 @@ class ConversationModel {
   bool get isGroup => type == 'group';
   bool get isUnlimited => maxMembers == null;
   bool get isOwner => myRole == 'owner';
+  bool get isCoOwner => myRole == 'co_owner';
+
+  /// Chủ phòng hoặc Phó phòng (Trợ giảng) đều có quyền duyệt thành viên & quản lý nội quy
+  bool get canManageRoom => isOwner || isCoOwner;
   bool get isPending => membershipStatus == 'pending';
   bool get hasLevelRequirement => level != null && level!.trim().isNotEmpty;
   bool get isFull =>
@@ -110,6 +114,8 @@ class ConversationModel {
       roomStreakCount > 0 && _daysSinceLastChat(now) >= 2;
 
   ConversationModel copyWith({
+    String? description,
+    int? memberCount,
     int? roomStreakCount,
     int? bestStreak,
     DateTime? lastChatDate,
@@ -120,7 +126,7 @@ class ConversationModel {
       id: id,
       type: type,
       name: name,
-      description: description,
+      description: description ?? this.description,
       level: level,
       targetLang: targetLang,
       maxMembers: maxMembers,
@@ -131,7 +137,7 @@ class ConversationModel {
       managerName: managerName,
       lastMessageText: lastMessageText ?? this.lastMessageText,
       lastMessageAt: lastMessageAt ?? this.lastMessageAt,
-      memberCount: memberCount,
+      memberCount: memberCount ?? this.memberCount,
       pendingCount: pendingCount,
       isJoined: isJoined,
       membershipStatus: membershipStatus,

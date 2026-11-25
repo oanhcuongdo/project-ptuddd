@@ -433,7 +433,7 @@ class ChatRoomCard extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (room.isOwner &&
+        if (room.canManageRoom &&
             room.isGroup &&
             room.pendingCount > 0 &&
             onManageRequests != null) ...[

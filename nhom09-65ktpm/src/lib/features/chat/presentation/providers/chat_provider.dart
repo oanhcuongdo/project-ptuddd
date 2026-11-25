@@ -6,6 +6,7 @@ import '../../data/models/conversation_model.dart';
 import '../../data/models/message_model.dart';
 import '../../data/models/online_member_model.dart';
 import '../../data/models/room_join_request.dart';
+import '../../data/models/room_member_model.dart';
 import '../../data/repositories/chat_repository.dart';
 
 /// Quản lý trạng thái danh sách Phòng Chat của tôi, Khám phá phòng nhóm & Bộ lọc.
@@ -29,10 +30,12 @@ class ChatProvider extends ChangeNotifier {
   String? _selectedLang;
   String? _selectedLevel;
 
-  // Trạng thái tin nhắn Realtime của phòng đang mở
+  // Trạng thái tin nhắn & thành viên của phòng đang mở
   String? _activeRoomId;
   List<MessageModel> _roomMessages = const [];
+  List<RoomMemberModel> _roomMembers = const [];
   bool _isLoadingMessages = false;
+  bool _isLoadingMembers = false;
   bool _isSendingMessage = false;
   String? _messageError;
   RealtimeChannel? _roomChannel;
@@ -51,7 +54,9 @@ class ChatProvider extends ChangeNotifier {
   String? get selectedLevel => _selectedLevel;
 
   List<MessageModel> get roomMessages => _roomMessages;
+  List<RoomMemberModel> get roomMembers => _roomMembers;
   bool get isLoadingMessages => _isLoadingMessages;
+  bool get isLoadingMembers => _isLoadingMembers;
   bool get isSendingMessage => _isSendingMessage;
   String? get messageError => _messageError;
 
@@ -460,9 +465,106 @@ class ChatProvider extends ChangeNotifier {
     _detachRoomChannel();
     _activeRoomId = null;
     _roomMessages = const [];
+    _roomMembers = const [];
     _messageError = null;
     _isLoadingMessages = false;
+    _isLoadingMembers = false;
     _isSendingMessage = false;
+  }
+
+  /// Tải danh sách thành viên phòng (Chủ phòng / Phó phòng / Thành viên) cho Panel Thông tin phòng
+  Future<void> loadRoomMembers(String conversationId) async {
+    if (!_repository.isReady) return;
+    _isLoadingMembers = true;
+    notifyListeners();
+
+    try {
+      _roomMembers = await _repository.fetchRoomMembers(conversationId);
+    } catch (e) {
+      debugPrint('[ChatProvider] Khong the tai danh sach thanh vien: $e');
+    } finally {
+      _isLoadingMembers = false;
+      notifyListeners();
+    }
+  }
+
+  /// Chủ phòng bổ nhiệm / gỡ quyền Phó phòng (Trợ giảng)
+  Future<bool> setMemberRole({
+    required String conversationId,
+    required String targetUserId,
+    required String newRole,
+    required String actorId,
+    required String roomName,
+  }) async {
+    try {
+      await _repository.updateMemberRole(
+        conversationId: conversationId,
+        targetUserId: targetUserId,
+        newRole: newRole,
+        actorId: actorId,
+        roomName: roomName,
+      );
+      _roomMembers = _roomMembers
+          .map((m) => m.userId == targetUserId ? m.copyWith(role: newRole) : m)
+          .toList()
+        ..sort((a, b) {
+          final cmp = a.roleSortOrder.compareTo(b.roleSortOrder);
+          return cmp != 0 ? cmp : b.effectiveStreak.compareTo(a.effectiveStreak);
+        });
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _messageError =
+          'Không thể cập nhật vai trò (hãy chắc chắn đã chạy Migration 014): $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Chủ phòng hoặc Phó phòng mời thành viên vi phạm ra khỏi phòng
+  Future<bool> kickMember({
+    required String conversationId,
+    required String targetUserId,
+    required String currentUserId,
+  }) async {
+    try {
+      await _repository.leaveRoom(
+        conversationId: conversationId,
+        userId: targetUserId,
+      );
+      _roomMembers =
+          _roomMembers.where((m) => m.userId != targetUserId).toList();
+      await loadRooms(currentUserId, silent: true);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _messageError = 'Không thể mời thành viên ra khỏi phòng: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Chủ phòng hoặc Phó phòng cập nhật mô tả / nội quy phòng
+  Future<bool> updateRoomDescription({
+    required String conversationId,
+    required String description,
+  }) async {
+    try {
+      await _repository.updateRoomDescription(
+        conversationId: conversationId,
+        description: description,
+      );
+      ConversationModel patch(ConversationModel r) =>
+          r.id == conversationId ? r.copyWith(description: description.trim()) : r;
+      _myRooms = _myRooms.map(patch).toList();
+      _discoverRooms = _discoverRooms.map(patch).toList();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _messageError = 'Không thể cập nhật nội quy phòng: $e';
+      notifyListeners();
+      return false;
+    }
   }
 
   void _detachRoomChannel() {
