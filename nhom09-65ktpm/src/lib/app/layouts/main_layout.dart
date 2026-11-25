@@ -40,8 +40,8 @@ class _MainLayoutState extends State<MainLayout> {
     MainNavItem(
       id: 'chat',
       label: 'Trò chuyện',
-      headerTitle: 'Trò chuyện Realtime',
-      headerSubtitle: 'Nhắn tin 1-1 và phòng học nhóm kèm chuỗi lửa từng phòng',
+      headerTitle: '',
+      headerSubtitle: '',
       section: 'Không gian học',
       icon: Icons.chat_bubble_outline_rounded,
       selectedIcon: Icons.chat_bubble_rounded,

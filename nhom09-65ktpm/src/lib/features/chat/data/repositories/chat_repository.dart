@@ -6,6 +6,7 @@ import '../../../auth_profile/data/models/language_model.dart';
 import '../../../notifications/data/repositories/notification_repository.dart';
 import '../models/conversation_model.dart';
 import '../models/message_model.dart';
+import '../models/online_member_model.dart';
 import '../models/room_join_request.dart';
 
 /// Lớp truy xuất 100% trực tuyến trên Supabase cho danh sách Phòng Chat, Thành viên & Kiểm duyệt.
@@ -28,6 +29,27 @@ class ChatRepository {
     return rows
         .map<LanguageModel>((row) => LanguageModel.fromMap(row))
         .toList();
+  }
+
+  /// Tải danh sách thành viên đang trực tuyến thật từ bảng `profiles` (`is_online = true`)
+  Future<List<OnlineMemberModel>> fetchOnlineMembers({
+    required String excludeUserId,
+    int limit = 6,
+  }) async {
+    try {
+      final rows = await SupabaseConfig.client
+          .from(DatabaseTables.profiles)
+          .select('user_id, display_name, avatar_url, target_lang, proficiency_level')
+          .eq('is_online', true)
+          .neq('user_id', excludeUserId)
+          .limit(limit);
+
+      return rows
+          .map<OnlineMemberModel>((r) => OnlineMemberModel.fromMap(r))
+          .toList();
+    } catch (_) {
+      return const [];
+    }
   }
 
   Future<Map<String, String>> _fetchProfileNames(Iterable<String> userIds) async {

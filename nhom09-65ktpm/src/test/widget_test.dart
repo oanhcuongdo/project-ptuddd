@@ -11,12 +11,14 @@ import 'package:buddytalk/features/auth_profile/data/repositories/auth_repositor
 import 'package:buddytalk/features/auth_profile/presentation/providers/auth_provider.dart';
 import 'package:buddytalk/features/chat/data/models/conversation_model.dart';
 import 'package:buddytalk/features/chat/data/models/message_model.dart';
+import 'package:buddytalk/features/chat/data/models/online_member_model.dart';
 import 'package:buddytalk/features/chat/data/models/room_join_request.dart';
 import 'package:buddytalk/features/chat/data/repositories/chat_repository.dart';
 import 'package:buddytalk/features/chat/presentation/providers/chat_provider.dart';
 import 'package:buddytalk/features/chat/presentation/screens/chat_rooms_tab.dart';
 import 'package:buddytalk/features/notifications/data/models/notification_model.dart';
 import 'package:buddytalk/features/notifications/data/repositories/notification_repository.dart';
+import 'package:buddytalk/features/notifications/presentation/components/notification_bell_button.dart';
 import 'package:buddytalk/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -102,6 +104,20 @@ class _FakeChatRepository extends ChatRepository {
           shortLabel: 'Anh',
           flagCode: 'GB',
           sortOrder: 1,
+        ),
+      ];
+
+  @override
+  Future<List<OnlineMemberModel>> fetchOnlineMembers({
+    required String excludeUserId,
+    int limit = 6,
+  }) async =>
+      const [
+        OnlineMemberModel(
+          userId: 'u-online-1',
+          displayName: 'Trịnh Trung Kiên',
+          targetLang: 'EN',
+          proficiencyLevel: 'B1',
         ),
       ];
 
@@ -471,7 +487,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('BuddyTalk'), findsOneWidget);
-    expect(find.text('Trò chuyện Realtime'), findsOneWidget);
+    expect(find.text('Phòng của tôi'), findsOneWidget);
+    expect(find.text('Trò chuyện Realtime'), findsNothing);
     expect(find.text('Kỷ luật'), findsNothing);
 
     await tester.tap(find.text('Bạn đồng hành'));
@@ -523,7 +540,10 @@ void main() {
     await tester.tap(find.text('Khám phá (2)'));
     await tester.pumpAndSettle();
 
-    expect(find.text('CLB Luyện Tiếng Anh Giao Tiếp'), findsOneWidget);
+    expect(find.text('CLB Luyện Tiếng Anh Giao Tiếp'), findsWidgets);
+    expect(find.text('Luyện nói cùng bạn bè'), findsOneWidget);
+    expect(find.text('Phòng học sôi nổi'), findsOneWidget);
+    expect(find.text('Bạn bè đang online'), findsOneWidget);
     expect(find.text('Quản lý: Nguyễn Minh Anh'), findsOneWidget);
     expect(find.text('Tham gia'), findsOneWidget);
     expect(find.text('Xin tham gia'), findsOneWidget);
@@ -531,17 +551,20 @@ void main() {
     expect(find.text('Hiển thị 1–2 trong tổng số 2 phòng'), findsOneWidget);
 
     // Bấm Xin tham gia ở phòng cần duyệt -> chuyển sang Chờ duyệt
+    await tester.ensureVisible(find.text('Xin tham gia'));
     await tester.tap(find.text('Xin tham gia'));
     await tester.pumpAndSettle();
     expect(find.text('Chờ duyệt'), findsOneWidget);
 
     // Thử chuyển chế độ Danh sách <-> Lưới
+    await tester.ensureVisible(find.text('Danh sách'));
     await tester.tap(find.text('Danh sách'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Lưới'));
     await tester.pumpAndSettle();
 
     // Bấm Tham gia -> cập nhật sang Vào chat và hiện trong Phòng của tôi (1)
+    await tester.ensureVisible(find.text('Tham gia'));
     await tester.tap(find.text('Tham gia'));
     await tester.pumpAndSettle();
 
@@ -549,6 +572,7 @@ void main() {
     expect(find.text('Vào chat'), findsOneWidget);
 
     // Mở hộp thoại + Tạo phòng mới (Không yêu cầu trình độ & Không giới hạn thành viên)
+    await tester.ensureVisible(find.text('Tạo phòng mới'));
     await tester.tap(find.text('Tạo phòng mới'));
     await tester.pumpAndSettle();
 
@@ -574,13 +598,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Phòng của tôi (2)'), findsOneWidget);
-    expect(find.text('Phòng Luyện Nói Tự Do'), findsOneWidget);
+    expect(find.text('Phòng Luyện Nói Tự Do'), findsWidgets);
     expect(find.text('Mọi trình độ'), findsOneWidget);
     expect(find.text('1 thành viên • Không giới hạn'), findsOneWidget);
     expect(find.text('Quản lý: Phạm Văn Hưng'), findsOneWidget);
 
     // Bấm Vào chat -> mở giao diện phòng chat bên trong Outlet
-    await tester.ensureVisible(find.text('Vào chat').first);
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -350));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Vào chat').first);
     await tester.pumpAndSettle();
 
@@ -652,7 +677,13 @@ void main() {
 
     // Badge số lượng chưa đọc = 1 hiển thị cạnh chuông thông báo
     expect(find.byTooltip('Thông báo'), findsOneWidget);
-    expect(find.text('1'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(NotificationBellButton),
+        matching: find.text('1'),
+      ),
+      findsOneWidget,
+    );
 
     // Bấm vào chuông -> xổ dropdown kiểu Facebook (Tất cả / Chưa đọc)
     await tester.tap(find.byTooltip('Thông báo'));
@@ -753,6 +784,8 @@ void main() {
 
     // Tham gia phòng rồi bấm Vào chat
     await tester.tap(find.text('Khám phá (2)'));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -350));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tham gia'));
     await tester.pumpAndSettle();
