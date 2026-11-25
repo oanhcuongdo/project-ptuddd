@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../styles/chat_room_styles.dart';
+import '../styles/chat_styles.dart';
 
-/// Thanh nhập tin nhắn dưới đáy Phòng Chat (kèm nút slot Gợi ý chủ đề & nút Gửi)
+/// Thanh nhập tin nhắn dưới đáy Phòng Chat (tông Xanh Ngọc, nút Gợi ý chủ đề & nút Gửi tròn)
 class ChatMessageComposer extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
@@ -24,7 +25,7 @@ class ChatMessageComposer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
+        vertical: 12,
       ),
       decoration: ChatRoomStyles.composerDecoration,
       child: Row(
@@ -33,8 +34,9 @@ class ChatMessageComposer extends StatelessWidget {
             onPressed: onSuggestTopicTap,
             tooltip: 'Gợi ý chủ đề & câu mở đầu',
             style: IconButton.styleFrom(
-              backgroundColor: const Color(0xFFEEF2FF),
-              foregroundColor: AppColors.primary,
+              backgroundColor: ChatStyles.tealSoftBg,
+              foregroundColor: ChatStyles.tealDark,
+              fixedSize: const Size(40, 40),
             ),
             icon: const Icon(Icons.lightbulb_outline_rounded, size: 20),
           ),
@@ -45,26 +47,30 @@ class ChatMessageComposer extends StatelessWidget {
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => onSend(),
               decoration: InputDecoration(
-                hintText: 'Nhập tin nhắn luyện giao tiếp...',
+                hintText: 'Nhập tin nhắn...',
+                hintStyle: const TextStyle(
+                  fontSize: 13.5,
+                  color: AppColors.textMuted,
+                ),
                 isDense: true,
                 filled: true,
-                fillColor: AppColors.scaffoldWebStart,
+                fillColor: const Color(0xFFF3F6F8),
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 18,
                   vertical: 12,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(999),
-                  borderSide: const BorderSide(color: AppColors.divider),
+                  borderSide: const BorderSide(color: Color(0xFFE2ECEE)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(999),
-                  borderSide: const BorderSide(color: AppColors.divider),
+                  borderSide: const BorderSide(color: Color(0xFFE2ECEE)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(999),
                   borderSide: const BorderSide(
-                    color: AppColors.primary,
+                    color: ChatStyles.tealPrimary,
                     width: 1.5,
                   ),
                 ),
@@ -76,8 +82,9 @@ class ChatMessageComposer extends StatelessWidget {
             onPressed: isSending ? null : onSend,
             tooltip: 'Gửi tin nhắn',
             style: IconButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: ChatStyles.tealPrimary,
               foregroundColor: Colors.white,
+              fixedSize: const Size(42, 42),
             ),
             icon: isSending
                 ? const SizedBox(

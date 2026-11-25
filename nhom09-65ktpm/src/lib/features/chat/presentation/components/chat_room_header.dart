@@ -4,13 +4,15 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../data/models/conversation_model.dart';
 import '../styles/chat_room_styles.dart';
+import '../styles/chat_styles.dart';
 import 'room_streak_badge.dart';
 
-/// Thanh đầu trang bên trong Phòng Chat:
-/// Nút quay lại, thông tin phòng (ngôn ngữ, trình độ, số thành viên) và nút slot Timer / Rời phòng.
+/// Thanh đầu trang bên trong Phòng Chat (tông Xanh Ngọc):
+/// Avatar phòng + chấm xanh, thông tin phòng, đốm lửa chuỗi phòng, nút Bắt đầu luyện & Rời phòng.
 class ChatRoomHeader extends StatelessWidget {
   final ConversationModel room;
   final VoidCallback onBack;
+  final bool showBackButton;
   final VoidCallback onStartSessionTap;
   final VoidCallback? onLeaveRoom;
 
@@ -18,51 +20,96 @@ class ChatRoomHeader extends StatelessWidget {
     super.key,
     required this.room,
     required this.onBack,
+    this.showBackButton = true,
     required this.onStartSessionTap,
     this.onLeaveRoom,
   });
 
   @override
   Widget build(BuildContext context) {
+    final gradient = ChatStyles.gradientForCoverKey(room.coverUrl) ??
+        const [ChatStyles.tealDark, ChatStyles.tealLight];
+    final hasImage =
+        room.coverUrl != null && room.coverUrl!.startsWith('http');
+
     final subtitleParts = <String>[
       if (room.isGroup)
         '${room.targetLang.toUpperCase()} • ${room.levelLabel}'
       else
         'Chat 1-1',
-      if (room.isGroup && room.managerName.isNotEmpty)
-        'Quản lý: ${room.managerName}',
+      if (room.roomFocus != null && room.roomFocus!.isNotEmpty) room.roomFocus!,
       if (room.isGroup) room.memberSummary,
     ];
 
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
+        vertical: 12,
       ),
       decoration: ChatRoomStyles.headerDecoration,
       child: Row(
         children: [
-          IconButton(
-            onPressed: onBack,
-            tooltip: 'Quay lại danh sách phòng',
-            icon: const Icon(
-              Icons.arrow_back_rounded,
-              color: AppColors.textPrimary,
+          if (showBackButton) ...[
+            IconButton(
+              onPressed: onBack,
+              tooltip: 'Quay lại danh sách phòng',
+              style: IconButton.styleFrom(
+                backgroundColor: ChatStyles.tealSoftBg,
+                foregroundColor: ChatStyles.tealDark,
+              ),
+              icon: const Icon(Icons.arrow_back_rounded, size: 20),
             ),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEEF2FF),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              room.isGroup ? Icons.groups_rounded : Icons.person_outline_rounded,
-              color: AppColors.primary,
-              size: 20,
-            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: gradient,
+                  ),
+                ),
+                child: hasImage
+                    ? Image.network(
+                        room.coverUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(
+                          room.isGroup
+                              ? Icons.groups_rounded
+                              : Icons.person_outline_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      )
+                    : Icon(
+                        room.isGroup
+                            ? Icons.groups_rounded
+                            : Icons.person_outline_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+              ),
+              Positioned(
+                right: -1,
+                bottom: -1,
+                child: Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF16A34A),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -91,17 +138,24 @@ class ChatRoomHeader extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onStartSessionTap,
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.streakOrange,
-              side: BorderSide(
-                color: AppColors.streakOrange.withValues(alpha: 0.4),
-              ),
+              foregroundColor: ChatStyles.tealDark,
+              backgroundColor: ChatStyles.tealSoftBg,
+              side: const BorderSide(color: ChatStyles.tealBorder),
+              minimumSize: const Size(0, 36),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            icon: const Icon(Icons.timer_outlined, size: 17),
+            icon: const Icon(Icons.timer_outlined, size: 16),
             label: const Text('Bắt đầu luyện'),
           ),
           if (room.isGroup && onLeaveRoom != null) ...[
-            const SizedBox(width: AppSpacing.xs),
+            const SizedBox(width: 4),
             IconButton(
               onPressed: onLeaveRoom,
               tooltip: 'Rời phòng',

@@ -612,12 +612,13 @@ void main() {
     expect(find.text('1 thành viên • Không giới hạn'), findsOneWidget);
     expect(find.text('Quản lý: Phạm Văn Hưng'), findsOneWidget);
 
-    // Bấm Vào chat -> mở giao diện phòng chat bên trong Outlet
+    // Bấm Vào chat -> mở giao diện phòng chat 2 cột (cột trái Tin nhắn + khung chat phải)
     await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -350));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Vào chat').first);
     await tester.pumpAndSettle();
 
+    expect(find.text('Không gian học'), findsOneWidget);
     expect(find.text('Bắt đầu luyện'), findsOneWidget);
     expect(find.byTooltip('Gợi ý chủ đề & câu mở đầu'), findsOneWidget);
 
@@ -628,7 +629,7 @@ void main() {
     );
     await tester.tap(find.byTooltip('Gửi tin nhắn'));
     await tester.pumpAndSettle();
-    expect(find.text('Hello everyone!'), findsOneWidget);
+    expect(find.text('Hello everyone!'), findsWidgets);
 
     chatRepo.emitRealtimeMessage(
       MessageModel(
@@ -643,6 +644,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Hi! Ready to practice?'), findsOneWidget);
     expect(find.textContaining('Trịnh Trung Kiên'), findsOneWidget);
+
+    // Chuyển nhanh sang phòng khác ngay ở cột trái "Tin nhắn"
+    await tester.tap(find.text('Phòng Luyện Nói Tự Do').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Bắt đầu cuộc trò chuyện nào!'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Quay lại danh sách phòng'));
     await tester.pumpAndSettle();
