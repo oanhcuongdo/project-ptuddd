@@ -180,6 +180,8 @@ class _FakeChatRepository extends ChatRepository {
     required String targetLang,
     int? maxMembers,
     bool requireApproval = false,
+    String? coverUrl,
+    String? roomFocus,
   }) async {
     final created = ConversationModel(
       id: 'room-new-${_createdRooms.length + 1}',
@@ -190,6 +192,8 @@ class _FakeChatRepository extends ChatRepository {
       targetLang: targetLang,
       maxMembers: maxMembers,
       requireApproval: requireApproval,
+      coverUrl: coverUrl,
+      roomFocus: roomFocus,
       createdBy: createdBy,
       managerName: managerName,
       memberCount: 1,
@@ -487,6 +491,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('BuddyTalk'), findsOneWidget);
+    expect(find.text('Phòng học'), findsOneWidget);
     expect(find.text('Phòng của tôi'), findsOneWidget);
     expect(find.text('Trò chuyện Realtime'), findsNothing);
     expect(find.text('Kỷ luật'), findsNothing);
@@ -586,10 +591,13 @@ void main() {
       'Phòng Luyện Nói Tự Do',
     );
 
-    // Chọn ngôn ngữ
+    // Chọn ngôn ngữ + định hướng kỹ năng
     await tester.tap(find.byType(DropdownButtonFormField<String>).at(0));
     await tester.pumpAndSettle();
     await tester.tap(find.text('GB English').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Giao tiếp tự do'));
     await tester.pumpAndSettle();
 
     // Tạo phòng với mặc định Không yêu cầu trình độ & Không giới hạn thành viên
@@ -599,6 +607,7 @@ void main() {
 
     expect(find.text('Phòng của tôi (2)'), findsOneWidget);
     expect(find.text('Phòng Luyện Nói Tự Do'), findsWidgets);
+    expect(find.text('Giao tiếp tự do'), findsOneWidget);
     expect(find.text('Mọi trình độ'), findsOneWidget);
     expect(find.text('1 thành viên • Không giới hạn'), findsOneWidget);
     expect(find.text('Quản lý: Phạm Văn Hưng'), findsOneWidget);

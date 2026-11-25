@@ -261,7 +261,7 @@ class ChatRepository {
     }).toList();
   }
 
-  /// Tạo phòng học nhóm mới (hỗ trợ chọn Vào ngay hoặc Cần kiểm duyệt)
+  /// Tạo phòng học nhóm mới (hỗ trợ Ảnh bìa, Định hướng kỹ năng, Vào ngay / Cần kiểm duyệt)
   Future<ConversationModel> createGroupRoom({
     required String createdBy,
     required String managerName,
@@ -271,23 +271,44 @@ class ChatRepository {
     required String targetLang,
     int? maxMembers,
     bool requireApproval = false,
+    String? coverUrl,
+    String? roomFocus,
   }) async {
     final client = SupabaseConfig.client;
 
-    final created = await client
-        .from(DatabaseTables.conversations)
-        .insert({
-          'type': 'group',
-          'name': name.trim(),
-          'description': description.trim(),
-          'level': level,
-          'target_lang': targetLang,
-          'max_members': maxMembers,
-          'require_approval': requireApproval,
-          'created_by': createdBy,
-        })
-        .select()
-        .single();
+    final basePayload = <String, dynamic>{
+      'type': 'group',
+      'name': name.trim(),
+      'description': description.trim(),
+      'level': level,
+      'target_lang': targetLang,
+      'max_members': maxMembers,
+      'require_approval': requireApproval,
+      'created_by': createdBy,
+    };
+
+    final fullPayload = <String, dynamic>{
+      ...basePayload,
+      if (coverUrl != null && coverUrl.trim().isNotEmpty)
+        'cover_url': coverUrl.trim(),
+      if (roomFocus != null && roomFocus.trim().isNotEmpty)
+        'room_focus': roomFocus.trim(),
+    };
+
+    Map<String, dynamic> created;
+    try {
+      created = await client
+          .from(DatabaseTables.conversations)
+          .insert(fullPayload)
+          .select()
+          .single();
+    } catch (_) {
+      created = await client
+          .from(DatabaseTables.conversations)
+          .insert(basePayload)
+          .select()
+          .single();
+    }
 
     final roomId = created['id'].toString();
     await client.from(DatabaseTables.conversationMembers).insert({

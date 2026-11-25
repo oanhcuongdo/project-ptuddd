@@ -39,12 +39,12 @@ class _MainLayoutState extends State<MainLayout> {
   static const List<MainNavItem> _navItems = [
     MainNavItem(
       id: 'chat',
-      label: 'Trò chuyện',
+      label: 'Phòng học',
       headerTitle: '',
       headerSubtitle: '',
       section: 'Không gian học',
-      icon: Icons.chat_bubble_outline_rounded,
-      selectedIcon: Icons.chat_bubble_rounded,
+      icon: Icons.forum_outlined,
+      selectedIcon: Icons.forum_rounded,
       page: ChatRoomsTab(),
     ),
     MainNavItem(

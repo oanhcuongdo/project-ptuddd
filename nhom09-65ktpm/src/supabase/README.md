@@ -18,6 +18,7 @@ Mở **Supabase Dashboard → SQL Editor → New query**, dán và bấm **Run**
 10. `migrations/010_room_join_approval.sql` — Thêm chế độ kiểm duyệt thành viên vào phòng (`conversations.require_approval`, `conversation_members.status` `'pending'/'approved'`).
 11. `migrations/011_notifications_realtime.sql` — Tạo bảng `notifications` & bật Supabase Realtime cho `notifications`, `conversation_members`.
 12. `migrations/012_room_streak.sql` — Thêm chuỗi lửa kỷ luật riêng từng thành viên theo từng phòng (`conversation_members.streak_count`, `best_streak`, `last_chat_date`).
+13. `migrations/013_room_cover_and_focus.sql` — Thêm ảnh bìa phòng học (`cover_url`) & định hướng kỹ năng dài hạn (`room_focus`) cho bảng `conversations`.
 
 ## Lưu ý bảo mật
 - Tạo file `.env` cục bộ từ `../.env.example` và chạy ứng dụng với `--dart-define-from-file=.env`.
