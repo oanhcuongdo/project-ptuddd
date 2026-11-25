@@ -16,7 +16,7 @@
 
 | STT | Họ và Tên | Mã Sinh Viên | Lớp Sinh Hoạt | Vai Trò | Nhiệm Vụ Phân Công | Đóng Góp (%) | Email |
 | :-: | :--- | :---: | :---: | :---: | :--- | :---: | :--- |
-| **1** | **Phạm Văn Hưng** | **2351170598** | 65KTPM | Trưởng nhóm | Quản lý dự án, Thiết kế CSDL (Supabase + SQLite), Firebase Auth & Hồ sơ người dùng, Phân hệ Kỷ luật (Mục tiêu hàng ngày, Streak, Heatmap), Phân hệ Chat Realtime (Chat 1-1 & Chat Nhóm học tập) | 100% | phamvanhung21122004@gmail.com |
+| **1** | **Phạm Văn Hưng** | **2351170598** | 65KTPM | Trưởng nhóm | Quản lý dự án, Thiết kế CSDL, Firebase Auth & Thiết lập hồ sơ, Quản lý phòng học, Kiểm duyệt thành viên phòng học, Nhắn tin Realtime, Chuỗi lửa kỷ luật riêng từng phòng, Hệ thống Thông báo Realtime | 100% | phamvanhung21122004@gmail.com |
 | **2** | **Trịnh Trung Kiên** | **2251172396** | 65KTPM | Thành viên | Thiết kế UI/UX Material 3 toàn ứng dụng, Lập trình Phân hệ Quản lý Buổi luyện tập (Practice Sessions): Tạo lịch hẹn, Đồng hồ đếm giờ học (Session Timer 15-30p), Đánh giá buổi học và Thống kê tổng giờ luyện tập | 100% | trinhkien0103@gmail.com |
 | **3** | **Đỗ Việt Tiến** | **2251243452** | 65KTPM | Thành viên | Lập trình Phân hệ Tìm kiếm & Ghép cặp bạn đồng hành (Buddy Matching) theo ngôn ngữ bù trừ và bộ lọc trình độ | 100% | tien.dv.65ktpm@gmail.com |
 | **4** | **Cao Đức Đạo** | **2351170581** | 65KTPM | Thành viên | Lập trình Phân hệ Gợi ý chủ đề & Kịch bản hội thoại tình huống (Conversation Topics): Kịch bản mẫu theo cấp độ A1-B2, gợi ý câu mở đầu hội thoại | 100% | caoducdao17022005@gmail.com |
@@ -53,7 +53,7 @@ Trong suốt quá trình học tập và thực hành học phần Phát Triển
 2. **Khắc phục triệt để "nỗi đau" học giao tiếp:** Giải quyết vấn đề lớn nhất của người tự học ngoại ngữ (tiếng Anh, tiếng Trung...): Tìm bạn luyện nói nhưng nhanh chóng bỏ cuộc sau 2-3 ngày vì thiếu kỷ luật, không có chủ đề cụ thể và gặp rào cản bất đồng ngôn ngữ.
 3. **Mô hình kiềng 3 chân đột phá:** Không đơn thuần là app học từ vựng hay mạng xã hội tìm bạn, BuddyTalk kết hợp chặt chẽ 3 yếu tố: **Kỷ luật cá nhân (Streak/Heatmap)** + **Kết nối bạn đồng hành bù trừ ngôn ngữ (Buddy Matching)** + **Thực hành giao tiếp thực tế qua Chat 1-1 & Chat Nhóm học tập đa người dùng**.
 4. **Tập trung sâu vào giao tiếp trực tuyến linh hoạt:** Hỗ trợ song song cả **Chat 1-1** riêng tư và **Chat Nhóm học tập (Study Group Rooms)** cho phép nhiều người cùng vào phòng luyện giao tiếp theo chủ đề, kết hợp dịch tức thì và gợi ý kịch bản tình huống phong phú.
-5. **Khối lượng công việc cân bằng cho nhóm 5 người:** Áp dụng kiến trúc Feature-First kết hợp Pragmatic Clean Architecture, tích hợp CSDL SQLite cục bộ (Offline-First), Supabase Realtime WebSocket, Firebase Auth và Translation API, đảm bảo cả 5 thành viên đều có phân hệ độc lập, rõ ràng và đóng góp 100% công sức.
+5. **Khối lượng công việc cân bằng cho nhóm 5 người:** Áp dụng kiến trúc Feature-First kết hợp Pragmatic Clean Architecture, tích hợp CSDL **Supabase Cloud PostgreSQL 100% trực tuyến**, Supabase Realtime WebSocket, Firebase Auth và Translation API, đảm bảo cả 5 thành viên đều có phân hệ độc lập, rõ ràng và đóng góp 100% công sức.
 
 ---
 
@@ -63,9 +63,9 @@ Trong suốt quá trình học tập và thực hành học phần Phát Triển
 
 - **Mục tiêu tổng quát:** Xây dựng ứng dụng di động hoàn chỉnh bằng Flutter, đóng vai trò là "Người quản trị kỷ luật và Cầu nối kèm cặp", giúp người dùng rèn luyện thói quen giao tiếp mỗi ngày thông qua mục tiêu cụ thể, chuỗi ngày kỷ luật (Streak), ma trận nhiệt (Heatmap Grid), ghép cặp bạn đồng hành bù trừ ngôn ngữ (Language Buddy) và phòng chat thực chiến thời gian thực (hỗ trợ cả Chat 1-1 và Chat Nhóm học tập, dịch tức thì và kho kịch bản tình huống).
 - **Mục tiêu cụ thể:**
-  - Hoàn thiện giao diện Material 3 (hỗ trợ trọn vẹn Dark/Light mode).
-  - Quản lý mục tiêu kỷ luật hàng ngày, tính chuỗi Streak và ma trận nhiệt Heatmap chuyên cần trên CSDL SQLite cục bộ (Offline-First).
-  - Hệ thống phòng Chat Realtime: Trò chuyện 1-1 ghép đôi và Phòng Chat Nhóm học tập đa người dùng (Group Chat) theo chủ đề.
+  - Hoàn thiện giao diện Material 3 đa nền tảng (Web Dashboard & Mobile).
+  - Quản lý xác thực Firebase Auth (Email & Google), tự động khôi phục phiên và thiết lập hồ sơ ban đầu (Onboarding).
+  - Hệ thống Quản lý phòng học & Chat Realtime: Khám phá/tạo phòng học linh hoạt (trình độ, giới hạn thành viên), kiểm duyệt thành viên vào phòng, nhắn tin WebSocket trực tuyến, chuỗi lửa kỷ luật riêng của từng người theo từng phòng học và hệ thống Thông báo Realtime.
   - Xây dựng thuật toán ghép cặp bạn học bù trừ ngôn ngữ (Vietnamese ⇄ English/Chinese).
   - Tích hợp công cụ Dịch tức thì (Instant Translate) hiển thị song song câu gốc - câu dịch và Sổ tay lưu từ vựng (Vocabulary Notebook).
   - Kho kịch bản và chủ đề hội thoại tình huống theo cấp độ (A1, A2, B1...), giải quyết triệt để vấn đề "không biết nói gì".
@@ -81,21 +81,20 @@ Trong suốt quá trình học tập và thực hành học phần Phát Triển
 
 ```text
 HỆ THỐNG KỶ LUẬT GIAO TIẾP & BẠN ĐỒNG HÀNH (BUDDYTALK)
-├── 1. Phân hệ Xác Thực Tài Khoản & Quản Lý Hồ Sơ Người Dùng (Auth & Profile)
-│   ├── Đăng nhập một chạm qua Google (Firebase Authentication)
-│   ├── Quản lý hồ sơ cá nhân: Ảnh đại diện, ngôn ngữ mẹ đẻ, ngôn ngữ học, trình độ
-│   ├── Cấu hình giao diện Sáng / Tối (SharedPreferences)
-│   └── Báo cáo người dùng vi phạm và chặn đối tác không mong muốn
-├── 2. Phân hệ Quản Lý Kỷ Luật Cá Nhân (Personal Discipline)
-│   ├── Thiết lập mục tiêu luyện giao tiếp hằng ngày (15 - 30 phút/ngày)
-│   ├── Thanh trượt chọn ngày linh hoạt & Check-in nhiệm vụ
-│   ├── Tính chuỗi ngày liên tiếp (Streak) & Ma trận nhiệt (Heatmap Calendar Grid)
-│   └── Thống kê tiến độ chuyên cần theo ngày, tuần, tháng (CSDL SQLite Offline-First)
-├── 3. Phân hệ Chat Trực Tuyến Thời Gian Thực: 1-1 & Nhóm Học Tập (Realtime Chat & Group Rooms)
-│   ├── Phòng Chat 1-1 ghép đôi thời gian thực qua WebSocket (Supabase Realtime)
-│   ├── Phòng Chat Nhóm học tập (Study Group Rooms) cho phép nhiều thành viên cùng vào luyện nói theo chủ đề
-│   ├── Trạng thái trực tuyến / ngoại tuyến (Online/Offline Status)
-│   └── Lưu trữ, đồng bộ lịch sử hội thoại đám mây & gửi hình ảnh
+├── 1. Phân hệ Xác Thực Tài Khoản & Thiết Lập Hồ Sơ Người Dùng (Auth & Onboarding)
+│   ├── Đăng nhập / Đăng ký bằng Email & Google (Firebase Authentication), tự khôi phục phiên
+│   ├── Luồng Thiết lập hồ sơ 2 bước (Onboarding): Ảnh đại diện, tên hiển thị, ngôn ngữ (từ bảng languages), trình độ & mục tiêu phút/ngày
+│   └── Quản lý hồ sơ cá nhân & phân quyền người dùng trên Supabase Cloud
+├── 2. Phân hệ Quản Lý Phòng Học, Kiểm Duyệt Thành Viên, Chat Realtime & Chuỗi Lửa Phòng
+│   ├── Khám phá, tìm kiếm, lọc theo ngôn ngữ/trình độ, sắp xếp & phân trang phòng học
+│   ├── Tạo phòng học nhóm linh hoạt (không yêu cầu/có yêu cầu trình độ, không giới hạn/có giới hạn thành viên, vào ngay/cần kiểm duyệt)
+│   ├── Kiểm duyệt thành viên vào phòng (Xin tham gia -> Chờ duyệt -> Quản lý phòng Duyệt / Từ chối)
+│   ├── Nhắn tin Realtime qua WebSocket (Supabase Realtime) lưu lịch sử trực tiếp vào bảng `messages`
+│   └── Chuỗi lửa kỷ luật riêng cho từng thành viên trong từng phòng học (nhắn 1 lần/ngày +1, quên 1 ngày tự reset về 0)
+├── 3. Phân hệ Thông Báo Thời Gian Thực (Realtime Notifications)
+│   ├── Chuông thông báo trên Header cập nhật tức thì qua WebSocket (`public.notifications`)
+│   ├── Dropdown kiểu Facebook (Tất cả / Chưa đọc / Đọc tất cả) & lịch sử duyệt/từ chối
+│   └── Bấm thông báo xin tham gia mở trực tiếp hộp thoại duyệt thành viên & tự đồng bộ phòng
 ├── 4. Phân hệ Tìm Kiếm & Kết Nối Bạn Đồng Hành (Buddy Matching)
 │   ├── Bộ lọc tìm kiếm theo ngôn ngữ học và ngôn ngữ có thể hỗ trợ
 │   ├── Ghép cặp 2 chiều theo nhu cầu bù trừ (Việt học Ngoại ngữ ⇄ Nước ngoài học Tiếng Việt)
@@ -126,42 +125,37 @@ Nhằm phục vụ quá trình làm việc nhóm 5 thành viên hiệu quả, tr
 
 - **Tầng Core (`lib/core/`):** Chứa các thành phần dùng chung: constants, theme Material 3, utils, network, widgets chung.
 - **Tầng Features (`lib/features/`):** Phân chia thành các phân hệ độc lập tương ứng với 5 thành viên:
-  - `auth_discipline_chat/`: Xác thực Firebase Auth, Hồ sơ người dùng, Kỷ luật cá nhân (Streak/Heatmap/SQLite), Phòng Chat 1-1 & Chat Nhóm học tập (Thành viên 1 - Phạm Văn Hưng).
+  - `auth_profile/`, `chat/`, `notifications/`: Xác thực Firebase Auth & Thiết lập hồ sơ (Onboarding), Quản lý phòng học, Kiểm duyệt thành viên, Nhắn tin Realtime, Chuỗi lửa kỷ luật riêng từng phòng & Hệ thống Thông báo Realtime (Thành viên 1 - Phạm Văn Hưng).
   - `session_management/`: Quản lý buổi học, Session Timer, Đánh giá đối tác & Bộ Theme UI Material 3 toàn app (Thành viên 2 - Trịnh Trung Kiên).
   - `buddy_matching/`: Tìm kiếm & Ghép cặp bạn đồng hành bù trừ ngôn ngữ (Thành viên 3 - Đỗ Việt Tiến).
   - `conversation_topics/`: Kho kịch bản chủ đề hội thoại tình huống A1-B2 & Starters (Thành viên 4 - Cao Đức Đạo).
-  - `translation_notebook/`: Trợ lý dịch tức thì, Hiển thị song ngữ & Sổ tay từ vựng ôn tập (Thành viên 5 - Trương Tuấn Hải).
+  - `translation_notebook/` & `chat_online/`: Trợ lý dịch tức thì, Hiển thị song ngữ & Sổ tay từ vựng ôn tập (Thành viên 5 - Trương Tuấn Hải).
 - Mỗi thư mục tính năng gồm 2 tầng rõ ràng:
-  - `data/`: Models, Data Sources (SQLite / Supabase), Repositories.
-  - `presentation/`: Màn hình giao diện (Screens/Widgets), Quản lý trạng thái bằng **Provider / ChangeNotifier** ($UI = f(State)$).
+  - `data/`: Models, Repositories kết nối trực tuyến tới Supabase Cloud / Firebase.
+  - `presentation/`: Màn hình giao diện (Screens/Components/Styles), Quản lý trạng thái bằng **Provider / ChangeNotifier** ($UI = f(State)$).
 
-#### b) Kiến trúc Cơ sở dữ liệu: Bộ đôi Firebase Auth + Supabase Realtime + SQLite Cục bộ
+#### b) Kiến trúc Cơ sở dữ liệu: Firebase Authentication + Supabase Cloud PostgreSQL & Realtime (100% Online)
 
 1. **Xác thực tài khoản (Firebase Authentication):**
-   - Đăng nhập Google (Google Sign-In) một chạm an toàn, tự động quản lý phiên làm việc (Session).
-2. **CSDL Đám mây & Realtime (Supabase Cloud Database & Realtime Channels):**
-   - Quản lý dữ liệu trung tâm với các bảng quan hệ chuẩn hóa:
-     - `profiles`: Thông tin cá nhân, ngôn ngữ mẹ đẻ (`native_lang`), ngôn ngữ học (`target_lang`), trình độ, chuỗi Streak.
-     - `buddy_matches`: Danh sách và trạng thái kết nối giữa các cặp bạn học (Pending, Accepted, Blocked).
-     - `messages`: Lưu trữ tin nhắn hội thoại (tin nhắn 1-1 và tin nhắn trong phòng nhóm, bao gồm bản dịch).
-     - `study_groups`: Quản lý danh sách các phòng học nhóm đa người dùng theo chủ đề.
-     - `group_members`: Quản lý danh sách thành viên tham gia từng phòng học nhóm.
-     - `conversation_topics`: Kho danh mục chủ đề và kịch bản hội thoại mẫu theo cấp độ.
-     - `practice_sessions`: Lưu lịch sử các buổi học, thời lượng thực hành, ghi chú và điểm đánh giá.
-     - `user_quest_logs`: Lịch sử check-in kỷ luật và ma trận nhiệt hàng ngày.
-   - **Kênh Chat Realtime:** Khai thác **Supabase Realtime Channel (WebSocket)** giúp tin nhắn chat hiển thị tức thì với độ trễ < 100ms.
-3. **Lưu trữ Cục bộ & Triết lý Offline-First (SQLite):**
-   - Sử dụng `sqflite` lưu bộ nhớ đệm (Cache) danh sách nhiệm vụ kỷ luật và chủ đề hội thoại. Người dùng có thể check-in và ôn lại bài ngay cả khi không có kết nối mạng.
+   - Đăng nhập bằng Email/Mật khẩu và Google Sign-In an toàn, tự động khôi phục phiên làm việc (Session Persistence).
+2. **CSDL Đám mây & Realtime (Supabase Cloud PostgreSQL & Realtime Channels):**
+   - Quản lý dữ liệu trung tâm 100% trực tuyến với các bảng quan hệ chuẩn hóa:
+     - `users`, `user_accounts`, `profiles`, `languages`: Tài khoản đa phương thức, hồ sơ người dùng, danh mục ngôn ngữ cấp phép và trạng thái Onboarding.
+     - `conversations`, `conversation_members`: Thống nhất cả Chat 1-1 & Phòng học nhóm (quy tắc trình độ/giới hạn thành viên linh hoạt, chế độ kiểm duyệt `require_approval`, trạng thái `pending/approved` và chuỗi lửa kỷ luật riêng từng thành viên theo phòng `streak_count`, `best_streak`, `last_chat_date`).
+     - `messages`: Lưu trữ lịch sử tin nhắn hội thoại Realtime (kèm trường hỗ trợ dịch thuật).
+     - `notifications`: Hệ thống thông báo Realtime dùng chung toàn ứng dụng (yêu cầu xin vào phòng, kết quả duyệt/từ chối...).
+     - `buddy_matches`: Danh sách và trạng thái kết nối giữa các cặp bạn học (`pending`, `accepted`, `rejected`, `blocked`).
+     - `conversation_topics`, `user_topic_progress`: Kho danh mục chủ đề và kịch bản hội thoại mẫu theo cấp độ.
+     - `practice_sessions`, `vocab_notebook`: Lịch sử buổi luyện tập và sổ tay từ vựng cá nhân.
+   - **Kênh WebSocket Realtime:** Khai thác **Supabase Realtime Channel** cho `messages`, `notifications`, `conversations`, `conversation_members` giúp cập nhật tức thì không cần tải lại trang.
 
 #### c) Danh mục thư viện & công nghệ cốt lõi
 
 - **Nền tảng:** Flutter SDK (3.x trở lên), Dart SDK.
 - **Xác thực tài khoản:** `firebase_core`, `firebase_auth`, `google_sign_in`.
-- **CSDL Đám mây & Realtime:** `supabase_flutter`.
-- **CSDL Cục bộ (Offline-First):** `sqflite`, `path_provider`.
-- **Dịch thuật tức thì:** `translator` (hỗ trợ Trung - Việt - Anh).
+- **CSDL Đám mây & Realtime:** `supabase_flutter` (PostgreSQL + Realtime WebSocket).
+- **Dịch thuật tức thì:** API Google Translate Endpoint (hỗ trợ Trung - Việt - Anh).
 - **Quản lý trạng thái:** `provider`.
-- **Thông báo & Cấu hình:** `flutter_local_notifications`, `shared_preferences`.
 
 ---
 
