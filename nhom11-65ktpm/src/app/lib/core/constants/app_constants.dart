@@ -3,7 +3,9 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   
   // Base API configuration
-  static const String defaultBaseUrl = 'http://10.0.2.2:8000/api'; // Android Emulator default
+  // Ghi đè khi chạy máy thật: flutter run --dart-define=API_BASE_URL=http://localhost:8000/api (kèm adb reverse tcp:8000 tcp:8000)
+  static const String defaultBaseUrl =
+      String.fromEnvironment('API_BASE_URL', defaultValue: 'http://10.0.2.2:8000/api'); // Android Emulator default
   static const String webBaseUrl = 'http://localhost:8000/api';
   
   // Storage keys
@@ -23,4 +25,5 @@ class AppConstants {
   static const String flashcardRoute = '/flashcard';
   static const String aiChatRoute = '/ai-chat';
   static const String statisticsRoute = '/statistics';
+  static const String devMenuRoute = '/dev';
 }

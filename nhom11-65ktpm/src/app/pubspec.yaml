@@ -68,6 +68,15 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  shaders:
+    - shaders/glass_lens.frag
+
+  # Dữ liệu dùng chung. assets/dev/lessons là bản sao của nhom11-65ktpm/data/lessons
+  # (chạy scripts/sync_dev_data.sh sau khi sửa data/; CI báo lỗi nếu hai nơi lệch nhau).
+  assets:
+    - assets/data/
+    - assets/dev/lessons/hsk1/
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

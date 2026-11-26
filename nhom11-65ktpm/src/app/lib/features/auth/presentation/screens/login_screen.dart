@@ -1,39 +1,62 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/glass.dart';
+
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Đăng Nhập')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock_outline, size: 72, color: Color(0xFFD32F2F)),
-            const SizedBox(height: 24),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    final theme = Theme.of(context);
+    return GlassScaffold(
+      appBar: const GlassAppBar(),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const EntranceAnimation(
+                child: CookieIcon(icon: Icons.lock_outline, color: AppColors.primary, size: 96, lobes: 12),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Mật khẩu',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              const SizedBox(height: 20),
+              EntranceAnimation(
+                index: 1,
+                child: Text('Đăng Nhập', style: theme.textTheme.headlineMedium),
               ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Đăng Nhập'),
-            ),
-          ],
+              const SizedBox(height: 4),
+              EntranceAnimation(
+                index: 2,
+                child: Text(
+                  'Tiếp tục hành trình học tiếng Trung',
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ),
+              const SizedBox(height: 28),
+              EntranceAnimation(
+                index: 3,
+                child: GlassCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      const TextField(
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline)),
+                      ),
+                      const SizedBox(height: 14),
+                      const TextField(
+                        obscureText: true,
+                        decoration: InputDecoration(labelText: 'Mật khẩu', prefixIcon: Icon(Icons.key_outlined)),
+                      ),
+                      const SizedBox(height: 20),
+                      GlassButton(label: 'Đăng Nhập', prominent: true, expand: true, onPressed: () {}),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

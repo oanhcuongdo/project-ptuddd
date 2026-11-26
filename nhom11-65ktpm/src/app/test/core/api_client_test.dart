@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chailish/core/network/api_client.dart';
 import 'package:chailish/core/storage/secure_storage_service.dart';
@@ -63,6 +65,37 @@ void main() {
         () async => await apiClient.get('/not-found', requireAuth: false),
         throwsA(isA<ApiException>()),
       );
+    });
+    test('refreshes on 401, retries and stores rotated refresh token', () async {
+      FlutterSecureStorage.setMockInitialValues({});
+      final storage = SecureStorageService(const FlutterSecureStorage());
+      await storage.saveToken('old-access');
+      await storage.saveRefreshToken('old-refresh');
+
+      final mockClient = MockClient((request) async {
+        if (request.url.path.endsWith('/auth/refresh')) {
+          expect(jsonDecode(request.body)['refresh_token'], 'old-refresh');
+          return http.Response(
+            '{"access_token": "new-access", "refresh_token": "new-refresh", "token_type": "bearer", "expires_in": 1800}',
+            200,
+          );
+        }
+        if (request.headers['Authorization'] == 'Bearer new-access') {
+          return http.Response('{"email": "hoc@chailish.vn"}', 200);
+        }
+        return http.Response('{"detail": "Token expired"}', 401);
+      });
+
+      final apiClient = ApiClient(
+        baseUrl: 'http://localhost:8000/api',
+        storage: storage,
+        client: mockClient,
+      );
+
+      final result = await apiClient.get('/me');
+      expect(result['email'], 'hoc@chailish.vn');
+      expect(await storage.getToken(), 'new-access');
+      expect(await storage.getRefreshToken(), 'new-refresh');
     });
   });
 }

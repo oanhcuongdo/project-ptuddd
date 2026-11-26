@@ -120,12 +120,13 @@ flowchart TD
 
 | Thành phần | Công nghệ / Thư viện chính | Vai trò trong hệ thống |
 | :--- | :--- | :--- |
-| **Mobile App** | Flutter 3.22+, Dart 3.4+ | Phát triển ứng dụng đa nền tảng (Android/iOS) |
+| **Mobile App** | Flutter 3.47, Dart 3.13 | Phát triển ứng dụng đa nền tảng (Android/iOS) |
 | **State Management** | `flutter_riverpod` | Quản lý trạng thái ứng dụng phản ứng (reactive state) |
 | **Routing** | `go_router` | Điều hướng màn hình khai báo tập trung |
 | **Local Database** | `sqflite` | Lưu trữ dữ liệu cục bộ phục vụ Offline-First |
 | **Secure Storage** | `flutter_secure_storage` | Lưu trữ an toàn JWT Token và thông tin phiên |
 | **Audio & Speech** | `record`, `speech_to_text`, `flutter_tts` | Thu âm WAV, nhận dạng giọng nói zh-CN và Text-to-Speech |
+| **UI / Design System** | Material 3 Expressive + Liquid Glass (fragment shader, Impeller) | Bộ widget kính, theme sáng/tối, chuyển động lò xo dùng chung |
 | **Canvas Graphics** | `CustomPainter` | Vẽ lưới Hán tự và hiển thị vector Make Me a Hanzi |
 | **Charts** | `fl_chart` | Biểu đồ phút học và thống kê ngữ âm trực quan |
 | **Backend Server** | Python 3.11+, FastAPI, Pydantic v2 | Máy chủ API hiệu năng cao, tự sinh OpenAPI Swagger |
@@ -145,9 +146,9 @@ Chi tiết mã công việc và phân chia 31 Issues được quản lý tại t
 | :---: | :--- | :---: | :---: | :---: | :--- |
 | 1 | **Nguyễn Hồng Phúc** | 2351170611 | `@LoudlyDawn2108` | **Trưởng nhóm** | Thiết kế kiến trúc Flutter, FastAPI Core, Auth JWT, Docker, Module Claude AI & UI Chat |
 | 2 | **Lê Tuấn Khanh** | 2351170601 | `@khanhx419` | Thành viên | Thu âm WAV, STT zh-CN, TTS, Engine chấm phát âm Offline, API Azure Speech Online & UI chấm âm |
-| 3 | **Đinh Thị Hoa** | 2351170593 | `@dinhhoa65ktpm` | Thành viên | Bộ dữ liệu từ vựng HSK 1-2 (~300 từ), Script nạp CSDL, UI Bài học, Module Flashcard SM-2 & Huy hiệu |
+| 3 | **Đinh Thị Hoa** | 2351170593 | `@dinhhoa65ktpm` | Thành viên | Bộ dữ liệu từ vựng HSK 1-2 (~300 từ), Script nạp CSDL, UI Bài học, Module Flashcard SM-2 & Mẹo phát âm |
 | 4 | **Chu Hữu Đệ** | 2251172273 | `@chuhuude` | Thành viên | CSDL SQLite, luồng Auth/Profile, Sync Offline-First, Canvas Luyện viết Hán tự & Kiểm tra nét vẽ |
-| 5 | **Phạm Vũ Ngọc Bảo** | 2251172249 | `@ngxcbao` | Thành viên | Bản đồ Lộ trình học, Placement Test, Dashboard Trang chủ, Bài kiểm tra HSK, Thống kê fl_chart & E2E Test |
+| 5 | **Phạm Vũ Ngọc Bảo** | 2251172249 | `@ngxcbao` | Thành viên | Bản đồ Lộ trình học, Placement Test, Dashboard Trang chủ, Bài kiểm tra HSK, Thống kê fl_chart, Huy hiệu & E2E Test |
 
 ---
 
@@ -164,11 +165,18 @@ nhom11-65ktpm/
 ├── assets/                      # Hình ảnh, tài nguyên đồ họa của dự án
 │   └── media/
 │       └── image1.png
-├── docs/                        # Tài liệu báo cáo, slide thuyết trình, kịch bản demo
+├── docs/                        # Tài liệu hướng dẫn, báo cáo, slide thuyết trình
+│   ├── huong-dan-setup.md       # Cài đặt môi trường, chạy app/server, quy trình Git
+│   ├── huong-dan-thiet-ke-ui.md # Hướng dẫn thiết kế giao diện (design system)
+│   ├── lam-viec-song-song.md    # Chia việc theo lát dọc, menu dev, thay bản giả bằng bản thật
+│   ├── hop-dong-du-lieu.md      # Định dạng dữ liệu + interface dùng chung giữa các tính năng
+│   ├── api-tro-ly-ai.md         # Hợp đồng API Trợ lý AI
+│   └── trien-khai-docker.md     # Triển khai Docker Compose, HTTPS, CI
 └── src/                         # Toàn bộ mã nguồn dự án
     ├── app/                     # Mã nguồn ứng dụng di động Flutter
     │   ├── lib/
-    │   │   ├── core/            # Theme, routing, network client, utilities
+    │   │   ├── core/            # Theme, widget kính, chuyển động, routing, network client
+    │   ├── shaders/             # Fragment shader khúc xạ của vật liệu kính
     │   │   └── features/        # Các module chức năng theo từng thành viên
     │   │       ├── auth/
     │   │       ├── roadmap/
@@ -196,9 +204,15 @@ nhom11-65ktpm/
 
 ## 🚀 6. Hướng Dẫn Cài Đặt & Khởi Chạy
 
+> 📘 Hướng dẫn chi tiết từng bước (chạy trên điện thoại thật, tài khoản demo, lỗi hay gặp): **[docs/huong-dan-setup.md](docs/huong-dan-setup.md)**
+>
+> 🎨 Hướng dẫn thiết kế giao diện (màu, chữ, vật liệu kính, chuyển động, checklist UI): **[docs/huong-dan-thiet-ke-ui.md](docs/huong-dan-thiet-ke-ui.md)**
+>
+> 🧩 Làm song song không chờ nhau (hợp đồng, bản giả, menu dev, sự kiện học tập): **[docs/lam-viec-song-song.md](docs/lam-viec-song-song.md)** · **[docs/hop-dong-du-lieu.md](docs/hop-dong-du-lieu.md)**
+
 ### 6.1. Yêu cầu môi trường tiền đề
-- **Flutter SDK:** Phiên bản `>= 3.22.0` (kèm Android SDK / Android Studio)
-- **Python:** Phiên bản `>= 3.11`
+- **Flutter SDK:** Phiên bản `3.47.x` (Dart 3.13, kèm Android SDK Platform 37 / Android Studio)
+- **Python:** Phiên bản `3.12`
 - **PostgreSQL:** Phiên bản `>= 16` (hoặc cài qua Docker)
 - **Docker & Docker Compose:** Đã cài đặt và đang chạy dịch vụ
 
@@ -228,8 +242,9 @@ nhom11-65ktpm/
    ```
 5. Chạy migration cơ sở dữ liệu và nạp dữ liệu mẫu:
    ```bash
+   docker compose up -d db          # PostgreSQL 16 bằng Docker
    alembic upgrade head
-   python scripts/seed_lessons.py
+   python -m scripts.seed_dev       # dữ liệu mẫu + tài khoản demo@chailish.dev / Demo12345
    ```
 6. Khởi động server với chế độ hot-reload:
    ```bash
@@ -261,7 +276,10 @@ docker compose up -d --build
    ```
 4. Khởi chạy ứng dụng:
    ```bash
-   flutter run
+   flutter run                       # Android Emulator (API mặc định http://10.0.2.2:8000/api)
+   # Điện thoại thật qua USB:
+   adb reverse tcp:8000 tcp:8000
+   flutter run --dart-define=API_BASE_URL=http://localhost:8000/api
    ```
 
 ---
@@ -302,9 +320,10 @@ pytest -v
    git push origin <tên-nhánh-tính-năng>
    ```
 5. **Mở Pull Request & Phản hồi chéo:**
-   - Mở PR trên GitHub gán reviewer theo bảng ma trận phân công.
+   - Mở PR bằng mẫu `docs/mau-pull-request.md` (`gh pr create --body-file nhom11-65ktpm/docs/mau-pull-request.md`), gán reviewer theo bảng ma trận phân công.
+   - **Bắt buộc kèm ảnh / video QA** app thật đang chạy tính năng, chụp từ commit cuối của PR. Quy định chi tiết: [docs/lam-viec-song-song.md](docs/lam-viec-song-song.md) mục 8.
    - Thảo luận, comment mã nguồn trực tiếp trên PR.
-   - Khi có ít nhất 1 phê duyệt (Approve), trưởng nhóm thực hiện Merge vào nhánh `nhom/nhom11-65ktpm`.
+   - Khi có ảnh QA hợp lệ **và** ít nhất 1 phê duyệt (Approve), trưởng nhóm thực hiện Merge vào nhánh `nhom/nhom11-65ktpm`. Thiếu ảnh QA thì không merge.
 
 ---
 

@@ -8,7 +8,9 @@ import '../../features/pronunciation/presentation/screens/pronunciation_screen.d
 import '../../features/writing/presentation/screens/writing_screen.dart';
 import '../../features/flashcard/presentation/screens/flashcard_screen.dart';
 import '../../features/ai_chat/presentation/screens/ai_chat_screen.dart';
+import '../../features/ai_chat/presentation/screens/ai_chat_summary_screen.dart';
 import '../../features/statistics/presentation/screens/statistics_screen.dart';
+import '../../features/dev/dev_menu_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: AppConstants.homeRoute,
@@ -43,11 +45,23 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppConstants.aiChatRoute,
-      builder: (context, state) => const AiChatScreen(),
+      // /ai-chat?lessonId=1&title=Chào hỏi
+      builder: (context, state) => AiChatScreen(
+        lessonId: int.tryParse(state.uri.queryParameters['lessonId'] ?? '') ?? 1,
+        lessonTitle: state.uri.queryParameters['title'],
+      ),
+    ),
+    GoRoute(
+      path: '${AppConstants.aiChatRoute}/summary/:id',
+      builder: (context, state) => AiChatSummaryScreen(conversationId: state.pathParameters['id']!),
     ),
     GoRoute(
       path: AppConstants.statisticsRoute,
       builder: (context, state) => const StatisticsScreen(),
+    ),
+    GoRoute(
+      path: AppConstants.devMenuRoute,
+      builder: (context, state) => const DevMenuScreen(),
     ),
   ],
 );

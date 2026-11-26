@@ -1,28 +1,65 @@
+# Khởi chạy toàn bộ backend: PostgreSQL 16 + FastAPI + Nginx (HTTPS).
+#   cp .env.example .env    # sửa SECRET_KEY, POSTGRES_PASSWORD, ANTHROPIC_API_KEY...
+#   docker compose up -d --build
+# API: https://localhost/docs  (chứng chỉ self-signed khi chưa có chứng chỉ thật)
+
+name: chailish
+
 services:
   db:
     image: postgres:16-alpine
-    container_name: chailish_postgres
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-      POSTGRES_DB: chailish_db
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-chailish_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Chỉ mở cổng trên localhost để kết nối từ máy (pgAdmin, alembic chạy ngoài container).
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
 
   api:
-    build: .
-    container_name: chailish_api
-    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chailish-api:latest
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
     environment:
-      - DATABASE_URL=postgresql://postgres:postgrespassword@db:5432/chailish_db
-      - SECRET_KEY=chailish_docker_secret_key_2026
-    ports:
-      - "8000:8000"
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-chailish_db}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    expose:
+      - "8000"
+
+  nginx:
+    build:
+      context: ./nginx
+    image: chailish-nginx:latest
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-localhost}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      # Đặt fullchain.pem + privkey.pem (Let's Encrypt) vào nginx/certs để dùng chứng chỉ thật.
+      - ./nginx/certs:/etc/nginx/certs
+      - certbot_www:/var/www/certbot
 
 volumes:
   postgres_data:
+  certbot_www:
