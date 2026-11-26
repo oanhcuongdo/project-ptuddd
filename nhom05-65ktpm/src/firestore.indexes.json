@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "role", "order": "ASCENDING" },
+        { "fieldPath": "rateLevel", "order": "ASCENDING" },
+        { "fieldPath": "groupId", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

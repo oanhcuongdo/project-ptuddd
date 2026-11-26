@@ -17,16 +17,18 @@ class PracticeScreen extends StatefulWidget {
   final Lesson lesson;
   final int sessionId;
   final ActiveTimer watch;
-  final Map<String, int> itemBest; // điểm cao nhất đã có của từng mục (câu mẫu → điểm)
+  final Map<String, int>
+  itemBest; // điểm cao nhất đã có của từng mục (câu mẫu → điểm)
   final int startIndex;
 
-  const PracticeScreen(
-      {super.key,
-      required this.lesson,
-      required this.sessionId,
-      required this.watch,
-      this.itemBest = const {},
-      this.startIndex = 0});
+  const PracticeScreen({
+    super.key,
+    required this.lesson,
+    required this.sessionId,
+    required this.watch,
+    this.itemBest = const {},
+    this.startIndex = 0,
+  });
 
   @override
   State<PracticeScreen> createState() => _PracticeScreenState();
@@ -57,14 +59,17 @@ class _PracticeScreenState extends State<PracticeScreen> {
     final ok = await _stt.initialize(
       onError: (e) {
         if (!mounted) return;
-        setState(() => _sttError = switch (e.errorMsg) {
-              'error_speech_timeout' || 'error_no_match' =>
-                'Không nghe rõ giọng nói. Hãy nói to, gần micro hơn rồi thử lại.',
-              'error_network' || 'error_network_timeout' || 'error_server' =>
-                'Lỗi mạng. Nhận dạng giọng nói cần kết nối Internet.',
-              'error_audio' || 'error_permission' => 'Không truy cập được micro. Hãy kiểm tra quyền.',
-              _ => 'Lỗi nhận dạng: ${e.errorMsg}. Hãy thử lại.',
-            });
+        setState(
+          () => _sttError = switch (e.errorMsg) {
+            'error_speech_timeout' || 'error_no_match' =>
+              'Không nghe rõ giọng nói. Hãy nói to, gần micro hơn rồi thử lại.',
+            'error_network' || 'error_network_timeout' || 'error_server' =>
+              'Lỗi mạng. Nhận dạng giọng nói cần kết nối Internet.',
+            'error_audio' || 'error_permission' =>
+              'Không truy cập được micro. Hãy kiểm tra quyền.',
+            _ => 'Lỗi nhận dạng: ${e.errorMsg}. Hãy thử lại.',
+          },
+        );
       },
       onStatus: (_) {
         if (mounted) setState(() {});
@@ -112,29 +117,41 @@ class _PracticeScreenState extends State<PracticeScreen> {
     setState(() => _heard = r.recognizedWords);
     if (!r.finalResult) return;
     // TODO(F3): pass the WAV recording as `wav:` so Azure scores it.
-    final result = await scoreAttempt(_target, r.recognizedWords,
-        confidence: r.hasConfidenceRating ? r.confidence : 0);
+    final result = await scoreAttempt(
+      _target,
+      r.recognizedWords,
+      confidence: r.hasConfidenceRating ? r.confidence : 0,
+    );
     if (!mounted) return;
     setState(() => _result = result);
     if (r.recognizedWords.trim().isEmpty) return;
     setState(() {
-      _summary.add(result.expectedText, result.score, widget.itemBest[result.expectedText] ?? 0);
+      _summary.add(
+        result.expectedText,
+        result.score,
+        widget.itemBest[result.expectedText] ?? 0,
+      );
       if (result.score > (_best[result.expectedText] ?? 0)) {
         _best[result.expectedText] = result.score;
       }
     });
     final state = context.read<AppState>();
-    await state.db.saveAttempt(state.user!.id, widget.sessionId, result);
+    await state.db.saveAttempt(
+      state.user!.id,
+      widget.sessionId,
+      result,
+      scoringSource: result.source == ScoreSource.azure ? 'ai' : 'offline',
+    );
     // Persist time so far in case the app is killed mid-session.
     await state.db.endSession(widget.sessionId, widget.watch.elapsedSeconds());
   }
 
   void _go(int delta) => setState(() {
-        widget.watch.touch();
-        _index = (_index + delta) % widget.lesson.items.length;
-        _heard = '';
-        _result = null;
-      });
+    widget.watch.touch();
+    _index = (_index + delta) % widget.lesson.items.length;
+    _heard = '';
+    _result = null;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -146,15 +163,24 @@ class _PracticeScreenState extends State<PracticeScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-              '${_index + 1}/${widget.lesson.items.length}'
-              '${_best[_target] == null ? '' : ' • cao nhất ${_best[_target]}'}'
-              '${(_best[_target] ?? 0) >= masteryScore ? ' ✅ thành thạo' : ''}',
-              style: theme.textTheme.labelLarge),
+            '${_index + 1}/${widget.lesson.items.length}'
+            '${_best[_target] == null ? '' : ' • cao nhất ${_best[_target]}'}'
+            '${(_best[_target] ?? 0) >= masteryScore ? ' ✅ thành thạo' : ''}',
+            style: theme.textTheme.labelLarge,
+          ),
           const SizedBox(height: 12),
-          Text(_target, textAlign: TextAlign.center, style: theme.textTheme.headlineMedium),
-          Text(ipaOfText(_target),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.secondary)),
+          Text(
+            _target,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineMedium,
+          ),
+          Text(
+            ipaOfText(_target),
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.secondary,
+            ),
+          ),
           const SizedBox(height: 8),
           Center(
             child: TextButton.icon(
@@ -184,14 +210,20 @@ class _PracticeScreenState extends State<PracticeScreen> {
           if (_heard.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text('Nghe được: "$_heard"',
-                  textAlign: TextAlign.center, style: theme.textTheme.bodyLarge),
+              child: Text(
+                'Nghe được: "$_heard"',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge,
+              ),
             ),
           if (_sttError != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text(_sttError!,
-                  textAlign: TextAlign.center, style: TextStyle(color: theme.colorScheme.error)),
+              child: Text(
+                _sttError!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
             ),
           if (_result != null) ...[
             const Divider(height: 32),
@@ -206,11 +238,15 @@ class _PracticeScreenState extends State<PracticeScreen> {
               margin: const EdgeInsets.only(top: 16),
               child: ListTile(
                 leading: const Icon(Icons.flag_outlined),
-                title: Text('Phiên này: ${_summary.attempts} lượt • TB ${_summary.average.round()}'),
+                title: Text(
+                  'Phiên này: ${_summary.attempts} lượt • TB ${_summary.average.round()}',
+                ),
                 subtitle: _summary.newlyMastered.isEmpty
                     ? null
-                    : Text('Mới thành thạo ${_summary.newlyMastered.length} mục: '
-                        '${_summary.newlyMastered.join(', ')}'),
+                    : Text(
+                        'Mới thành thạo ${_summary.newlyMastered.length} mục: '
+                        '${_summary.newlyMastered.join(', ')}',
+                      ),
               ),
             ),
           const SizedBox(height: 16),
@@ -218,9 +254,15 @@ class _PracticeScreenState extends State<PracticeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               OutlinedButton.icon(
-                  onPressed: () => _go(-1), icon: const Icon(Icons.arrow_back), label: const Text('Trước')),
+                onPressed: () => _go(-1),
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Trước'),
+              ),
               FilledButton.icon(
-                  onPressed: () => _go(1), icon: const Icon(Icons.arrow_forward), label: const Text('Tiếp')),
+                onPressed: () => _go(1),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Tiếp'),
+              ),
             ],
           ),
         ],
@@ -235,8 +277,12 @@ class FeedbackView extends StatelessWidget {
   final String currentLessonId;
   final Future<dynamic> Function(String) speak;
 
-  const FeedbackView(
-      {super.key, required this.result, required this.currentLessonId, required this.speak});
+  const FeedbackView({
+    super.key,
+    required this.result,
+    required this.currentLessonId,
+    required this.speak,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -244,8 +290,8 @@ class FeedbackView extends StatelessWidget {
     final color = result.score >= 75
         ? Colors.green
         : result.score >= 50
-            ? Colors.orange
-            : theme.colorScheme.error;
+        ? Colors.orange
+        : theme.colorScheme.error;
     final ok = theme.colorScheme.onSurface;
     final suggestions = suggestionsFor(result);
 
@@ -258,52 +304,74 @@ class FeedbackView extends StatelessWidget {
             SizedBox(
               width: 72,
               height: 72,
-              child: Stack(alignment: Alignment.center, children: [
-                CircularProgressIndicator(
-                    value: result.score / 100, strokeWidth: 7, color: color,
-                    backgroundColor: color.withValues(alpha: 0.2)),
-                Text('${result.score}', style: theme.textTheme.headlineSmall),
-              ]),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: result.score / 100,
+                    strokeWidth: 7,
+                    color: color,
+                    backgroundColor: color.withValues(alpha: 0.2),
+                  ),
+                  Text('${result.score}', style: theme.textTheme.headlineSmall),
+                ],
+              ),
             ),
             const SizedBox(width: 16),
             Text(verdict(result.score), style: theme.textTheme.titleLarge),
           ],
         ),
         const SizedBox(height: 16),
-        Text('Phân tích từng âm (đỏ = sai):', style: theme.textTheme.titleSmall),
+        Text(
+          'Phân tích từng âm (đỏ = sai):',
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 12,
           runSpacing: 8,
           children: [
             for (final w in result.words)
-              Column(children: [
-                Text(w.word,
+              Column(
+                children: [
+                  Text(
+                    w.word,
                     style: theme.textTheme.titleMedium?.copyWith(
-                        color: w.score == 100 ? ok : theme.colorScheme.error,
-                        fontWeight: FontWeight.bold)),
-                Text.rich(TextSpan(children: [
-                  const TextSpan(text: '/'),
-                  for (var i = 0; i < w.phonemes.length; i++)
-                    TextSpan(
-                      text: ipa(w.phonemes[i]),
-                      style: w.correct[i]
-                          ? null
-                          : TextStyle(
-                              color: theme.colorScheme.error,
-                              decoration: TextDecoration.underline,
-                              fontWeight: FontWeight.bold),
+                      color: w.score == 100 ? ok : theme.colorScheme.error,
+                      fontWeight: FontWeight.bold,
                     ),
-                  const TextSpan(text: '/'),
-                ])),
-                Text('${w.score}', style: theme.textTheme.labelSmall),
-              ]),
+                  ),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(text: '/'),
+                        for (var i = 0; i < w.phonemes.length; i++)
+                          TextSpan(
+                            text: ipa(w.phonemes[i]),
+                            style: w.correct[i]
+                                ? null
+                                : TextStyle(
+                                    color: theme.colorScheme.error,
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                          ),
+                        const TextSpan(text: '/'),
+                      ],
+                    ),
+                  ),
+                  Text('${w.score}', style: theme.textTheme.labelSmall),
+                ],
+              ),
           ],
         ),
         if (result.errors.isNotEmpty) ...[
           const SizedBox(height: 12),
           for (final e in result.errors)
-            Text('• ${e.word}: ${e.describe}', style: theme.textTheme.bodyMedium),
+            Text(
+              '• ${e.word}: ${e.describe}',
+              style: theme.textTheme.bodyMedium,
+            ),
         ],
         for (final s in suggestions)
           Card(
@@ -318,18 +386,29 @@ class FeedbackView extends StatelessWidget {
                   Text(s.tip),
                   if (s.practiceWords.isNotEmpty) ...[
                     const SizedBox(height: 8),
-                    Text('Luyện cặp từ (nhấn để nghe):', style: theme.textTheme.labelLarge),
-                    Wrap(spacing: 8, children: [
-                      for (final p in s.practiceWords)
-                        ActionChip(label: Text(p), onPressed: () => speak(p.replaceAll('–', ','))),
-                    ]),
+                    Text(
+                      'Luyện cặp từ (nhấn để nghe):',
+                      style: theme.textTheme.labelLarge,
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final p in s.practiceWords)
+                          ActionChip(
+                            label: Text(p),
+                            onPressed: () => speak(p.replaceAll('–', ',')),
+                          ),
+                      ],
+                    ),
                   ],
                   if (s.lessonId != currentLessonId)
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () => Navigator.pop(context, s.lessonId),
-                        child: Text('Luyện bài "${lessonById(s.lessonId).title}"'),
+                        child: Text(
+                          'Luyện bài "${lessonById(s.lessonId).title}"',
+                        ),
                       ),
                     ),
                 ],

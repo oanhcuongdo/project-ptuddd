@@ -14,6 +14,8 @@ class SessionSummary {
   void add(String item, int score, int bestBeforeSession) {
     _count++;
     _sum += score;
-    if (bestBeforeSession < masteryScore && score >= masteryScore) newlyMastered.add(item);
+    if (bestBeforeSession < masteryScore && score >= masteryScore) {
+      newlyMastered.add(item);
+    }
   }
 }
