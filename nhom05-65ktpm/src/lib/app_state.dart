@@ -53,6 +53,7 @@ class AppState extends ChangeNotifier {
         u.reminderHour,
         u.reminderMinute,
         stats!.streak,
+        practicedToday: stats!.practicedToday,
       );
     } else {
       await NotificationService.cancel();

@@ -13,12 +13,18 @@ import '../services/firebase_backend.dart';
 import '../services/firestore_group_repository.dart';
 import '../services/notification_service.dart';
 
-class FirebaseAccessScreen extends StatelessWidget {
+class FirebaseAccessScreen extends StatefulWidget {
   const FirebaseAccessScreen({super.key});
 
   @override
+  State<FirebaseAccessScreen> createState() => _FirebaseAccessScreenState();
+}
+
+class _FirebaseAccessScreenState extends State<FirebaseAccessScreen> {
+  late final FirebaseAccountRepository repository = FirebaseAccountRepository();
+
+  @override
   Widget build(BuildContext context) {
-    final repository = FirebaseAccountRepository();
     return StreamBuilder<auth.User?>(
       stream: repository.authChanges(),
       builder: (context, snapshot) {
@@ -108,7 +114,7 @@ class _SignInFormState extends State<_SignInForm> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Speak Up · Account')),
+    appBar: AppBar(title: const Text('Speak Up · Tài khoản')),
     body: Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 440),
@@ -119,16 +125,16 @@ class _SignInFormState extends State<_SignInForm> {
             shrinkWrap: true,
             children: [
               Text(
-                _register ? 'Create learner account' : 'Welcome back',
+                _register ? 'Tạo tài khoản người học' : 'Chào mừng bạn quay lại',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 20),
               if (_register)
                 TextFormField(
                   controller: _name,
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Tên người học'),
                   validator: (value) => value == null || value.trim().isEmpty
-                      ? 'Enter your name'
+                      ? 'Vui lòng nhập tên.'
                       : null,
                 ),
               TextFormField(
@@ -136,15 +142,15 @@ class _SignInFormState extends State<_SignInForm> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(labelText: 'Email'),
                 validator: (value) => value == null || !value.contains('@')
-                    ? 'Enter a valid email'
+                    ? 'Vui lòng nhập email hợp lệ.'
                     : null,
               ),
               TextFormField(
                 controller: _password,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Mật khẩu'),
                 validator: (value) => value == null || value.length < 6
-                    ? 'Use at least 6 characters'
+                    ? 'Mật khẩu cần có ít nhất 6 ký tự.'
                     : null,
               ),
               if (_error != null)
@@ -162,7 +168,7 @@ class _SignInFormState extends State<_SignInForm> {
                 onPressed: _busy ? null : _submit,
                 child: _busy
                     ? const CircularProgressIndicator()
-                    : Text(_register ? 'Register as learner' : 'Sign in'),
+                    : Text(_register ? 'Đăng ký người học' : 'Đăng nhập'),
               ),
               TextButton(
                 onPressed: _busy
@@ -173,8 +179,8 @@ class _SignInFormState extends State<_SignInForm> {
                       }),
                 child: Text(
                   _register
-                      ? 'I already have an account'
-                      : 'Create a learner account',
+                      ? 'Tôi đã có tài khoản'
+                      : 'Tạo tài khoản người học',
                 ),
               ),
               if (!_register)
@@ -183,19 +189,35 @@ class _SignInFormState extends State<_SignInForm> {
                       ? null
                       : () async {
                           if (_email.text.trim().isEmpty) {
-                            setState(() => _error = 'Enter your email first.');
+                            setState(() => _error = 'Vui lòng nhập email trước.');
                             return;
                           }
-                          await widget.repository.sendPasswordReset(
-                            _email.text,
-                          );
-                          if (mounted) {
-                            setState(
-                              () => _error = 'Password reset email sent if the account exists.',
+                          try {
+                            await widget.repository.sendPasswordReset(
+                              _email.text.trim(),
                             );
+                            if (mounted) {
+                              setState(
+                                () => _error = 'Nếu email đã đăng ký, hướng dẫn đặt lại mật khẩu sẽ được gửi.',
+                              );
+                            }
+                          } on auth.FirebaseAuthException catch (error) {
+                            if (mounted) {
+                              setState(
+                                () => _error =
+                                    error.message ??
+                                    'Không thể gửi email đặt lại mật khẩu.',
+                              );
+                            }
+                          } catch (_) {
+                            if (mounted) {
+                              setState(
+                                () => _error = 'Lỗi kết nối. Vui lòng thử lại.',
+                              );
+                            }
                           }
                         },
-                  child: const Text('Forgot password?'),
+                  child: const Text('Quên mật khẩu?'),
                 ),
             ],
           ),
@@ -216,11 +238,11 @@ class _MissingProfile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            'Account profile is missing. Ask the project administrator to check Firestore.',
+            'Không tìm thấy hồ sơ tài khoản. Vui lòng liên hệ quản trị viên dự án.',
           ),
           TextButton(
             onPressed: repository.signOut,
-            child: const Text('Sign out'),
+            child: const Text('Đăng xuất'),
           ),
         ],
       ),

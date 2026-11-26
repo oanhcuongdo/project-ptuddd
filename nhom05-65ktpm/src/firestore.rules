@@ -23,7 +23,9 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly([
           'displayName', 'email', 'role', 'rate', 'rateLevel', 'attemptCount', 'groupId', 'createdAt'
         ]);
-      allow read: if own(uid) || isMentor();
+      // Learners can see only profiles belonging to their own study group.
+      allow read: if own(uid) || isMentor()
+        || (resource.data.groupId is string && groupMember(resource.data.groupId));
       allow update: if own(uid)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName'])
         || own(uid)

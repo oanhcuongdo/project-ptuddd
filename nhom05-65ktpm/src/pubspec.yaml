@@ -43,7 +43,6 @@ dependencies:
   timezone: ^0.11.2
   sqflite_common_ffi_web: ^1.2.0
   http: ^1.6.0
-  fl_chart: ^1.1.1
   firebase_core: ^5.2.0
   firebase_auth: ^7.1.0
   cloud_firestore: ^7.2.0

@@ -1,10 +1,11 @@
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import '../scoring/pronunciation_scorer.dart';
 import '../scoring/rate.dart';
+import '../scoring/weak_sounds.dart';
 
 class User {
   final int id;
@@ -42,36 +43,41 @@ class DayStat {
   const DayStat(this.date, this.seconds);
 }
 
-/// The mean pronunciation score recorded on a calendar day.
 class DailyScore {
   final String date;
   final double averageScore;
   final int attemptCount;
-
   const DailyScore(this.date, this.averageScore, this.attemptCount);
 }
 
-/// A phoneme error aggregated for one learner profile.
 class PhonemeErrorStat {
   final String phoneme;
   final int count;
-
   const PhonemeErrorStat(this.phoneme, this.count);
 }
 
-/// Current and all-time consecutive practice-day counts for a learner.
 class StreakStat {
   final int current;
   final int best;
-
   const StreakStat(this.current, this.best);
 }
+
+/// Điểm trung bình của một ngày; [avg] null nếu hôm đó không luyện.
+class DayScore {
+  final String date;
+  final double? avg;
+  const DayScore(this.date, this.avg);
+}
+
+/// Số ngày hiển thị trên biểu đồ xu hướng điểm.
+const trendDays = 14;
 
 class LessonStat {
   final int attempts;
   final double avgScore;
   final int bestScore;
-  const LessonStat(this.attempts, this.avgScore, this.bestScore);
+  final Map<String, int> itemBest; // câu mẫu -> điểm cao nhất của từng mục
+  const LessonStat(this.attempts, this.avgScore, this.bestScore, this.itemBest);
 }
 
 class Stats {
@@ -82,10 +88,13 @@ class Stats {
   final int attempts;
   final double avgScore;
   final List<DayStat> last7Days;
-  final Map<String, int> topErrors; // expected phoneme -> count
+  final List<WeakSound>
+  weakSounds; // âm hay sai nhất (theo tỉ lệ) trong các lượt gần đây
   final List<Map<String, Object?>> recentAttempts;
   final Map<String, LessonStat> lessons; // lesson id -> tiến độ từng bài
   final Rate? rate; // null until enough attempts
+  final bool practicedToday; // hôm nay đã có ít nhất một lượt nói
+  final List<DayScore> scoreTrend; // [trendDays] ngày gần nhất, cũ → mới
 
   const Stats(
     this.streak,
@@ -95,12 +104,25 @@ class Stats {
     this.attempts,
     this.avgScore,
     this.last7Days,
-    this.topErrors,
+    this.weakSounds,
     this.recentAttempts,
     this.lessons,
     this.rate,
+    this.practicedToday,
+    this.scoreTrend,
   );
 }
+
+/// Nhãn thứ trong tuần theo kiểu Việt Nam: T2…T7, CN.
+String weekdayLabel(String date) => const [
+  'T2',
+  'T3',
+  'T4',
+  'T5',
+  'T6',
+  'T7',
+  'CN',
+][DateTime.parse(date).weekday - 1];
 
 String dayKey(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -130,12 +152,16 @@ String dayKey(DateTime d) =>
   return (current: current, best: best);
 }
 
+/// Số lượt nói gần nhất dùng để tính âm hay sai.
+const weakWindow = 50;
+
 class AppDatabase {
   final Database db;
   AppDatabase._(this.db);
 
   Future<void> close() => db.close();
 
+  /// [path] chỉ dùng cho kiểm thử (vd. `inMemoryDatabasePath`).
   static Future<AppDatabase> open({String? path, int schemaVersion = 3}) async {
     if (kIsWeb) {
       databaseFactory = databaseFactoryFfiWebNoWebWorker; // web demo only
@@ -195,22 +221,18 @@ class AppDatabase {
         );
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        // Version 2 retains all existing rows and gives old attempts a safe
-        // offline default, matching the original on-device scorer behaviour.
         if (oldVersion < 2) {
           await db.execute(
             "ALTER TABLE attempts ADD COLUMN scoring_source TEXT NOT NULL DEFAULT 'offline'",
           );
           await db.execute('ALTER TABLE attempts ADD COLUMN audio_path TEXT');
           await db.execute(
-            'CREATE INDEX IF NOT EXISTS idx_attempts_user_created '
-            'ON attempts(user_id, created_at)',
+            'CREATE INDEX IF NOT EXISTS idx_attempts_user_created ON attempts(user_id, created_at)',
           );
         }
         if (oldVersion < 3) {
           await db.execute(
-            'ALTER TABLE users ADD COLUMN avatar_color INTEGER NOT NULL '
-            'DEFAULT 4284960932',
+            'ALTER TABLE users ADD COLUMN avatar_color INTEGER NOT NULL DEFAULT 4284960932',
           );
         }
       },
@@ -239,10 +261,7 @@ class AppDatabase {
   }) async {
     await db.update(
       'users',
-      {
-        ...?(name == null ? null : {'name': name.trim()}),
-        ...?(avatarColor == null ? null : {'avatar_color': avatarColor}),
-      },
+      {if (name != null) 'name': name.trim(), 'avatar_color': ?avatarColor},
       where: 'id = ?',
       whereArgs: [user.id],
     );
@@ -306,11 +325,7 @@ class AppDatabase {
     String? audioPath,
   }) => db.transaction((txn) async {
     if (scoringSource != 'ai' && scoringSource != 'offline') {
-      throw ArgumentError.value(
-        scoringSource,
-        'scoringSource',
-        "must be either 'ai' or 'offline'",
-      );
+      throw ArgumentError.value(scoringSource, 'scoringSource');
     }
     final id = await txn.insert('attempts', {
       'session_id': sessionId,
@@ -334,109 +349,68 @@ class AppDatabase {
     }
   });
 
-  /// Returns daily score aggregates in the requested rolling period.
-  ///
-  /// The list only contains days with attempts; callers that need zero-value
-  /// days for a chart can fill the gaps using [dayKey].
   Future<List<DailyScore>> dailyAverageScores(
     int userId, {
     int days = 7,
     DateTime? until,
   }) async {
-    if (days <= 0) throw ArgumentError.value(days, 'days', 'must be positive');
+    if (days <= 0) throw ArgumentError.value(days, 'days');
     final end = until ?? DateTime.now();
-    final start = DateTime(end.year, end.month, end.day - (days - 1));
+    final start = DateTime(end.year, end.month, end.day - days + 1);
     final rows = await db.rawQuery(
-      '''
-      SELECT substr(created_at, 1, 10) AS day,
-             AVG(score) AS average_score,
-             COUNT(*) AS attempt_count
-      FROM attempts
-      WHERE user_id = ? AND substr(created_at, 1, 10) >= ?
-                        AND substr(created_at, 1, 10) <= ?
-      GROUP BY substr(created_at, 1, 10)
-      ORDER BY day ASC
-    ''',
+      'SELECT substr(created_at,1,10) AS day, AVG(score) AS av, COUNT(*) AS c FROM attempts WHERE user_id=? AND substr(created_at,1,10) BETWEEN ? AND ? GROUP BY day ORDER BY day',
       [userId, dayKey(start), dayKey(end)],
     );
     return [
-      for (final row in rows)
+      for (final r in rows)
         DailyScore(
-          row['day'] as String,
-          (row['average_score'] as num).toDouble(),
-          row['attempt_count'] as int,
+          r['day'] as String,
+          (r['av'] as num).toDouble(),
+          r['c'] as int,
         ),
     ];
   }
 
-  /// Returns study duration per day, scoped to exactly one learner profile.
   Future<List<DayStat>> dailyStudyDurations(
     int userId, {
     int days = 7,
     DateTime? until,
   }) async {
-    if (days <= 0) throw ArgumentError.value(days, 'days', 'must be positive');
     final end = until ?? DateTime.now();
-    final start = DateTime(end.year, end.month, end.day - (days - 1));
+    final start = DateTime(end.year, end.month, end.day - days + 1);
     final rows = await db.rawQuery(
-      '''
-      SELECT day, SUM(duration_seconds) AS seconds
-      FROM practice_sessions
-      WHERE user_id = ? AND day >= ? AND day <= ?
-      GROUP BY day
-      ORDER BY day ASC
-    ''',
+      'SELECT day, SUM(duration_seconds) AS secs FROM practice_sessions WHERE user_id=? AND day BETWEEN ? AND ? GROUP BY day ORDER BY day',
       [userId, dayKey(start), dayKey(end)],
     );
     return [
-      for (final row in rows)
-        DayStat(row['day'] as String, (row['seconds'] as num?)?.toInt() ?? 0),
+      for (final r in rows)
+        DayStat(r['day'] as String, (r['secs'] as num).toInt()),
     ];
   }
 
-  /// Calculates current and best streaks from distinct days with an attempt.
   Future<StreakStat> streakForUser(int userId, {DateTime? today}) async {
     final rows = await db.rawQuery(
-      '''
-      SELECT DISTINCT s.day
-      FROM practice_sessions s
-      INNER JOIN attempts a ON a.session_id = s.id
-      WHERE s.user_id = ?
-    ''',
+      'SELECT DISTINCT substr(created_at,1,10) AS day FROM attempts WHERE user_id=?',
       [userId],
     );
     final value = computeStreak(
-      rows.map((row) => row['day'] as String).toSet(),
+      rows.map((r) => r['day'] as String).toSet(),
       today ?? DateTime.now(),
     );
     return StreakStat(value.current, value.best);
   }
 
-  /// Finds the most frequent expected phonemes the selected learner missed.
   Future<List<PhonemeErrorStat>> topMispronouncedPhonemes(
     int userId, {
     int limit = 5,
   }) async {
-    if (limit <= 0) {
-      throw ArgumentError.value(limit, 'limit', 'must be positive');
-    }
+    if (limit <= 0) throw ArgumentError.value(limit, 'limit');
     final rows = await db.rawQuery(
-      '''
-      SELECT e.expected_phoneme AS phoneme, COUNT(*) AS error_count
-      FROM phoneme_errors e
-      INNER JOIN attempts a ON a.id = e.attempt_id
-      WHERE a.user_id = ?
-        AND e.expected_phoneme IS NOT NULL
-        AND e.expected_phoneme != ''
-      GROUP BY e.expected_phoneme
-      ORDER BY error_count DESC, phoneme ASC
-      LIMIT ?
-    ''',
+      "SELECT e.expected_phoneme AS p, COUNT(*) AS c FROM phoneme_errors e JOIN attempts a ON a.id=e.attempt_id WHERE a.user_id=? AND e.expected_phoneme IS NOT NULL AND e.expected_phoneme != '' GROUP BY e.expected_phoneme ORDER BY c DESC, p LIMIT ?",
       [userId, limit],
     );
     return [
-      for (final row in rows)
-        PhonemeErrorStat(row['phoneme'] as String, row['error_count'] as int),
+      for (final r in rows) PhonemeErrorStat(r['p'] as String, r['c'] as int),
     ];
   }
 
@@ -491,14 +465,23 @@ class AppDatabase {
     }
   }
 
+  /// Toàn bộ lượt nói của người học, cũ nhất trước (dùng để xuất CSV).
+  Future<List<Map<String, Object?>>> allAttempts(int userId) => db.query(
+    'attempts',
+    where: 'user_id = ?',
+    whereArgs: [userId],
+    orderBy: 'id',
+  );
+
   Future<Stats> stats(int userId) async {
     final now = DateTime.now();
-    // A day counts toward the streak only if the user made at least one attempt.
+    // Một ngày chỉ tính vào streak nếu có ít nhất một lượt nói. Lấy ngày theo
+    // thời điểm của lượt nói (không phải lúc bắt đầu phiên) để phiên kéo qua
+    // nửa đêm không bị tính nhầm sang hôm trước.
     final dayRows = await db.rawQuery(
       '''
-      SELECT DISTINCT s.day FROM practice_sessions s
-      JOIN attempts a ON a.session_id = s.id
-      WHERE s.user_id = ?''',
+      SELECT DISTINCT substr(created_at, 1, 10) AS day FROM attempts
+      WHERE user_id = ?''',
       [userId],
     );
     final streak = computeStreak(
@@ -522,6 +505,21 @@ class AppDatabase {
         DayStat(dayKey(daysAgo(i)), perDay[dayKey(daysAgo(i))] ?? 0),
     ];
 
+    final trendFrom = dayKey(daysAgo(trendDays - 1));
+    final perDayScore = {
+      for (final r in await db.rawQuery(
+        '''
+        SELECT substr(created_at, 1, 10) AS d, AVG(score) AS avg FROM attempts
+        WHERE user_id = ? AND substr(created_at, 1, 10) >= ? GROUP BY d''',
+        [userId, trendFrom],
+      ))
+        r['d'] as String: (r['avg'] as num).toDouble(),
+    };
+    final scoreTrend = [
+      for (var i = trendDays - 1; i >= 0; i--)
+        DayScore(dayKey(daysAgo(i)), perDayScore[dayKey(daysAgo(i))]),
+    ];
+
     final total =
         (await db.rawQuery(
               'SELECT SUM(duration_seconds) AS t FROM practice_sessions WHERE user_id = ?',
@@ -532,12 +530,16 @@ class AppDatabase {
       'SELECT COUNT(*) AS c, AVG(score) AS avg FROM attempts WHERE user_id = ?',
       [userId],
     )).single;
-    final errs = await db.rawQuery(
+    // Chỉ xét $weakWindow lượt nói gần nhất để phản ánh trình độ hiện tại.
+    final windowTexts = await db.rawQuery(
+      'SELECT expected_text AS t FROM attempts WHERE user_id = ? ORDER BY id DESC LIMIT $weakWindow',
+      [userId],
+    );
+    final windowErrors = await db.rawQuery(
       '''
-      SELECT e.expected_phoneme AS p, COUNT(*) AS c FROM phoneme_errors e
-      JOIN attempts a ON a.id = e.attempt_id
-      WHERE a.user_id = ? AND e.expected_phoneme IS NOT NULL
-      GROUP BY e.expected_phoneme ORDER BY c DESC LIMIT 5''',
+      SELECT expected_phoneme AS p FROM phoneme_errors
+      WHERE expected_phoneme IS NOT NULL AND attempt_id IN (
+        SELECT id FROM attempts WHERE user_id = ? ORDER BY id DESC LIMIT $weakWindow)''',
       [userId],
     );
     final recent = await db.query(
@@ -564,6 +566,18 @@ class AppDatabase {
       [userId],
     );
 
+    final perItem = await db.rawQuery(
+      '''
+      SELECT s.lesson_id AS l, a.expected_text AS t, MAX(a.score) AS best
+      FROM attempts a JOIN practice_sessions s ON s.id = a.session_id
+      WHERE a.user_id = ? GROUP BY s.lesson_id, a.expected_text''',
+      [userId],
+    );
+    final itemBest = <String, Map<String, int>>{};
+    for (final r in perItem) {
+      (itemBest[r['l'] as String] ??= {})[r['t'] as String] = r['best'] as int;
+    }
+
     return Stats(
       streak.current,
       streak.best,
@@ -572,7 +586,10 @@ class AppDatabase {
       agg['c'] as int,
       (agg['avg'] as num?)?.toDouble() ?? 0,
       last7,
-      {for (final r in errs) r['p'] as String: r['c'] as int},
+      computeWeakSounds(
+        [for (final r in windowTexts) r['t'] as String],
+        [for (final r in windowErrors) r['p'] as String],
+      ),
       recent,
       {
         for (final r in perLesson)
@@ -580,9 +597,12 @@ class AppDatabase {
             r['c'] as int,
             (r['avg'] as num).toDouble(),
             r['best'] as int,
+            itemBest[r['l'] as String] ?? const {},
           ),
       },
       computeRate([for (final r in rateScores) r['score'] as int]),
+      dayRows.any((r) => r['day'] == dayKey(now)),
+      scoreTrend,
     );
   }
 }

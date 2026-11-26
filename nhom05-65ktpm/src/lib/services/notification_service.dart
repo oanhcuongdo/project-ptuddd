@@ -3,9 +3,20 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+/// Thời điểm nhắc đầu tiên: hôm nay lúc [hour]:[minute] nếu chưa qua giờ và
+/// người học chưa luyện, ngược lại là cùng giờ ngày mai.
+DateTime nextReminderTime(DateTime now, int hour, int minute, {required bool practicedToday}) {
+  final today = DateTime(now.year, now.month, now.day, hour, minute);
+  return practicedToday || !today.isAfter(now)
+      ? DateTime(now.year, now.month, now.day + 1, hour, minute)
+      : today;
+}
+
 class NotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
   static const _reminderId = 1;
+  static const _repeatId = 2;
+  static const _title = 'Đến giờ luyện phát âm rồi! 🎤';
   static const _details = NotificationDetails(
     android: AndroidNotificationDetails(
       'daily_reminder',
@@ -42,22 +53,32 @@ class NotificationService {
         ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
-  /// Schedules a daily reminder at local [hour]:[minute].
+  /// Đặt lần nhắc tiếp theo với nội dung streak mới nhất, kèm một thông báo lặp
+  /// hằng ngày (nội dung chung) từ ngày hôm sau, để thông báo bị bỏ qua không
+  /// lặp mãi số streak cũ.
   // shortcut: converts to a fixed UTC time, so the reminder shifts by an hour
   // across DST changes; add flutter_timezone and use tz.local if that matters.
-  static Future<void> scheduleDaily(int hour, int minute, int streak) async {
+  static Future<void> scheduleDaily(int hour, int minute, int streak,
+      {bool practicedToday = false}) async {
     if (kIsWeb) return;
     await cancel();
-    final now = DateTime.now();
-    var at = DateTime(now.year, now.month, now.day, hour, minute);
-    if (!at.isAfter(now)) at = at.add(const Duration(days: 1));
+    final first = nextReminderTime(DateTime.now(), hour, minute, practicedToday: practicedToday);
+    tz.TZDateTime utc(DateTime d) => tz.TZDateTime.from(d.toUtc(), tz.UTC);
     await _plugin.zonedSchedule(
       id: _reminderId,
-      title: 'Đến giờ luyện phát âm rồi! 🎤',
+      title: _title,
       body: streak > 0
           ? 'Giữ chuỗi $streak ngày của bạn — chỉ cần vài phút hôm nay.'
           : 'Bắt đầu chuỗi ngày luyện tập mới ngay hôm nay.',
-      scheduledDate: tz.TZDateTime.from(at.toUtc(), tz.UTC),
+      scheduledDate: utc(first),
+      notificationDetails: _details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+    await _plugin.zonedSchedule(
+      id: _repeatId,
+      title: _title,
+      body: 'Vài phút luyện phát âm hôm nay giúp bạn giữ nhịp học.',
+      scheduledDate: utc(DateTime(first.year, first.month, first.day + 1, hour, minute)),
       notificationDetails: _details,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -65,7 +86,9 @@ class NotificationService {
   }
 
   static Future<void> cancel() async {
-    if (!kIsWeb) await _plugin.cancel(id: _reminderId);
+    if (kIsWeb) return;
+    await _plugin.cancel(id: _reminderId);
+    await _plugin.cancel(id: _repeatId);
   }
 
   /// Shows a foreground FCM notification while preserving the daily reminder.

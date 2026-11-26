@@ -5,7 +5,9 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import '../app_state.dart';
+import '../data/active_timer.dart';
 import '../data/lessons.dart';
+import '../data/session_summary.dart';
 import '../scoring/azure_scorer.dart';
 import '../scoring/feedback.dart';
 import '../scoring/phonemes.dart';
@@ -14,13 +16,18 @@ import '../scoring/pronunciation_scorer.dart';
 class PracticeScreen extends StatefulWidget {
   final Lesson lesson;
   final int sessionId;
-  final Stopwatch watch;
+  final ActiveTimer watch;
+  final Map<String, int>
+  itemBest; // điểm cao nhất đã có của từng mục (câu mẫu → điểm)
+  final int startIndex;
 
   const PracticeScreen({
     super.key,
     required this.lesson,
     required this.sessionId,
     required this.watch,
+    this.itemBest = const {},
+    this.startIndex = 0,
   });
 
   @override
@@ -32,7 +39,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
   final _tts = FlutterTts();
   bool _sttReady = false;
   String? _sttError;
-  int _index = 0;
+  late int _index = widget.startIndex;
+  late final Map<String, int> _best = {...widget.itemBest};
+  final _summary = SessionSummary();
   String _heard = '';
   PronunciationResult? _result;
 
@@ -82,6 +91,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   Future<void> _listen() async {
+    widget.watch.touch();
     await _tts.stop();
     setState(() {
       _heard = '';
@@ -115,6 +125,16 @@ class _PracticeScreenState extends State<PracticeScreen> {
     if (!mounted) return;
     setState(() => _result = result);
     if (r.recognizedWords.trim().isEmpty) return;
+    setState(() {
+      _summary.add(
+        result.expectedText,
+        result.score,
+        widget.itemBest[result.expectedText] ?? 0,
+      );
+      if (result.score > (_best[result.expectedText] ?? 0)) {
+        _best[result.expectedText] = result.score;
+      }
+    });
     final state = context.read<AppState>();
     await state.db.saveAttempt(
       state.user!.id,
@@ -123,10 +143,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
       scoringSource: result.source == ScoreSource.azure ? 'ai' : 'offline',
     );
     // Persist time so far in case the app is killed mid-session.
-    await state.db.endSession(widget.sessionId, widget.watch.elapsed.inSeconds);
+    await state.db.endSession(widget.sessionId, widget.watch.elapsedSeconds());
   }
 
   void _go(int delta) => setState(() {
+    widget.watch.touch();
     _index = (_index + delta) % widget.lesson.items.length;
     _heard = '';
     _result = null;
@@ -142,7 +163,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            '${_index + 1}/${widget.lesson.items.length}',
+            '${_index + 1}/${widget.lesson.items.length}'
+            '${_best[_target] == null ? '' : ' • cao nhất ${_best[_target]}'}'
+            '${(_best[_target] ?? 0) >= masteryScore ? ' ✅ thành thạo' : ''}',
             style: theme.textTheme.labelLarge,
           ),
           const SizedBox(height: 12),
@@ -161,7 +184,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
           const SizedBox(height: 8),
           Center(
             child: TextButton.icon(
-              onPressed: () => _tts.speak(_target),
+              onPressed: () {
+                widget.watch.touch();
+                _tts.speak(_target);
+              },
               icon: const Icon(Icons.volume_up),
               label: const Text('Nghe mẫu'),
             ),
@@ -207,6 +233,22 @@ class _PracticeScreenState extends State<PracticeScreen> {
               speak: _tts.speak,
             ),
           ],
+          if (_summary.attempts > 0)
+            Card(
+              margin: const EdgeInsets.only(top: 16),
+              child: ListTile(
+                leading: const Icon(Icons.flag_outlined),
+                title: Text(
+                  'Phiên này: ${_summary.attempts} lượt • TB ${_summary.average.round()}',
+                ),
+                subtitle: _summary.newlyMastered.isEmpty
+                    ? null
+                    : Text(
+                        'Mới thành thạo ${_summary.newlyMastered.length} mục: '
+                        '${_summary.newlyMastered.join(', ')}',
+                      ),
+              ),
+            ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
