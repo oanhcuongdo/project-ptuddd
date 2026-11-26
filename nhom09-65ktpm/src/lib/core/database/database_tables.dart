@@ -20,6 +20,8 @@ class DatabaseTables {
   static const String conversationMembers = 'conversation_members';
   static const String messages = 'messages';
   static const String notifications = 'notifications';
+  static const String roomMeetSessions = 'room_meet_sessions';
+  static const String roomMeetAttendance = 'room_meet_attendance';
 
   // === 004: Chủ đề (Đạo), Buổi luyện tập (Kiên) & Sổ tay từ vựng (Hải) ===
   static const String conversationTopics = 'conversation_topics';

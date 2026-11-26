@@ -5,14 +5,18 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth_profile/presentation/providers/auth_provider.dart';
 import '../../data/models/conversation_model.dart';
+import '../../data/models/meet_session_model.dart';
 import '../../data/models/message_model.dart';
 import '../components/chat_conversation_sidebar.dart';
+import '../components/chat_meet_banner.dart';
 import '../components/chat_message_composer.dart';
 import '../components/chat_room_header.dart';
 import '../components/chat_room_info_panel.dart';
+import '../components/schedule_meet_dialog.dart';
 import '../providers/chat_provider.dart';
 import '../styles/chat_room_styles.dart';
 import '../styles/chat_styles.dart';
+import 'room_meet_call_view.dart';
 
 /// Giao diện Phòng Chat Realtime dạng 2 cột kiểu Messenger/Zalo ngay bên trong tab Phòng học:
 /// - Cột trái (màn rộng >= 860px): Danh sách các phòng bạn đã tham gia + nút Back về trang Phòng học
@@ -41,6 +45,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
   late final ChatProvider _chatProvider;
   int _lastMessageCount = 0;
   bool _showInfoPanel = false;
+  MeetSessionModel? _joinedMeetSession;
 
   @override
   void initState() {
@@ -103,7 +108,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
         profile.displayName.trim().isNotEmpty ? profile.displayName : 'Bạn';
 
     _messageController.clear();
-    final result = await _chatProvider.sendMessage(
+    final ok = await _chatProvider.sendMessage(
       conversationId: widget.room.id,
       senderId: profile.userId,
       senderName: senderName,
@@ -111,25 +116,39 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       content: text,
     );
 
-    if (!result.ok && mounted) {
+    if (!ok && mounted) {
       _messageController.text = text;
       _messageController.selection = TextSelection.collapsed(
         offset: text.length,
       );
-      return;
     }
+  }
 
-    if (result.ok &&
-        mounted &&
-        result.streakIncrementedToday &&
-        result.roomStreak != null) {
+  Future<void> _openScheduleMeetDialog(ConversationModel liveRoom) async {
+    final profile = context.read<AuthProvider>().currentProfile;
+    if (profile == null) return;
+    final hostName = profile.displayName.trim().isNotEmpty
+        ? profile.displayName
+        : 'Trợ giảng';
+
+    final created = await showDialog<MeetSessionModel>(
+      context: context,
+      builder: (_) => ScheduleMeetDialog(
+        room: liveRoom,
+        hostId: profile.userId,
+        hostName: hostName,
+      ),
+    );
+    if (!mounted || created == null) return;
+
+    if (created.isLive) {
+      setState(() => _joinedMeetSession = created);
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: AppColors.streakOrange,
-          behavior: SnackBarBehavior.floating,
+          backgroundColor: ChatStyles.tealDark,
           content: Text(
-            '🔥 Chuỗi phòng "${widget.room.name}" đã lên ${result.roomStreak} ngày!',
-            style: const TextStyle(fontWeight: FontWeight.w700),
+            'Đã hẹn lịch buổi "${created.title}" và gửi thông báo cho cả phòng!',
           ),
         ),
       );
@@ -150,6 +169,26 @@ class _ChatRoomViewState extends State<ChatRoomView> {
     final currentUserId =
         context.watch<AuthProvider>().currentProfile?.userId;
     final messages = chat.roomMessages;
+    final activeMeet = chat.activeMeetSession;
+
+    // Nếu người dùng đang tham gia phòng Video Call Meet -> hiển thị màn hình Meet nhúng trực tiếp
+    if (_joinedMeetSession != null) {
+      return RoomMeetCallView(
+        room: liveRoom,
+        session: _joinedMeetSession!,
+        onExit: () => setState(() => _joinedMeetSession = null),
+      );
+    }
+
+    var canManageRoom = liveRoom.canManageRoom;
+    if (currentUserId != null) {
+      for (final m in chat.roomMembers) {
+        if (m.userId == currentUserId) {
+          canManageRoom = m.isOwner || m.isCoOwner;
+          break;
+        }
+      }
+    }
 
     // Đảm bảo danh sách phòng cột trái luôn có ít nhất phòng đang mở
     final joinedRooms = chat.myRooms.any((r) => r.id == liveRoom.id)
@@ -226,12 +265,41 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                           room: liveRoom,
                           showBackButton: !showConversationList,
                           isInfoPanelOpen: canDockInfoPanel && _showInfoPanel,
+                          canScheduleMeet: canManageRoom,
+                          hasLiveMeet: activeMeet?.isLive ?? false,
                           onToggleInfoPanel: handleToggleInfoPanel,
                           onBack: widget.onBack,
-                          onStartSessionTap: () => _showComingSoon(
-                            'Đồng hồ bấm giờ buổi luyện tập',
-                          ),
+                          onMeetActionTap: () {
+                            if (activeMeet != null && activeMeet.isLive) {
+                              setState(() => _joinedMeetSession = activeMeet);
+                            } else if (canManageRoom) {
+                              _openScheduleMeetDialog(liveRoom);
+                            }
+                          },
                         ),
+                        if (activeMeet != null && !activeMeet.isEnded)
+                          ChatMeetBanner(
+                            session: activeMeet,
+                            canManage: canManageRoom,
+                            onJoinMeet: () =>
+                                setState(() => _joinedMeetSession = activeMeet),
+                            onStartNow: () async {
+                              final ok = await _chatProvider.updateMeetStatus(
+                                sessionId: activeMeet.id,
+                                status: 'live',
+                              );
+                              if (ok && mounted) {
+                                setState(
+                                  () => _joinedMeetSession =
+                                      activeMeet.copyWith(status: 'live'),
+                                );
+                              }
+                            },
+                            onEndSession: () => _chatProvider.updateMeetStatus(
+                              sessionId: activeMeet.id,
+                              status: 'ended',
+                            ),
+                          ),
                         if (chat.messageError != null)
                           Container(
                             width: double.infinity,

@@ -10,6 +10,7 @@ import 'package:buddytalk/features/auth_profile/data/models/profile_model.dart';
 import 'package:buddytalk/features/auth_profile/data/repositories/auth_repository.dart';
 import 'package:buddytalk/features/auth_profile/presentation/providers/auth_provider.dart';
 import 'package:buddytalk/features/chat/data/models/conversation_model.dart';
+import 'package:buddytalk/features/chat/data/models/meet_session_model.dart';
 import 'package:buddytalk/features/chat/data/models/message_model.dart';
 import 'package:buddytalk/features/chat/data/models/online_member_model.dart';
 import 'package:buddytalk/features/chat/data/models/room_join_request.dart';
@@ -344,6 +345,128 @@ class _FakeChatRepository extends ChatRepository {
     required String conversationId,
     required String description,
   }) async {}
+
+  MeetSessionModel? _activeMeet;
+  int _savedAttendedSeconds = 0;
+  bool _savedStreakAwarded = false;
+  int _todayPersonalMinutes = 0;
+
+  @override
+  Future<MeetSessionModel?> fetchActiveMeetSession(
+    String conversationId,
+  ) async =>
+      (_activeMeet != null &&
+              _activeMeet!.conversationId == conversationId &&
+              !_activeMeet!.isEnded)
+          ? _activeMeet
+          : null;
+
+  @override
+  Future<MeetSessionModel> createMeetSession({
+    required String conversationId,
+    required String roomName,
+    required String hostId,
+    required String hostName,
+    required String title,
+    required DateTime scheduledAt,
+    required int minMinutes,
+    required bool startImmediately,
+  }) async {
+    _activeMeet = MeetSessionModel(
+      id: 'meet-1',
+      conversationId: conversationId,
+      hostId: hostId,
+      hostName: hostName,
+      title: title,
+      meetRoomCode: 'BuddyTalk-TestRoom',
+      scheduledAt: scheduledAt,
+      minMinutes: minMinutes,
+      status: startImmediately ? 'live' : 'scheduled',
+      createdAt: DateTime.now(),
+    );
+    _savedAttendedSeconds = 0;
+    _savedStreakAwarded = false;
+    return _activeMeet!;
+  }
+
+  @override
+  Future<void> updateMeetSessionStatus({
+    required String sessionId,
+    required String status,
+  }) async {
+    if (_activeMeet?.id == sessionId) {
+      _activeMeet = _activeMeet!.copyWith(status: status);
+    }
+  }
+
+  @override
+  RealtimeChannel? subscribeToRoomMeetSessions({
+    required String conversationId,
+    required void Function() onChanged,
+  }) =>
+      null;
+
+  @override
+  Future<({int attendedSeconds, bool streakAwarded})> fetchMyMeetAttendance({
+    required String sessionId,
+    required String userId,
+  }) async =>
+      (
+        attendedSeconds: _savedAttendedSeconds,
+        streakAwarded: _savedStreakAwarded,
+      );
+
+  @override
+  Future<List<MeetAttendanceModel>> fetchSessionAttendances(
+    String sessionId,
+  ) async =>
+      [
+        MeetAttendanceModel(
+          sessionId: sessionId,
+          userId: 'u-chat',
+          displayName: 'Phạm Văn Hưng',
+          attendedSeconds: _savedAttendedSeconds,
+          streakAwarded: _savedStreakAwarded,
+          updatedAt: DateTime.now(),
+        ),
+      ];
+
+  @override
+  Future<void> saveMeetAttendanceProgress({
+    required String sessionId,
+    required String userId,
+    required int attendedSeconds,
+    required bool streakAwarded,
+  }) async {
+    _savedAttendedSeconds = attendedSeconds;
+    _savedStreakAwarded = streakAwarded;
+  }
+
+  @override
+  Future<int> fetchTodayPersonalMinutes(String userId) async =>
+      _todayPersonalMinutes;
+
+  @override
+  Future<
+      ({
+        int todayMinutes,
+        int streakCount,
+        int bestStreak,
+        bool goalReached,
+      })?> recordPersonalDailyMeetMinutes({
+    required String userId,
+    required int addMinutes,
+    required int dailyGoalMinutes,
+  }) async {
+    _todayPersonalMinutes += addMinutes;
+    final reached = _todayPersonalMinutes >= dailyGoalMinutes;
+    return (
+      todayMinutes: _todayPersonalMinutes,
+      streakCount: reached ? 1 : 0,
+      bestStreak: reached ? 1 : 0,
+      goalReached: reached,
+    );
+  }
 }
 
 class _FakeNotificationRepository extends NotificationRepository {
@@ -660,7 +783,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Không gian học'), findsOneWidget);
-    expect(find.text('Bắt đầu luyện'), findsOneWidget);
+    expect(find.text('Hẹn lịch Meet'), findsOneWidget);
     expect(find.byTooltip('Gợi ý chủ đề & câu mở đầu'), findsOneWidget);
 
     // Gửi tin nhắn thật vào repository & nhận tin nhắn Realtime từ người khác
@@ -832,15 +955,16 @@ void main() {
     expect(lostRoom.effectiveRoomStreak(today), 0);
     expect(lostRoom.isStreakLost(today), isTrue);
 
-    // 2. Kiểm tra trên giao diện phòng chat: mới vào là "0 ngày", nhắn 1 tin lập tức lên "1 ngày"
+    // 2. Kiểm tra quy tắc mới: Nhắn tin thường KHÔNG lên chuỗi -> học đủ 1 phút trong Meet mới lên chuỗi "1 ngày"!
     tester.view.physicalSize = const Size(1280, 900);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
     final authRepo = _FakeAuthRepository(
       initialProfile: const ProfileModel(
-        userId: 'u-streak',
+        userId: 'u-chat',
         displayName: 'Phạm Văn Hưng',
+        dailyGoalMinutes: 15,
         onboardingCompleted: true,
       ),
     );
@@ -873,10 +997,34 @@ void main() {
 
     expect(find.text('0 ngày'), findsOneWidget);
 
+    // Nhắn tin thường -> chuỗi vẫn giữ nguyên 0 ngày
     await tester.enterText(find.byType(TextField).last, 'Hello!');
     await tester.tap(find.byTooltip('Gửi tin nhắn'));
     await tester.pumpAndSettle();
+    expect(find.text('0 ngày'), findsOneWidget);
 
+    // Chủ phòng / Trợ giảng bấm Hẹn lịch Meet -> chọn 1 phút (Demo) -> Mở phòng Meet ngay
+    await tester.tap(find.text('Hẹn lịch Meet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1 phút (Demo)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mở phòng Meet ngay'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Rời buổi học'), findsOneWidget);
+
+    // Giả lập học đủ 60 giây trong phòng Meet -> tự động cộng chuỗi phòng!
+    await tester.pump(const Duration(seconds: 61));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Đã đủ 1 phút • Đã cộng chuỗi phòng!'),
+      findsOneWidget,
+    );
+
+    // Rời buổi học -> quay lại khung chat thấy đốm lửa đã lên "1 ngày"
+    await tester.tap(find.text('Rời buổi học'));
+    await tester.pumpAndSettle();
     expect(find.text('1 ngày'), findsOneWidget);
   });
 }

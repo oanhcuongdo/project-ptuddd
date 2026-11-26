@@ -5,6 +5,7 @@ import '../../../../core/network/supabase_config.dart';
 import '../../../auth_profile/data/models/language_model.dart';
 import '../../../notifications/data/repositories/notification_repository.dart';
 import '../models/conversation_model.dart';
+import '../models/meet_session_model.dart';
 import '../models/message_model.dart';
 import '../models/online_member_model.dart';
 import '../models/room_join_request.dart';
@@ -834,5 +835,315 @@ class ChatRepository {
         .from(DatabaseTables.conversations)
         .update({'description': description.trim()})
         .eq('id', conversationId);
+  }
+
+  // ==================== LỊCH HỌC VIDEO CALL MEET & ĐIỂM DANH ====================
+
+  static String _formatDateKey(DateTime dt) =>
+      '${dt.year.toString().padLeft(4, '0')}-'
+      '${dt.month.toString().padLeft(2, '0')}-'
+      '${dt.day.toString().padLeft(2, '0')}';
+
+  /// Tải buổi học Meet đang diễn ra (`live`) hoặc sắp tới (`scheduled`) mới nhất của phòng
+  Future<MeetSessionModel?> fetchActiveMeetSession(
+    String conversationId,
+  ) async {
+    try {
+      final rows = await SupabaseConfig.client
+          .from(DatabaseTables.roomMeetSessions)
+          .select()
+          .eq('conversation_id', conversationId)
+          .inFilter('status', ['live', 'scheduled'])
+          .order('created_at', ascending: false)
+          .limit(1);
+
+      if (rows.isEmpty) return null;
+      final row = rows.first;
+      final hostId = row['host_id'].toString();
+      final names = await _fetchProfileNames([hostId]);
+      return MeetSessionModel.fromMap(row, hostName: names[hostId]);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Chủ phòng / Trợ giảng tạo lịch buổi học Meet & bắn thông báo chuông Realtime cho cả phòng
+  Future<MeetSessionModel> createMeetSession({
+    required String conversationId,
+    required String roomName,
+    required String hostId,
+    required String hostName,
+    required String title,
+    required DateTime scheduledAt,
+    required int minMinutes,
+    required bool startImmediately,
+  }) async {
+    final client = SupabaseConfig.client;
+    final shortConv = conversationId.replaceAll('-', '');
+    final prefix = shortConv.length >= 8 ? shortConv.substring(0, 8) : shortConv;
+    final suffix = DateTime.now().millisecondsSinceEpoch % 100000;
+    final roomCode = 'BuddyTalk-$prefix-$suffix';
+
+    // Kết thúc các buổi cũ còn treo của phòng để chỉ có 1 buổi hiện hành sạch sẽ
+    await client
+        .from(DatabaseTables.roomMeetSessions)
+        .update({'status': 'ended'})
+        .eq('conversation_id', conversationId)
+        .inFilter('status', ['live', 'scheduled']);
+
+    final inserted = await client
+        .from(DatabaseTables.roomMeetSessions)
+        .insert({
+          'conversation_id': conversationId,
+          'host_id': hostId,
+          'title': title.trim(),
+          'meet_room_code': roomCode,
+          'scheduled_at': scheduledAt.toUtc().toIso8601String(),
+          'min_minutes': minMinutes,
+          'status': startImmediately ? 'live' : 'scheduled',
+        })
+        .select()
+        .single();
+
+    // Bắn thông báo chuông Realtime cho các thành viên khác trong phòng
+    try {
+      final memberRows = await client
+          .from(DatabaseTables.conversationMembers)
+          .select('user_id, status')
+          .eq('conversation_id', conversationId);
+
+      final timeStr =
+          '${scheduledAt.hour.toString().padLeft(2, '0')}:${scheduledAt.minute.toString().padLeft(2, '0')} '
+          '${scheduledAt.day.toString().padLeft(2, '0')}/${scheduledAt.month.toString().padLeft(2, '0')}';
+
+      for (final m in memberRows) {
+        final uid = m['user_id'].toString();
+        final status = m['status'] as String? ?? 'approved';
+        if (uid == hostId || status != 'approved') continue;
+
+        await _notifications.createNotification(
+          userId: uid,
+          actorId: hostId,
+          type: 'system',
+          title: startImmediately
+              ? 'Buổi học Meet đang diễn ra'
+              : 'Lịch học Meet mới tại "$roomName"',
+          body: startImmediately
+              ? '$hostName vừa mở buổi "${title.trim()}" tại "$roomName". Học đủ $minMinutes phút để 🔥 +1 chuỗi!'
+              : '$hostName hẹn buổi "${title.trim()}" lúc $timeStr (học đủ $minMinutes phút để 🔥 +1 chuỗi).',
+          referenceId: conversationId,
+        );
+      }
+    } catch (_) {}
+
+    return MeetSessionModel.fromMap(inserted, hostName: hostName);
+  }
+
+  /// Cập nhật trạng thái buổi học Meet (`live` hoặc `ended`)
+  Future<void> updateMeetSessionStatus({
+    required String sessionId,
+    required String status,
+  }) async {
+    await SupabaseConfig.client
+        .from(DatabaseTables.roomMeetSessions)
+        .update({'status': status})
+        .eq('id', sessionId);
+  }
+
+  /// Lắng nghe Realtime khi Chủ phòng / Trợ giảng tạo, mở hoặc kết thúc lịch Meet
+  RealtimeChannel? subscribeToRoomMeetSessions({
+    required String conversationId,
+    required void Function() onChanged,
+  }) {
+    if (!isReady) return null;
+
+    final channel = SupabaseConfig.client.channel('room_meet:$conversationId');
+    channel
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: DatabaseTables.roomMeetSessions,
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'conversation_id',
+            value: conversationId,
+          ),
+          callback: (_) => onChanged(),
+        )
+        .subscribe();
+
+    return channel;
+  }
+
+  /// Lấy tiến độ điểm danh đã tích lũy của bản thân trong buổi Meet này (chống mất giờ khi rớt mạng)
+  Future<({int attendedSeconds, bool streakAwarded})> fetchMyMeetAttendance({
+    required String sessionId,
+    required String userId,
+  }) async {
+    try {
+      final row = await SupabaseConfig.client
+          .from(DatabaseTables.roomMeetAttendance)
+          .select('attended_seconds, streak_awarded')
+          .eq('session_id', sessionId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (row == null) return (attendedSeconds: 0, streakAwarded: false);
+      return (
+        attendedSeconds: (row['attended_seconds'] as num?)?.toInt() ?? 0,
+        streakAwarded: row['streak_awarded'] as bool? ?? false,
+      );
+    } catch (_) {
+      return (attendedSeconds: 0, streakAwarded: false);
+    }
+  }
+
+  /// Lấy danh sách điểm danh toàn buổi Meet (dành cho Chủ phòng / Trợ giảng & thành viên xem)
+  Future<List<MeetAttendanceModel>> fetchSessionAttendances(
+    String sessionId,
+  ) async {
+    try {
+      final rows = await SupabaseConfig.client
+          .from(DatabaseTables.roomMeetAttendance)
+          .select()
+          .eq('session_id', sessionId)
+          .order('attended_seconds', ascending: false);
+
+      if (rows.isEmpty) return const [];
+      final userIds =
+          rows.map<String>((r) => r['user_id'].toString()).toSet().toList();
+      final names = await _fetchProfileNames(userIds);
+
+      return rows
+          .map<MeetAttendanceModel>(
+            (r) => MeetAttendanceModel.fromRow(
+              r,
+              displayName: names[r['user_id'].toString()],
+            ),
+          )
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Lưu cộng dồn số giây đã học trong buổi Meet vào `room_meet_attendance`
+  Future<void> saveMeetAttendanceProgress({
+    required String sessionId,
+    required String userId,
+    required int attendedSeconds,
+    required bool streakAwarded,
+  }) async {
+    try {
+      await SupabaseConfig.client.from(DatabaseTables.roomMeetAttendance).upsert(
+        {
+          'session_id': sessionId,
+          'user_id': userId,
+          'attended_seconds': attendedSeconds,
+          'streak_awarded': streakAwarded,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        },
+        onConflict: 'session_id,user_id',
+      );
+    } catch (_) {}
+  }
+
+  /// Lấy tổng số phút cá nhân đã luyện qua Meet hôm nay (`user_quest_logs`)
+  Future<int> fetchTodayPersonalMinutes(String userId) async {
+    try {
+      final todayKey = _formatDateKey(DateTime.now());
+      final row = await SupabaseConfig.client
+          .from(DatabaseTables.userQuestLogs)
+          .select('completed_minutes')
+          .eq('user_id', userId)
+          .eq('log_date', todayKey)
+          .maybeSingle();
+      return (row?['completed_minutes'] as num?)?.toInt() ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Cộng dồn phút học Meet hôm nay vào `user_quest_logs` và cộng chuỗi cá nhân (`profiles.streak_count`)
+  /// ngay khi tổng phút trong ngày đạt `daily_goal_minutes` đã chọn lúc tạo tài khoản.
+  Future<({int todayMinutes, int streakCount, int bestStreak, bool goalReached})?>
+      recordPersonalDailyMeetMinutes({
+    required String userId,
+    required int addMinutes,
+    required int dailyGoalMinutes,
+  }) async {
+    if (addMinutes <= 0) return null;
+    try {
+      final client = SupabaseConfig.client;
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final todayKey = _formatDateKey(today);
+      final goal = dailyGoalMinutes > 0 ? dailyGoalMinutes : 15;
+
+      final existing = await client
+          .from(DatabaseTables.userQuestLogs)
+          .select('completed_minutes')
+          .eq('user_id', userId)
+          .eq('log_date', todayKey)
+          .maybeSingle();
+
+      final prevMinutes = (existing?['completed_minutes'] as num?)?.toInt() ?? 0;
+      final nextMinutes = (prevMinutes + addMinutes).clamp(0, 600);
+      final isCompleted = nextMinutes >= goal;
+
+      await client.from(DatabaseTables.userQuestLogs).upsert({
+        'user_id': userId,
+        'log_date': todayKey,
+        'goal_minutes': goal,
+        'completed_minutes': nextMinutes,
+        'is_completed': isCompleted,
+      }, onConflict: 'user_id,log_date');
+
+      // Tính chuỗi ngày đạt mục tiêu cá nhân liên tiếp
+      final start = today.subtract(const Duration(days: 89));
+      final logs = await client
+          .from(DatabaseTables.userQuestLogs)
+          .select('log_date, is_completed')
+          .eq('user_id', userId)
+          .eq('is_completed', true)
+          .gte('log_date', _formatDateKey(start));
+
+      final completedDates = <String>{
+        for (final row in logs)
+          row['log_date'].toString().split('T').first.split(' ').first,
+      };
+
+      var streak = 0;
+      var cursor = today;
+      if (!completedDates.contains(_formatDateKey(cursor))) {
+        cursor = cursor.subtract(const Duration(days: 1));
+      }
+      while (completedDates.contains(_formatDateKey(cursor))) {
+        streak++;
+        cursor = cursor.subtract(const Duration(days: 1));
+      }
+
+      final profileRow = await client
+          .from(DatabaseTables.profiles)
+          .select('best_streak')
+          .eq('user_id', userId)
+          .maybeSingle();
+      final prevBest = (profileRow?['best_streak'] as num?)?.toInt() ?? 0;
+      final nextBest = streak > prevBest ? streak : prevBest;
+
+      await client.from(DatabaseTables.profiles).update({
+        'streak_count': streak,
+        'best_streak': nextBest,
+      }).eq('user_id', userId);
+
+      return (
+        todayMinutes: nextMinutes,
+        streakCount: streak,
+        bestStreak: nextBest,
+        goalReached: isCompleted,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 }

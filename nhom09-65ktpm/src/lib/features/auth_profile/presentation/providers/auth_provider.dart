@@ -129,6 +129,22 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Đồng bộ chuỗi kỷ luật cá nhân trên Header ngay khi học đủ mục tiêu phút/ngày trong Meet
+  void updateLocalStreak({required int streakCount, int? bestStreak}) {
+    final current = _currentProfile;
+    if (current == null) return;
+    final nextBest = bestStreak ??
+        (streakCount > current.bestStreak ? streakCount : current.bestStreak);
+    if (current.streakCount == streakCount && current.bestStreak == nextBest) {
+      return;
+    }
+    _currentProfile = current.copyWith(
+      streakCount: streakCount,
+      bestStreak: nextBest,
+    );
+    notifyListeners();
+  }
+
   Future<bool> _runAuthAction(Future<ProfileModel> Function() action) async {
     _isLoading = true;
     _errorMessage = null;

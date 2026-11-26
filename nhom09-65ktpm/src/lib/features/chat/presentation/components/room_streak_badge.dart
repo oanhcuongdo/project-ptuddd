@@ -44,15 +44,15 @@ class RoomStreakBadge extends StatelessWidget {
       iconColor = const Color(0xFFD97706);
       textColor = const Color(0xFFB45309);
       tooltip =
-          'Chuỗi $streak ngày đang chờ giữ lửa! Nhắn ít nhất 1 tin hôm nay kẻo mất chuỗi.';
+          'Chuỗi $streak ngày đang chờ giữ lửa! Vào buổi Meet học đủ phút hôm nay kẻo mất chuỗi.';
     } else {
       bgColor = const Color(0xFFF1F5F9);
       borderColor = AppColors.divider;
       iconColor = AppColors.textMuted;
       textColor = AppColors.textMuted;
       tooltip = isLost
-          ? 'Bạn đã bỏ lỡ 1 ngày nên chuỗi phòng này về 0. Nhắn tin hôm nay để thắp lại!'
-          : 'Chuỗi phòng: 0 ngày. Nhắn 1 tin trong phòng này để bắt đầu thắp lửa!';
+          ? 'Bạn đã bỏ lỡ 1 ngày nên chuỗi phòng này về 0. Vào buổi Meet học đủ phút để thắp lại!'
+          : 'Chuỗi phòng: 0 ngày. Tham gia buổi học Meet đủ số phút quy định để thắp lửa!';
     }
 
     final label = compact ? '$streak' : '$streak ngày';

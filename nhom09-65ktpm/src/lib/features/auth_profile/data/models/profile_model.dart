@@ -45,6 +45,27 @@ class ProfileModel {
     );
   }
 
+  ProfileModel copyWith({
+    int? streakCount,
+    int? bestStreak,
+    int? dailyGoalMinutes,
+  }) {
+    return ProfileModel(
+      userId: userId,
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+      bio: bio,
+      nativeLang: nativeLang,
+      targetLang: targetLang,
+      proficiencyLevel: proficiencyLevel,
+      dailyGoalMinutes: dailyGoalMinutes ?? this.dailyGoalMinutes,
+      streakCount: streakCount ?? this.streakCount,
+      bestStreak: bestStreak ?? this.bestStreak,
+      isOnline: isOnline,
+      onboardingCompleted: onboardingCompleted,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,

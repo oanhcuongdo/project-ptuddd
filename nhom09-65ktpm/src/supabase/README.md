@@ -20,6 +20,7 @@ Mở **Supabase Dashboard → SQL Editor → New query**, dán và bấm **Run**
 12. `migrations/012_room_streak.sql` — Thêm chuỗi lửa kỷ luật riêng từng thành viên theo từng phòng (`conversation_members.streak_count`, `best_streak`, `last_chat_date`).
 13. `migrations/013_room_cover_and_focus.sql` — Thêm ảnh bìa phòng học (`cover_url`) & định hướng kỹ năng dài hạn (`room_focus`) cho bảng `conversations`.
 14. `migrations/014_room_co_owner_role.sql` — Mở rộng vai trò thành viên phòng (`owner` Chủ phòng, `co_owner` Phó phòng / Trợ giảng, `member` Thành viên).
+15. `migrations/015_room_meet_sessions.sql` — Tạo bảng `room_meet_sessions` & `room_meet_attendance` cho lịch học Video Call Jitsi Meet và điểm danh lên chuỗi 2 tầng.
 
 ## Lưu ý bảo mật
 - Tạo file `.env` cục bộ từ `../.env.example` và chạy ứng dụng với `--dart-define-from-file=.env`.
