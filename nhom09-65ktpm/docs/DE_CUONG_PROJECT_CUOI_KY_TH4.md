@@ -16,7 +16,7 @@
 
 | STT | Họ và Tên | Mã Sinh Viên | Lớp Sinh Hoạt | Vai Trò | Nhiệm Vụ Phân Công | Đóng Góp (%) | Email |
 | :-: | :--- | :---: | :---: | :---: | :--- | :---: | :--- |
-| **1** | **Phạm Văn Hưng** | **2351170598** | 65KTPM | Trưởng nhóm | Quản lý dự án, Thiết kế CSDL, Firebase Auth & Thiết lập hồ sơ, Quản lý phòng học, Kiểm duyệt thành viên phòng học, Nhắn tin Realtime, Chuỗi lửa kỷ luật riêng từng phòng, Hệ thống Thông báo Realtime | 100% | phamvanhung21122004@gmail.com |
+| **1** | **Phạm Văn Hưng** | **2351170598** | 65KTPM | Trưởng nhóm | Quản lý dự án, Thiết kế CSDL, Đăng nhập / Đăng ký (Email & Google) & Thiết lập hồ sơ, Quản lý phòng học, Kiểm duyệt thành viên phòng học, Phân quyền thành viên trong phòng học (Chủ phòng, Trợ giảng, Người dùng), Bảng Thông tin phòng, Nhắn tin Realtime, Lên lịch học bằng Video Call, Điểm danh & Tính chuỗi ngày học (theo phòng và cá nhân), Thông báo Realtime | 100% | phamvanhung21122004@gmail.com |
 | **2** | **Trịnh Trung Kiên** | **2251172396** | 65KTPM | Thành viên | Thiết kế UI/UX Material 3 toàn ứng dụng, Lập trình Phân hệ Quản lý Buổi luyện tập (Practice Sessions): Tạo lịch hẹn, Đồng hồ đếm giờ học (Session Timer 15-30p), Đánh giá buổi học và Thống kê tổng giờ luyện tập | 100% | trinhkien0103@gmail.com |
 | **3** | **Đỗ Việt Tiến** | **2251243452** | 65KTPM | Thành viên | Lập trình Phân hệ Tìm kiếm & Ghép cặp bạn đồng hành (Buddy Matching) theo ngôn ngữ bù trừ và bộ lọc trình độ | 100% | tien.dv.65ktpm@gmail.com |
 | **4** | **Cao Đức Đạo** | **2351170581** | 65KTPM | Thành viên | Lập trình Phân hệ Gợi ý chủ đề & Kịch bản hội thoại tình huống (Conversation Topics): Kịch bản mẫu theo cấp độ A1-B2, gợi ý câu mở đầu hội thoại | 100% | caoducdao17022005@gmail.com |
@@ -65,7 +65,7 @@ Trong suốt quá trình học tập và thực hành học phần Phát Triển
 - **Mục tiêu cụ thể:**
   - Hoàn thiện giao diện Material 3 đa nền tảng (Web Dashboard & Mobile).
   - Quản lý xác thực Firebase Auth (Email & Google), tự động khôi phục phiên và thiết lập hồ sơ ban đầu (Onboarding).
-  - Hệ thống Quản lý phòng học & Chat Realtime: Khám phá/tạo phòng học linh hoạt (trình độ, giới hạn thành viên), kiểm duyệt thành viên vào phòng, nhắn tin WebSocket trực tuyến, chuỗi lửa kỷ luật riêng của từng người theo từng phòng học và hệ thống Thông báo Realtime.
+  - Hệ thống Quản lý phòng học, Chat & Video Call Realtime: Khám phá/tạo phòng học (ảnh bìa, định hướng kỹ năng, trình độ, sức chứa), kiểm duyệt thành viên, phân quyền thành viên trong phòng học (Chủ phòng, Trợ giảng, Người dùng), bảng Thông tin phòng, nhắn tin Realtime, lên lịch học bằng Video Call, điểm danh & tính chuỗi ngày học (chuỗi theo từng phòng và chuỗi mục tiêu ngày cá nhân) và Thông báo Realtime.
   - Xây dựng thuật toán ghép cặp bạn học bù trừ ngôn ngữ (Vietnamese ⇄ English/Chinese).
   - Tích hợp công cụ Dịch tức thì (Instant Translate) hiển thị song song câu gốc - câu dịch và Sổ tay lưu từ vựng (Vocabulary Notebook).
   - Kho kịch bản và chủ đề hội thoại tình huống theo cấp độ (A1, A2, B1...), giải quyết triệt để vấn đề "không biết nói gì".
@@ -85,12 +85,14 @@ HỆ THỐNG KỶ LUẬT GIAO TIẾP & BẠN ĐỒNG HÀNH (BUDDYTALK)
 │   ├── Đăng nhập / Đăng ký bằng Email & Google (Firebase Authentication), tự khôi phục phiên
 │   ├── Luồng Thiết lập hồ sơ 2 bước (Onboarding): Ảnh đại diện, tên hiển thị, ngôn ngữ (từ bảng languages), trình độ & mục tiêu phút/ngày
 │   └── Quản lý hồ sơ cá nhân & phân quyền người dùng trên Supabase Cloud
-├── 2. Phân hệ Quản Lý Phòng Học, Kiểm Duyệt Thành Viên, Chat Realtime & Chuỗi Lửa Phòng
-│   ├── Khám phá, tìm kiếm, lọc theo ngôn ngữ/trình độ, sắp xếp & phân trang phòng học
-│   ├── Tạo phòng học nhóm linh hoạt (không yêu cầu/có yêu cầu trình độ, không giới hạn/có giới hạn thành viên, vào ngay/cần kiểm duyệt)
-│   ├── Kiểm duyệt thành viên vào phòng (Xin tham gia -> Chờ duyệt -> Quản lý phòng Duyệt / Từ chối)
-│   ├── Nhắn tin Realtime qua WebSocket (Supabase Realtime) lưu lịch sử trực tiếp vào bảng `messages`
-│   └── Chuỗi lửa kỷ luật riêng cho từng thành viên trong từng phòng học (nhắn 1 lần/ngày +1, quên 1 ngày tự reset về 0)
+├── 2. Phân hệ Phòng Học, Chat Realtime, Phân Quyền & Lên Lịch Học Bằng Video Call
+│   ├── Khám phá, tìm kiếm, lọc, phân trang phòng học & cột Cộng đồng (phòng sôi nổi, bạn bè đang online)
+│   ├── Tạo phòng học nhóm (ảnh bìa, định hướng kỹ năng, trình độ, giới hạn thành viên, vào ngay / cần kiểm duyệt)
+│   ├── Kiểm duyệt thành viên vào phòng (Xin tham gia -> Chờ duyệt -> Duyệt / Từ chối)
+│   ├── Không gian học 2 cột & Nhắn tin Realtime (Supabase Realtime WebSocket)
+│   ├── Bảng Thông tin phòng (thành viên, sửa nội quy, link đã chia sẻ, rời phòng) & Phân quyền thành viên trong phòng học (Chủ phòng, Trợ giảng, Người dùng)
+│   ├── Lên lịch học bằng Video Call trực tiếp trong phòng học
+│   └── Điểm danh tự động & Tính chuỗi ngày học (chuỗi lửa từng phòng và chuỗi mục tiêu ngày cá nhân)
 ├── 3. Phân hệ Thông Báo Thời Gian Thực (Realtime Notifications)
 │   ├── Chuông thông báo trên Header cập nhật tức thì qua WebSocket (`public.notifications`)
 │   ├── Dropdown kiểu Facebook (Tất cả / Chưa đọc / Đọc tất cả) & lịch sử duyệt/từ chối
@@ -125,7 +127,7 @@ Nhằm phục vụ quá trình làm việc nhóm 5 thành viên hiệu quả, tr
 
 - **Tầng Core (`lib/core/`):** Chứa các thành phần dùng chung: constants, theme Material 3, utils, network, widgets chung.
 - **Tầng Features (`lib/features/`):** Phân chia thành các phân hệ độc lập tương ứng với 5 thành viên:
-  - `auth_profile/`, `chat/`, `notifications/`: Xác thực Firebase Auth & Thiết lập hồ sơ (Onboarding), Quản lý phòng học, Kiểm duyệt thành viên, Nhắn tin Realtime, Chuỗi lửa kỷ luật riêng từng phòng & Hệ thống Thông báo Realtime (Thành viên 1 - Phạm Văn Hưng).
+  - `auth_profile/`, `chat/`, `notifications/`: Đăng nhập / Đăng ký & Thiết lập hồ sơ (Onboarding), Quản lý phòng học, Kiểm duyệt thành viên, Phân quyền thành viên trong phòng học (Chủ phòng, Trợ giảng, Người dùng), Bảng Thông tin phòng, Nhắn tin Realtime, Lên lịch học bằng Video Call, Điểm danh & Tính chuỗi ngày học (theo phòng và cá nhân) & Thông báo Realtime (Thành viên 1 - Phạm Văn Hưng).
   - `session_management/`: Quản lý buổi học, Session Timer, Đánh giá đối tác & Bộ Theme UI Material 3 toàn app (Thành viên 2 - Trịnh Trung Kiên).
   - `buddy_matching/`: Tìm kiếm & Ghép cặp bạn đồng hành bù trừ ngôn ngữ (Thành viên 3 - Đỗ Việt Tiến).
   - `conversation_topics/`: Kho kịch bản chủ đề hội thoại tình huống A1-B2 & Starters (Thành viên 4 - Cao Đức Đạo).
@@ -141,31 +143,32 @@ Nhằm phục vụ quá trình làm việc nhóm 5 thành viên hiệu quả, tr
 2. **CSDL Đám mây & Realtime (Supabase Cloud PostgreSQL & Realtime Channels):**
    - Quản lý dữ liệu trung tâm 100% trực tuyến với các bảng quan hệ chuẩn hóa:
      - `users`, `user_accounts`, `profiles`, `languages`: Tài khoản đa phương thức, hồ sơ người dùng, danh mục ngôn ngữ cấp phép và trạng thái Onboarding.
-     - `conversations`, `conversation_members`: Thống nhất cả Chat 1-1 & Phòng học nhóm (quy tắc trình độ/giới hạn thành viên linh hoạt, chế độ kiểm duyệt `require_approval`, trạng thái `pending/approved` và chuỗi lửa kỷ luật riêng từng thành viên theo phòng `streak_count`, `best_streak`, `last_chat_date`).
-     - `messages`: Lưu trữ lịch sử tin nhắn hội thoại Realtime (kèm trường hỗ trợ dịch thuật).
-     - `notifications`: Hệ thống thông báo Realtime dùng chung toàn ứng dụng (yêu cầu xin vào phòng, kết quả duyệt/từ chối...).
+     - `conversations`, `conversation_members`: Phòng học nhóm & Chat 1-1 (ảnh bìa `cover_url`, định hướng `room_focus`, kiểm duyệt `require_approval`, phân quyền `owner` / `co_owner` / `member`, chuỗi lửa phòng `streak_count`, `best_streak`, `last_chat_date`).
+     - `messages`: Lịch sử tin nhắn hội thoại Realtime.
+     - `room_meet_sessions`, `room_meet_attendance`, `user_quest_logs`: Lịch học bằng Video Call, điểm danh thời lượng học thực tế và tích lũy phút mục tiêu ngày cá nhân.
+     - `notifications`: Thông báo Realtime dùng chung toàn ứng dụng (xin vào phòng, duyệt/từ chối, bổ nhiệm Trợ giảng, hẹn lịch Meet).
      - `buddy_matches`: Danh sách và trạng thái kết nối giữa các cặp bạn học (`pending`, `accepted`, `rejected`, `blocked`).
      - `conversation_topics`, `user_topic_progress`: Kho danh mục chủ đề và kịch bản hội thoại mẫu theo cấp độ.
      - `practice_sessions`, `vocab_notebook`: Lịch sử buổi luyện tập và sổ tay từ vựng cá nhân.
-   - **Kênh WebSocket Realtime:** Khai thác **Supabase Realtime Channel** cho `messages`, `notifications`, `conversations`, `conversation_members` giúp cập nhật tức thì không cần tải lại trang.
+   - **Kênh WebSocket Realtime:** Khai thác **Supabase Realtime Channel** cho `messages`, `notifications`, `conversations`, `conversation_members`, `room_meet_sessions` giúp cập nhật tức thì không cần tải lại trang.
 
 #### c) Danh mục thư viện & công nghệ cốt lõi
 
 - **Nền tảng:** Flutter SDK (3.x trở lên), Dart SDK.
 - **Xác thực tài khoản:** `firebase_core`, `firebase_auth`, `google_sign_in`.
 - **CSDL Đám mây & Realtime:** `supabase_flutter` (PostgreSQL + Realtime WebSocket).
+- **Video Call trực tuyến:** Jitsi Meet nhúng trực tiếp.
 - **Dịch thuật tức thì:** API Google Translate Endpoint (hỗ trợ Trung - Việt - Anh).
 - **Quản lý trạng thái:** `provider`.
 
 ---
 
-### 3.5. Kế hoạch thực hiện & Phân công chi tiết (3 tuần)
+### 3.5. Kế hoạch thực hiện & Phân công chi tiết (2 tuần)
 
 | Tuần | Nội dung công việc cụ thể | Phân công chi tiết cả 5 thành viên | Sản phẩm bàn giao (Deliverables) |
 | :---: | :--- | :--- | :--- |
-| **Tuần 1**<br>*(Khởi động, Thiết kế & CSDL)* | • Khảo sát yêu cầu chi tiết (SRS), vẽ sơ đồ Use Case, Activity Diagram.<br>• Thiết kế Prototype Figma hoàn chỉnh cho các màn hình ứng dụng.<br>• Khởi tạo dự án Flutter theo kiến trúc Feature-First, cấu hình Theme Material 3 (Dark/Light).<br>• Tích hợp Firebase Auth (Google Sign-In), thiết kế các bảng CSDL trên Supabase & SQLite cục bộ (`sqflite`).<br>• Xây dựng bộ dữ liệu mẫu cho Kho chủ đề hội thoại và cấu hình API Dịch thuật. | • **Phạm Văn Hưng (Trưởng nhóm):** Phân tích SRS, khởi tạo khung dự án Flutter, cấu hình Firebase Auth & CSDL Supabase, thiết kế kiến trúc Chat Realtime & SQLite kỷ luật.<br>• **Trịnh Trung Kiên:** Thiết kế UI/UX Prototype Figma, xây dựng Theme Material 3 toàn hệ thống và thiết kế luồng quản lý buổi học.<br>• **Đỗ Việt Tiến:** Thiết kế luồng Use Case Ghép cặp bạn học, thiết kế bảng `buddy_matches` và UI tìm kiếm bạn.<br>• **Cao Đức Đạo:** Thu thập và biên soạn danh mục kịch bản chủ đề giao tiếp (A1-B2), thiết kế bảng `conversation_topics`.<br>• **Trương Tuấn Hải:** Nghiên cứu API Dịch thuật, thiết kế cấu trúc dữ liệu Sổ tay từ vựng và giao diện dịch trong chat. | Bản đặc tả SRS, Figma Prototype, Khung dự án Flutter chạy được, CSDL Supabase & SQLite sẵn sàng. |
-| **Tuần 2**<br>*(Lập trình các Phân hệ cốt lõi)* | • Lập trình xác thực Đăng nhập Google, quản lý hồ sơ và CSDL SQLite Offline-First.<br>• Xây dựng Màn hình Kỷ luật hàng ngày, tính Streak và ma trận Heatmap.<br>• Lập trình Phòng Chat Realtime 1-1 và Phòng Chat Nhóm học tập đa người dùng.<br>• Lập trình thuật toán ghép cặp bạn học bù trừ ngôn ngữ và danh sách bạn đồng hành.<br>• Lập trình Màn hình Thư viện chủ đề hội thoại tình huống và bộ gợi ý mở đầu (Starters).<br>• Lập trình công cụ Dịch tức thì (song song câu gốc - câu dịch) và Đồng hồ bấm giờ buổi học. | • **Phạm Văn Hưng (Chủ trì):** Lập trình Đăng nhập Google, Hồ sơ người dùng, Màn hình Kỷ luật (Streak/Heatmap/SQLite), Phòng Chat 1-1 & Phòng Chat Nhóm học tập (Supabase Realtime).<br>• **Trịnh Trung Kiên (Chủ trì):** Lập trình Phân hệ Quản lý Buổi luyện tập: tạo lịch hẹn, Đồng hồ bấm giờ (Session Timer 15-30p) và hoàn thiện các UI Widgets chung.<br>• **Đỗ Việt Tiến (Chủ trì):** Lập trình logic ghép cặp bạn học bù trừ ngôn ngữ, gửi/nhận lời mời kèm cặp và quản lý danh sách bạn.<br>• **Cao Đức Đạo (Chủ trì):** Lập trình màn hình Thư viện chủ đề, bộ lọc cấp độ A1-B2, gợi ý mẫu câu hội thoại và đánh dấu hoàn thành.<br>• **Trương Tuấn Hải (Chủ trì):** Tích hợp nút Dịch tức thì trong tin nhắn chat, tính năng tra cứu từ mới và Sổ tay lưu từ vựng (Vocabulary Notebook). | Hoàn thành toàn bộ các phân hệ cốt lõi: Đăng nhập, Kỷ luật Streak/Heatmap, Chat 1-1 & Nhóm học tập, Ghép cặp bạn học, Kho chủ đề & Dịch tức thì. |
-| **Tuần 3**<br>*(Thống Kê, Test, Đóng Gói & Báo Cáo)* | • Hoàn thiện màn hình Tổng kết buổi học, ghi chú từ vựng và chấm sao đánh giá bạn đồng hành.<br>• Viết Unit Test, Widget Test và kiểm thử chức năng toàn diện trên thiết bị thật Android.<br>• Rà soát và tối ưu mã nguồn (đạt 0 cảnh báo `flutter analyze`), xuất bản file cài đặt `app-release.apk`.<br>• Hoàn thiện toàn bộ Báo cáo đồ án chi tiết (Word/PDF), Slide bảo vệ và kịch bản video demo sản phẩm. | • **Trịnh Trung Kiên & Phạm Văn Hưng:** Hoàn thiện màn hình đánh giá buổi học, tối ưu hiệu năng và đóng gói `app-release.apk`.<br>• **Cả nhóm (Kiên, Tiến, Đạo, Hải):** Kiểm thử toàn diện chức năng trên nhiều thiết bị Android, rà soát giao diện và vá lỗi phát sinh.<br>• **Phạm Văn Hưng (Trưởng nhóm):** Kiểm duyệt kỹ thuật mã nguồn, đóng gói tài liệu nộp bài trên GitHub.<br>• **Cả nhóm 09:** Hoàn thiện Báo cáo đồ án chi tiết (DOCX/PDF), Slide thuyết trình và chuẩn bị video demo sản phẩm. | File cài đặt `app-release.apk`, Báo cáo đồ án chi tiết (DOCX/PDF), Slide thuyết trình và Video demo. |
+| **Tuần 1**<br>*(Thiết kế, CSDL & Phân hệ nền tảng)* | • Khảo sát yêu cầu (SRS), thiết kế giao diện Material 3 và khởi tạo khung dự án Flutter theo kiến trúc Feature-First.<br>• Cấu hình Firebase Auth (Email & Google) và thiết kế CSDL trực tuyến 100% trên Supabase Cloud (PostgreSQL + Realtime).<br>• Lập trình Đăng nhập / Đăng ký, Thiết lập hồ sơ (Onboarding), Quản lý phòng học, Kiểm duyệt thành viên, Nhắn tin Realtime & Thông báo Realtime.<br>• Thiết kế dữ liệu và giao diện cơ bản cho Ghép cặp bạn học, Kho chủ đề hội thoại, Dịch tức thì & Quản lý buổi luyện tập. | • **Phạm Văn Hưng (Trưởng nhóm):** Khởi tạo dự án Flutter, thiết kế CSDL Supabase Cloud, lập trình Đăng nhập / Đăng ký & Onboarding, Quản lý phòng học, Kiểm duyệt thành viên, Nhắn tin Realtime & Thông báo Realtime.<br>• **Trịnh Trung Kiên:** Thiết kế UI/UX Material 3 toàn ứng dụng và khung màn hình Quản lý buổi luyện tập.<br>• **Đỗ Việt Tiến:** Thiết kế bảng `buddy_matches` và giao diện Tìm kiếm / Ghép cặp bạn đồng hành.<br>• **Cao Đức Đạo:** Biên soạn kho chủ đề & kịch bản hội thoại A1–B2, thiết kế bảng `conversation_topics`.<br>• **Trương Tuấn Hải:** Tích hợp API Dịch tức thì (Anh - Việt - Trung), cấu trúc Sổ tay từ vựng và viết test dịch thuật. | Đề cương SRS, khung dự án Flutter chạy ổn định, CSDL Supabase Cloud, các phân hệ Auth, Phòng học, Chat & Thông báo Realtime và API Dịch thuật. |
+| **Tuần 2**<br>*(Tính năng nâng cao, Kiểm thử & Đóng gói)* | • Hoàn thiện Phân quyền thành viên trong phòng học (Chủ phòng, Trợ giảng, Người dùng), Bảng Thông tin phòng, Lên lịch học bằng Video Call, Điểm danh & Tính chuỗi ngày học (theo phòng và cá nhân).<br>• Hoàn thiện Ghép cặp bạn đồng hành, Thư viện chủ đề hội thoại, Tích hợp nút Dịch tức thì + Sổ tay từ vựng và Quản lý buổi luyện tập.<br>• Viết Unit/Widget Test, kiểm thử toàn diện (`flutter analyze` 0 cảnh báo) và đóng gói `app-release.apk`.<br>• Hoàn thiện báo cáo đồ án, slide bảo vệ, video demo và nộp bài đúng chuẩn Git/GitHub. | • **Phạm Văn Hưng (Trưởng nhóm):** Hoàn thiện Phân quyền thành viên trong phòng học (Chủ phòng, Trợ giảng, Người dùng), Bảng Thông tin phòng, Lên lịch học bằng Video Call, Điểm danh & Tính chuỗi ngày học, kiểm duyệt PR và đóng gói tài liệu nộp bài.<br>• **Trịnh Trung Kiên:** Hoàn thiện Quản lý buổi luyện tập (Session Timer, đánh giá đối tác) & phối hợp đóng gói `app-release.apk`.<br>• **Đỗ Việt Tiến:** Hoàn thiện ghép cặp bạn học bù trừ ngôn ngữ, gửi/nhận lời mời và danh sách bạn đồng hành.<br>• **Cao Đức Đạo:** Hoàn thiện thư viện chủ đề A1–B2, bộ lọc cấp độ và gợi ý câu mở đầu hội thoại.<br>• **Trương Tuấn Hải:** Hoàn thiện dịch tức thì trong chat, tra cứu & lưu Sổ tay từ vựng.<br>• **Cả nhóm 09:** Kiểm thử chéo, hoàn thiện Báo cáo, Slide thuyết trình và Video demo. | Ứng dụng BuddyTalk hoàn chỉnh, `app-release.apk`, Báo cáo đồ án, Slide thuyết trình & Video demo. |
 
 ---
 
