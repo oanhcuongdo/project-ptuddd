@@ -180,11 +180,13 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       );
     }
 
-    var canManageRoom = liveRoom.canManageRoom;
+    final isCreator =
+        currentUserId != null && liveRoom.createdBy == currentUserId;
+    var canManageRoom = isCreator || liveRoom.canManageRoom;
     if (currentUserId != null) {
       for (final m in chat.roomMembers) {
         if (m.userId == currentUserId) {
-          canManageRoom = m.isOwner || m.isCoOwner;
+          canManageRoom = isCreator || m.isOwner || m.isCoOwner;
           break;
         }
       }
@@ -421,7 +423,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
               Text(
                 room.description.isNotEmpty
                     ? room.description
-                    : 'Hãy thoải mái chia sẻ, nhắn 1 tin hôm nay để thắp sáng chuỗi lửa cùng mọi người trong phòng "${room.name}" nhé!',
+                    : 'Hãy trao đổi cùng mọi người và tham gia buổi học Video Call Meet trong phòng "${room.name}" để giữ chuỗi lửa nhé!',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 13.5,

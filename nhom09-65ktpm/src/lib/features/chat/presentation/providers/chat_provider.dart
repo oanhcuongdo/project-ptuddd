@@ -293,6 +293,8 @@ class ChatProvider extends ChangeNotifier {
     _detachRoomChannel();
     _activeRoomId = conversationId;
     _roomMessages = const [];
+    _roomMembers = const [];
+    _activeMeetSession = null;
     _messageError = null;
 
     if (!_repository.isReady) {
@@ -636,19 +638,23 @@ class ChatProvider extends ChangeNotifier {
     _discoverRooms = _discoverRooms.map(patch).toList();
   }
 
-  /// Tải danh sách thành viên phòng (Chủ phòng / Phó phòng / Thành viên) cho Panel Thông tin phòng
+  /// Tải danh sách thành viên phòng (Chủ phòng / Trợ giảng / Thành viên) cho Panel Thông tin phòng
   Future<void> loadRoomMembers(String conversationId) async {
     if (!_repository.isReady) return;
     _isLoadingMembers = true;
     notifyListeners();
 
     try {
-      _roomMembers = await _repository.fetchRoomMembers(conversationId);
+      final fetched = await _repository.fetchRoomMembers(conversationId);
+      if (_activeRoomId != null && _activeRoomId != conversationId) return;
+      _roomMembers = fetched;
     } catch (e) {
       debugPrint('[ChatProvider] Khong the tai danh sach thanh vien: $e');
     } finally {
-      _isLoadingMembers = false;
-      notifyListeners();
+      if (_activeRoomId == null || _activeRoomId == conversationId) {
+        _isLoadingMembers = false;
+        notifyListeners();
+      }
     }
   }
 

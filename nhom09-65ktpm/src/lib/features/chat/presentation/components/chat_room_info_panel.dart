@@ -152,13 +152,15 @@ class _ChatRoomInfoPanelState extends State<ChatRoomInfoPanel> {
     final currentUid = widget.currentUserId;
     final links = _extractLinks();
 
-    // Xác định vai trò thật của bản thân trong phòng (ưu tiên từ danh sách members vừa tải)
-    var amOwner = widget.room.isOwner;
+    // Xác định vai trò thật của bản thân trong phòng (ưu tiên created_by và danh sách members vừa tải)
+    final isCreator =
+        currentUid != null && widget.room.createdBy == currentUid;
+    var amOwner = isCreator || widget.room.isOwner;
     var amCoOwner = widget.room.isCoOwner;
     if (currentUid != null) {
       for (final m in members) {
         if (m.userId == currentUid) {
-          amOwner = m.isOwner;
+          amOwner = isCreator || m.isOwner;
           amCoOwner = m.isCoOwner;
           break;
         }

@@ -149,6 +149,8 @@ class ChatRepository {
       final type = row['type'] as String? ?? 'group';
       final creatorId = row['created_by'].toString();
       final streakInfo = streakByConv[id];
+      final effectiveRole =
+          (type == 'group' && creatorId == userId) ? 'owner' : roleByConv[id];
       String? resolvedName;
       if (type == 'direct') {
         final partnerId = partnerByDirectConv[id];
@@ -162,7 +164,7 @@ class ChatRepository {
         pendingCount: pendingCountMap[id] ?? 0,
         isJoined: true,
         membershipStatus: 'approved',
-        myRole: roleByConv[id],
+        myRole: effectiveRole,
         resolvedName: resolvedName,
         managerName: profileNames[creatorId] ?? 'Quản trị phòng',
         roomStreakCount: streakInfo?.count ?? 0,
@@ -248,13 +250,17 @@ class ChatRepository {
       final creatorId = row['created_by'].toString();
       final myStatus = myStatusMap[id];
       final streakInfo = myStreakMap[id];
+      final effectiveRole =
+          (myStatus == 'approved' && creatorId == userId)
+              ? 'owner'
+              : myRoleMap[id];
       return ConversationModel.fromMap(
         row,
         memberCount: approvedCountMap[id] ?? 0,
         pendingCount: pendingCountMap[id] ?? 0,
         isJoined: myStatus == 'approved',
         membershipStatus: myStatus,
-        myRole: myRoleMap[id],
+        myRole: effectiveRole,
         managerName: profileNames[creatorId] ?? 'Quản trị phòng',
         roomStreakCount: streakInfo?.count ?? 0,
         bestStreak: streakInfo?.best ?? 0,
@@ -330,22 +336,35 @@ class ChatRepository {
     );
   }
 
-  /// Tham gia phòng (vào thẳng nếu mở, hoặc gửi yêu cầu `pending` + bắn thông báo Realtime cho chủ phòng)
+  /// Tham gia phòng (vào thẳng nếu mở, hoặc gửi yêu cầu `pending` + bắn thông báo Realtime cho chủ phòng).
+  /// Nếu người tham gia lại chính là người tạo phòng (`created_by`), tự khôi phục quyền `owner` + `approved`.
   Future<void> joinRoom({
     required String conversationId,
     required String userId,
     bool requireApproval = false,
   }) async {
+    var isCreator = false;
+    try {
+      final room = await SupabaseConfig.client
+          .from(DatabaseTables.conversations)
+          .select('created_by')
+          .eq('id', conversationId)
+          .maybeSingle();
+      isCreator = room?['created_by']?.toString() == userId;
+    } catch (_) {}
+
     await SupabaseConfig.client
         .from(DatabaseTables.conversationMembers)
         .upsert({
           'conversation_id': conversationId,
           'user_id': userId,
-          'role': 'member',
-          'status': requireApproval ? 'pending' : 'approved',
+          'role': isCreator ? 'owner' : 'member',
+          'status': isCreator
+              ? 'approved'
+              : (requireApproval ? 'pending' : 'approved'),
         }, onConflict: 'conversation_id,user_id');
 
-    if (requireApproval) {
+    if (requireApproval && !isCreator) {
       await _notifyRoomOwnerOfJoinRequest(
         conversationId: conversationId,
         requesterId: userId,
@@ -743,9 +762,19 @@ class ChatRepository {
 
   // ==================== THÀNH VIÊN & PHÂN QUYỀN PHÓ PHÒNG ====================
 
-  /// Lấy danh sách tất cả thành viên chính thức trong phòng (Chủ phòng -> Phó phòng -> Thành viên)
+  /// Lấy danh sách tất cả thành viên chính thức trong phòng (Chủ phòng -> Trợ giảng -> Thành viên)
   Future<List<RoomMemberModel>> fetchRoomMembers(String conversationId) async {
     final client = SupabaseConfig.client;
+
+    String? creatorId;
+    try {
+      final roomRow = await client
+          .from(DatabaseTables.conversations)
+          .select('created_by')
+          .eq('id', conversationId)
+          .maybeSingle();
+      creatorId = roomRow?['created_by']?.toString();
+    } catch (_) {}
 
     List<dynamic> rows;
     try {
@@ -781,11 +810,22 @@ class ChatRepository {
       profileMap[p['user_id'].toString()] = p;
     }
 
-    final members = approved
-        .map<RoomMemberModel>(
-          (r) => RoomMemberModel.fromRow(r, profileMap[r['user_id'].toString()]),
-        )
-        .toList();
+    final members = approved.map<RoomMemberModel>((r) {
+      final uid = r['user_id'].toString();
+      final model = RoomMemberModel.fromRow(r, profileMap[uid]);
+      if (creatorId != null && uid == creatorId && !model.isOwner) {
+        // Tự đồng bộ lại role='owner' trên DB nếu người tạo phòng từng rời rồi vào lại
+        client
+            .from(DatabaseTables.conversationMembers)
+            .update({'role': 'owner'})
+            .eq('conversation_id', conversationId)
+            .eq('user_id', uid)
+            .then((_) {})
+            .catchError((_) {});
+        return model.copyWith(role: 'owner');
+      }
+      return model;
+    }).toList();
 
     members.sort((a, b) {
       final roleCmp = a.roleSortOrder.compareTo(b.roleSortOrder);
