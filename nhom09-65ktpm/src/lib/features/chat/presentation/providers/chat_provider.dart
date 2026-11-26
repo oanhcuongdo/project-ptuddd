@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../auth_profile/data/models/language_model.dart';
 import '../../data/models/conversation_model.dart';
+import '../../data/models/meet_session_model.dart';
 import '../../data/models/message_model.dart';
 import '../../data/models/online_member_model.dart';
 import '../../data/models/room_join_request.dart';
@@ -30,15 +31,17 @@ class ChatProvider extends ChangeNotifier {
   String? _selectedLang;
   String? _selectedLevel;
 
-  // Trạng thái tin nhắn & thành viên của phòng đang mở
+  // Trạng thái tin nhắn, thành viên & lịch học Meet của phòng đang mở
   String? _activeRoomId;
   List<MessageModel> _roomMessages = const [];
   List<RoomMemberModel> _roomMembers = const [];
+  MeetSessionModel? _activeMeetSession;
   bool _isLoadingMessages = false;
   bool _isLoadingMembers = false;
   bool _isSendingMessage = false;
   String? _messageError;
   RealtimeChannel? _roomChannel;
+  RealtimeChannel? _meetChannel;
   final Map<String, ({String name, String? avatarUrl})> _senderCache = {};
 
   List<ConversationModel> get myRooms => _myRooms;
@@ -55,6 +58,7 @@ class ChatProvider extends ChangeNotifier {
 
   List<MessageModel> get roomMessages => _roomMessages;
   List<RoomMemberModel> get roomMembers => _roomMembers;
+  MeetSessionModel? get activeMeetSession => _activeMeetSession;
   bool get isLoadingMessages => _isLoadingMessages;
   bool get isLoadingMembers => _isLoadingMembers;
   bool get isSendingMessage => _isSendingMessage;
@@ -316,6 +320,13 @@ class ChatProvider extends ChangeNotifier {
         conversationId: conversationId,
         onNewMessage: _handleRealtimeMessage,
       );
+
+      _activeMeetSession =
+          await _repository.fetchActiveMeetSession(conversationId);
+      _meetChannel = _repository.subscribeToRoomMeetSessions(
+        conversationId: conversationId,
+        onChanged: () => _refreshActiveMeet(conversationId),
+      );
     } catch (e) {
       if (_activeRoomId != conversationId) return;
       _messageError = 'Không thể tải lịch sử tin nhắn: $e';
@@ -365,9 +376,9 @@ class ChatProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  /// Gửi tin nhắn mới vào Supabase, hiển thị ngay trên khung chat
-  /// và tự động thắp lửa / cộng chuỗi Streak riêng của phòng (kiểu TikTok).
-  Future<({bool ok, int? roomStreak, bool streakIncrementedToday})> sendMessage({
+  /// Gửi tin nhắn mới vào Supabase & hiển thị ngay trên khung chat.
+  /// Lưu ý: Chuỗi lửa phòng chỉ cộng khi học đủ số phút quy định trong buổi Meet.
+  Future<bool> sendMessage({
     required String conversationId,
     required String senderId,
     required String senderName,
@@ -375,9 +386,7 @@ class ChatProvider extends ChangeNotifier {
     required String content,
   }) async {
     final trimmed = content.trim();
-    if (trimmed.isEmpty) {
-      return (ok: false, roomStreak: null, streakIncrementedToday: false);
-    }
+    if (trimmed.isEmpty) return false;
 
     _isSendingMessage = true;
     _messageError = null;
@@ -398,28 +407,16 @@ class ChatProvider extends ChangeNotifier {
         _roomMessages = [..._roomMessages, saved];
       }
 
-      final streakUpdate = await _repository.recordRoomChatStreak(
-        conversationId: conversationId,
-        userId: senderId,
-      );
-
       _patchRoomAfterMessage(
         conversationId: conversationId,
         lastMessageText: trimmed,
         lastMessageAt: saved.createdAt,
-        streakCount: streakUpdate?.streakCount,
-        bestStreak: streakUpdate?.bestStreak,
-        lastChatDate: streakUpdate?.lastChatDate,
       );
 
-      return (
-        ok: true,
-        roomStreak: streakUpdate?.streakCount,
-        streakIncrementedToday: streakUpdate?.incrementedToday ?? false,
-      );
+      return true;
     } catch (e) {
       _messageError = 'Không thể gửi tin nhắn: $e';
-      return (ok: false, roomStreak: null, streakIncrementedToday: false);
+      return false;
     } finally {
       _isSendingMessage = false;
       notifyListeners();
@@ -466,10 +463,177 @@ class ChatProvider extends ChangeNotifier {
     _activeRoomId = null;
     _roomMessages = const [];
     _roomMembers = const [];
+    _activeMeetSession = null;
     _messageError = null;
     _isLoadingMessages = false;
     _isLoadingMembers = false;
     _isSendingMessage = false;
+  }
+
+  Future<void> _refreshActiveMeet(String conversationId) async {
+    if (_activeRoomId != conversationId) return;
+    _activeMeetSession =
+        await _repository.fetchActiveMeetSession(conversationId);
+    if (_activeRoomId == conversationId) {
+      notifyListeners();
+    }
+  }
+
+  /// Chủ phòng / Trợ giảng tạo buổi học Video Call Meet mới
+  Future<MeetSessionModel?> scheduleMeetSession({
+    required String conversationId,
+    required String roomName,
+    required String hostId,
+    required String hostName,
+    required String title,
+    required DateTime scheduledAt,
+    required int minMinutes,
+    required bool startImmediately,
+  }) async {
+    try {
+      final created = await _repository.createMeetSession(
+        conversationId: conversationId,
+        roomName: roomName,
+        hostId: hostId,
+        hostName: hostName,
+        title: title,
+        scheduledAt: scheduledAt,
+        minMinutes: minMinutes,
+        startImmediately: startImmediately,
+      );
+      if (_activeRoomId == conversationId) {
+        _activeMeetSession = created;
+        notifyListeners();
+      }
+      return created;
+    } catch (e) {
+      _messageError =
+          'Không thể tạo lịch Meet (hãy chắc chắn đã chạy Migration 015): $e';
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// Chủ phòng / Trợ giảng bắt đầu buổi đã hẹn (`live`) hoặc kết thúc buổi (`ended`)
+  Future<bool> updateMeetStatus({
+    required String sessionId,
+    required String status,
+  }) async {
+    try {
+      await _repository.updateMeetSessionStatus(
+        sessionId: sessionId,
+        status: status,
+      );
+      if (_activeMeetSession?.id == sessionId) {
+        _activeMeetSession =
+            status == 'ended' ? null : _activeMeetSession!.copyWith(status: status);
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      _messageError = 'Không thể cập nhật trạng thái buổi Meet: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<({int attendedSeconds, bool streakAwarded})> fetchMyMeetAttendance({
+    required String sessionId,
+    required String userId,
+  }) =>
+      _repository.fetchMyMeetAttendance(sessionId: sessionId, userId: userId);
+
+  Future<List<MeetAttendanceModel>> fetchSessionAttendances(String sessionId) =>
+      _repository.fetchSessionAttendances(sessionId);
+
+  Future<int> fetchTodayPersonalMinutes(String userId) =>
+      _repository.fetchTodayPersonalMinutes(userId);
+
+  Future<void> saveMeetProgress({
+    required String sessionId,
+    required String userId,
+    required int attendedSeconds,
+    required bool streakAwarded,
+  }) =>
+      _repository.saveMeetAttendanceProgress(
+        sessionId: sessionId,
+        userId: userId,
+        attendedSeconds: attendedSeconds,
+        streakAwarded: streakAwarded,
+      );
+
+  /// Ghi nhận khi thành viên đã học ĐỦ phút tối thiểu trong buổi Meet:
+  /// - Tầng 1: Cộng +1 chuỗi lửa riêng của phòng (`conversation_members`)
+  /// - Tầng 2: Cộng dồn phút vào mục tiêu cá nhân hôm nay (`user_quest_logs` -> `profiles.streak_count`)
+  Future<
+      ({
+        int? roomStreak,
+        bool roomStreakIncremented,
+        int? personalTodayMinutes,
+        int? personalStreak,
+        int? personalBestStreak,
+        bool personalGoalReached,
+      })> awardMeetStreak({
+    required String sessionId,
+    required String conversationId,
+    required String userId,
+    required int attendedSeconds,
+    required int addMinutesToDaily,
+    required int dailyGoalMinutes,
+  }) async {
+    await _repository.saveMeetAttendanceProgress(
+      sessionId: sessionId,
+      userId: userId,
+      attendedSeconds: attendedSeconds,
+      streakAwarded: true,
+    );
+
+    final roomStreakRes = await _repository.recordRoomChatStreak(
+      conversationId: conversationId,
+      userId: userId,
+    );
+
+    if (roomStreakRes != null) {
+      _patchRoomStreak(
+        conversationId: conversationId,
+        streakCount: roomStreakRes.streakCount,
+        bestStreak: roomStreakRes.bestStreak,
+        lastChatDate: roomStreakRes.lastChatDate,
+      );
+      notifyListeners();
+    }
+
+    final personalRes = await _repository.recordPersonalDailyMeetMinutes(
+      userId: userId,
+      addMinutes: addMinutesToDaily,
+      dailyGoalMinutes: dailyGoalMinutes,
+    );
+
+    return (
+      roomStreak: roomStreakRes?.streakCount,
+      roomStreakIncremented: roomStreakRes?.incrementedToday ?? false,
+      personalTodayMinutes: personalRes?.todayMinutes,
+      personalStreak: personalRes?.streakCount,
+      personalBestStreak: personalRes?.bestStreak,
+      personalGoalReached: personalRes?.goalReached ?? false,
+    );
+  }
+
+  void _patchRoomStreak({
+    required String conversationId,
+    required int streakCount,
+    required int bestStreak,
+    required DateTime lastChatDate,
+  }) {
+    ConversationModel patch(ConversationModel r) => r.id == conversationId
+        ? r.copyWith(
+            roomStreakCount: streakCount,
+            bestStreak: bestStreak,
+            lastChatDate: lastChatDate,
+          )
+        : r;
+    _myRooms = _myRooms.map(patch).toList();
+    _discoverRooms = _discoverRooms.map(patch).toList();
   }
 
   /// Tải danh sách thành viên phòng (Chủ phòng / Phó phòng / Thành viên) cho Panel Thông tin phòng
@@ -572,6 +736,11 @@ class ChatProvider extends ChangeNotifier {
     _roomChannel = null;
     if (ch != null) {
       _repository.unsubscribeChannel(ch);
+    }
+    final mch = _meetChannel;
+    _meetChannel = null;
+    if (mch != null) {
+      _repository.unsubscribeChannel(mch);
     }
   }
 

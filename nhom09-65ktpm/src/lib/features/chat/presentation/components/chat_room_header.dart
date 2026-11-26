@@ -14,8 +14,10 @@ class ChatRoomHeader extends StatelessWidget {
   final VoidCallback onBack;
   final bool showBackButton;
   final bool isInfoPanelOpen;
+  final bool canScheduleMeet;
+  final bool hasLiveMeet;
   final VoidCallback onToggleInfoPanel;
-  final VoidCallback onStartSessionTap;
+  final VoidCallback onMeetActionTap;
 
   const ChatRoomHeader({
     super.key,
@@ -23,8 +25,10 @@ class ChatRoomHeader extends StatelessWidget {
     required this.onBack,
     this.showBackButton = true,
     this.isInfoPanelOpen = false,
+    this.canScheduleMeet = false,
+    this.hasLiveMeet = false,
     required this.onToggleInfoPanel,
-    required this.onStartSessionTap,
+    required this.onMeetActionTap,
   });
 
   @override
@@ -136,26 +140,53 @@ class ChatRoomHeader extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           RoomStreakBadge(room: room),
-          const SizedBox(width: AppSpacing.sm),
-          OutlinedButton.icon(
-            onPressed: onStartSessionTap,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: ChatStyles.tealDark,
-              backgroundColor: ChatStyles.tealSoftBg,
-              side: const BorderSide(color: ChatStyles.tealBorder),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-              textStyle: const TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            icon: const Icon(Icons.timer_outlined, size: 16),
-            label: const Text('Bắt đầu luyện'),
-          ),
+          if (hasLiveMeet || canScheduleMeet) ...[
+            const SizedBox(width: AppSpacing.sm),
+            hasLiveMeet
+                ? FilledButton.icon(
+                    onPressed: onMeetActionTap,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: ChatStyles.tealPrimary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 36),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    icon: const Icon(Icons.videocam_rounded, size: 17),
+                    label: const Text('Vào Meet'),
+                  )
+                : OutlinedButton.icon(
+                    onPressed: onMeetActionTap,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: ChatStyles.tealDark,
+                      backgroundColor: ChatStyles.tealSoftBg,
+                      side: const BorderSide(color: ChatStyles.tealBorder),
+                      minimumSize: const Size(0, 36),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    icon: const Icon(Icons.video_call_rounded, size: 17),
+                    label: const Text('Hẹn lịch Meet'),
+                  ),
+          ],
           const SizedBox(width: 6),
           IconButton(
             onPressed: onToggleInfoPanel,
