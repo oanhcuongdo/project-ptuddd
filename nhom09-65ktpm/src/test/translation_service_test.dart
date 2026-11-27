@@ -1,68 +1,131 @@
-import '../lib/features/chat_online/models/translation_result.dart';
-import '../lib/features/chat_online/services/translation_service.dart';
+import 'package:buddytalk/features/chat_online/models/translation_language.dart';
+import 'package:buddytalk/features/chat_online/models/translation_result.dart';
+import 'package:buddytalk/features/chat_online/services/translation_service.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-/// File kiểm thử độc lập hàm gọi API Dịch tức thì Anh - Việt.
-/// Có thể chạy kiểm thử bằng lệnh: dart run test/translation_service_test.dart
-void main() async {
-  print('================================================================');
-  print('🚀 BẮT ĐẦU KIỂM THỬ TRANSLATION SERVICE (NHÓM 09 - BUDDYTALK)');
-  print('================================================================\n');
+void main() {
+  group('TranslationLanguage', () {
+    test('fromCode chuan hoa cac ma ngon ngu Trung - Viet - Anh', () {
+      expect(TranslationLanguage.fromCode('en'), TranslationLanguage.en);
+      expect(TranslationLanguage.fromCode('en-US'), TranslationLanguage.en);
+      expect(TranslationLanguage.fromCode('vi'), TranslationLanguage.vi);
+      expect(TranslationLanguage.fromCode('vi_VN'), TranslationLanguage.vi);
+      expect(TranslationLanguage.fromCode('zh'), TranslationLanguage.zhCn);
+      expect(TranslationLanguage.fromCode('zh-CN'), TranslationLanguage.zhCn);
+      expect(TranslationLanguage.fromCode('zh_cn'), TranslationLanguage.zhCn);
+      expect(TranslationLanguage.fromCode('auto'), TranslationLanguage.auto);
+      expect(TranslationLanguage.fromCode(''), TranslationLanguage.auto);
+    });
 
-  final service = TranslationService();
+    test('defaultTargetFor chon dung ngon ngu dich mac dinh', () {
+      expect(
+        TranslationLanguage.defaultTargetFor(TranslationLanguage.vi),
+        TranslationLanguage.en,
+      );
+      expect(
+        TranslationLanguage.defaultTargetFor(TranslationLanguage.en),
+        TranslationLanguage.vi,
+      );
+      expect(
+        TranslationLanguage.defaultTargetFor(TranslationLanguage.zhCn),
+        TranslationLanguage.vi,
+      );
+    });
+  });
 
-  // Test Case 1: Dịch câu chat từ Tiếng Anh sang Tiếng Việt
-  print('--- Test Case 1: Dịch Anh -> Việt ---');
-  const enSentence = "Hello! Let's practice speaking English for 15 minutes today.";
-  print('Câu gốc (EN): "$enSentence"');
-  
-  final stopwatch1 = Stopwatch()..start();
-  final resultEnToVi = await service.translateEnToVi(enSentence);
-  stopwatch1.stop();
+  group('TranslationResult', () {
+    test('toMap va fromMap giu nguyen ven thuoc tinh va trang thai cache', () {
+      final original = TranslationResult.success(
+        originalText: 'Practice makes perfect',
+        translatedText: 'Có công mài sắt có ngày nên kim',
+        sourceLanguage: 'en',
+        targetLanguage: 'vi',
+        fromCache: true,
+      );
 
-  if (resultEnToVi.isSuccess) {
-    print('✅ Dịch thành công (${stopwatch1.elapsedMilliseconds} ms):');
-    print('   => Bản dịch (VI): "${resultEnToVi.translatedText}"');
-  } else {
-    print('❌ Lỗi: ${resultEnToVi.errorMessage}');
-  }
-  print('');
+      final restored = TranslationResult.fromMap(original.toMap());
+      expect(restored.originalText, 'Practice makes perfect');
+      expect(restored.translatedText, 'Có công mài sắt có ngày nên kim');
+      expect(restored.sourceLangEnum, TranslationLanguage.en);
+      expect(restored.targetLangEnum, TranslationLanguage.vi);
+      expect(restored.isSuccess, isTrue);
+      expect(restored.fromCache, isTrue);
+      expect(restored.languagePairLabel, 'EN → VI');
+    });
 
-  // Test Case 2: Dịch câu chat từ Tiếng Việt sang Tiếng Anh
-  print('--- Test Case 2: Dịch Việt -> Anh ---');
-  const viSentence = "Hôm nay mình rất tự tin khi hoàn thành thử thách kỷ luật giao tiếp.";
-  print('Câu gốc (VI): "$viSentence"');
-  
-  final stopwatch2 = Stopwatch()..start();
-  final resultViToEn = await service.translateViToEn(viSentence);
-  stopwatch2.stop();
+    test('copyWith va failure hoat dong chinh xac', () {
+      final failed = TranslationResult.failure(
+        originalText: '你好',
+        errorMessage: 'Timeout',
+        sourceLanguage: 'zh-cn',
+        targetLanguage: 'vi',
+      );
+      expect(failed.isSuccess, isFalse);
+      expect(failed.translatedText, '你好');
+      expect(failed.hasTranslation, isFalse);
 
-  if (resultViToEn.isSuccess) {
-    print('✅ Dịch thành công (${stopwatch2.elapsedMilliseconds} ms):');
-    print('   => Bản dịch (EN): "${resultViToEn.translatedText}"');
-  } else {
-    print('❌ Lỗi: ${resultViToEn.errorMessage}');
-  }
-  print('');
+      final updated = failed.copyWith(
+        isSuccess: true,
+        translatedText: 'Xin chào',
+      );
+      expect(updated.hasTranslation, isTrue);
+      expect(updated.languagePairLabel, 'ZH → VI');
+    });
+  });
 
-  // Test Case 3: Kiểm tra tốc độ đọc từ Bộ nhớ đệm (Cache)
-  print('--- Test Case 3: Kiểm tra tốc độ phản hồi qua Cache ---');
-  final stopwatch3 = Stopwatch()..start();
-  final cachedResult = await service.translateEnToVi(enSentence);
-  stopwatch3.stop();
+  group('TranslationService', () {
+    late TranslationService service;
 
-  print('✅ Gọi lại câu đã dịch (Thời gian phản hồi: ${stopwatch3.elapsedMilliseconds} ms):');
-  print('   => Bản dịch từ Cache: "${cachedResult.translatedText}"');
-  print('   => Tổng số mục đã lưu Cache: ${service.cacheSize}');
-  print('');
+    setUp(() {
+      service = TranslationService();
+      service.clearCache();
+    });
 
-  // Test Case 4: Kiểm tra chuyển đổi toMap / fromMap cho lưu trữ CSDL
-  print('--- Test Case 4: Kiểm tra toMap & fromMap (SQLite / Supabase) ---');
-  final map = resultEnToVi.toMap();
-  final reconstructed = TranslationResult.fromMap(map);
-  print('✅ Chuyển đổi CSDL thành công: ${reconstructed.toString()}');
+    test('tra ve chuoi rong ngay lap tuc khi dau vao rong', () async {
+      final res = await service.translate(text: '   ', from: 'en', to: 'vi');
+      expect(res.isSuccess, isTrue);
+      expect(res.translatedText, '');
+      expect(service.cacheSize, 0);
+    });
 
-  print('\n================================================================');
-  print('🎉 HOÀN TẤT TẤT CẢ CÁC BÀI TEST - SERVICE HOẠT ĐỘNG CHUẨN XÁC!');
-  print('================================================================');
+    test('tra ve ngay lap tuc khi ngon ngu nguon va dich trung nhau', () async {
+      final res = await service.translate(
+        text: 'Xin chào BuddyTalk',
+        from: 'vi',
+        to: 'vi',
+      );
+      expect(res.isSuccess, isTrue);
+      expect(res.translatedText, 'Xin chào BuddyTalk');
+      expect(res.isSameLanguage, isTrue);
+    });
+
+    test('doc du lieu tu In-memory Cache voi fromCache = true', () async {
+      final seeded = TranslationResult.success(
+        originalText: '你好',
+        translatedText: 'Xin chào',
+        sourceLanguage: 'zh-cn',
+        targetLanguage: 'vi',
+      );
+      service.putCache(seeded);
+      expect(service.cacheSize, 1);
+
+      final cached = await service.translateZhToVi('你好');
+      expect(cached.isSuccess, isTrue);
+      expect(cached.translatedText, 'Xin chào');
+      expect(cached.fromCache, isTrue);
+    });
+
+    test('nhan dien ky tu Tieng Trung va dau Tieng Viet chinh xac', () {
+      expect(TranslationService.containsChineseCharacters('你好世界'), isTrue);
+      expect(TranslationService.containsChineseCharacters('Hello'), isFalse);
+      expect(
+        TranslationService.containsVietnameseDiacritics('Luyện nói mỗi ngày'),
+        isTrue,
+      );
+      expect(
+        TranslationService.containsVietnameseDiacritics('Practice every day'),
+        isFalse,
+      );
+    });
+  });
 }
-
