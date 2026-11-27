@@ -1,11 +1,14 @@
+import 'translation_language.dart';
+
 /// Model chứa kết quả dịch thuật tức thì cho tin nhắn trong phòng Chat.
-/// Phân hệ Chat Thực Chiến 1-1 - Dự án BuddyTalk (Nhóm 09 - 65KTPM).
+/// Phân hệ Trợ lý Dịch thuật Tức thì - Dự án BuddyTalk (Nhóm 09 - 65KTPM).
 class TranslationResult {
   final String originalText;
   final String translatedText;
   final String sourceLanguage;
   final String targetLanguage;
   final bool isSuccess;
+  final bool fromCache;
   final String? errorMessage;
   final DateTime timestamp;
 
@@ -15,6 +18,7 @@ class TranslationResult {
     required this.sourceLanguage,
     required this.targetLanguage,
     required this.isSuccess,
+    this.fromCache = false,
     this.errorMessage,
     required this.timestamp,
   });
@@ -25,6 +29,7 @@ class TranslationResult {
     required String translatedText,
     required String sourceLanguage,
     required String targetLanguage,
+    bool fromCache = false,
   }) {
     return TranslationResult(
       originalText: originalText,
@@ -32,6 +37,7 @@ class TranslationResult {
       sourceLanguage: sourceLanguage,
       targetLanguage: targetLanguage,
       isSuccess: true,
+      fromCache: fromCache,
       timestamp: DateTime.now(),
     );
   }
@@ -49,12 +55,56 @@ class TranslationResult {
       sourceLanguage: sourceLanguage,
       targetLanguage: targetLanguage,
       isSuccess: false,
+      fromCache: false,
       errorMessage: errorMessage,
       timestamp: DateTime.now(),
     );
   }
 
-  /// Chuyển đổi sang Map để lưu trữ CSDL SQLite hoặc gửi qua Supabase
+  /// Ngôn ngữ nguồn đã chuẩn hóa theo enum [TranslationLanguage]
+  TranslationLanguage get sourceLangEnum =>
+      TranslationLanguage.fromCode(sourceLanguage);
+
+  /// Ngôn ngữ đích đã chuẩn hóa theo enum [TranslationLanguage]
+  TranslationLanguage get targetLangEnum =>
+      TranslationLanguage.fromCode(targetLanguage);
+
+  /// Kiểm tra ngôn ngữ nguồn và ngôn ngữ đích có trùng nhau hay không
+  bool get isSameLanguage =>
+      sourceLangEnum != TranslationLanguage.auto &&
+      sourceLangEnum == targetLangEnum;
+
+  /// Kiểm tra kết quả có bản dịch hợp lệ để hiển thị
+  bool get hasTranslation => isSuccess && translatedText.trim().isNotEmpty;
+
+  /// Nhãn cặp ngôn ngữ ngắn gọn hiển thị trên giao diện (ví dụ: "EN → VI")
+  String get languagePairLabel =>
+      '${sourceLangEnum.shortLabel} → ${targetLangEnum.shortLabel}';
+
+  /// Tạo bản sao với các thuộc tính tùy chỉnh (ví dụ đánh dấu `fromCache = true`)
+  TranslationResult copyWith({
+    String? originalText,
+    String? translatedText,
+    String? sourceLanguage,
+    String? targetLanguage,
+    bool? isSuccess,
+    bool? fromCache,
+    String? errorMessage,
+    DateTime? timestamp,
+  }) {
+    return TranslationResult(
+      originalText: originalText ?? this.originalText,
+      translatedText: translatedText ?? this.translatedText,
+      sourceLanguage: sourceLanguage ?? this.sourceLanguage,
+      targetLanguage: targetLanguage ?? this.targetLanguage,
+      isSuccess: isSuccess ?? this.isSuccess,
+      fromCache: fromCache ?? this.fromCache,
+      errorMessage: errorMessage ?? this.errorMessage,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
+
+  /// Chuyển đổi sang Map để lưu trữ hoặc đồng bộ dữ liệu
   Map<String, dynamic> toMap() {
     return {
       'original_text': originalText,
@@ -62,6 +112,7 @@ class TranslationResult {
       'source_language': sourceLanguage,
       'target_language': targetLanguage,
       'is_success': isSuccess ? 1 : 0,
+      'from_cache': fromCache ? 1 : 0,
       'error_message': errorMessage,
       'timestamp': timestamp.toIso8601String(),
     };
@@ -75,9 +126,10 @@ class TranslationResult {
       sourceLanguage: map['source_language'] as String? ?? 'auto',
       targetLanguage: map['target_language'] as String? ?? 'vi',
       isSuccess: (map['is_success'] == 1 || map['is_success'] == true),
+      fromCache: (map['from_cache'] == 1 || map['from_cache'] == true),
       errorMessage: map['error_message'] as String?,
       timestamp: map['timestamp'] != null
-          ? DateTime.tryParse(map['timestamp'] as String) ?? DateTime.now()
+          ? DateTime.tryParse(map['timestamp'].toString()) ?? DateTime.now()
           : DateTime.now(),
     );
   }
@@ -90,4 +142,3 @@ class TranslationResult {
     return 'Translation Failed: $errorMessage ("$originalText")';
   }
 }
-
