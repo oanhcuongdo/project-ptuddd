@@ -159,7 +159,7 @@ Nhằm phục vụ quá trình làm việc nhóm 5 thành viên hiệu quả, tr
 - **Xác thực tài khoản:** `firebase_core`, `firebase_auth`, `google_sign_in`.
 - **CSDL Đám mây & Realtime:** `supabase_flutter` (PostgreSQL + Realtime WebSocket).
 - **Video Call trực tuyến:** Jitsi Meet nhúng trực tiếp.
-- **Dịch thuật tức thì:** API Google Translate Endpoint (hỗ trợ Trung - Việt - Anh).
+- **Dịch thuật tức thì:** Package `translator` (`GoogleTranslator`, hỗ trợ đa nền tảng Web/Android cho Trung - Việt - Anh).
 - **Quản lý trạng thái:** `provider`.
 
 ---
