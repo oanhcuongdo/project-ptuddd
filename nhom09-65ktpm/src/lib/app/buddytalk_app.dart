@@ -6,6 +6,7 @@ import '../core/theme/app_theme.dart';
 import '../features/auth_profile/presentation/providers/auth_provider.dart';
 import '../features/chat/presentation/providers/chat_provider.dart';
 import '../features/notifications/presentation/providers/notification_provider.dart';
+import '../features/vocab_notebook/presentation/providers/vocab_provider.dart';
 import 'router/app_router.dart';
 
 class BuddyTalkApp extends StatelessWidget {
@@ -23,6 +24,14 @@ class BuddyTalkApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<NotificationProvider>(
           create: (_) => NotificationProvider(),
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, VocabProvider>(
+          create: (_) => VocabProvider(),
+          update: (_, auth, vocab) {
+            final provider = vocab ?? VocabProvider();
+            provider.bindUser(auth.currentProfile?.userId);
+            return provider;
+          },
         ),
       ],
       child: MaterialApp(
