@@ -10,6 +10,7 @@ import '../models/message_model.dart';
 import '../models/online_member_model.dart';
 import '../models/room_join_request.dart';
 import '../models/room_member_model.dart';
+import '../models/streak_board_model.dart';
 
 /// Lớp truy xuất 100% trực tuyến trên Supabase cho danh sách Phòng Chat, Thành viên & Kiểm duyệt.
 class ChatRepository {
@@ -1185,5 +1186,121 @@ class ChatRepository {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Tải dữ liệu tổng hợp cho Bảng cập nhật chuỗi (100% trực tuyến Supabase):
+  /// - 7 ngày tuần này (`T2 -> CN`) từ bảng `user_quest_logs`
+  /// - Tối đa 10 buổi điểm danh Video Call gần nhất từ `room_meet_attendance` & `room_meet_sessions`
+  Future<StreakBoardData> fetchStreakBoardData({
+    required String userId,
+    required int dailyGoalMinutes,
+    DateTime? now,
+  }) async {
+    final ref = now ?? DateTime.now();
+    final today = DateTime(ref.year, ref.month, ref.day);
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    final safeGoal = dailyGoalMinutes > 0 ? dailyGoalMinutes : 15;
+
+    final logsByKey =
+        <String, ({int completedMinutes, int goalMinutes, bool isCompleted})>{};
+    try {
+      final logRows = await SupabaseConfig.client
+          .from(DatabaseTables.userQuestLogs)
+          .select('log_date, completed_minutes, goal_minutes, is_completed')
+          .eq('user_id', userId)
+          .gte('log_date', _formatDateKey(weekStart))
+          .lte('log_date', _formatDateKey(weekEnd));
+
+      for (final row in logRows) {
+        final key =
+            row['log_date'].toString().split('T').first.split(' ').first;
+        logsByKey[key] = (
+          completedMinutes: (row['completed_minutes'] as num?)?.toInt() ?? 0,
+          goalMinutes: (row['goal_minutes'] as num?)?.toInt() ?? safeGoal,
+          isCompleted: row['is_completed'] as bool? ?? false,
+        );
+      }
+    } catch (_) {}
+
+    final weekDays = StreakBoardData.buildCurrentWeekDays(
+      referenceDate: today,
+      dailyGoalMinutes: safeGoal,
+      logsByDateKey: logsByKey,
+    );
+    final todayMinutes = logsByKey[_formatDateKey(today)]?.completedMinutes ?? 0;
+
+    final history = <StreakHistoryItem>[];
+    try {
+      final attRows = await SupabaseConfig.client
+          .from(DatabaseTables.roomMeetAttendance)
+          .select('session_id, attended_seconds, streak_awarded, updated_at')
+          .eq('user_id', userId)
+          .order('updated_at', ascending: false)
+          .limit(10);
+
+      if (attRows.isNotEmpty) {
+        final sessionIds = attRows
+            .map<String>((r) => r['session_id'].toString())
+            .toSet()
+            .toList();
+
+        final sessionRows = await SupabaseConfig.client
+            .from(DatabaseTables.roomMeetSessions)
+            .select('id, conversation_id, title, min_minutes')
+            .inFilter('id', sessionIds);
+
+        final sessionMap = <String, Map<String, dynamic>>{
+          for (final s in sessionRows) s['id'].toString(): s,
+        };
+
+        final convIds = sessionRows
+            .map<String>((s) => s['conversation_id'].toString())
+            .toSet()
+            .toList();
+
+        final convNameMap = <String, String>{};
+        if (convIds.isNotEmpty) {
+          final convRows = await SupabaseConfig.client
+              .from(DatabaseTables.conversations)
+              .select('id, name')
+              .inFilter('id', convIds);
+          for (final c in convRows) {
+            final name = (c['name'] as String?)?.trim() ?? '';
+            convNameMap[c['id'].toString()] =
+                name.isNotEmpty ? name : 'Phòng học';
+          }
+        }
+
+        for (final row in attRows) {
+          final sid = row['session_id'].toString();
+          final s = sessionMap[sid];
+          if (s == null) continue;
+          final cid = s['conversation_id'].toString();
+          final title = (s['title'] as String?)?.trim() ?? 'Buổi học Video Call';
+          history.add(
+            StreakHistoryItem(
+              sessionId: sid,
+              conversationId: cid,
+              roomName: convNameMap[cid] ?? 'Phòng học',
+              sessionTitle: title.isNotEmpty ? title : 'Buổi học Video Call',
+              attendedSeconds: (row['attended_seconds'] as num?)?.toInt() ?? 0,
+              minMinutes: (s['min_minutes'] as num?)?.toInt() ?? 15,
+              streakAwarded: row['streak_awarded'] as bool? ?? false,
+              updatedAt: row['updated_at'] != null
+                  ? (DateTime.tryParse(row['updated_at'].toString()) ?? ref)
+                  : ref,
+            ),
+          );
+        }
+      }
+    } catch (_) {}
+
+    return StreakBoardData(
+      todayMinutes: todayMinutes,
+      dailyGoalMinutes: safeGoal,
+      weekDays: weekDays,
+      recentHistory: history,
+    );
   }
 }

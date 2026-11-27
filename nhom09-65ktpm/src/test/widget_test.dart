@@ -15,6 +15,7 @@ import 'package:buddytalk/features/chat/data/models/message_model.dart';
 import 'package:buddytalk/features/chat/data/models/online_member_model.dart';
 import 'package:buddytalk/features/chat/data/models/room_join_request.dart';
 import 'package:buddytalk/features/chat/data/models/room_member_model.dart';
+import 'package:buddytalk/features/chat/data/models/streak_board_model.dart';
 import 'package:buddytalk/features/chat/data/repositories/chat_repository.dart';
 import 'package:buddytalk/features/chat/presentation/providers/chat_provider.dart';
 import 'package:buddytalk/features/chat/presentation/screens/chat_rooms_tab.dart';
@@ -465,6 +466,52 @@ class _FakeChatRepository extends ChatRepository {
       streakCount: reached ? 1 : 0,
       bestStreak: reached ? 1 : 0,
       goalReached: reached,
+    );
+  }
+
+  @override
+  Future<StreakBoardData> fetchStreakBoardData({
+    required String userId,
+    required int dailyGoalMinutes,
+    DateTime? now,
+  }) async {
+    final ref = now ?? DateTime.now();
+    final todayKey = StreakBoardData.formatDateKey(ref);
+    final yesterdayKey = StreakBoardData.formatDateKey(
+      ref.subtract(const Duration(days: 1)),
+    );
+    final weekDays = StreakBoardData.buildCurrentWeekDays(
+      referenceDate: ref,
+      dailyGoalMinutes: dailyGoalMinutes,
+      logsByDateKey: {
+        yesterdayKey: (
+          completedMinutes: dailyGoalMinutes,
+          goalMinutes: dailyGoalMinutes,
+          isCompleted: true,
+        ),
+        todayKey: (
+          completedMinutes: _todayPersonalMinutes,
+          goalMinutes: dailyGoalMinutes,
+          isCompleted: _todayPersonalMinutes >= dailyGoalMinutes,
+        ),
+      },
+    );
+    return StreakBoardData(
+      todayMinutes: _todayPersonalMinutes,
+      dailyGoalMinutes: dailyGoalMinutes,
+      weekDays: weekDays,
+      recentHistory: [
+        StreakHistoryItem(
+          sessionId: 'meet-1',
+          conversationId: 'room-1',
+          roomName: 'CLB Luyện Tiếng Anh Giao Tiếp',
+          sessionTitle: 'Luyện nói buổi tối',
+          attendedSeconds: 900,
+          minMinutes: 15,
+          streakAwarded: true,
+          updatedAt: ref,
+        ),
+      ],
     );
   }
 }
@@ -1026,5 +1073,46 @@ void main() {
     await tester.tap(find.text('Rời buổi học'));
     await tester.pumpAndSettle();
     expect(find.text('1 ngày'), findsOneWidget);
+  });
+
+  test('StreakBoardData tổng hợp đúng 7 ngày T2->CN & ChatProvider.loadStreakBoard tải lịch sử', () async {
+    // Thứ 4 ngày 25/11/2026
+    final wednesday = DateTime(2026, 11, 25);
+    final weekDays = StreakBoardData.buildCurrentWeekDays(
+      referenceDate: wednesday,
+      dailyGoalMinutes: 15,
+      logsByDateKey: {
+        '2026-11-23': (completedMinutes: 20, goalMinutes: 15, isCompleted: true),
+        '2026-11-24': (completedMinutes: 15, goalMinutes: 15, isCompleted: true),
+        '2026-11-25': (completedMinutes: 10, goalMinutes: 15, isCompleted: false),
+      },
+    );
+
+    expect(weekDays.length, 7);
+    expect(weekDays.first.shortWeekdayLabel, 'T2');
+    expect(weekDays.last.shortWeekdayLabel, 'CN');
+    expect(weekDays[0].isCompleted, isTrue);
+    expect(weekDays[1].isCompleted, isTrue);
+    expect(weekDays[2].isToday, isTrue);
+    expect(weekDays[2].hasPartialProgress, isTrue);
+    expect(weekDays[3].isFuture, isTrue);
+
+    final board = StreakBoardData(
+      todayMinutes: 10,
+      dailyGoalMinutes: 15,
+      weekDays: weekDays,
+      recentHistory: const [],
+    );
+    expect(board.completedDaysThisWeek, 2);
+    expect(board.remainingMinutesToday, 5);
+    expect(board.isTodayGoalCompleted, isFalse);
+
+    final provider = ChatProvider(repository: _FakeChatRepository());
+    await provider.loadStreakBoard(userId: 'u-chat', dailyGoalMinutes: 15);
+    expect(provider.isLoadingStreakBoard, isFalse);
+    expect(provider.streakBoard, isNotNull);
+    expect(provider.streakBoard!.weekDays.length, 7);
+    expect(provider.streakBoard!.recentHistory.length, 1);
+    expect(provider.streakBoard!.recentHistory.first.attendedMinutes, 15);
   });
 }
