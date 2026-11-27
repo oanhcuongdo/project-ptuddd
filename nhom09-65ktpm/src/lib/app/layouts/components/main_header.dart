@@ -16,6 +16,7 @@ class MainHeader extends StatelessWidget {
   final bool showMenuButton;
   final VoidCallback? onOpenDrawer;
   final VoidCallback? onOpenProfile;
+  final VoidCallback? onOpenStreakBoard;
 
   const MainHeader({
     super.key,
@@ -23,6 +24,7 @@ class MainHeader extends StatelessWidget {
     this.showMenuButton = false,
     this.onOpenDrawer,
     this.onOpenProfile,
+    this.onOpenStreakBoard,
   });
 
   @override
@@ -73,7 +75,10 @@ class MainHeader extends StatelessWidget {
             const Spacer(),
           const SizedBox(width: AppSpacing.sm),
           if (profile != null) ...[
-            _StreakStatusPill(streakCount: profile.streakCount),
+            _StreakStatusPill(
+              streakCount: profile.streakCount,
+              onTap: onOpenStreakBoard,
+            ),
             const SizedBox(width: AppSpacing.sm),
             const NotificationBellButton(),
             const SizedBox(width: AppSpacing.sm),
@@ -91,35 +96,49 @@ class MainHeader extends StatelessWidget {
 
 class _StreakStatusPill extends StatelessWidget {
   final int streakCount;
+  final VoidCallback? onTap;
 
-  const _StreakStatusPill({required this.streakCount});
+  const _StreakStatusPill({
+    required this.streakCount,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 6,
-      ),
-      decoration: MainLayoutStyles.streakPillDecoration,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.local_fire_department_rounded,
-            size: 16,
-            color: AppColors.streakOrange,
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            '$streakCount ngày',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: AppColors.streakOrange,
+    return Tooltip(
+      message: 'Xem bảng cập nhật chuỗi',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 6,
+            ),
+            decoration: MainLayoutStyles.streakPillDecoration,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.local_fire_department_rounded,
+                  size: 16,
+                  color: AppColors.streakOrange,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '$streakCount ngày',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.streakOrange,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
