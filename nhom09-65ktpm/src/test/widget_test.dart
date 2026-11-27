@@ -1115,4 +1115,54 @@ void main() {
     expect(provider.streakBoard!.recentHistory.length, 1);
     expect(provider.streakBoard!.recentHistory.first.attendedMinutes, 15);
   });
+
+  testWidgets('Bấm huy hiệu lửa trên MainHeader mở Bảng cập nhật chuỗi', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final authRepo = _FakeAuthRepository(
+      initialProfile: const ProfileModel(
+        userId: 'u-chat',
+        displayName: 'Phạm Văn Hưng',
+        streakCount: 3,
+        bestStreak: 7,
+        dailyGoalMinutes: 15,
+        onboardingCompleted: true,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: authRepo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: _FakeChatRepository()),
+          ),
+          ChangeNotifierProvider<NotificationProvider>(
+            create: (_) => NotificationProvider(
+              repository: _FakeNotificationRepository(),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: AuthGuard(child: MainLayout())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Xem bảng cập nhật chuỗi'), findsOneWidget);
+    await tester.tap(find.byTooltip('Xem bảng cập nhật chuỗi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bảng cập nhật chuỗi'), findsOneWidget);
+    expect(find.text('3 ngày liên tiếp'), findsOneWidget);
+    expect(find.text('Kỷ lục: 7 ngày'), findsOneWidget);
+    expect(find.text('Tiến độ 7 ngày tuần này'), findsOneWidget);
+    expect(find.text('Lịch sử cập nhật chuỗi gần đây'), findsOneWidget);
+    expect(find.text('+1 chuỗi 🔥'), findsOneWidget);
+  });
 }

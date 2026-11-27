@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../../features/auth_profile/presentation/providers/auth_provider.dart';
 import '../../features/auth_profile/presentation/screens/profile_tab.dart';
 import '../../features/buddy_matching/presentation/screens/buddy_matching_tab.dart';
+import '../../features/chat/presentation/providers/chat_provider.dart';
 import '../../features/chat/presentation/screens/chat_rooms_tab.dart';
+import '../../features/chat/presentation/screens/streak_dashboard_tab.dart';
 import 'components/main_header.dart';
 import 'components/main_nav_sidebar.dart';
 import 'components/nav_item.dart';
@@ -48,6 +50,16 @@ class _MainLayoutState extends State<MainLayout> {
       page: ChatRoomsTab(),
     ),
     MainNavItem(
+      id: 'streak',
+      label: 'Bảng chuỗi',
+      headerTitle: '',
+      headerSubtitle: '',
+      section: 'Không gian học',
+      icon: Icons.local_fire_department_outlined,
+      selectedIcon: Icons.local_fire_department_rounded,
+      page: StreakDashboardTab(),
+    ),
+    MainNavItem(
       id: 'buddy',
       label: 'Bạn đồng hành',
       headerTitle: 'Tìm bạn đồng hành',
@@ -82,6 +94,20 @@ class _MainLayoutState extends State<MainLayout> {
 
   int get _profileNavIndex =>
       _navItems.indexWhere((item) => item.id == 'profile');
+
+  int get _streakNavIndex =>
+      _navItems.indexWhere((item) => item.id == 'streak');
+
+  void _openStreakDashboard() {
+    _selectNav(_streakNavIndex);
+    final profile = context.read<AuthProvider>().currentProfile;
+    if (profile != null) {
+      context.read<ChatProvider>().loadStreakBoard(
+            userId: profile.userId,
+            dailyGoalMinutes: profile.dailyGoalMinutes,
+          );
+    }
+  }
 
   Widget _buildOutlet() {
     if (widget.outlet != null) {
@@ -124,6 +150,7 @@ class _MainLayoutState extends State<MainLayout> {
                       MainHeader(
                         currentItem: currentItem,
                         onOpenProfile: () => _selectNav(_profileNavIndex),
+                        onOpenStreakBoard: _openStreakDashboard,
                       ),
                       Expanded(
                         child: Container(
@@ -169,6 +196,7 @@ class _MainLayoutState extends State<MainLayout> {
                   showMenuButton: true,
                   onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
                   onOpenProfile: () => _selectNav(_profileNavIndex),
+                  onOpenStreakBoard: _openStreakDashboard,
                 ),
                 Expanded(child: _buildOutlet()),
               ],
