@@ -8,6 +8,7 @@ import '../../data/models/message_model.dart';
 import '../../data/models/online_member_model.dart';
 import '../../data/models/room_join_request.dart';
 import '../../data/models/room_member_model.dart';
+import '../../data/models/streak_board_model.dart';
 import '../../data/repositories/chat_repository.dart';
 
 /// Quản lý trạng thái danh sách Phòng Chat của tôi, Khám phá phòng nhóm & Bộ lọc.
@@ -44,6 +45,11 @@ class ChatProvider extends ChangeNotifier {
   RealtimeChannel? _meetChannel;
   final Map<String, ({String name, String? avatarUrl})> _senderCache = {};
 
+  // Trạng thái dữ liệu Bảng cập nhật chuỗi (7 ngày tuần này + lịch sử điểm danh Meet)
+  StreakBoardData? _streakBoard;
+  bool _isLoadingStreakBoard = false;
+  String? _streakBoardError;
+
   List<ConversationModel> get myRooms => _myRooms;
   List<ConversationModel> get discoverRooms => _discoverRooms;
   List<LanguageModel> get languages => _languages;
@@ -63,6 +69,9 @@ class ChatProvider extends ChangeNotifier {
   bool get isLoadingMembers => _isLoadingMembers;
   bool get isSendingMessage => _isSendingMessage;
   String? get messageError => _messageError;
+  StreakBoardData? get streakBoard => _streakBoard;
+  bool get isLoadingStreakBoard => _isLoadingStreakBoard;
+  String? get streakBoardError => _streakBoardError;
 
   Future<void> loadRooms(String userId, {bool silent = false}) async {
     if (!_repository.isReady) {
@@ -550,6 +559,34 @@ class ChatProvider extends ChangeNotifier {
 
   Future<int> fetchTodayPersonalMinutes(String userId) =>
       _repository.fetchTodayPersonalMinutes(userId);
+
+  /// Tải dữ liệu tổng hợp cho Bảng cập nhật chuỗi (7 ngày tuần này & lịch sử điểm danh)
+  Future<void> loadStreakBoard({
+    required String userId,
+    required int dailyGoalMinutes,
+  }) async {
+    if (!_repository.isReady) {
+      _streakBoardError = 'Chưa kết nối Supabase.';
+      notifyListeners();
+      return;
+    }
+
+    _isLoadingStreakBoard = true;
+    _streakBoardError = null;
+    notifyListeners();
+
+    try {
+      _streakBoard = await _repository.fetchStreakBoardData(
+        userId: userId,
+        dailyGoalMinutes: dailyGoalMinutes,
+      );
+    } catch (e) {
+      _streakBoardError = 'Không thể tải bảng cập nhật chuỗi: $e';
+    } finally {
+      _isLoadingStreakBoard = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> saveMeetProgress({
     required String sessionId,
