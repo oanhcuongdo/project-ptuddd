@@ -20,7 +20,7 @@
 | **2** | **Trịnh Trung Kiên** | **2251172396** | 65KTPM | Thành viên | Thiết kế UI/UX Material 3 toàn ứng dụng, Lập trình Phân hệ Quản lý Buổi luyện tập (Practice Sessions): Tạo lịch hẹn, Đồng hồ đếm giờ học (Session Timer 15-30p), Đánh giá buổi học và Thống kê tổng giờ luyện tập | 100% | trinhkien0103@gmail.com |
 | **3** | **Đỗ Việt Tiến** | **2251243452** | 65KTPM | Thành viên | Lập trình Phân hệ Tìm kiếm & Ghép cặp bạn đồng hành (Buddy Matching) theo ngôn ngữ bù trừ và bộ lọc trình độ | 100% | tien.dv.65ktpm@gmail.com |
 | **4** | **Cao Đức Đạo** | **2351170581** | 65KTPM | Thành viên | Lập trình Phân hệ Gợi ý chủ đề & Kịch bản hội thoại tình huống (Conversation Topics): Kịch bản mẫu theo cấp độ A1-B2, gợi ý câu mở đầu hội thoại | 100% | caoducdao17022005@gmail.com |
-| **5** | **Trương Tuấn Hải** | **2351170590** | 65KTPM | Thành viên | Lập trình Phân hệ Trợ lý Dịch thuật tức thì (Translation Assistant) & Sổ tay từ vựng: Tích hợp API Dịch song ngữ (Trung - Việt - Anh), nút dịch nhanh trong chat, tra cứu và lưu từ mới | 100% | tuanhaiii2005@gmail.com |
+| **5** | **Trương Tuấn Hải** | **2351170590** | 65KTPM | Thành viên | Lập trình Phân hệ Trợ lý Dịch thuật tức thì (Translation Assistant) & Sổ tay từ vựng: Chuẩn hóa định danh đa ngôn ngữ (`TranslationLanguage` Trung - Việt - Anh), tích hợp API Dịch song ngữ, nút dịch nhanh trong chat, tra cứu và lưu từ mới | 100% | tuanhaiii2005@gmail.com |
 
 ---
 
@@ -108,6 +108,7 @@ HỆ THỐNG KỶ LUẬT GIAO TIẾP & BẠN ĐỒNG HÀNH (BUDDYTALK)
 │   ├── Bộ câu hỏi gợi ý mở đầu hội thoại (Conversation Starters) chống "bí từ"
 │   └── Đánh dấu các chủ đề đã hoàn thành sau mỗi buổi luyện tập
 ├── 6. Phân hệ Trợ Lý Dịch Thuật Tức Thì & Sổ Tay Từ Vựng (Translation Assistant & Notebook)
+│   ├── Chuẩn hóa định danh & bộ chuyển đổi mã đa ngôn ngữ (Trung - Việt - Anh, Tự động nhận diện)
 │   ├── Nút dịch trực tiếp bên trong bong bóng tin nhắn chat 1-1 và chat nhóm
 │   ├── Hiển thị song song câu gốc và câu dịch (Trung - Việt - Anh)
 │   ├── Tra cứu nhanh nghĩa từ mới và lưu vào Sổ tay từ vựng cá nhân (Vocabulary Notebook)
