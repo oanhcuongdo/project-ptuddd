@@ -115,6 +115,15 @@ class TranslationService {
     return lang.code;
   }
 
+  /// Hàm tiện ích dùng enum [TranslationLanguage] cho UI chọn ngôn ngữ
+  Future<TranslationResult> translateWithLanguages({
+    required String text,
+    TranslationLanguage from = TranslationLanguage.auto,
+    TranslationLanguage to = TranslationLanguage.vi,
+  }) {
+    return translate(text: text, from: from.code, to: to.code);
+  }
+
   /// Hàm tiện ích: Dịch câu chat từ Tiếng Anh sang Tiếng Việt
   Future<TranslationResult> translateEnToVi(String text) {
     return translate(
@@ -133,22 +142,99 @@ class TranslationService {
     );
   }
 
+  /// Hàm tiện ích: Dịch câu chat từ Tiếng Trung (Giản thể) sang Tiếng Việt
+  Future<TranslationResult> translateZhToVi(String text) {
+    return translate(
+      text: text,
+      from: TranslationLanguage.zhCn.code,
+      to: TranslationLanguage.vi.code,
+    );
+  }
+
+  /// Hàm tiện ích: Dịch câu chat từ Tiếng Việt sang Tiếng Trung (Giản thể)
+  Future<TranslationResult> translateViToZh(String text) {
+    return translate(
+      text: text,
+      from: TranslationLanguage.vi.code,
+      to: TranslationLanguage.zhCn.code,
+    );
+  }
+
+  /// Hàm tiện ích: Dịch câu chat từ Tiếng Anh sang Tiếng Trung
+  Future<TranslationResult> translateEnToZh(String text) {
+    return translate(
+      text: text,
+      from: TranslationLanguage.en.code,
+      to: TranslationLanguage.zhCn.code,
+    );
+  }
+
+  /// Hàm tiện ích: Dịch câu chat từ Tiếng Trung sang Tiếng Anh
+  Future<TranslationResult> translateZhToEn(String text) {
+    return translate(
+      text: text,
+      from: TranslationLanguage.zhCn.code,
+      to: TranslationLanguage.en.code,
+    );
+  }
+
+  /// Kiểm tra nhanh câu có chứa ký tự Tiếng Trung (CJK Unified Ideographs)
+  static bool containsChineseCharacters(String text) {
+    return RegExp(r'[\u4E00-\u9FFF]').hasMatch(text);
+  }
+
+  /// Kiểm tra nhanh câu có chứa dấu thanh/chữ cái đặc trưng Tiếng Việt
+  static bool containsVietnameseDiacritics(String text) {
+    return RegExp(
+      r'[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]',
+    ).hasMatch(text);
+  }
+
   /// Hàm thông minh cho phòng chat BuddyTalk:
   /// Tự động nhận diện ngôn ngữ của câu chat.
-  /// Nếu người bạn nước ngoài chat tiếng Anh/Trung -> Dịch tức thì sang tiếng Việt.
-  /// Nếu người dùng gõ tiếng Việt -> Dịch sang tiếng Anh để người bạn hiểu.
-  Future<TranslationResult> translateAutoForChat(String text) async {
+  /// - Nếu người bạn nước ngoài chat Tiếng Anh hoặc Tiếng Trung -> Dịch sang Tiếng Việt.
+  /// - Nếu người dùng gõ Tiếng Việt -> Dịch sang [preferredForeignLang] (mặc định Tiếng Anh).
+  Future<TranslationResult> translateAutoForChat(
+    String text, {
+    TranslationLanguage preferredForeignLang = TranslationLanguage.en,
+  }) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) {
+      return translate(text: text, from: 'auto', to: 'vi');
+    }
+
+    final targetForeign = preferredForeignLang == TranslationLanguage.vi ||
+            preferredForeignLang == TranslationLanguage.auto
+        ? TranslationLanguage.en
+        : preferredForeignLang;
+
+    if (containsChineseCharacters(trimmed)) {
+      return translateZhToVi(trimmed);
+    }
+
+    if (containsVietnameseDiacritics(trimmed)) {
+      return translate(
+        text: trimmed,
+        from: TranslationLanguage.vi.code,
+        to: targetForeign.code,
+      );
+    }
+
     final firstTry = await translate(
-      text: text,
+      text: trimmed,
       from: TranslationLanguage.auto.code,
       to: TranslationLanguage.vi.code,
     );
 
-    if (firstTry.sourceLangEnum == TranslationLanguage.vi) {
+    final isUnchangedVi = firstTry.isSuccess &&
+        firstTry.sourceLangEnum == TranslationLanguage.auto &&
+        firstTry.translatedText.trim().toLowerCase() == trimmed.toLowerCase();
+
+    if (firstTry.sourceLangEnum == TranslationLanguage.vi || isUnchangedVi) {
       return translate(
-        text: text,
+        text: trimmed,
         from: TranslationLanguage.vi.code,
-        to: TranslationLanguage.en.code,
+        to: targetForeign.code,
       );
     }
 
