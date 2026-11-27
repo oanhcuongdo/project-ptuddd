@@ -22,7 +22,7 @@ class TextNormalizerZh {
       text = text.replaceAll(digit, hanzi);
     });
 
-    final punctuationRegex = RegExp(r'[，。！？、；：“”‘’（）《》〈〉【】…—\.,!?;:\(\)\[\]"\'\-]');
+    final punctuationRegex = RegExp(r'''[，。！？、；：“”‘’（）《》〈〉【】…—\.,!?;:()[\]"'\-]''');
     text = text.replaceAll(punctuationRegex, '');
 
     text = text.replaceAll(RegExp(r'\s+'), ' ').trim();

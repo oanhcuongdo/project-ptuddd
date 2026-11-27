@@ -1,5 +1,4 @@
 import 'pinyin_tone_helper.dart';
-import 'text_normalizer_zh.dart';
 
 class ToneSandhiRules {
   static List<String> applyToneSandhi(List<String> hanziList, List<String> pinyinList) {

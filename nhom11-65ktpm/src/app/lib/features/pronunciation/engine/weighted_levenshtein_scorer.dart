@@ -88,7 +88,6 @@ class WeightedLevenshteinScorer {
     double durationSeconds = 2.0,
   }) {
     final evaluations = <PhonemeEvaluation>[];
-    double totalWordScore = 0.0;
     double totalToneScore = 0.0;
     double totalAccuracy = 0.0;
 
@@ -129,7 +128,6 @@ class WeightedLevenshteinScorer {
           isToneError: tonePenalty > 0,
         ));
 
-        totalWordScore += wordScore;
         totalToneScore += singleToneScore;
         totalAccuracy += singleAccuracy;
       } else {

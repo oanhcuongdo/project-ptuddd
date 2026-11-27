@@ -33,7 +33,10 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppConstants.pronunciationRoute,
-      builder: (context, state) => const PronunciationScreen(),
+      builder: (context, state) => PronunciationScreen(
+        lessonId: state.uri.queryParameters['lessonId'],
+        word: state.uri.queryParameters['word'],
+      ),
     ),
     GoRoute(
       path: AppConstants.writingRoute,

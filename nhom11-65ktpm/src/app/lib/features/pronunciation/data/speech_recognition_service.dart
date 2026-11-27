@@ -98,14 +98,16 @@ class SpeechRecognitionService {
           _lastRecognizedWords = result.recognizedWords;
           _recognizedTextController.add(_lastRecognizedWords);
         },
-        listenFor: listenFor,
-        pauseFor: pauseFor,
-        localeId: localeId,
         onSoundLevelChange: (level) {
           _soundLevelController.add(level);
         },
-        cancelOnError: false,
-        partialResults: true,
+        listenOptions: SpeechListenOptions(
+          listenFor: listenFor,
+          pauseFor: pauseFor,
+          localeId: localeId,
+          cancelOnError: false,
+          partialResults: true,
+        ),
       );
       _updateStatus(SpeechServiceStatus.listening);
       return true;

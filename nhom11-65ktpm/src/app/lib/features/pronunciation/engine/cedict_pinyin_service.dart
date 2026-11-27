@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
+
 import '../../../../core/contracts/lesson_repository.dart';
 import '../../../../core/contracts/speech_services.dart';
 
-/// Bo chuyen doi Han tu sang Pinyin va xu ly bien dieu. Chu so huu: Khanh (#12)
+/// Bộ chuyển đổi Hán tự sang Pinyin và xử lý biến điệu theo CC-CEDICT.
+/// Chủ sở hữu: Khánh (#12)
 class CedictPinyinService implements PinyinService {
   final LessonRepository _lessons;
   Map<String, String>? _dict;
@@ -25,22 +29,45 @@ class CedictPinyinService implements PinyinService {
   Future<void> _ensureLoaded() async {
     if (_dict != null) return;
     final dict = <String, String>{};
-    final allLessons = await _lessons.lessons();
-    for (final l in allLessons) {
-      for (final w in l.words) {
-        dict[w.hanzi] = w.pinyin.toLowerCase().trim();
+
+    // 1. Nạp từ điển CC-CEDICT Compact từ asset
+    try {
+      final jsonStr = await rootBundle.loadString('assets/data/cc_cedict_compact.json');
+      final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+      final rawDict = data['dictionary'] as Map<String, dynamic>?;
+      if (rawDict != null) {
+        rawDict.forEach((k, v) {
+          dict[k] = (v as String).toLowerCase().trim();
+        });
       }
+    } catch (_) {
+      // Fallback khi chạy unit test thuần túy không có asset bundle
     }
-    final baseDict = {
-      '你好': 'nǐ hǎo', '您好': 'nín hǎo', '谢谢': 'xièxie', '不客气': 'bú kèqi',
-      '再见': 'zàijiàn', '对不起': 'duìbuqǐ', '没关系': 'méi guānxi', '请问': 'qǐngwèn',
-      '中国': 'zhōngguó', '北京': 'běijīng', '汉语': 'hànyǔ', '老师': 'lǎoshī',
-      '学生': 'xuésheng', '朋友': 'péngyou', '爸爸': 'bàba', '妈妈': 'māma',
-      '今天': 'jīntiān', '明天': 'míngtiān', '昨天': 'zuótiān', '现在': 'xiànzài',
-      '喜欢': 'xǐhuan', '认识': 'rènshi', '高兴': 'gāoxìng', '喝水': 'hē shuǐ',
-      '吃米饭': 'chī mǐfàn', '看书': 'kàn shū', '去学校': 'qù xuéxiào',
-      '买东西': 'mǎi dōngxi', '打电话': 'dǎ diànhuà', '听音乐': 'tīng yīnyuè',
-      '几': 'jǐ', '什么': 'shénme', '多少': 'duōshao', '怎么': 'zěnme',
+
+    // 2. Bổ sung từ vựng từ các bài học
+    try {
+      final allLessons = await _lessons.lessons();
+      for (final l in allLessons) {
+        for (final w in l.words) {
+          dict[w.hanzi] = w.pinyin.toLowerCase().trim();
+        }
+      }
+    } catch (_) {}
+
+    // 3. Fallback tích hợp sẵn đảm bảo luôn có đủ từ vựng cơ bản và từng chữ đơn
+    final fallbackDict = {
+      '你好': 'nǐ hǎo', '您好': 'nín hǎo', '谢谢': 'xiè xie', '不客气': 'bú kè qi',
+      '再见': 'zài jiàn', '对不起': 'duì bu qǐ', '没关系': 'méi guān xi', '请问': 'qǐng wèn',
+      '中国': 'zhōng guó', '北京': 'běi jīng', '汉语': 'hàn yǔ', '老师': 'lǎo shī',
+      '学生': 'xué sheng', '朋友': 'péng you', '爸爸': 'bà ba', '妈妈': 'mā ma',
+      '今天': 'jīn tiān', '明天': 'míng tiān', '昨天': 'zuó tiān', '现在': 'xiàn zài',
+      '喜欢': 'xǐ huan', '认识': 'rèn shi', '高兴': 'gāo xìng', '喝水': 'hē shuǐ',
+      '吃米饭': 'chī mǐ fàn', '看书': 'kàn shū', '去学校': 'qù xué xiào',
+      '买东西': 'mǎi dōng xi', '打电话': 'dǎ diàn huà', '听音乐': 'tīng yīn yuè',
+      '一共': 'yī gòng', '一天': 'yī tiān', '不是': 'bù shì', '不用': 'bù yòng',
+      '猫': 'māo', '狗': 'gǒu', '茶': 'chá', '喝茶': 'hē chá', '苹果': 'píng guǒ',
+      '火车': 'huǒ chē', '水饺': 'shuǐ jiǎo', '饺子': 'jiǎo zi',
+      '几': 'jǐ', '什么': 'shén me', '多少': 'duō shao', '怎么': 'zěn me',
       '一': 'yī', '二': 'èr', '三': 'sān', '四': 'sì', '五': 'wǔ',
       '六': 'liù', '七': 'qī', '八': 'bā', '九': 'jiǔ', '十': 'shí',
       '好': 'hǎo', '大': 'dà', '小': 'xiǎo', '多': 'duō', '少': 'shǎo',
@@ -50,9 +77,10 @@ class CedictPinyinService implements PinyinService {
       '想': 'xiǎng', '能': 'néng', '会': 'huì', '可以': 'kěyǐ', '做': 'zuò',
       '天': 'tiān', '年': 'nián', '起': 'qǐ', '看': 'kàn', '个': 'gè', '岁': 'suì',
     };
-    baseDict.forEach((k, v) {
+    fallbackDict.forEach((k, v) {
       dict.putIfAbsent(k, () => v);
     });
+
     _dict = dict;
   }
 
@@ -72,15 +100,24 @@ class CedictPinyinService implements PinyinService {
       }
 
       var matched = false;
+      // Khớp từ dài nhất trước (từ 4 chữ xuống 1 chữ)
       for (var len = 4; len >= 1; len--) {
         if (i + len <= clean.length) {
           final sub = clean.substring(i, i + len);
           final p = dict[sub];
           if (p != null) {
             final syls = p.split(RegExp(r'\s+'));
-            for (var k = 0; k < sub.length; k++) {
-              hanziList.add(sub[k]);
-              pinyinList.add(k < syls.length ? syls[k] : syls.last);
+            if (syls.length == sub.length) {
+              for (var k = 0; k < sub.length; k++) {
+                hanziList.add(sub[k]);
+                pinyinList.add(syls[k]);
+              }
+            } else {
+              for (var k = 0; k < sub.length; k++) {
+                final ch = sub[k];
+                hanziList.add(ch);
+                pinyinList.add(dict[ch] ?? (k < syls.length ? syls[k] : '?'));
+              }
             }
             i += len;
             matched = true;
@@ -89,10 +126,12 @@ class CedictPinyinService implements PinyinService {
         }
       }
 
+      // Nếu không khớp cụm từ, tra theo từng chữ đơn
       if (!matched) {
         final ch = clean[i];
+        final p = dict[ch];
         hanziList.add(ch);
-        pinyinList.add(dict[ch] ?? '?');
+        pinyinList.add(p ?? (RegExp(r'[\u4e00-\u9fff]').hasMatch(ch) ? '?' : ch));
         i++;
       }
     }
@@ -108,6 +147,7 @@ class CedictPinyinService implements PinyinService {
     if (hanziList.length != pinyinList.length) return;
     final n = hanziList.length;
 
+    // 1. Biến điệu hai thanh 3 liền nhau: thanh 3 trước chuyển sang thanh 2
     for (var i = 0; i < n - 1; i++) {
       final p1 = pinyinList[i];
       final p2 = pinyinList[i + 1];
@@ -116,16 +156,23 @@ class CedictPinyinService implements PinyinService {
       }
     }
 
+    // 2. Biến điệu chữ 不:
+    // - Đứng trước thanh 4: đọc thành bú (thanh 2)
+    // - Ở giữa cấu trúc lặp lại động từ (A 不 A): đọc thanh nhẹ bu
     for (var i = 0; i < n; i++) {
       if (hanziList[i] == '不') {
-        if (i < n - 1 && _hasTone4(pinyinList[i + 1])) {
-          pinyinList[i] = 'bú';
-        } else if (i > 0 && i < n - 1 && hanziList[i - 1] == hanziList[i + 1]) {
+        if (i > 0 && i < n - 1 && hanziList[i - 1] == hanziList[i + 1]) {
           pinyinList[i] = 'bu';
+        } else if (i < n - 1 && _hasTone4(pinyinList[i + 1])) {
+          pinyinList[i] = 'bú';
         }
       }
     }
 
+    // 3. Biến điệu chữ 一:
+    // - Ở giữa cấu trúc lặp lại động từ (A 一 A): đọc thanh nhẹ yi
+    // - Đứng trước thanh 4: đọc thành yí (thanh 2)
+    // - Đứng trước thanh 1, 2, 3: đọc thành yì (thanh 4)
     for (var i = 0; i < n; i++) {
       if (hanziList[i] == '一') {
         if (i > 0 && i < n - 1 && hanziList[i - 1] == hanziList[i + 1]) {

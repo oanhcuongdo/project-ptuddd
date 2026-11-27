@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 
 enum AudioRecordingState {
@@ -55,14 +54,8 @@ class AudioRecordingService {
 
   Future<bool> requestMicrophonePermission() async {
     try {
-      final status = await Permission.microphone.status;
-      if (status.isGranted) {
-        _updateState(AudioRecordingState.ready);
-        return true;
-      }
-
-      final result = await Permission.microphone.request();
-      if (result.isGranted) {
+      final hasPerm = await _recorder.hasPermission();
+      if (hasPerm) {
         _updateState(AudioRecordingState.ready);
         return true;
       } else {
@@ -70,7 +63,7 @@ class AudioRecordingService {
         return false;
       }
     } catch (e) {
-      debugPrint('Loi khi xin quyen micro: $e');
+      debugPrint('Error requesting mic permission: $e');
       _updateState(AudioRecordingState.error);
       return false;
     }

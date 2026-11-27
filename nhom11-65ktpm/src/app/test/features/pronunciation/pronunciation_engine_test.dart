@@ -334,5 +334,45 @@ void main() {
       expect(res.syllables.length, 2);
       expect(res.syllables[0].expected.initial, 'n');
     });
+
+    test('16. Tru diem nhe hon cho cap thanh dieu nham lan 2 <-> 3 cua nguoi Viet (#13)', () async {
+      final scorer = OfflinePronunciationEngine();
+      // Doc lech thanh 2 thay vi thanh 3 (ní hǎo thay vi nǐ hǎo)
+      final resTone23 = await scorer.assess(
+        referenceHanzi: '你',
+        referencePinyin: 'nǐ',
+        recognizedPinyin: 'ní',
+      );
+
+      // Doc lech thanh 4 thay vi thanh 3 (nì thay vi nǐ)
+      final resTone4 = await scorer.assess(
+        referenceHanzi: '你',
+        referencePinyin: 'nǐ',
+        recognizedPinyin: 'nì',
+      );
+
+      // Nhầm thanh 2 ↔ 3 bị trừ nhẹ hơn nhầm thanh 4 (điểm cao hơn)
+      expect(resTone23.overall, greaterThan(resTone4.overall));
+      expect(resTone23.syllables.first.errors, contains(PronunciationError.tone));
+    });
+
+    test('17. Ma tran phat am nguoi Viet tru nhe cho zh/z va u/ü (#13)', () async {
+      final scorer = OfflinePronunciationEngine();
+      // Doc nham zh -> z (am de nham)
+      final resZhZ = await scorer.assess(
+        referenceHanzi: '中',
+        referencePinyin: 'zhōng',
+        recognizedPinyin: 'zōng',
+      );
+
+      // Doc nham zh -> b (am khong lien quan)
+      final resZhB = await scorer.assess(
+        referenceHanzi: '中',
+        referencePinyin: 'zhōng',
+        recognizedPinyin: 'bōng',
+      );
+
+      expect(resZhZ.overall, greaterThan(resZhB.overall));
+    });
   });
 }

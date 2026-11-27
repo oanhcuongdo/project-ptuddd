@@ -1,293 +1,196 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/contracts/models/pronunciation.dart';
 import '../../../../core/contracts/pronunciation_scorer.dart';
-import '../../../../core/contracts/speech_services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/glass.dart';
+import '../controllers/pronunciation_controller.dart';
 
-/// Man hinh luyen phat am va xem phan hoi chi tiet chuan Liquid Glass UI. Chu so huu: Khanh (#15)
+/// Màn hình luyện phát âm và xem phản hồi chi tiết chuẩn Liquid Glass UI.
+/// Chủ sở hữu: Khánh (#15)
 class PronunciationPracticeScreen extends ConsumerStatefulWidget {
   final String targetHanzi;
   final String targetPinyin;
   final String meaning;
+  final String? lessonId;
+  final String? initialWord;
 
   const PronunciationPracticeScreen({
     super.key,
     this.targetHanzi = '你好',
     this.targetPinyin = 'nǐ hǎo',
     this.meaning = 'Xin chào',
+    this.lessonId,
+    this.initialWord,
   });
 
   @override
   ConsumerState<PronunciationPracticeScreen> createState() => _PronunciationPracticeScreenState();
 }
 
-class _PracticeWordItem {
-  final String hanzi;
-  final String pinyin;
-  final String meaning;
-  const _PracticeWordItem(this.hanzi, this.pinyin, this.meaning);
-}
-
 class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPracticeScreen> {
-  bool _isInitializing = true;
-  bool _isRecording = false;
-  bool _isAssessing = false;
-  bool _isPlayingTts = false;
-  DateTime? _lastTtsTap;
-  PronunciationResult? _result;
-  double _currentAmplitude = 0.0;
-  double _maxAmplitudeObserved = 0.0;
-  String _recognizedWords = '';
-  DateTime? _recordingStartedAt;
-  Timer? _silenceTimer;
-  Timer? _speechSilenceTimer;
-  StreamSubscription<double>? _ampSub;
-  bool _voiceDetected = false;
-
-  late int _currentWordIndex;
-  late List<_PracticeWordItem> _words;
-
   @override
   void initState() {
     super.initState();
-    _words = [
-      _PracticeWordItem(widget.targetHanzi, widget.targetPinyin, widget.meaning),
-      const _PracticeWordItem('谢谢', 'xiè xie', 'Cảm ơn'),
-      const _PracticeWordItem('再见', 'zài jiàn', 'Tạm biệt'),
-      const _PracticeWordItem('很好', 'hěn hǎo', 'Rất tốt'),
-      const _PracticeWordItem('朋友', 'péng you', 'Bạn bè'),
-    ];
-    _currentWordIndex = 0;
-
-    // Khởi động tuần tự (staggered warm-up) Loa TTS và Mic STT trong màn hình chờ
-    // Giúp triệt tiêu xung đột AudioTrack / AudioRecord trên Android Emulator, tránh tiếng nổ rè
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await ref.read(ttsServiceProvider).initialize();
-        // Giãn cách 300ms để AudioTrack DAC ổn định hoàn toàn trước khi mở AudioRecord
-        await Future.delayed(const Duration(milliseconds: 300));
-        await ref.read(speechRecognizerProvider).initialize();
-        // Cho Audio HAL ổn định thêm 150ms sau khi cả TTS + STT đã sẵn sàng
-        await Future.delayed(const Duration(milliseconds: 150));
-      } catch (_) {}
-      if (mounted) {
-        setState(() => _isInitializing = false);
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(pronunciationControllerProvider.notifier).init(
+        targetHanzi: widget.targetHanzi,
+        targetPinyin: widget.targetPinyin,
+        meaning: widget.meaning,
+        lessonId: widget.lessonId,
+        initialWord: widget.initialWord,
+      );
     });
   }
 
-  _PracticeWordItem get _currentWord => _words[_currentWordIndex];
-
-  void _nextWord() {
-    _silenceTimer?.cancel();
-    _silenceTimer = null;
-    _speechSilenceTimer?.cancel();
-    _speechSilenceTimer = null;
-    _ampSub?.cancel();
-    _ampSub = null;
-    if (_isRecording) {
-      ref.read(speechRecognizerProvider).stop();
-      ref.read(voiceRecorderProvider).cancel();
-    }
-    if (_isPlayingTts) {
-      ref.read(ttsServiceProvider).stop();
-    }
-    setState(() {
-      _currentWordIndex = (_currentWordIndex + 1) % _words.length;
-      _result = null;
-      _recognizedWords = '';
-      _currentAmplitude = 0.0;
-      _maxAmplitudeObserved = 0.0;
-      _isRecording = false;
-      _isPlayingTts = false;
-      _voiceDetected = false;
-    });
-  }
-
-  void _prevWord() {
-    _silenceTimer?.cancel();
-    _silenceTimer = null;
-    _speechSilenceTimer?.cancel();
-    _speechSilenceTimer = null;
-    _ampSub?.cancel();
-    _ampSub = null;
-    if (_isRecording) {
-      ref.read(speechRecognizerProvider).stop();
-      ref.read(voiceRecorderProvider).cancel();
-    }
-    if (_isPlayingTts) {
-      ref.read(ttsServiceProvider).stop();
-    }
-    setState(() {
-      _currentWordIndex = (_currentWordIndex - 1 + _words.length) % _words.length;
-      _result = null;
-      _recognizedWords = '';
-      _currentAmplitude = 0.0;
-      _maxAmplitudeObserved = 0.0;
-      _isRecording = false;
-      _isPlayingTts = false;
-      _voiceDetected = false;
-    });
-  }
-
-  @override
-  void dispose() {
-    _silenceTimer?.cancel();
-    _speechSilenceTimer?.cancel();
-    _ampSub?.cancel();
-    try {
-      ref.read(speechRecognizerProvider).stop();
-    } catch (_) {}
-    try {
-      ref.read(voiceRecorderProvider).cancel();
-    } catch (_) {}
-    try {
-      ref.read(ttsServiceProvider).stop();
-    } catch (_) {}
-    super.dispose();
-  }
-
-  void _startSilenceTimer({required VoidCallback onTimeout}) {
-    _silenceTimer?.cancel();
-    _silenceTimer = Timer(const Duration(seconds: 12), onTimeout);
-  }
-
-  Future<void> _playTts(TtsService tts, {bool slow = false}) async {
-    final now = DateTime.now();
-    if (_isPlayingTts) return;
-    if (_lastTtsTap != null && now.difference(_lastTtsTap!).inMilliseconds < 400) {
-      return;
-    }
-    _lastTtsTap = now;
-    setState(() => _isPlayingTts = true);
-    try {
-      await tts.speak(_currentWord.hanzi, slow: slow);
-    } catch (_) {}
-    // Luôn nhả nút sau thời lượng phát của từ (khoảng 1.1s, hoặc 1.6s nếu đọc chậm)
-    Future.delayed(Duration(milliseconds: slow ? 1600 : 1100), () {
-      if (mounted) {
-        setState(() => _isPlayingTts = false);
-      }
-    });
-  }
-
-  Future<void> _stopAndAssess({
-    required SpeechRecognizer speechRecognizer,
-    required VoiceRecorder voiceRecorder,
-    required PinyinService pinyinService,
-    required PronunciationScorer scorer,
-  }) async {
-    _silenceTimer?.cancel();
-    _silenceTimer = null;
-    _speechSilenceTimer?.cancel();
-    _speechSilenceTimer = null;
-    _ampSub?.cancel();
-    _ampSub = null;
-    if (!_isRecording && !_isAssessing) return;
-
-    setState(() {
-      _isRecording = false;
-      _isAssessing = true;
-    });
-
-    Recording? realRecording;
-    try {
-      realRecording = await voiceRecorder.stop();
-    } catch (_) {}
-
-    try {
-      await speechRecognizer.stop();
-      // Đợi một khoảng ngắn (350ms) để STT xử lý và hoàn tất phát sự kiện onResult cuối cùng
-      await Future<void>.delayed(const Duration(milliseconds: 350));
-    } catch (_) {}
-
-    final duration = _recordingStartedAt != null
-        ? DateTime.now().difference(_recordingStartedAt!)
-        : (realRecording?.duration ?? Duration.zero);
-    _recordingStartedAt = null;
-    final recording = realRecording ?? Recording(path: null, duration: duration);
-
-    // Nếu bấm dừng ngay khi vừa dứt lời, đợi thêm 250ms nếu micro từng phát hiện có tiếng nói
-    if (_recognizedWords.trim().isEmpty && _voiceDetected) {
-      await Future<void>.delayed(const Duration(milliseconds: 250));
-    }
-
-    String recognizedText = _recognizedWords.trim();
-
-    String recognizedPinyin = '';
-    if (recognizedText.isNotEmpty) {
-      if (RegExp(r'[a-zA-Z]').hasMatch(recognizedText) && !RegExp(r'[\u4e00-\u9fff]').hasMatch(recognizedText)) {
-        recognizedPinyin = recognizedText;
-      } else {
-        try {
-          recognizedPinyin = await pinyinService.toPinyin(recognizedText);
-        } catch (_) {}
-        if (recognizedPinyin.isEmpty && recognizedText == _currentWord.hanzi) {
-          recognizedPinyin = _currentWord.pinyin;
-        }
-      }
-    }
-
-    final res = await scorer.assess(
-      referenceHanzi: _currentWord.hanzi,
-      referencePinyin: _currentWord.pinyin,
-      recording: recording,
-      recognizedPinyin: recognizedPinyin.isNotEmpty ? recognizedPinyin : null,
-      recognizedText: recognizedText.isNotEmpty ? recognizedText : null,
+  void _showSupportExercises(PronunciationResult res) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        final errorSyllables = res.syllables.where((s) => s.status != SyllableStatus.ok).toList();
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF1E232A),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Row(
+                children: [
+                  Icon(Icons.fitness_center_rounded, color: AppColors.primary, size: 24),
+                  SizedBox(width: 10),
+                  Text(
+                    'Bài Tập Bổ Trợ Phát Âm',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Luyện tập các cặp âm tương phản để khắc phục lỗi ngữ âm thường gặp của người Việt:',
+                style: TextStyle(color: AppColors.cloud, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              if (errorSyllables.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.jadeGreen.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'Phát âm của bạn đã rất chuẩn! Hãy tiếp tục luyện các từ tiếp theo để duy trì phong độ.',
+                    style: TextStyle(color: AppColors.jadeGreen, fontSize: 13),
+                  ),
+                )
+              else ...[
+                for (final s in errorSyllables)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(s.hanzi, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Luyện âm: ${s.expected.initial.isNotEmpty ? s.expected.initial : s.expected.finalPart} (Thanh ${s.expected.tone})',
+                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.white),
+                              ),
+                              Text(
+                                s.expected.tone == 3
+                                    ? 'Cặp luyện: 你好 (ní hǎo) ↔ 我想 (wó xiǎng)'
+                                    : s.expected.initial == 'zh' || s.expected.initial == 'z'
+                                        ? 'Cặp đối chiếu: 这 (zhè) ↔ 早 (zǎo)'
+                                        : 'Lặp lại 3 lần to và rõ ràng âm tiết "${s.hanzi}".',
+                                style: const TextStyle(color: AppColors.cloud, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: GlassButton(
+                  icon: Icons.check,
+                  label: 'Đã hiểu, quay lại luyện tập',
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
     );
-
-    // Xoá file âm thanh tạm sau khi đã gửi đi chấm
-    if (recording.path != null) {
-      try {
-        final f = File(recording.path!);
-        if (await f.exists()) {
-          await f.delete();
-        }
-      } catch (_) {}
-    }
-
-    if (mounted) {
-      setState(() {
-        _result = res;
-        _isAssessing = false;
-      });
-    }
-  }
-
-  Future<void> _testPinyinDirectly(
-    String testPinyin, {
-    required PronunciationScorer scorer,
-  }) async {
-    setState(() {
-      _isAssessing = true;
-      _recognizedWords = testPinyin;
-    });
-
-    final res = await scorer.assess(
-      referenceHanzi: _currentWord.hanzi,
-      referencePinyin: _currentWord.pinyin,
-      recording: const Recording(path: null, duration: Duration(milliseconds: 1200)),
-      recognizedPinyin: testPinyin,
-      recognizedText: testPinyin,
-    );
-
-    if (mounted) {
-      setState(() {
-        _result = res;
-        _isAssessing = false;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isInitializing) {
+    final state = ref.watch(pronunciationControllerProvider);
+    final controller = ref.read(pronunciationControllerProvider.notifier);
+    final mode = ref.watch(scoringModeProvider);
+    final tipsAsync = ref.watch(pronunciationTipsProvider);
+    final tipsMap = tipsAsync.asData?.value ?? const {};
+
+    // Lắng nghe thông báo lỗi và quyền micro
+    ref.listen<PronunciationState>(pronunciationControllerProvider, (prev, next) {
+      if (next.permissionDenied && next.errorMessage != null && prev?.permissionDenied != true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.errorMessage!),
+            backgroundColor: AppColors.errorRed,
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: 'Đã hiểu',
+              textColor: Colors.white,
+              onPressed: () => controller.dismissError(),
+            ),
+          ),
+        );
+      }
+    });
+
+    if (state.isInitializing) {
       return const GlassScaffold(
         appBar: GlassAppBar(
           title: Text('Luyện Phát Âm'),
@@ -330,12 +233,7 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
       );
     }
 
-    final tts = ref.watch(ttsServiceProvider);
-    final scorer = ref.watch(pronunciationScorerProvider);
-    final speechRecognizer = ref.watch(speechRecognizerProvider);
-    final voiceRecorder = ref.watch(voiceRecorderProvider);
-    final pinyinService = ref.watch(pinyinServiceProvider);
-    final mode = ref.watch(scoringModeProvider);
+    final curWord = state.currentWord;
 
     return GlassScaffold(
       appBar: GlassAppBar(
@@ -401,7 +299,7 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        onPressed: _currentWordIndex > 0 ? _prevWord : null,
+                        onPressed: state.currentWordIndex > 0 ? () => controller.prevWord() : null,
                         icon: const Icon(Icons.arrow_back_ios_new, size: 18),
                         tooltip: 'Từ trước',
                       ),
@@ -412,273 +310,141 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
                           shape: const StadiumBorder(),
                         ),
                         child: Text(
-                          'Từ ${_currentWordIndex + 1} / ${_words.length}',
+                          'Từ ${state.currentWordIndex + 1} / ${state.words.length}',
                           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
                         ),
                       ),
                       IconButton(
-                        onPressed: _currentWordIndex < _words.length - 1 ? _nextWord : null,
+                        onPressed: state.currentWordIndex < state.words.length - 1 ? () => controller.nextWord() : null,
                         icon: const Icon(Icons.arrow_forward_ios, size: 18),
-                        tooltip: 'Từ tiếp theo',
+                        tooltip: 'Từ sau',
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Text(
-                    _currentWord.pinyin,
-                    style: const TextStyle(fontSize: 22, color: AppColors.cloud, fontWeight: FontWeight.w500),
+                    curWord.hanzi,
+                    style: const TextStyle(
+                      fontSize: 54,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
-                    _currentWord.hanzi,
-                    style: const TextStyle(fontSize: 54, fontWeight: FontWeight.bold),
+                    curWord.pinyin,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
-                    _currentWord.meaning,
-                    style: const TextStyle(fontSize: 16, color: AppColors.cloud),
+                    curWord.meaning,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.cloud,
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.center,
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      GlassButton(
-                        onPressed: _isPlayingTts ? null : () => _playTts(tts),
-                        icon: _isPlayingTts ? Icons.graphic_eq : Icons.volume_up,
-                        label: _isPlayingTts ? 'Đang đọc...' : 'Nghe mẫu',
+                      FilledButton.tonalIcon(
+                        onPressed: state.isPlayingTts ? null : () => controller.playTts(slow: false),
+                        icon: state.isPlayingTts
+                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.volume_up_rounded),
+                        label: const Text('Nghe mẫu'),
                       ),
-                      GlassButton(
-                        onPressed: _isPlayingTts ? null : () => _playTts(tts, slow: true),
-                        icon: Icons.speed,
-                        label: 'Đọc chậm',
+                      const SizedBox(width: 12),
+                      OutlinedButton.icon(
+                        onPressed: state.isPlayingTts ? null : () => controller.playTts(slow: true),
+                        icon: const Icon(Icons.slow_motion_video),
+                        label: const Text('Chậm 0.7x'),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-
-            if (_isRecording || _recognizedWords.isNotEmpty)
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: _recognizedWords.isNotEmpty
-                      ? AppColors.jadeGreen.withValues(alpha: 0.12)
-                      : AppColors.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _recognizedWords.isNotEmpty
-                        ? AppColors.jadeGreen
-                        : AppColors.primary.withValues(alpha: 0.3),
-                    width: 1.5,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _recognizedWords.isNotEmpty ? Icons.record_voice_over : Icons.hearing,
-                          color: _recognizedWords.isNotEmpty ? AppColors.jadeGreen : AppColors.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _recognizedWords.isNotEmpty ? 'ĐÃ NHẬN DIỆN ĐƯỢC' : 'ĐANG LẮNG NGHE GIỌNG BẠN...',
-                          style: TextStyle(
-                            color: _recognizedWords.isNotEmpty ? AppColors.jadeGreen : AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _recognizedWords.isNotEmpty
-                          ? '"$_recognizedWords"'
-                          : 'Hãy đọc to từ: ${_currentWord.hanzi} (${_currentWord.pinyin})',
-                      style: TextStyle(
-                        fontSize: _recognizedWords.isNotEmpty ? 24 : 14,
-                        fontWeight: _recognizedWords.isNotEmpty ? FontWeight.bold : FontWeight.normal,
-                        color: _recognizedWords.isNotEmpty ? AppColors.slate : AppColors.cloud,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-
-            if (_isRecording)
-              Container(
-                height: 54,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.errorRed.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(27),
-                  border: Border.all(color: AppColors.errorRed.withValues(alpha: 0.4)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.mic, color: AppColors.errorRed),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Text(
-                                'Đang thu âm...',
-                                style: TextStyle(color: AppColors.errorRed, fontWeight: FontWeight.bold, fontSize: 13),
-                              ),
-                              if (_recognizedWords.isNotEmpty) ...[
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    ': "$_recognizedWords"',
-                                    style: const TextStyle(color: AppColors.slate, fontSize: 12, fontWeight: FontWeight.w600),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: _currentAmplitude,
-                              backgroundColor: AppColors.errorRed.withValues(alpha: 0.2),
-                              color: AppColors.errorRed,
-                              minHeight: 6,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
             const SizedBox(height: 24),
 
+            // Sóng âm thanh động Visualizer
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 100),
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(15, (index) {
+                  final centerDist = (index - 7).abs();
+                  final factor = (1.0 - (centerDist / 8.0)).clamp(0.2, 1.0);
+                  final ampVal = state.isRecording ? (state.currentAmplitude * factor).clamp(0.08, 1.0) : 0.08;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 120),
+                    margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                    width: 4,
+                    height: 40 * ampVal + 4,
+                    decoration: BoxDecoration(
+                      color: state.isRecording
+                          ? (index % 2 == 0 ? AppColors.primary : AppColors.secondary)
+                          : Colors.grey.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Lời thoại đang nhận diện từ SpeechToText
+            if (state.isRecording || state.recognizedWords.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      state.isRecording ? Icons.mic : Icons.check_circle_outline,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        state.recognizedWords.isEmpty ? 'Đang lắng nghe giọng đọc...' : 'Đang nghe: "${state.recognizedWords}"',
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // Nút Micro chính
             GestureDetector(
-              onTap: _isAssessing
+              onTap: state.isAssessing
                   ? null
-                  : () async {
-                      if (_isRecording) {
-                        await _stopAndAssess(
-                          speechRecognizer: speechRecognizer,
-                          voiceRecorder: voiceRecorder,
-                          pinyinService: pinyinService,
-                          scorer: scorer,
-                        );
+                  : () {
+                      if (state.isRecording) {
+                        controller.stopAndAssess();
                       } else {
-                        _recognizedWords = '';
-                        _maxAmplitudeObserved = 0.0;
-                        _recordingStartedAt = DateTime.now();
-
-                        setState(() {
-                          _isRecording = true;
-                          _result = null;
-                          _currentAmplitude = 0.15;
-                        });
-
-                        _speechSilenceTimer?.cancel();
-                        _speechSilenceTimer = null;
-                        _voiceDetected = false;
-
-                        _startSilenceTimer(
-                          onTimeout: () => _stopAndAssess(
-                            speechRecognizer: speechRecognizer,
-                            voiceRecorder: voiceRecorder,
-                            pinyinService: pinyinService,
-                            scorer: scorer,
-                          ),
-                        );
-
-                        // Bat dau ghi am WAV qua RealVoiceRecorder (cho ket qua online Azure #14)
-                        try {
-                          await voiceRecorder.start();
-                          _ampSub?.cancel();
-                          _ampSub = voiceRecorder.amplitude.listen((amp) {
-                            if (mounted) {
-                              setState(() {
-                                _currentAmplitude = amp;
-                                if (amp > _maxAmplitudeObserved) {
-                                  _maxAmplitudeObserved = amp;
-                                }
-                              });
-                            }
-                          });
-                        } catch (e) {
-                          debugPrint('RealVoiceRecorder start error: $e');
-                        }
-
-                        try {
-                          await speechRecognizer.listen(
-                            onResult: (text, isFinal) {
-                              if (text.isNotEmpty && mounted) {
-                                setState(() {
-                                  _recognizedWords = text;
-                                });
-                              }
-                              if (isFinal && mounted && _isRecording) {
-                                _speechSilenceTimer?.cancel();
-                                _speechSilenceTimer = Timer(const Duration(milliseconds: 1800), () {
-                                  if (mounted && _isRecording) {
-                                    _stopAndAssess(
-                                      speechRecognizer: speechRecognizer,
-                                      voiceRecorder: voiceRecorder,
-                                      pinyinService: pinyinService,
-                                      scorer: scorer,
-                                    );
-                                  }
-                                });
-                              }
-                            },
-                            onSoundLevel: (amp) {
-                              if (mounted) {
-                                setState(() {
-                                  _currentAmplitude = amp;
-                                  if (amp > _maxAmplitudeObserved) {
-                                    _maxAmplitudeObserved = amp;
-                                  }
-                                });
-                                if (amp >= 0.16) {
-                                  _voiceDetected = true;
-                                  _speechSilenceTimer?.cancel();
-                                  _speechSilenceTimer = Timer(const Duration(milliseconds: 2500), () {
-                                    if (mounted && _isRecording) {
-                                      _stopAndAssess(
-                                        speechRecognizer: speechRecognizer,
-                                        voiceRecorder: voiceRecorder,
-                                        pinyinService: pinyinService,
-                                        scorer: scorer,
-                                      );
-                                    }
-                                  });
-                                }
-                              }
-                            },
-                            onError: (error) {
-                              debugPrint('STT notice on emulator: $error');
-                            },
-                          );
-                        } catch (e) {
-                          debugPrint('Speech recognition error: $e');
-                        }
+                        controller.startRecording();
                       }
                     },
               child: AnimatedContainer(
@@ -687,17 +453,17 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _isRecording ? AppColors.errorRed : AppColors.primary,
+                  color: state.isRecording ? AppColors.errorRed : AppColors.primary,
                   boxShadow: [
                     BoxShadow(
-                      color: (_isRecording ? AppColors.errorRed : AppColors.primary).withValues(alpha: _isRecording ? 0.5 : 0.25),
-                      blurRadius: _isRecording ? 20 : 12,
-                      spreadRadius: _isRecording ? 6 : 2,
+                      color: (state.isRecording ? AppColors.errorRed : AppColors.primary).withValues(alpha: state.isRecording ? 0.5 : 0.25),
+                      blurRadius: state.isRecording ? 20 : 12,
+                      spreadRadius: state.isRecording ? 6 : 2,
                     )
                   ],
                 ),
                 child: Icon(
-                  _isRecording ? Icons.stop : Icons.mic,
+                  state.isRecording ? Icons.stop : Icons.mic,
                   color: Colors.white,
                   size: 40,
                 ),
@@ -705,11 +471,11 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
             ),
             const SizedBox(height: 8),
             Text(
-              _isRecording ? 'Đang lắng nghe... Chạm nút để gửi hoặc dừng nói 2.5s' : 'Chạm vào micro để bắt đầu nói',
+              state.isRecording ? 'Đang lắng nghe... Chạm nút để gửi hoặc dừng nói 2.5s' : 'Chạm vào micro để bắt đầu nói',
               style: const TextStyle(color: AppColors.cloud, fontSize: 13),
             ),
 
-            if (kDebugMode && !_isRecording && !_isAssessing) ...[
+            if (kDebugMode && !state.isRecording && !state.isAssessing) ...[
               const SizedBox(height: 14),
               const Text('Kiểm tra nhanh bắt lỗi dấu Pinyin (Debug):', style: TextStyle(color: AppColors.cloud, fontSize: 12)),
               const SizedBox(height: 8),
@@ -721,37 +487,37 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
                   ActionChip(
                     avatar: const Icon(Icons.check_circle_outline, size: 16, color: AppColors.jadeGreen),
                     label: const Text('nǐ hǎo (Chuẩn 100đ)', style: TextStyle(fontSize: 12)),
-                    onPressed: () => _testPinyinDirectly('nǐ hǎo', scorer: scorer),
+                    onPressed: () => controller.testPinyinDirectly('nǐ hǎo'),
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.cancel_outlined, size: 16, color: AppColors.errorRed),
                     label: const Text('ni háo (Sai cả 2 thanh)', style: TextStyle(fontSize: 12)),
-                    onPressed: () => _testPinyinDirectly('ni háo', scorer: scorer),
+                    onPressed: () => controller.testPinyinDirectly('ni háo'),
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.cancel_outlined, size: 16, color: AppColors.errorRed),
                     label: const Text('nĩ hào (Sai thanh 4)', style: TextStyle(fontSize: 12)),
-                    onPressed: () => _testPinyinDirectly('nĩ hào', scorer: scorer),
+                    onPressed: () => controller.testPinyinDirectly('nĩ hào'),
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.warning_amber_rounded, size: 16, color: AppColors.warningOrange),
                     label: const Text('nỉ hao (Sai thanh nhẹ)', style: TextStyle(fontSize: 12)),
-                    onPressed: () => _testPinyinDirectly('nỉ hao', scorer: scorer),
+                    onPressed: () => controller.testPinyinDirectly('nỉ hao'),
                   ),
                 ],
               ),
             ],
 
-            if (_isAssessing) ...[
+            if (state.isAssessing) ...[
               const SizedBox(height: 24),
               const CircularProgressIndicator(),
               const SizedBox(height: 8),
               const Text('Đang phân tích phát âm...'),
             ],
 
-            if (_result != null) ...[
+            if (state.result != null) ...[
               const SizedBox(height: 28),
-              _buildFeedbackCard(_result!),
+              _buildFeedbackCard(state.result!, state, controller, tipsMap),
             ],
           ],
         ),
@@ -759,7 +525,12 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
     );
   }
 
-  Widget _buildFeedbackCard(PronunciationResult res) {
+  Widget _buildFeedbackCard(
+    PronunciationResult res,
+    PronunciationState state,
+    PronunciationController controller,
+    Map<String, PronunciationTip> tipsMap,
+  ) {
     Color scoreColor = AppColors.jadeGreen;
     if (res.overall < 60) {
       scoreColor = AppColors.errorRed;
@@ -816,8 +587,8 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      _recognizedWords.trim().isNotEmpty
-                          ? 'Đã nhận diện âm "${_recognizedWords.trim()}" nhưng chưa khớp chính xác từ cần luyện (${_currentWord.hanzi}). Hãy thử đọc lại rõ ràng hơn!'
+                      state.recognizedWords.trim().isNotEmpty
+                          ? 'Đã nhận diện âm "${state.recognizedWords.trim()}" nhưng chưa khớp chính xác từ cần luyện (${state.currentWord.hanzi}). Hãy thử đọc lại rõ ràng hơn!'
                           : 'Chưa nhận diện được phát âm tiếng Trung. Hãy thử nói to hơn gần micro máy tính hoặc kiểm tra cài đặt mic của máy ảo!',
                       style: const TextStyle(color: AppColors.errorRed, fontSize: 13),
                     ),
@@ -826,7 +597,7 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
               ),
             ),
           ] else ...[
-            if (res.recognizedText.isNotEmpty && res.recognizedText != _currentWord.hanzi)
+            if (res.recognizedText.isNotEmpty && res.recognizedText != state.currentWord.hanzi)
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -863,19 +634,31 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 10),
-            for (final s in res.syllables) _buildSyllableDetailCard(s),
+            for (final s in res.syllables) _buildSyllableDetailCard(s, tipsMap),
           ],
-          if (_currentWordIndex < _words.length - 1) ...[
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              child: GlassButton(
-                icon: Icons.navigate_next,
-                label: 'Luyện từ tiếp theo: ${_words[_currentWordIndex + 1].hanzi}',
-                onPressed: _nextWord,
+
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Expanded(
+                child: GlassButton(
+                  icon: Icons.fitness_center_rounded,
+                  label: 'Bài tập bổ trợ',
+                  onPressed: () => _showSupportExercises(res),
+                ),
               ),
-            ),
-          ],
+              if (state.currentWordIndex < state.words.length - 1) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GlassButton(
+                    icon: Icons.navigate_next,
+                    label: 'Từ tiếp: ${state.words[state.currentWordIndex + 1].hanzi}',
+                    onPressed: () => controller.nextWord(),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -954,24 +737,21 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-              Row(
-                children: [
-                  Text(desc, style: TextStyle(fontSize: 11, color: barColor, fontWeight: FontWeight.w500)),
-                  const SizedBox(width: 8),
-                  Text('${score.toInt()}%', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: barColor)),
-                ],
+              Text(label, style: const TextStyle(fontSize: 13, color: AppColors.slate)),
+              Text(
+                '${score.toInt()} đ ($desc)',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: barColor),
               ),
             ],
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: (score / 100.0).clamp(0.0, 1.0),
-              backgroundColor: barColor.withValues(alpha: 0.15),
-              color: barColor,
+              value: (score / 100).clamp(0.0, 1.0),
               minHeight: 6,
+              backgroundColor: AppColors.cloud.withValues(alpha: 0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(barColor),
             ),
           ),
         ],
@@ -979,7 +759,7 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
     );
   }
 
-  Widget _buildSyllableDetailCard(SyllableScore s) {
+  Widget _buildSyllableDetailCard(SyllableScore s, Map<String, PronunciationTip> tipsMap) {
     Color cardBorder = AppColors.jadeGreen;
     String statusText = 'Chuẩn xác';
     if (s.status == SyllableStatus.error) {
@@ -995,9 +775,26 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
     final hasToneError = s.errors.contains(PronunciationError.tone);
     final isMissing = s.errors.contains(PronunciationError.missing);
 
+    // Tra cứu mẹo từ pronunciationTipsProvider (#15)
     String tip = '';
+    final initialTip = tipsMap[s.expected.initial];
+    final finalTip = tipsMap[s.expected.finalPart];
+    final toneTip = tipsMap['tone${s.expected.tone}'];
+
     if (isMissing) {
       tip = 'Âm tiết bị bỏ sót khi đọc, hãy đọc to và trọn vẹn từ.';
+    } else if (hasInitialError && initialTip != null) {
+      tip = '${initialTip.title}: ${initialTip.mouthVi} ${initialTip.tongueVi} ${initialTip.compareVi}';
+      if (initialTip.examples.isNotEmpty) {
+        tip += ' (Ví dụ: ${initialTip.examples.join(', ')})';
+      }
+    } else if (hasToneError && toneTip != null) {
+      tip = '${toneTip.title}: ${toneTip.mouthVi} ${toneTip.tongueVi} ${toneTip.compareVi}';
+      if (toneTip.examples.isNotEmpty) {
+        tip += ' (Ví dụ: ${toneTip.examples.join(', ')})';
+      }
+    } else if (hasFinalError && finalTip != null) {
+      tip = '${finalTip.title}: ${finalTip.mouthVi} ${finalTip.tongueVi} ${finalTip.compareVi}';
     } else if (hasInitialError && hasToneError) {
       tip = 'Sai phụ âm đầu "${s.expected.initial}" và lệch thanh điệu thanh ${s.expected.tone}.';
     } else if (hasInitialError) {
@@ -1051,85 +848,78 @@ class _PronunciationPracticeScreenState extends ConsumerState<PronunciationPract
             ],
           ),
           const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildPartColumn(
-                  label: 'Thanh mẫu',
-                  expected: s.expected.initial.isEmpty ? 'Ø' : s.expected.initial,
-                  actual: s.actual?.initial.isEmpty == true ? 'Ø' : (s.actual?.initial ?? '—'),
-                  isError: hasInitialError || isMissing,
-                ),
-                _buildPartColumn(
-                  label: 'Vận mẫu',
-                  expected: s.expected.finalPart,
-                  actual: s.actual?.finalPart ?? '—',
-                  isError: hasFinalError || isMissing,
-                ),
-                _buildPartColumn(
-                  label: 'Thanh điệu',
-                  expected: 'Thanh ${s.expected.tone}',
-                  actual: s.actual != null ? 'Thanh ${s.actual!.tone}' : '—',
-                  isError: hasToneError || isMissing,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
+          Table(
+            border: TableBorder.all(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
             children: [
-              Icon(
-                s.status == SyllableStatus.ok ? Icons.check_circle : Icons.tips_and_updates,
-                size: 15,
-                color: cardBorder,
+              TableRow(
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.04)),
+                children: const [
+                  Padding(padding: EdgeInsets.all(6), child: Text('Thành phần', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11))),
+                  Padding(padding: EdgeInsets.all(6), child: Text('Mẫu chuẩn', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11))),
+                  Padding(padding: EdgeInsets.all(6), child: Text('Bạn đọc', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11))),
+                  Padding(padding: EdgeInsets.all(6), child: Text('Đánh giá', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11))),
+                ],
               ),
+              TableRow(
+                children: [
+                  const Padding(padding: EdgeInsets.all(6), child: Text('Thanh mẫu', style: TextStyle(fontSize: 12))),
+                  Padding(padding: const EdgeInsets.all(6), child: Text(s.expected.initial.isNotEmpty ? s.expected.initial : 'Ø', style: const TextStyle(fontSize: 12))),
+                  Padding(padding: const EdgeInsets.all(6), child: Text(s.actual?.initial.isNotEmpty == true ? s.actual!.initial : 'Ø', style: const TextStyle(fontSize: 12))),
+                  Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Text(
+                      hasInitialError ? 'Sai âm' : 'Đúng',
+                      style: TextStyle(fontSize: 12, color: hasInitialError ? AppColors.errorRed : AppColors.jadeGreen, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              TableRow(
+                children: [
+                  const Padding(padding: EdgeInsets.all(6), child: Text('Vận mẫu', style: TextStyle(fontSize: 12))),
+                  Padding(padding: const EdgeInsets.all(6), child: Text(s.expected.finalPart, style: const TextStyle(fontSize: 12))),
+                  Padding(padding: const EdgeInsets.all(6), child: Text(s.actual?.finalPart ?? '-', style: const TextStyle(fontSize: 12))),
+                  Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Text(
+                      hasFinalError ? 'Sai vần' : 'Đúng',
+                      style: TextStyle(fontSize: 12, color: hasFinalError ? AppColors.errorRed : AppColors.jadeGreen, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              TableRow(
+                children: [
+                  const Padding(padding: EdgeInsets.all(6), child: Text('Thanh điệu', style: TextStyle(fontSize: 12))),
+                  Padding(padding: const EdgeInsets.all(6), child: Text('Thanh ${s.expected.tone}', style: const TextStyle(fontSize: 12))),
+                  Padding(padding: const EdgeInsets.all(6), child: Text(s.actual != null ? 'Thanh ${s.actual!.tone}' : '-', style: const TextStyle(fontSize: 12))),
+                  Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Text(
+                      hasToneError ? 'Lệch thanh' : 'Đúng',
+                      style: TextStyle(fontSize: 12, color: hasToneError ? AppColors.errorRed : AppColors.jadeGreen, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.tips_and_updates_outlined, size: 16, color: AppColors.primary),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   tip,
-                  style: TextStyle(fontSize: 12, color: s.status == SyllableStatus.ok ? AppColors.jadeGreen : AppColors.slate),
+                  style: const TextStyle(fontSize: 12, color: AppColors.cloud, fontStyle: FontStyle.italic),
                 ),
               ),
             ],
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildPartColumn({
-    required String label,
-    required String expected,
-    required String actual,
-    required bool isError,
-  }) {
-    return Column(
-      children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: AppColors.cloud)),
-        const SizedBox(height: 2),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              expected,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-            ),
-            if (isError) ...[
-              const Icon(Icons.arrow_right_alt, size: 14, color: AppColors.errorRed),
-              Text(
-                actual,
-                style: const TextStyle(fontSize: 13, color: AppColors.errorRed, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ],
-        ),
-      ],
     );
   }
 }

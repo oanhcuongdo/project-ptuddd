@@ -185,7 +185,12 @@ class OfflinePronunciationEngine implements PronunciationScorer {
 
       if (expected.tone != actual.tone) {
         errors.add(PronunciationError.tone);
-        tonePen = 45.0;
+        // Cặp thanh điệu nhầm lẫn phổ biến ở người Việt (thanh 2 ↔ thanh 3): trừ nhẹ hơn 35đ thay vì 50đ (#13)
+        if ((expected.tone == 2 && actual.tone == 3) || (expected.tone == 3 && actual.tone == 2)) {
+          tonePen = 35.0;
+        } else {
+          tonePen = 50.0;
+        }
       }
 
       double score;
@@ -236,6 +241,9 @@ class OfflinePronunciationEngine implements PronunciationScorer {
     final avgAccuracy = (totalAccuracy / n).roundToDouble();
     final avgTone = (totalTone / n).roundToDouble();
 
+    // [Giới hạn thuật toán chấm Offline]:
+    // Điểm Trôi chảy (Fluency) được ước lượng dựa trên thời lượng audio thực tế so với
+    // thời lượng chuẩn (600ms/âm tiết), giới hạn trong khoảng từ 60.0 đến 92.0 điểm (#13).
     double fluency = 92.0;
     if (recording != null && recording.duration.inMilliseconds > 0) {
       final expectedDurationMs = chars.length * 600;
