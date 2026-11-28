@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "483303690920",
+    "project_id": "nhom15-ccf0d",
+    "storage_bucket": "nhom15-ccf0d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:483303690920:android:6b809b8ec68ae11917e89d",
+        "android_client_info": {
+          "package_name": "com.group15.soroban_kids_app.soroban_kids_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX9bO9AvRWW_E3GvWMxIcy9ePDLRIJRyE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

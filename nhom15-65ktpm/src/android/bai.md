@@ -1,0 +1,1 @@
+giao diện zero text để phù hợp với trẻ nhỏ
