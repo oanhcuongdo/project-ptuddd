@@ -1,5 +1,24 @@
 /// Evaluates quick arithmetic expressions for the Cashew-style amount keypad.
 abstract final class CashewCalculator {
+  /// Adds a numeric keypad value to the current expression.
+  static String appendDigits(String current, String digits) {
+    if (digits != '000' && !RegExp(r'^\d+$').hasMatch(digits)) {
+      return current;
+    }
+    if (current == '0' && digits != '000') return digits;
+    return '$current$digits';
+  }
+
+  /// Removes the last digit or the trailing operator and its spacing.
+  static String backspace(String current) {
+    final trimmed = current.trimRight();
+    if (trimmed.isEmpty) return '';
+    if (RegExp(r'[+\-*/]$').hasMatch(trimmed)) {
+      return trimmed.substring(0, trimmed.length - 1).trimRight();
+    }
+    return trimmed.substring(0, trimmed.length - 1);
+  }
+
   /// Evaluates [expression] supporting `+`, `-`/`−`, `*`/`×`, `/`/`÷`.
   ///
   /// Returns `null` if [expression] is empty, syntactically invalid, or
@@ -75,7 +94,8 @@ abstract final class CashewCalculator {
     var i = 0;
     while (i < input.length) {
       final ch = input[i];
-      final isUnaryMinus = ch == '-' && (tokens.isEmpty || _isOperator(tokens.last));
+      final isUnaryMinus =
+          ch == '-' && (tokens.isEmpty || _isOperator(tokens.last));
       if (_isDigitOrDot(ch) || isUnaryMinus) {
         final buf = StringBuffer(ch);
         i++;

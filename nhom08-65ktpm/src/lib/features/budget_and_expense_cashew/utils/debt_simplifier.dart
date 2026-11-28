@@ -28,7 +28,7 @@ class SimplifiedSettlement {
   final int amount;
 }
 
-/// Greedy debt-simplification calculator minimizing settlement transfers.
+/// Debt-simplification calculator minimizing settlement transfers.
 abstract final class DebtSimplifier {
   /// Splits total group expenses equally across [contributions] and computes
   /// the minimum transfers from net debtors to net creditors.
@@ -37,7 +37,10 @@ abstract final class DebtSimplifier {
   ) {
     if (contributions.length <= 1) return const [];
 
-    final totalPaid = contributions.fold<int>(0, (sum, c) => sum + c.paidAmount);
+    final totalPaid = contributions.fold<int>(
+      0,
+      (sum, c) => sum + c.paidAmount,
+    );
     if (totalPaid <= 0) return const [];
 
     final count = contributions.length;
@@ -57,8 +60,89 @@ abstract final class DebtSimplifier {
     return simplifyNetBalances(balances: balances, names: names);
   }
 
-  /// Simplifies precomputed [balances] (positive = creditor, negative = debtor).
+  /// Simplifies [balances] (positive = creditor, negative = debtor).
+  ///
+  /// Searches pairings for balanced member ledgers and uses a greedy fallback
+  /// when the supplied balances do not sum to zero.
   static List<SimplifiedSettlement> simplifyNetBalances({
+    required Map<String, int> balances,
+    required Map<String, String> names,
+  }) {
+    final totalBalance = balances.values.fold<int>(
+      0,
+      (sum, value) => sum + value,
+    );
+    if (totalBalance != 0) {
+      return _greedySimplification(balances: balances, names: names);
+    }
+
+    final ids =
+        balances.entries
+            .where((entry) => entry.value != 0)
+            .map((entry) => entry.key)
+            .toList()
+          ..sort((a, b) => balances[b]!.abs().compareTo(balances[a]!.abs()));
+    if (ids.length <= 1) return const [];
+
+    final remaining = [for (final id in ids) balances[id]!];
+    final transfers = <SimplifiedSettlement>[];
+    var best = _greedySimplification(balances: balances, names: names);
+
+    void search(int start, int count) {
+      while (start < remaining.length && remaining[start] == 0) {
+        start++;
+      }
+      if (start == remaining.length) {
+        if (count < best.length) {
+          best = List<SimplifiedSettlement>.of(transfers);
+        }
+        return;
+      }
+      if (count >= best.length) return;
+
+      final attemptedBalances = <int>{};
+      for (var index = start + 1; index < remaining.length; index++) {
+        final current = remaining[start];
+        final candidate = remaining[index];
+        if (candidate == 0 ||
+            (current > 0) == (candidate > 0) ||
+            !attemptedBalances.add(candidate)) {
+          continue;
+        }
+
+        final amount = current.abs() < candidate.abs()
+            ? current.abs()
+            : candidate.abs();
+        final debtorIndex = current < 0 ? start : index;
+        final creditorIndex = current > 0 ? start : index;
+        final debtorId = ids[debtorIndex];
+        final creditorId = ids[creditorIndex];
+
+        remaining[debtorIndex] += amount;
+        remaining[creditorIndex] -= amount;
+        transfers.add(
+          SimplifiedSettlement(
+            fromId: debtorId,
+            fromName: names[debtorId] ?? debtorId,
+            toId: creditorId,
+            toName: names[creditorId] ?? creditorId,
+            amount: amount,
+          ),
+        );
+        search(start, count + 1);
+        transfers.removeLast();
+        remaining[debtorIndex] -= amount;
+        remaining[creditorIndex] += amount;
+
+        if (candidate.abs() == current.abs()) break;
+      }
+    }
+
+    search(0, 0);
+    return best;
+  }
+
+  static List<SimplifiedSettlement> _greedySimplification({
     required Map<String, int> balances,
     required Map<String, String> names,
   }) {
@@ -83,7 +167,9 @@ abstract final class DebtSimplifier {
     while (ci < creditors.length && di < debtors.length) {
       final creditor = creditors[ci];
       final debtor = debtors[di];
-      final amount = creditor.value < debtor.value ? creditor.value : debtor.value;
+      final amount = creditor.value < debtor.value
+          ? creditor.value
+          : debtor.value;
 
       if (amount > 0) {
         transfers.add(

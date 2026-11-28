@@ -13,6 +13,7 @@ import '../features/auth_and_group/repository/auth_repository.dart';
 import '../features/budget_and_expense_cashew/presentation/add_expense_ocr_screen.dart';
 import '../features/budget_and_expense_cashew/presentation/budget_screen.dart';
 import '../features/budget_and_expense_cashew/presentation/expense_detail_screen.dart';
+import '../features/budget_and_expense_cashew/models/trip_expense.dart';
 import '../features/goal_and_checklist/presentation/checklist_screen.dart';
 import '../features/place_and_itinerary_planner/presentation/add_activity_screen.dart';
 import '../features/place_and_itinerary_planner/presentation/itinerary_screen.dart';
@@ -62,7 +63,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: false,
     redirect: (context, state) {
       final authAsync = ref.read(authStateProvider);
-      final user = authAsync.asData?.value ??
+      final user =
+          authAsync.asData?.value ??
           ref.read(authRepositoryProvider).currentUser;
       final isLoggingIn = state.matchedLocation == AppRoutes.login;
 
@@ -113,7 +115,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.budgetDetail,
         name: 'budget_detail',
-        builder: (context, state) => const ExpenseDetailScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          return ExpenseDetailScreen(
+            expense: extra is TripExpense ? extra : null,
+          );
+        },
       ),
       ...extraModule2Routes,
       StatefulShellRoute.indexedStack(
@@ -178,7 +185,8 @@ class _LiveMomoFundPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authStateProvider).asData?.value ??
+    final user =
+        ref.watch(authStateProvider).asData?.value ??
         ref.read(authRepositoryProvider).currentUser;
     final trip = ref.watch(currentTripProvider).asData?.value;
     final tripId = ref.watch(currentTripIdProvider) ?? 'demo-trip';
@@ -203,7 +211,8 @@ class _LiveApproveReceiptPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authStateProvider).asData?.value ??
+    final user =
+        ref.watch(authStateProvider).asData?.value ??
         ref.read(authRepositoryProvider).currentUser;
     final tripId = ref.watch(currentTripIdProvider) ?? 'demo-trip';
     return ApproveReceiptScreen(
