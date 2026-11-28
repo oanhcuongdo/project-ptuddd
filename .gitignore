@@ -40,3 +40,5 @@ Pods/
 *~
 .DS_Store
 Thumbs.db
+# Group 14 - Legacy migrations backup
+/nhom14-65ktpm/supabase/migrations_backup/
