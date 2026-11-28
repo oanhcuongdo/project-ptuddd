@@ -735,6 +735,7 @@ class _RoomMatchingScreenState extends ConsumerState<RoomMatchingScreen> {
     try {
       await ref.read(roomMatchingRepositoryProvider).respondToInvitation(
             invitationId: invitation.id,
+            responderId: userId,
             accept: accept,
           );
       ref.invalidate(myInvitationsProvider(userId));
