@@ -1,0 +1,380 @@
+[
+  {
+    "code": "less_sugar_drink",
+    "title": "Gọi ít đường",
+    "content": "Lần sau thử gọi 30–50% đường, vị vẫn ngon mà nhẹ nhàng hơn nhiều.",
+    "goals": ["weight_loss", "less_sugar", "balanced"],
+    "applies_to": { "category": ["drink"], "sugar_level": ["high", "medium"] },
+    "priority": 10,
+    "source": "Khuyến nghị chung về hạn chế đường bổ sung"
+  },
+  {
+    "code": "less_ice",
+    "title": "Gọi ít đá",
+    "content": "Chọn ít đá để vị trà đậm đà hơn, bạn sẽ thấy không cần thêm nhiều đường.",
+    "goals": ["weight_loss", "less_sugar"],
+    "applies_to": { "category": ["drink"], "sugar_level": ["high", "medium"] },
+    "priority": 4,
+    "source": "Thói quen gọi đồ uống lành mạnh"
+  },
+  {
+    "code": "skip_topping",
+    "title": "Bỏ bớt topping",
+    "content": "Thử bỏ trân châu hoặc chỉ chọn một loại topping, ly nước sẽ nhẹ bụng hơn.",
+    "goals": ["weight_loss", "less_sugar", "balanced"],
+    "applies_to": { "category": ["drink"], "carb_level": ["high"] },
+    "priority": 9,
+    "source": "Khuyến nghị chung về hạn chế đường bổ sung"
+  },
+  {
+    "code": "smaller_size",
+    "title": "Chọn size nhỏ hơn",
+    "content": "Size M hoặc S vẫn đủ đã thèm, lại dễ giữ thói quen lâu dài.",
+    "goals": ["weight_loss", "less_sugar"],
+    "applies_to": { "category": ["drink"], "sugar_level": ["high"] },
+    "priority": 7,
+    "source": "Kiểm soát khẩu phần"
+  },
+  {
+    "code": "skip_cheese_foam",
+    "title": "Bỏ lớp kem cheese/kem sữa",
+    "content": "Lớp kem béo khá đậm vị; thử gọi không kem hoặc xin kem để riêng và dùng một ít thôi.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["drink"], "fat_level": ["high", "medium"] },
+    "priority": 8,
+    "source": "Khuyến nghị chung về hạn chế chất béo bão hòa"
+  },
+  {
+    "code": "jelly_instead_of_pearl",
+    "title": "Đổi trân châu sang thạch",
+    "content": "Thạch trái cây hoặc nha đam là lựa chọn nhẹ nhàng hơn trân châu đường đen.",
+    "goals": ["weight_loss", "less_sugar"],
+    "applies_to": { "category": ["drink"], "carb_level": ["high"] },
+    "priority": 6,
+    "source": "Thói quen gọi đồ uống lành mạnh"
+  },
+  {
+    "code": "water_instead_of_soda",
+    "title": "Thay nước ngọt bằng nước lọc",
+    "content": "Lần tới thử nước lọc, nước khoáng hoặc trà không đường để giải khát nhé.",
+    "goals": ["weight_loss", "less_sugar", "balanced"],
+    "applies_to": { "category": ["drink"], "sugar_level": ["high"] },
+    "priority": 8,
+    "source": "Khuyến nghị chung về hạn chế đồ uống có đường"
+  },
+  {
+    "code": "unsweetened_tea",
+    "title": "Thử trà không đường",
+    "content": "Trà đá, trà xanh hay trà hoa không đường vừa mát vừa thanh, rất hợp khi ăn ngoài.",
+    "goals": ["weight_loss", "less_sugar", "balanced"],
+    "applies_to": { "category": ["drink"], "sugar_level": ["high", "medium"] },
+    "priority": 6,
+    "source": "Khuyến nghị chung về hạn chế đồ uống có đường"
+  },
+  {
+    "code": "less_condensed_milk_coffee",
+    "title": "Cà phê ít sữa đặc",
+    "content": "Dặn quán cho ít sữa đặc, hoặc thử cà phê đen ít đường – vẫn tỉnh táo mà nhẹ hơn.",
+    "goals": ["weight_loss", "less_sugar", "balanced"],
+    "applies_to": { "category": ["drink"], "sugar_level": ["high", "medium"], "fat_level": ["medium", "high"] },
+    "priority": 7,
+    "source": "Khuyến nghị chung về hạn chế đường bổ sung"
+  },
+  {
+    "code": "juice_no_added_sugar",
+    "title": "Nước ép không thêm đường",
+    "content": "Khi gọi nước ép hoặc sinh tố, dặn quán không thêm đường hay sữa đặc để giữ vị trái cây tự nhiên.",
+    "goals": ["weight_loss", "less_sugar", "balanced"],
+    "applies_to": { "category": ["drink"], "sugar_level": ["high", "medium"] },
+    "priority": 5,
+    "source": "Khuyến nghị chung về hạn chế đường bổ sung"
+  },
+  {
+    "code": "share_big_drink",
+    "title": "Chia sẻ ly size lớn",
+    "content": "Ly size lớn có thể chia với bạn bè, vừa vui vừa không bị quá ngọt.",
+    "goals": ["weight_loss", "less_sugar"],
+    "applies_to": { "category": ["drink"], "sugar_level": ["high"], "energy_level": ["high"] },
+    "priority": 3,
+    "source": "Kiểm soát khẩu phần"
+  },
+  {
+    "code": "plan_sweet_drink_days",
+    "title": "Hẹn ngày cho đồ uống ngọt",
+    "content": "Chọn trước vài ngày trong tuần để thưởng cho mình một ly đồ ngọt, những ngày còn lại uống nước lọc hoặc trà.",
+    "goals": ["less_sugar", "weight_loss"],
+    "applies_to": { "category": ["drink"], "sugar_level": ["high"] },
+    "priority": 5,
+    "source": "Xây dựng thói quen bền vững"
+  },
+  {
+    "code": "swap_fried_to_boiled",
+    "title": "Đổi món chiên sang luộc/hấp",
+    "content": "Lần sau thử phiên bản luộc, hấp hoặc nướng của món này – vẫn ngon mà nhẹ bụng hơn.",
+    "goals": ["weight_loss", "balanced", "less_sugar"],
+    "applies_to": { "category": ["main_dish", "snack"], "fat_level": ["high"] },
+    "priority": 9,
+    "source": "Khuyến nghị chung về hạn chế chất béo bão hòa"
+  },
+  {
+    "code": "remove_skin_fat",
+    "title": "Bỏ bớt da và mỡ",
+    "content": "Với gà, vịt hay thịt ba chỉ, bỏ bớt phần da và mỡ là món ăn đã nhẹ hơn hẳn.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "fat_level": ["high"], "protein_level": ["medium", "high"] },
+    "priority": 7,
+    "source": "Khuyến nghị chung về hạn chế chất béo bão hòa"
+  },
+  {
+    "code": "sauce_on_side",
+    "title": "Nước sốt để riêng",
+    "content": "Xin nước sốt, mỡ hành hoặc nước béo để riêng rồi dùng vừa đủ để giữ vị.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "fat_level": ["high", "medium"] },
+    "priority": 5,
+    "source": "Thói quen gọi món lành mạnh"
+  },
+  {
+    "code": "pair_fried_with_veg",
+    "title": "Ăn kèm rau khi có món chiên",
+    "content": "Món chiên sẽ cân bằng hơn khi đi cùng một đĩa rau sống, rau luộc hoặc dưa leo.",
+    "goals": ["balanced", "weight_loss"],
+    "applies_to": { "category": ["main_dish", "snack"], "fat_level": ["high"], "veg_level": ["low", "medium"] },
+    "priority": 7,
+    "source": "Khuyến nghị chung về ăn nhiều rau xanh"
+  },
+  {
+    "code": "share_fried_snack",
+    "title": "Chia sẻ món chiên",
+    "content": "Gọi một phần khoai hoặc gà rán để cả nhóm cùng ăn, vừa đủ vui miệng.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["snack"], "fat_level": ["high"] },
+    "priority": 5,
+    "source": "Kiểm soát khẩu phần"
+  },
+  {
+    "code": "skim_broth_fat",
+    "title": "Hớt bớt váng mỡ",
+    "content": "Với phở, bún bò, hủ tiếu, thử hớt bớt lớp váng mỡ trên mặt và chan nước vừa phải.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "fat_level": ["high", "medium"], "carb_level": ["high", "medium"] },
+    "priority": 4,
+    "source": "Thói quen ăn món nước lành mạnh"
+  },
+  {
+    "code": "half_rice",
+    "title": "Bớt nửa chén cơm",
+    "content": "Thử bớt khoảng nửa chén cơm và thêm rau hoặc món đạm, bữa ăn vẫn no mà cân bằng hơn.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "carb_level": ["high"] },
+    "priority": 9,
+    "source": "Mô hình đĩa ăn cân bằng"
+  },
+  {
+    "code": "try_brown_rice",
+    "title": "Thử cơm gạo lứt",
+    "content": "Nếu quán có cơm gạo lứt hoặc cơm trộn ngũ cốc, thử đổi vài bữa trong tuần nhé.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "carb_level": ["high"] },
+    "priority": 4,
+    "source": "Khuyến nghị chung về ngũ cốc nguyên hạt"
+  },
+  {
+    "code": "less_noodle_more_veg",
+    "title": "Ít bánh, thêm rau",
+    "content": "Với bún, phở, mì: dặn quán ít bánh, thêm rau và giá – vẫn đầy đặn mà cân bằng.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "carb_level": ["high"], "veg_level": ["low", "medium"] },
+    "priority": 8,
+    "source": "Mô hình đĩa ăn cân bằng"
+  },
+  {
+    "code": "avoid_double_carb",
+    "title": "Tránh gấp đôi tinh bột",
+    "content": "Nếu đã có cơm hoặc bún, thử bỏ món ăn kèm nhiều tinh bột như bánh mì hay khoai chiên.",
+    "goals": ["weight_loss"],
+    "applies_to": { "category": ["main_dish"], "carb_level": ["high"], "energy_level": ["high"] },
+    "priority": 6,
+    "source": "Mô hình đĩa ăn cân bằng"
+  },
+  {
+    "code": "small_snack_portion",
+    "title": "Chia phần ăn vặt nhỏ",
+    "content": "Bánh tráng, snack hay bánh ngọt nên chia phần nhỏ ra đĩa thay vì ăn trực tiếp từ túi.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["snack"], "carb_level": ["high", "medium"] },
+    "priority": 6,
+    "source": "Kiểm soát khẩu phần"
+  },
+  {
+    "code": "add_vegetables",
+    "title": "Thêm một phần rau",
+    "content": "Thêm một đĩa rau luộc, rau xào ít dầu hoặc canh rau để bữa ăn cân bằng hơn.",
+    "goals": ["weight_loss", "balanced", "less_sugar"],
+    "applies_to": { "category": ["main_dish"], "veg_level": ["low"] },
+    "priority": 9,
+    "source": "Khuyến nghị chung về ăn nhiều rau xanh"
+  },
+  {
+    "code": "veg_first",
+    "title": "Ăn rau trước",
+    "content": "Thử ăn vài miếng rau trước rồi mới đến cơm và thịt, bạn sẽ thấy no lâu hơn.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "veg_level": ["low", "medium"] },
+    "priority": 5,
+    "source": "Thói quen ăn uống chánh niệm"
+  },
+  {
+    "code": "extra_herbs",
+    "title": "Xin thêm rau sống",
+    "content": "Các quán bún, phở thường có rau thơm và giá – cứ xin thêm một đĩa nhé.",
+    "goals": ["balanced", "weight_loss"],
+    "applies_to": { "category": ["main_dish"], "veg_level": ["low"], "carb_level": ["high", "medium"] },
+    "priority": 5,
+    "source": "Khuyến nghị chung về ăn nhiều rau xanh"
+  },
+  {
+    "code": "add_veg_soup",
+    "title": "Gọi thêm canh rau",
+    "content": "Một bát canh rau nhỏ giúp bữa cơm ngoài thêm phần rau và đủ nước hơn.",
+    "goals": ["balanced", "weight_loss", "less_sugar"],
+    "applies_to": { "category": ["main_dish"], "veg_level": ["low"] },
+    "priority": 5,
+    "source": "Khuyến nghị chung về ăn nhiều rau xanh"
+  },
+  {
+    "code": "add_protein",
+    "title": "Bổ sung món đạm",
+    "content": "Thêm trứng, đậu phụ, cá hoặc thịt nạc để bữa ăn đủ chất và no lâu hơn.",
+    "goals": ["balanced", "weight_loss"],
+    "applies_to": { "category": ["main_dish"], "protein_level": ["low"] },
+    "priority": 8,
+    "source": "Mô hình đĩa ăn cân bằng"
+  },
+  {
+    "code": "lean_protein",
+    "title": "Chọn đạm nạc",
+    "content": "Thỉnh thoảng ưu tiên ức gà, cá, tôm, đậu phụ thay cho thịt nhiều mỡ nhé.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "fat_level": ["high"], "protein_level": ["medium", "high"] },
+    "priority": 6,
+    "source": "Khuyến nghị chung về hạn chế chất béo bão hòa"
+  },
+  {
+    "code": "snack_with_protein",
+    "title": "Ăn vặt có đạm",
+    "content": "Khi đói giữa buổi, thử sữa chua không đường, một nắm hạt hoặc trứng luộc thay cho bánh kẹo.",
+    "goals": ["balanced", "weight_loss", "less_sugar"],
+    "applies_to": { "category": ["snack"], "protein_level": ["low"] },
+    "priority": 6,
+    "source": "Mô hình đĩa ăn cân bằng"
+  },
+  {
+    "code": "fruit_for_dessert",
+    "title": "Tráng miệng bằng trái cây",
+    "content": "Thử trái cây tươi cho món tráng miệng, ngọt tự nhiên và mát lành.",
+    "goals": ["weight_loss", "less_sugar", "balanced"],
+    "applies_to": { "category": ["dessert"], "sugar_level": ["high", "medium"] },
+    "priority": 9,
+    "source": "Khuyến nghị chung về ăn trái cây tươi"
+  },
+  {
+    "code": "share_dessert",
+    "title": "Chia đôi phần tráng miệng",
+    "content": "Món ngọt ngon nhất ở vài thìa đầu – chia đôi với bạn hoặc để dành một nửa nhé.",
+    "goals": ["weight_loss", "less_sugar"],
+    "applies_to": { "category": ["dessert"], "sugar_level": ["high"] },
+    "priority": 7,
+    "source": "Kiểm soát khẩu phần"
+  },
+  {
+    "code": "less_sweet_che",
+    "title": "Chè ít đường, ít nước cốt",
+    "content": "Khi ăn chè, dặn quán ít đường và ít nước cốt dừa, thêm đá bào cho mát.",
+    "goals": ["less_sugar", "weight_loss"],
+    "applies_to": { "category": ["dessert"], "sugar_level": ["high"], "fat_level": ["medium", "high"] },
+    "priority": 4,
+    "source": "Khuyến nghị chung về hạn chế đường bổ sung"
+  },
+  {
+    "code": "sweets_as_treat",
+    "title": "Đồ ngọt là phần thưởng",
+    "content": "Xem món ngọt như phần thưởng cuối tuần thay vì thói quen hằng ngày.",
+    "goals": ["less_sugar", "weight_loss"],
+    "applies_to": { "category": ["dessert", "snack"], "sugar_level": ["high"] },
+    "priority": 5,
+    "source": "Xây dựng thói quen bền vững"
+  },
+  {
+    "code": "plain_yogurt",
+    "title": "Sữa chua ít đường",
+    "content": "Chọn sữa chua không đường hoặc ít đường, thêm trái cây để có vị ngọt tự nhiên.",
+    "goals": ["less_sugar", "balanced"],
+    "applies_to": { "category": ["dessert", "snack"], "sugar_level": ["high", "medium"] },
+    "priority": 4,
+    "source": "Khuyến nghị chung về hạn chế đường bổ sung"
+  },
+  {
+    "code": "nuts_instead_of_chips",
+    "title": "Hạt rang thay snack chiên",
+    "content": "Một nắm nhỏ hạt rang không muối là món ăn vặt giòn ngon thay cho snack chiên.",
+    "goals": ["balanced", "weight_loss"],
+    "applies_to": { "category": ["snack"], "fat_level": ["high"] },
+    "priority": 6,
+    "source": "Khuyến nghị chung về chất béo tốt"
+  },
+  {
+    "code": "mindful_snacking",
+    "title": "Ăn vặt có chủ đích",
+    "content": "Trước khi ăn vặt, uống một ly nước và tự hỏi mình có đói thật không nhé.",
+    "goals": ["weight_loss", "less_sugar"],
+    "applies_to": { "category": ["snack"], "energy_level": ["medium", "high"] },
+    "priority": 4,
+    "source": "Thói quen ăn uống chánh niệm"
+  },
+  {
+    "code": "lighter_late_dinner",
+    "title": "Bữa tối nhẹ nhàng",
+    "content": "Nếu ăn tối muộn, chọn món nước, món hấp hoặc nhiều rau để ngủ ngon hơn.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "energy_level": ["high"] },
+    "priority": 5,
+    "source": "Thói quen ăn uống điều độ"
+  },
+  {
+    "code": "eat_slowly",
+    "title": "Ăn chậm, nhai kỹ",
+    "content": "Dành khoảng 15–20 phút cho bữa ăn để cơ thể kịp nhận tín hiệu no.",
+    "goals": ["weight_loss", "balanced"],
+    "applies_to": { "category": ["main_dish"], "energy_level": ["high"] },
+    "priority": 4,
+    "source": "Thói quen ăn uống chánh niệm"
+  },
+  {
+    "code": "stop_when_satisfied",
+    "title": "Dừng lại khi vừa no",
+    "content": "Không cần ăn hết nếu phần ăn quá lớn – có thể xin hộp mang về cho bữa sau.",
+    "goals": ["weight_loss"],
+    "applies_to": { "category": ["main_dish"], "energy_level": ["high"] },
+    "priority": 6,
+    "source": "Kiểm soát khẩu phần"
+  },
+  {
+    "code": "keep_good_choice",
+    "title": "Giữ vững lựa chọn tốt",
+    "content": "Món này khá cân bằng, cứ duy trì những lựa chọn như vậy nhé!",
+    "goals": ["weight_loss", "balanced", "less_sugar"],
+    "applies_to": { "veg_level": ["medium", "high"], "fat_level": ["low", "medium"], "sugar_level": ["low", "medium"] },
+    "priority": 3,
+    "source": "Khích lệ thói quen tích cực"
+  },
+  {
+    "code": "carry_water_bottle",
+    "title": "Mang theo bình nước",
+    "content": "Mang theo bình nước bên mình và uống từng ngụm trong ngày để đỡ thèm đồ uống ngọt.",
+    "goals": ["weight_loss", "less_sugar", "balanced"],
+    "applies_to": {},
+    "priority": 1,
+    "source": "Xây dựng thói quen bền vững"
+  }
+]

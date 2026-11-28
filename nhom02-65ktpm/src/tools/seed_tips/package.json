@@ -1,0 +1,14 @@
+{
+  "name": "nutritrack-seed-tips",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nạp thư viện gợi ý NutriTrack AI lên Firestore (collection tips)",
+  "main": "seed.js",
+  "scripts": {
+    "check": "node seed.js --dry-run",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.1"
+  }
+}
