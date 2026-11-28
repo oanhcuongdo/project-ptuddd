@@ -109,13 +109,22 @@ class _VocabFlashcardDialogState extends State<VocabFlashcardDialog>
   Widget build(BuildContext context) {
     if (_cards.isEmpty) {
       return AlertDialog(
-        title: const Text('Chưa có từ vựng'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        title: const Text(
+          'Chưa có từ vựng',
+          style: TextStyle(color: AppColors.textPrimary),
+        ),
         content: const Text(
           'Hãy lưu ít nhất 1 từ vựng từ phòng chat hoặc hộp tra cứu để ôn tập Flashcard.',
+          style: TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: VocabStyles.tealDark,
+            ),
             child: const Text('Đóng'),
           ),
         ],
@@ -126,6 +135,8 @@ class _VocabFlashcardDialogState extends State<VocabFlashcardDialog>
     final progress = (_currentIndex + 1) / _cards.length;
 
     return Dialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 500),
@@ -167,7 +178,11 @@ class _VocabFlashcardDialogState extends State<VocabFlashcardDialog>
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded, size: 20),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      size: 20,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -214,6 +229,10 @@ class _VocabFlashcardDialogState extends State<VocabFlashcardDialog>
                     onPressed:
                         _currentIndex > 0 ? () => _goTo(_currentIndex - 1) : null,
                     tooltip: 'Thẻ trước',
+                    style: IconButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: const BorderSide(color: AppColors.border),
+                    ),
                     icon: const Icon(Icons.chevron_left_rounded),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -223,6 +242,7 @@ class _VocabFlashcardDialogState extends State<VocabFlashcardDialog>
                           ? null
                           : () => _markCurrent(targetMastered: false),
                       style: OutlinedButton.styleFrom(
+                        backgroundColor: VocabStyles.learningBg,
                         foregroundColor: VocabStyles.learningText,
                         side: const BorderSide(color: VocabStyles.learningBorder),
                         padding: const EdgeInsets.symmetric(vertical: 11),
@@ -273,6 +293,10 @@ class _VocabFlashcardDialogState extends State<VocabFlashcardDialog>
                         ? () => _goTo(_currentIndex + 1)
                         : null,
                     tooltip: 'Thẻ tiếp theo',
+                    style: IconButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: const BorderSide(color: AppColors.border),
+                    ),
                     icon: const Icon(Icons.chevron_right_rounded),
                   ),
                 ],

@@ -156,9 +156,9 @@ class VocabStatsHeader extends StatelessWidget {
                         backgroundColor: Colors.white,
                         foregroundColor: VocabStyles.tealDark,
                         disabledBackgroundColor:
-                            Colors.white.withValues(alpha: 0.45),
+                            Colors.white.withValues(alpha: 0.85),
                         disabledForegroundColor:
-                            VocabStyles.tealDeep.withValues(alpha: 0.55),
+                            VocabStyles.tealDeep.withValues(alpha: 0.72),
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 18,
@@ -177,9 +177,10 @@ class VocabStatsHeader extends StatelessWidget {
                     OutlinedButton.icon(
                       onPressed: onAddWord,
                       style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.16),
                         foregroundColor: Colors.white,
                         side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.55),
+                          color: Colors.white.withValues(alpha: 0.75),
                         ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,

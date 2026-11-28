@@ -191,6 +191,12 @@ class _VocabTranslatorBoxState extends State<VocabTranslatorBox> {
                   controller: _controller,
                   maxLines: 2,
                   minLines: 1,
+                  cursorColor: VocabStyles.tealPrimary,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
                   textInputAction: TextInputAction.search,
                   onSubmitted: (_) => _handleTranslate(),
                   onChanged: (_) {
@@ -211,7 +217,11 @@ class _VocabTranslatorBoxState extends State<VocabTranslatorBox> {
                               });
                             },
                             tooltip: 'Xóa nội dung',
-                            icon: const Icon(Icons.close_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              size: 18,
+                              color: AppColors.textMuted,
+                            ),
                           )
                         : null,
                   ),
@@ -461,6 +471,13 @@ class _LanguageDropdown extends StatelessWidget {
         child: DropdownButton<TranslationLanguage>(
           value: value,
           isDense: true,
+          dropdownColor: Colors.white,
+          iconEnabledColor: VocabStyles.tealDark,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 19,
+            color: VocabStyles.tealDark,
+          ),
           borderRadius: BorderRadius.circular(12),
           style: const TextStyle(
             fontSize: 13,

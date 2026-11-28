@@ -69,6 +69,12 @@ class _VocabFilterBarState extends State<VocabFilterBar> {
               Expanded(
                 child: TextField(
                   controller: _searchController,
+                  cursorColor: VocabStyles.tealPrimary,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
                   onChanged: widget.onSearchChanged,
                   decoration: VocabStyles.inputDecoration(
                     hintText: 'Tìm từ vựng, nghĩa hoặc câu ví dụ...',
@@ -80,7 +86,11 @@ class _VocabFilterBarState extends State<VocabFilterBar> {
                               widget.onSearchChanged('');
                             },
                             tooltip: 'Xóa từ khóa',
-                            icon: const Icon(Icons.close_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              size: 18,
+                              color: AppColors.textMuted,
+                            ),
                           )
                         : null,
                   ),
@@ -99,6 +109,8 @@ class _VocabFilterBarState extends State<VocabFilterBar> {
                   child: DropdownButton<VocabSortOrder>(
                     value: widget.filter.sortOrder,
                     isDense: true,
+                    dropdownColor: Colors.white,
+                    iconEnabledColor: VocabStyles.tealDark,
                     borderRadius: BorderRadius.circular(12),
                     icon: const Icon(
                       Icons.sort_rounded,

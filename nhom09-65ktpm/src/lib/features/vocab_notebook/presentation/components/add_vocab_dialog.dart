@@ -136,6 +136,8 @@ class _AddVocabDialogState extends State<AddVocabDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
@@ -173,7 +175,11 @@ class _AddVocabDialogState extends State<AddVocabDialog> {
                     ),
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close_rounded, size: 20),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        size: 20,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -213,6 +219,11 @@ class _AddVocabDialogState extends State<AddVocabDialog> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _wordController,
+                  cursorColor: VocabStyles.tealPrimary,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                  ),
                   textInputAction: TextInputAction.next,
                   decoration: VocabStyles.inputDecoration(
                     hintText: 'Ví dụ: fluency, 坚持...',
@@ -260,6 +271,11 @@ class _AddVocabDialogState extends State<AddVocabDialog> {
                 const SizedBox(height: 4),
                 TextFormField(
                   controller: _meaningController,
+                  cursorColor: VocabStyles.tealPrimary,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                  ),
                   textInputAction: TextInputAction.next,
                   decoration: VocabStyles.inputDecoration(
                     hintText: 'Ví dụ: sự trôi chảy, kiên trì...',
@@ -280,6 +296,11 @@ class _AddVocabDialogState extends State<AddVocabDialog> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _exampleController,
+                  cursorColor: VocabStyles.tealPrimary,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                  ),
                   maxLines: 2,
                   decoration: VocabStyles.inputDecoration(
                     hintText: 'Ví dụ: Daily practice improves speaking fluency.',
@@ -291,6 +312,9 @@ class _AddVocabDialogState extends State<AddVocabDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.textSecondary,
+                      ),
                       child: const Text('Hủy'),
                     ),
                     const SizedBox(width: AppSpacing.sm),
@@ -350,6 +374,8 @@ class _AddVocabDialogState extends State<AddVocabDialog> {
               value: value,
               isExpanded: true,
               isDense: true,
+              dropdownColor: Colors.white,
+              iconEnabledColor: VocabStyles.tealDark,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
