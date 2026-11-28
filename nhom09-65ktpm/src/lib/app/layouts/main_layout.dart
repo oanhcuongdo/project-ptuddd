@@ -7,6 +7,7 @@ import '../../features/buddy_matching/presentation/screens/buddy_matching_tab.da
 import '../../features/chat/presentation/providers/chat_provider.dart';
 import '../../features/chat/presentation/screens/chat_rooms_tab.dart';
 import '../../features/chat/presentation/screens/streak_dashboard_tab.dart';
+import '../../features/vocab_notebook/presentation/screens/vocab_notebook_tab.dart';
 import 'components/main_header.dart';
 import 'components/main_nav_sidebar.dart';
 import 'components/nav_item.dart';
@@ -68,6 +69,16 @@ class _MainLayoutState extends State<MainLayout> {
       icon: Icons.people_outline_rounded,
       selectedIcon: Icons.people_rounded,
       page: BuddyMatchingTab(),
+    ),
+    MainNavItem(
+      id: 'vocab',
+      label: 'Sổ tay',
+      headerTitle: '',
+      headerSubtitle: '',
+      section: 'Không gian học',
+      icon: Icons.menu_book_outlined,
+      selectedIcon: Icons.menu_book_rounded,
+      page: VocabNotebookTab(),
     ),
     MainNavItem(
       id: 'profile',
