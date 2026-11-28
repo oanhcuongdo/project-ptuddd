@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth_profile/presentation/providers/auth_provider.dart';
+import '../../../chat_online/models/translation_language.dart';
 import '../../../chat_online/models/translation_result.dart';
 import '../../../chat_online/services/translation_service.dart';
 import '../../../vocab_notebook/data/repositories/vocab_repository.dart';
@@ -16,6 +17,7 @@ import '../components/chat_meet_banner.dart';
 import '../components/chat_message_composer.dart';
 import '../components/chat_room_header.dart';
 import '../components/chat_room_info_panel.dart';
+import '../components/compose_translate_dialog.dart';
 import '../components/message_translation_footer.dart';
 import '../components/message_word_picker_dialog.dart';
 import '../components/schedule_meet_dialog.dart';
@@ -168,6 +170,48 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       }
       _translateMessage(msg);
     }
+  }
+
+  Future<void> _openComposeTranslate(ConversationModel liveRoom) async {
+    final preferredLang = TranslationLanguage.fromCode(liveRoom.targetLang);
+    final defaultTarget = preferredLang == TranslationLanguage.vi ||
+            preferredLang == TranslationLanguage.auto
+        ? TranslationLanguage.en
+        : preferredLang;
+
+    final res = await ComposeTranslateDialog.show(
+      context,
+      initialText: _messageController.text,
+      defaultTargetLang: defaultTarget,
+      translationService: _translationService,
+    );
+    if (!mounted || res == null) return;
+
+    if (res.action == ComposeTranslateAction.replaceInput) {
+      _messageController.text = res.translatedText;
+      _messageController.selection = TextSelection.collapsed(
+        offset: res.translatedText.length,
+      );
+      return;
+    }
+
+    final profile = context.read<AuthProvider>().currentProfile;
+    if (profile == null) return;
+    final senderName =
+        profile.displayName.trim().isNotEmpty ? profile.displayName : 'Bạn';
+
+    final bilingualContent = ChatTranslateHelper.encodeBilingual(
+      primaryText: res.translatedText,
+      secondaryText: res.originalText,
+    );
+    _messageController.clear();
+    await _chatProvider.sendMessage(
+      conversationId: widget.room.id,
+      senderId: profile.userId,
+      senderName: senderName,
+      senderAvatarUrl: profile.avatarUrl,
+      content: bilingualContent,
+    );
   }
 
   void _openWordPicker(MessageModel msg) {
@@ -504,6 +548,8 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                           controller: _messageController,
                           onSend: _handleSend,
                           isSending: chat.isSendingMessage,
+                          onTranslateInputTap: () =>
+                              _openComposeTranslate(liveRoom),
                           onSuggestTopicTap: () => _showComingSoon(
                             'Gợi ý chủ đề & câu mở đầu hội thoại',
                           ),
@@ -698,11 +744,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    msg.content,
-                                    style:
-                                        ChatRoomStyles.messageText(isMine: isMine),
-                                  ),
+                                  _buildBubbleBody(msg.content, isMine),
                                   if (isMine) ...[
                                     const SizedBox(height: 3),
                                     Row(
@@ -777,6 +819,51 @@ class _ChatRoomViewState extends State<ChatRoomView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildBubbleBody(String rawContent, bool isMine) {
+    final bilingual = ChatTranslateHelper.parseBilingual(rawContent);
+    if (bilingual != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            bilingual.primaryText,
+            style: ChatRoomStyles.messageText(isMine: isMine),
+          ),
+          const SizedBox(height: 5),
+          Container(
+            padding: const EdgeInsets.only(top: 5),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: isMine
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : AppColors.divider,
+                ),
+              ),
+            ),
+            child: Text(
+              bilingual.secondaryText,
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: isMine
+                    ? Colors.white.withValues(alpha: 0.85)
+                    : AppColors.textSecondary,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Text(
+      rawContent,
+      style: ChatRoomStyles.messageText(isMine: isMine),
     );
   }
 }
