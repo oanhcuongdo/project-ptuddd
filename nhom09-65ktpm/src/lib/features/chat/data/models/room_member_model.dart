@@ -49,15 +49,19 @@ class RoomMemberModel {
     return today.difference(last).inDays <= 1 ? streakCount : 0;
   }
 
-  RoomMemberModel copyWith({String? role}) {
+  RoomMemberModel copyWith({
+    String? role,
+    int? streakCount,
+    DateTime? lastChatDate,
+  }) {
     return RoomMemberModel(
       userId: userId,
       displayName: displayName,
       avatarUrl: avatarUrl,
       proficiencyLevel: proficiencyLevel,
       role: role ?? this.role,
-      streakCount: streakCount,
-      lastChatDate: lastChatDate,
+      streakCount: streakCount ?? this.streakCount,
+      lastChatDate: lastChatDate ?? this.lastChatDate,
       joinedAt: joinedAt,
     );
   }

@@ -117,10 +117,22 @@ class _FakeChatRepository extends ChatRepository {
   }) async =>
       const [
         OnlineMemberModel(
+          userId: 'u-online-2',
+          displayName: 'Trương Tuấn Hải',
+          targetLang: 'EN',
+          proficiencyLevel: 'A2',
+          streakCount: 2,
+          bestStreak: 4,
+          topRoomName: 'clb tiếng anh',
+        ),
+        OnlineMemberModel(
           userId: 'u-online-1',
           displayName: 'Trịnh Trung Kiên',
           targetLang: 'EN',
           proficiencyLevel: 'B1',
+          streakCount: 6,
+          bestStreak: 8,
+          topRoomName: 'CLB Luyện Tiếng Anh Giao Tiếp',
         ),
       ];
 
@@ -759,7 +771,9 @@ void main() {
     expect(find.text('CLB Luyện Tiếng Anh Giao Tiếp'), findsWidgets);
     expect(find.text('Luyện nói cùng bạn bè'), findsOneWidget);
     expect(find.text('Phòng học sôi nổi'), findsOneWidget);
-    expect(find.text('Bạn bè đang online'), findsOneWidget);
+    expect(find.text('Xếp hạng chuỗi cao'), findsOneWidget);
+    expect(find.text('Phòng: clb tiếng anh'), findsOneWidget);
+    expect(find.text('5 thành viên'), findsWidgets);
     expect(find.text('Quản lý: Nguyễn Minh Anh'), findsOneWidget);
     expect(find.text('Tham gia'), findsOneWidget);
     expect(find.text('Xin tham gia'), findsOneWidget);
@@ -1116,7 +1130,7 @@ void main() {
     expect(provider.streakBoard!.recentHistory.first.attendedMinutes, 15);
   });
 
-  testWidgets('Bấm huy hiệu lửa trên MainHeader mở Bảng cập nhật chuỗi', (
+  testWidgets('Bấm mục Bảng chuỗi trên Sidebar mở Dashboard Bảng cập nhật chuỗi phòng', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1280, 900);
@@ -1127,8 +1141,6 @@ void main() {
       initialProfile: const ProfileModel(
         userId: 'u-chat',
         displayName: 'Phạm Văn Hưng',
-        streakCount: 3,
-        bestStreak: 7,
         dailyGoalMinutes: 15,
         onboardingCompleted: true,
       ),
@@ -1154,15 +1166,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byTooltip('Xem bảng cập nhật chuỗi'), findsOneWidget);
-    await tester.tap(find.byTooltip('Xem bảng cập nhật chuỗi'));
+    // Không còn huy hiệu chuỗi tổng cá nhân trên Header
+    expect(find.byTooltip('Xem bảng cập nhật chuỗi'), findsNothing);
+
+    await tester.tap(find.text('Bảng chuỗi'));
     await tester.pumpAndSettle();
 
     expect(find.text('Bảng cập nhật chuỗi'), findsOneWidget);
-    expect(find.text('3 ngày liên tiếp'), findsOneWidget);
-    expect(find.text('Kỷ lục: 7 ngày'), findsOneWidget);
-    expect(find.text('Tiến độ 7 ngày tuần này'), findsOneWidget);
-    expect(find.text('Lịch sử cập nhật chuỗi gần đây'), findsOneWidget);
+    expect(find.text('Chuỗi phòng cao nhất'), findsOneWidget);
+    expect(find.text('Kỷ lục chuỗi phòng'), findsOneWidget);
+    expect(find.text('Hoạt động học 7 ngày tuần này'), findsOneWidget);
+    expect(find.text('Lịch sử điểm danh gần đây'), findsOneWidget);
     expect(find.text('+1 chuỗi 🔥'), findsOneWidget);
   });
 }

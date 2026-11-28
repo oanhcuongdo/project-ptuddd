@@ -90,24 +90,24 @@ class _MainLayoutState extends State<MainLayout> {
   void _selectNav(int index) {
     if (index == _currentIndex) return;
     setState(() => _currentIndex = index);
+
+    final profile = context.read<AuthProvider>().currentProfile;
+    if (profile == null) return;
+    final targetId = _navItems[index].id;
+    if (targetId == 'streak') {
+      final chat = context.read<ChatProvider>();
+      chat.loadStreakBoard(
+        userId: profile.userId,
+        dailyGoalMinutes: profile.dailyGoalMinutes,
+      );
+      chat.loadRooms(profile.userId, silent: true);
+    } else if (targetId == 'chat') {
+      context.read<ChatProvider>().loadRooms(profile.userId, silent: true);
+    }
   }
 
   int get _profileNavIndex =>
       _navItems.indexWhere((item) => item.id == 'profile');
-
-  int get _streakNavIndex =>
-      _navItems.indexWhere((item) => item.id == 'streak');
-
-  void _openStreakDashboard() {
-    _selectNav(_streakNavIndex);
-    final profile = context.read<AuthProvider>().currentProfile;
-    if (profile != null) {
-      context.read<ChatProvider>().loadStreakBoard(
-            userId: profile.userId,
-            dailyGoalMinutes: profile.dailyGoalMinutes,
-          );
-    }
-  }
 
   Widget _buildOutlet() {
     if (widget.outlet != null) {
@@ -150,7 +150,6 @@ class _MainLayoutState extends State<MainLayout> {
                       MainHeader(
                         currentItem: currentItem,
                         onOpenProfile: () => _selectNav(_profileNavIndex),
-                        onOpenStreakBoard: _openStreakDashboard,
                       ),
                       Expanded(
                         child: Container(
@@ -196,7 +195,6 @@ class _MainLayoutState extends State<MainLayout> {
                   showMenuButton: true,
                   onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
                   onOpenProfile: () => _selectNav(_profileNavIndex),
-                  onOpenStreakBoard: _openStreakDashboard,
                 ),
                 Expanded(child: _buildOutlet()),
               ],
