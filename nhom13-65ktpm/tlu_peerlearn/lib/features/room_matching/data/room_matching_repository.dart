@@ -519,12 +519,12 @@ class RoomMatchingRepository {
       'user_id': menteeId,
       'role': 'mentee',
     }, onConflict: 'room_id,user_id');
-    final roomId = response['room_id'] as String?;
-    final senderId = response['sender_id'] as String?;
-    if (senderId != null) {
+    final notifRoomId = response['room_id'] as String?;
+    final notifSenderId = response['sender_id'] as String?;
+    if (notifSenderId != null) {
       final isRequest = response['type'] == 'request';
       await NotificationService().createNotification(
-        userId: senderId,
+        userId: notifSenderId,
         title: isRequest
             ? 'Yêu cầu tham gia được chấp nhận'
             : 'Mentee đã chấp nhận lời mời',
@@ -532,7 +532,7 @@ class RoomMatchingRepository {
             ? 'Mentor đã duyệt yêu cầu tham gia phòng học của bạn.'
             : 'Một học viên đã chấp nhận lời mời tham gia phòng học.',
         type: 'accepted',
-        roomId: roomId,
+        roomId: notifRoomId,
       );
     }
   }
