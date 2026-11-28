@@ -202,10 +202,15 @@ class TopicsProvider extends ChangeNotifier {
       );
       return nextCompleted;
     } catch (e) {
-      // Revert on error
-      final revertedList = List<TopicModel>.from(_topics);
-      revertedList[index] = previousTopic;
-      _topics = revertedList;
+      // Lookup current index by topicId in case _topics changed while awaiting
+      final currentIndex = _topics.indexWhere((t) => t.id == topicId);
+      if (currentIndex != -1) {
+        final revertedList = List<TopicModel>.from(_topics);
+        revertedList[currentIndex] = _topics[currentIndex].copyWith(
+          isCompleted: previousTopic.isCompleted,
+        );
+        _topics = revertedList;
+      }
       _errorMessage = 'Không thể lưu tiến độ chủ đề lên đám mây.';
       debugPrint('[TopicsProvider] Lỗi toggleTopicCompleted: $e');
       return previousTopic.isCompleted;
