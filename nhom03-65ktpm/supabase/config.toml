@@ -1,0 +1,5 @@
+project_id = "smartnote"
+
+[functions.summarize-note]
+# Firebase ID tokens are verified inside the function.
+verify_jwt = false
