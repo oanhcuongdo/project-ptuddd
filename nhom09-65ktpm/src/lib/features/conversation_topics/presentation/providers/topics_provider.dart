@@ -23,13 +23,18 @@ class TopicsProvider extends ChangeNotifier {
   int _loadRequestSeq = 0;
   final Set<String> _updatingTopicIds = <String>{};
 
-  List<TopicModel> get allTopics => _topics;
+  List<TopicModel> get allTopics => List<TopicModel>.unmodifiable(_topics);
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get selectedLevel => _selectedLevel;
   String get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
   bool get showOnlyIncomplete => _showOnlyIncomplete;
+  bool get hasActiveFilters =>
+      _selectedLevel != 'ALL' ||
+      _selectedCategory != 'ALL' ||
+      _searchQuery.trim().isNotEmpty ||
+      _showOnlyIncomplete;
   bool isUpdatingTopic(String topicId) => _updatingTopicIds.contains(topicId);
 
   int get totalCount => _topics.length;
@@ -37,7 +42,7 @@ class TopicsProvider extends ChangeNotifier {
   double get completionProgress =>
       totalCount == 0 ? 0.0 : completedCount / totalCount;
 
-  /// Danh sách danh mục duy nhất để hiển thị bộ lọc phụ
+  /// Danh sách danh mục duy nhất (đã sắp xếp ổn định) để hiển thị bộ lọc phụ
   List<String> get availableCategories {
     final set = <String>{};
     for (final topic in _topics) {
@@ -45,7 +50,9 @@ class TopicsProvider extends ChangeNotifier {
         set.add(topic.category.trim());
       }
     }
-    return ['ALL', ...set];
+    final sorted = set.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return ['ALL', ...sorted];
   }
 
   /// Danh sách chủ đề sau khi áp dụng bộ lọc cấp độ (A1-B2), danh mục và từ khóa tìm kiếm
@@ -177,6 +184,12 @@ class TopicsProvider extends ChangeNotifier {
     _selectedCategory = 'ALL';
     _searchQuery = '';
     _showOnlyIncomplete = false;
+    _safeNotifyListeners();
+  }
+
+  void clearError() {
+    if (_errorMessage == null) return;
+    _errorMessage = null;
     _safeNotifyListeners();
   }
 
