@@ -9,11 +9,11 @@ import '../../data/models/streak_board_model.dart';
 import '../providers/chat_provider.dart';
 import '../styles/chat_styles.dart';
 
-/// Trang Dashboard "Bảng cập nhật chuỗi" hiển thị toàn màn hình:
-/// - 4 thẻ KPI tổng quan (Chuỗi hiện tại, Kỷ lục, Tiến độ hôm nay, Ngày đạt tuần này)
+/// Trang Dashboard "Bảng cập nhật chuỗi" (tập trung duy nhất vào Chuỗi phòng học):
+/// - 4 thẻ KPI tổng quan: Chuỗi phòng cao nhất, Kỷ lục chuỗi phòng, Phòng đang giữ lửa, Thời lượng học tuần này
 /// - Bố cục 2 cột rộng trên Desktop:
-///   + Trái: Tiến độ 7 ngày tuần này (T2 -> CN) + Chuỗi theo từng phòng học
-///   + Phải: Cách tính chuỗi + Lịch sử cập nhật chuỗi gần đây
+///   + Trái: Hoạt động học 7 ngày tuần này (T2 -> CN) + Danh sách chuỗi từng phòng học
+///   + Phải: Cách giữ chuỗi phòng + Lịch sử điểm danh Video Call gần đây
 class StreakDashboardTab extends StatefulWidget {
   const StreakDashboardTab({super.key});
 
@@ -76,23 +76,41 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
     final board = chat.streakBoard;
     final isLoading = chat.isLoadingStreakBoard;
     final rooms = chat.myRooms;
-    final streakCount = profile?.streakCount ?? 0;
-    final bestStreak = (profile?.bestStreak ?? 0) > streakCount
-        ? (profile?.bestStreak ?? 0)
-        : streakCount;
-    final todayMinutes = board?.todayMinutes ?? 0;
-    final progress = (todayMinutes / dailyGoal).clamp(0.0, 1.0);
-    final remaining = (dailyGoal - todayMinutes).clamp(0, dailyGoal);
-    final isGoalDone = todayMinutes >= dailyGoal;
+
+    // Tính chỉ số hoàn toàn từ Chuỗi phòng học
+    var topRoomStreak = 0;
+    String? topRoomName;
+    var bestRoomStreak = 0;
+    var activeRoomsCount = 0;
+    var litTodayCount = 0;
+
+    for (final room in rooms) {
+      final effective = room.effectiveRoomStreak();
+      if (effective > 0) activeRoomsCount++;
+      if (room.isStreakLitToday()) litTodayCount++;
+      if (effective > topRoomStreak) {
+        topRoomStreak = effective;
+        topRoomName = room.name;
+      }
+      if (room.bestStreak > bestRoomStreak) {
+        bestRoomStreak = room.bestStreak;
+      }
+    }
+    if (topRoomStreak > bestRoomStreak) bestRoomStreak = topRoomStreak;
+
     final weekDays = board?.weekDays ??
         StreakBoardData.buildCurrentWeekDays(
           referenceDate: DateTime.now(),
           dailyGoalMinutes: dailyGoal,
           logsByDateKey: const {},
         );
-    final completedDays = weekDays.where((d) => d.isCompleted).length;
-    final activeRoomsCount =
-        rooms.where((r) => r.effectiveRoomStreak() > 0).length;
+    final todayMinutes = board?.todayMinutes ?? 0;
+    final totalWeekMinutes = weekDays.fold<int>(
+      0,
+      (sum, d) => sum + d.completedMinutes,
+    );
+    final activeDaysThisWeek =
+        weekDays.where((d) => d.completedMinutes > 0).length;
 
     return Align(
       alignment: Alignment.topCenter,
@@ -114,21 +132,20 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // 4 thẻ KPI tổng quan
+              // 4 thẻ KPI tổng quan Chuỗi phòng
               _buildKpiGrid(
-                streakCount: streakCount,
-                bestStreak: bestStreak,
-                todayMinutes: todayMinutes,
-                dailyGoal: dailyGoal,
-                progress: progress,
-                isGoalDone: isGoalDone,
-                completedDays: completedDays,
+                topRoomStreak: topRoomStreak,
+                topRoomName: topRoomName,
+                bestRoomStreak: bestRoomStreak,
                 activeRoomsCount: activeRoomsCount,
+                litTodayCount: litTodayCount,
                 totalRoomsCount: rooms.length,
+                totalWeekMinutes: totalWeekMinutes,
+                todayMinutes: todayMinutes,
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Bố cục Dashboard 2 cột rộng hiển thị đầy đủ mọi thông tin
+              // Bố cục Dashboard 2 cột rộng hiển thị đầy đủ
               LayoutBuilder(
                 builder: (context, constraints) {
                   final isWide = constraints.maxWidth >= 920;
@@ -136,14 +153,9 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
                   final leftColumn = Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildWeekProgressCard(
+                      _buildWeekActivityCard(
                         weekDays: weekDays,
-                        todayMinutes: todayMinutes,
-                        dailyGoal: dailyGoal,
-                        progress: progress,
-                        remaining: remaining,
-                        isGoalDone: isGoalDone,
-                        completedDays: completedDays,
+                        activeDaysThisWeek: activeDaysThisWeek,
                         isLoading: isLoading && board == null,
                       ),
                       const SizedBox(height: AppSpacing.lg),
@@ -154,7 +166,7 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
                   final rightColumn = Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildStreakRulesCard(dailyGoal: dailyGoal),
+                      _buildStreakRulesCard(),
                       const SizedBox(height: AppSpacing.lg),
                       _buildRecentHistoryCard(
                         history: board?.recentHistory ?? const [],
@@ -234,7 +246,7 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
                   Text('Bảng cập nhật chuỗi', style: ChatStyles.pageTitle),
                   SizedBox(height: 2),
                   Text(
-                    'Theo dõi chuỗi cá nhân, tiến độ 7 ngày, chuỗi từng phòng học và lịch sử điểm danh',
+                    'Theo dõi chuỗi từng phòng học, thời lượng luyện Video Call và lịch sử điểm danh',
                     style: ChatStyles.pageSubtitle,
                   ),
                 ],
@@ -273,54 +285,50 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
   }
 
   Widget _buildKpiGrid({
-    required int streakCount,
-    required int bestStreak,
-    required int todayMinutes,
-    required int dailyGoal,
-    required double progress,
-    required bool isGoalDone,
-    required int completedDays,
+    required int topRoomStreak,
+    required String? topRoomName,
+    required int bestRoomStreak,
     required int activeRoomsCount,
+    required int litTodayCount,
     required int totalRoomsCount,
+    required int totalWeekMinutes,
+    required int todayMinutes,
   }) {
-    final pct = (progress * 100).round();
     final cards = [
       _KpiCard(
         icon: Icons.local_fire_department_rounded,
         iconBg: AppColors.streakBg,
         iconColor: AppColors.streakOrange,
-        label: 'Chuỗi cá nhân hiện tại',
-        value: '$streakCount ngày liên tiếp',
-        subtext: isGoalDone
-            ? 'Đã hoàn thành mục tiêu hôm nay'
-            : 'Vào Video Call để giữ lửa hôm nay',
+        label: 'Chuỗi phòng cao nhất',
+        value: '$topRoomStreak ngày',
+        subtext: topRoomName != null
+            ? 'Tại phòng: $topRoomName'
+            : 'Vào buổi Video Call để thắp lửa',
         highlightBorder: const Color(0xFFFDBA74),
       ),
       _KpiCard(
         icon: Icons.emoji_events_rounded,
         iconBg: const Color(0xFFFEF3C7),
         iconColor: const Color(0xFFD97706),
-        label: 'Kỷ lục chuỗi dài nhất',
-        value: 'Kỷ lục: $bestStreak ngày',
-        subtext: 'Chuỗi cá nhân cao nhất từng đạt',
-      ),
-      _KpiCard(
-        icon: Icons.timer_outlined,
-        iconBg: ChatStyles.tealSoftBg,
-        iconColor: ChatStyles.tealPrimary,
-        label: 'Mục tiêu hôm nay ($pct%)',
-        value: '$todayMinutes / $dailyGoal phút',
-        subtext: isGoalDone
-            ? 'Vượt mốc mục tiêu mỗi ngày'
-            : 'Còn thiếu ${(dailyGoal - todayMinutes).clamp(0, dailyGoal)} phút',
+        label: 'Kỷ lục chuỗi phòng',
+        value: 'Kỷ lục: $bestRoomStreak ngày',
+        subtext: 'Chuỗi dài nhất từng đạt trong phòng',
       ),
       _KpiCard(
         icon: Icons.groups_rounded,
         iconBg: const Color(0xFFE0F2FE),
         iconColor: const Color(0xFF0284C7),
-        label: 'Tuần này & Phòng đang cháy',
-        value: '$completedDays/7 ngày đạt',
-        subtext: '$activeRoomsCount/$totalRoomsCount phòng đang có chuỗi lửa',
+        label: 'Phòng đang giữ lửa',
+        value: '$activeRoomsCount / $totalRoomsCount phòng',
+        subtext: '$litTodayCount phòng đã thắp lửa hôm nay',
+      ),
+      _KpiCard(
+        icon: Icons.videocam_rounded,
+        iconBg: ChatStyles.tealSoftBg,
+        iconColor: ChatStyles.tealPrimary,
+        label: 'Thời lượng học tuần này',
+        value: '$totalWeekMinutes phút',
+        subtext: 'Hôm nay đã học $todayMinutes phút',
       ),
     ];
 
@@ -342,17 +350,11 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
     );
   }
 
-  Widget _buildWeekProgressCard({
+  Widget _buildWeekActivityCard({
     required List<DailyStreakDay> weekDays,
-    required int todayMinutes,
-    required int dailyGoal,
-    required double progress,
-    required int remaining,
-    required bool isGoalDone,
-    required int completedDays,
+    required int activeDaysThisWeek,
     required bool isLoading,
   }) {
-    final pct = (progress * 100).round();
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: ChatStyles.cardDecoration,
@@ -366,7 +368,7 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Tiến độ 7 ngày tuần này',
+                      'Hoạt động học 7 ngày tuần này',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -375,7 +377,7 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Tự động cập nhật từ thời gian học Video Call mỗi ngày',
+                      'Ghi nhận tự động số phút học qua Video Call mỗi ngày trong tuần',
                       style: ChatStyles.metaText,
                     ),
                   ],
@@ -392,7 +394,7 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
                   border: Border.all(color: ChatStyles.tealBorder),
                 ),
                 child: Text(
-                  '$completedDays/7 ngày đạt',
+                  '$activeDaysThisWeek/7 ngày học',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -403,8 +405,6 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
             ],
           ),
           const SizedBox(height: 18),
-
-          // 7 ô ngày T2 -> CN rộng rãi
           if (isLoading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 28),
@@ -418,79 +418,6 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
                   .map((day) => Expanded(child: _WeekDayColumn(day: day)))
                   .toList(),
             ),
-
-          const SizedBox(height: 18),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: isGoalDone
-                  ? ChatStyles.tealSoftBg
-                  : const Color(0xFFFFF7ED),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isGoalDone
-                    ? ChatStyles.tealBorder
-                    : const Color(0xFFFDBA74),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Mục tiêu hôm nay: $todayMinutes / $dailyGoal phút',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: isGoalDone
-                            ? ChatStyles.tealDark
-                            : const Color(0xFF9A3412),
-                      ),
-                    ),
-                    Text(
-                      '$pct%',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: isGoalDone
-                            ? ChatStyles.tealDark
-                            : const Color(0xFFC2410C),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 9,
-                    backgroundColor: Colors.white.withValues(alpha: 0.85),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      isGoalDone
-                          ? ChatStyles.tealPrimary
-                          : AppColors.streakOrange,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  isGoalDone
-                      ? 'Xuất sắc! Bạn đã hoàn thành mục tiêu giữ chuỗi cá nhân hôm nay.'
-                      : 'Còn thiếu $remaining phút học trong Video Call nữa để hoàn thành mục tiêu hôm nay.',
-                  style: TextStyle(
-                    fontSize: 12.2,
-                    fontWeight: FontWeight.w600,
-                    color: isGoalDone
-                        ? ChatStyles.tealDark
-                        : const Color(0xFF9A3412),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -498,7 +425,11 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
 
   Widget _buildRoomStreaksCard(List<ConversationModel> rooms) {
     final sorted = [...rooms]..sort(
-        (a, b) => b.effectiveRoomStreak().compareTo(a.effectiveRoomStreak()),
+        (a, b) {
+          final cmp = b.effectiveRoomStreak().compareTo(a.effectiveRoomStreak());
+          if (cmp != 0) return cmp;
+          return b.bestStreak.compareTo(a.bestStreak);
+        },
       );
 
     return Container(
@@ -618,7 +549,7 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '${room.targetLang.toUpperCase()} • ${room.levelLabel} • Kỷ lục phòng: ${room.bestStreak} ngày',
+                              '${room.targetLang.toUpperCase()} • ${room.levelLabel} • Kỷ lục: ${room.bestStreak} ngày',
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textMuted,
@@ -656,7 +587,7 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
     );
   }
 
-  Widget _buildStreakRulesCard({required int dailyGoal}) {
+  Widget _buildStreakRulesCard() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -668,10 +599,10 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: ChatStyles.tealBorder),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(
                 Icons.info_outline_rounded,
@@ -681,7 +612,7 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Cách tính & cập nhật chuỗi',
+                  'Cách giữ chuỗi phòng học',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -691,20 +622,15 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          const _RuleBullet(
-            text:
-                'Chuỗi phòng: Tham gia buổi học Video Call do Chủ phòng hoặc Trợ giảng mở và học đủ số phút tối thiểu.',
-          ),
-          const SizedBox(height: 6),
+          SizedBox(height: 10),
           _RuleBullet(
             text:
-                'Chuỗi cá nhân: Cộng dồn tổng số phút học Video Call trong ngày; đạt $dailyGoal phút/ngày sẽ tự động tăng chuỗi cá nhân.',
+                'Tham gia buổi học Video Call do Chủ phòng hoặc Trợ giảng mở và học đủ số phút tối thiểu để cộng +1 chuỗi phòng.',
           ),
-          const SizedBox(height: 6),
-          const _RuleBullet(
+          SizedBox(height: 6),
+          _RuleBullet(
             text:
-                'Giữ kỷ luật đều đặn: Bỏ lỡ trọn vẹn 1 ngày không học, chuỗi phòng sẽ tự đặt lại về 0 để bắt đầu lại.',
+                'Bỏ lỡ trọn vẹn 1 ngày không học, chuỗi phòng sẽ đặt lại về 0 (kỷ lục cao nhất vẫn được lưu lại).',
           ),
         ],
       ),
@@ -731,7 +657,7 @@ class _StreakDashboardTabState extends State<StreakDashboardTab> {
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Lịch sử cập nhật chuỗi gần đây',
+                  'Lịch sử điểm danh gần đây',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -964,27 +890,20 @@ class _WeekDayColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasStudied = day.completedMinutes > 0;
     Color bg;
     Color border;
     Widget inner;
 
-    if (day.isCompleted) {
+    if (hasStudied) {
       bg = AppColors.streakOrange;
       border = AppColors.streakOrange;
-      inner = const Icon(
-        Icons.local_fire_department_rounded,
-        size: 22,
-        color: Colors.white,
-      );
-    } else if (day.hasPartialProgress) {
-      bg = AppColors.streakBg;
-      border = const Color(0xFFFDBA74);
       inner = Text(
         '${day.completedMinutes}p',
         style: const TextStyle(
           fontSize: 11.5,
           fontWeight: FontWeight.w800,
-          color: Color(0xFFC2410C),
+          color: Colors.white,
         ),
       );
     } else if (day.isToday) {
@@ -1020,7 +939,7 @@ class _WeekDayColumn extends StatelessWidget {
       children: [
         Tooltip(
           message:
-              '${day.shortWeekdayLabel} (${day.date.day}/${day.date.month}): ${day.completedMinutes}/${day.goalMinutes} phút',
+              '${day.shortWeekdayLabel} (${day.date.day}/${day.date.month}): Đã học ${day.completedMinutes} phút',
           child: Container(
             width: 44,
             height: 44,

@@ -102,7 +102,7 @@ class ChatHeroBanner extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Nhắn tin Realtime mỗi ngày để thắp sáng chuỗi lửa riêng cùng cộng đồng BuddyTalk.',
+                            'Tham gia buổi học Video Call mỗi ngày để thắp sáng chuỗi lửa phòng cùng cộng đồng BuddyTalk.',
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.white.withValues(alpha: 0.88),

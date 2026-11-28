@@ -639,6 +639,16 @@ class ChatProvider extends ChangeNotifier {
         bestStreak: roomStreakRes.bestStreak,
         lastChatDate: roomStreakRes.lastChatDate,
       );
+      _roomMembers = _roomMembers
+          .map(
+            (m) => m.userId == userId
+                ? m.copyWith(
+                    streakCount: roomStreakRes.streakCount,
+                    lastChatDate: roomStreakRes.lastChatDate,
+                  )
+                : m,
+          )
+          .toList();
       notifyListeners();
     }
 
@@ -647,6 +657,20 @@ class ChatProvider extends ChangeNotifier {
       addMinutes: addMinutesToDaily,
       dailyGoalMinutes: dailyGoalMinutes,
     );
+
+    // Tự động đồng bộ tức thì Bảng Xếp Hạng chuỗi cao & Dashboard Bảng chuỗi (không cần F5/reload)
+    try {
+      final synced = await Future.wait([
+        _repository.fetchOnlineMembers(excludeUserId: userId),
+        _repository.fetchStreakBoardData(
+          userId: userId,
+          dailyGoalMinutes: dailyGoalMinutes,
+        ),
+      ]);
+      _onlineMembers = synced[0] as List<OnlineMemberModel>;
+      _streakBoard = synced[1] as StreakBoardData;
+      notifyListeners();
+    } catch (_) {}
 
     return (
       roomStreak: roomStreakRes?.streakCount,
