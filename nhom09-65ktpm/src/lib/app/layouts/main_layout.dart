@@ -7,6 +7,8 @@ import '../../features/buddy_matching/presentation/screens/buddy_matching_tab.da
 import '../../features/chat/presentation/providers/chat_provider.dart';
 import '../../features/chat/presentation/screens/chat_rooms_tab.dart';
 import '../../features/chat/presentation/screens/streak_dashboard_tab.dart';
+import '../../features/conversation_topics/presentation/providers/topics_provider.dart';
+import '../../features/conversation_topics/presentation/screens/conversation_topics_tab.dart';
 import 'components/main_header.dart';
 import 'components/main_nav_sidebar.dart';
 import 'components/nav_item.dart';
@@ -70,6 +72,16 @@ class _MainLayoutState extends State<MainLayout> {
       page: BuddyMatchingTab(),
     ),
     MainNavItem(
+      id: 'topics',
+      label: 'Chủ đề',
+      headerTitle: 'Chủ đề hội thoại',
+      headerSubtitle: 'Kịch bản mẫu A1–B2 và gợi ý câu mở đầu thực chiến',
+      section: 'Không gian học',
+      icon: Icons.auto_stories_outlined,
+      selectedIcon: Icons.auto_stories_rounded,
+      page: ConversationTopicsTab(),
+    ),
+    MainNavItem(
       id: 'profile',
       label: 'Hồ sơ',
       headerTitle: 'Hồ sơ cá nhân',
@@ -103,6 +115,8 @@ class _MainLayoutState extends State<MainLayout> {
       chat.loadRooms(profile.userId, silent: true);
     } else if (targetId == 'chat') {
       context.read<ChatProvider>().loadRooms(profile.userId, silent: true);
+    } else if (targetId == 'topics') {
+      context.read<TopicsProvider>().loadTopics(userId: profile.userId);
     }
   }
 
