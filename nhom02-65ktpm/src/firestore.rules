@@ -1,0 +1,85 @@
+rules_version = '2';
+
+// =============================================================================
+// Firestore Security Rules - NutriTrack AI
+// Nguyên tắc:
+//   1. Mỗi người chỉ đọc/ghi được dữ liệu trong users/{uid} của CHÍNH MÌNH.
+//   2. Thư viện tips: người đã đăng nhập chỉ được ĐỌC; chỉ nạp bằng Admin SDK
+//      (script tools/seed_tips) nên client không bao giờ ghi được.
+//   3. Validate kiểu dữ liệu/giá trị enum để chặn dữ liệu rác.
+//   4. Mọi đường dẫn không khai báo ở đây đều bị TỪ CHỐI mặc định.
+// Deploy: firebase deploy --only firestore:rules
+// =============================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Hàm tiện ích ----------
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function data() { return request.resource.data; }
+
+    function isLevel(v) { return v in ['low', 'medium', 'high']; }
+
+    function validLevels(levels) {
+      return levels is map
+        && levels.keys().hasOnly(['sugar', 'fat', 'carb', 'veg', 'protein', 'energy'])
+        && isLevel(levels.sugar) && isLevel(levels.fat) && isLevel(levels.carb)
+        && isLevel(levels.veg) && isLevel(levels.protein) && isLevel(levels.energy);
+    }
+
+    function validCategory(v) { return v in ['drink', 'main_dish', 'snack', 'dessert']; }
+
+    // ---------- Thư viện gợi ý ----------
+    match /tips/{tipCode} {
+      allow read: if signedIn();
+      allow write: if false; // chỉ nạp bằng Admin SDK (tools/seed_tips)
+    }
+
+    // ---------- Dữ liệu cá nhân ----------
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && data().goal in ['weight_loss', 'balanced', 'less_sugar']
+        && data().age_confirmed is bool
+        && data().display_name is string
+        && data().display_name.size() <= 60
+        && data().theme_mode in ['system', 'light', 'dark']
+        && data().reminders.times is list
+        && data().reminders.times.size() <= 6;
+
+      match /meals/{mealId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && data().keys().hasAll(['eaten_at', 'meal_type', 'items', 'is_deleted'])
+          && data().eaten_at is timestamp
+          && data().is_deleted is bool
+          && data().meal_type in ['breakfast', 'lunch', 'dinner', 'snack']
+          && data().input_method in ['photo', 'menu', 'manual', 'relog']
+          && data().items is list
+          && data().items.size() >= 1
+          && data().items.size() <= 10;
+      }
+
+      match /favorites/{favId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && data().name is string
+          && data().name.size() <= 100
+          && validCategory(data().category)
+          && validLevels(data().levels)
+          && data().use_count is int;
+      }
+
+      match /challenges/{challengeId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && data().type in ['max_sugary_drinks', 'less_sugar_orders', 'veg_meals', 'max_fried_meals']
+          && data().status in ['active', 'completed', 'failed', 'cancelled']
+          && data().week_start is string
+          && data().target is int
+          && data().target >= 0
+          && data().progress is int;
+      }
+    }
+  }
+}
