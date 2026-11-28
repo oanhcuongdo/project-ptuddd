@@ -19,6 +19,8 @@ class TopicsProvider extends ChangeNotifier {
   bool _showOnlyIncomplete = false;
   String? _boundUserId;
   bool _hasLoadedInitial = false;
+  bool _isDisposed = false;
+  int _loadRequestSeq = 0;
   final Set<String> _updatingTopicIds = <String>{};
 
   List<TopicModel> get allTopics => _topics;
@@ -56,7 +58,9 @@ class TopicsProvider extends ChangeNotifier {
         return false;
       }
 
-      if (_selectedCategory != 'ALL' && topic.category != _selectedCategory) {
+      if (_selectedCategory != 'ALL' &&
+          topic.category.trim().toLowerCase() !=
+              _selectedCategory.toLowerCase()) {
         return false;
       }
 
@@ -84,9 +88,10 @@ class TopicsProvider extends ChangeNotifier {
   }
 
   int countByLevel(String level) {
-    if (level.toUpperCase() == 'ALL') return _topics.length;
+    final normalized = level.trim().toUpperCase();
+    if (normalized.isEmpty || normalized == 'ALL') return _topics.length;
     return _topics
-        .where((topic) => topic.level.toUpperCase() == level.toUpperCase())
+        .where((topic) => topic.level.trim().toUpperCase() == normalized)
         .length;
   }
 
@@ -112,47 +117,59 @@ class TopicsProvider extends ChangeNotifier {
       return;
     }
 
+    final requestId = ++_loadRequestSeq;
     _boundUserId = normalizedUid;
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
-      _topics = await _repository.fetchTopics(userId: _boundUserId);
+      final fetched = await _repository.fetchTopics(userId: _boundUserId);
+      if (_isDisposed || requestId != _loadRequestSeq) return;
+      _topics = fetched;
       _hasLoadedInitial = true;
     } catch (e) {
+      if (_isDisposed || requestId != _loadRequestSeq) return;
       _errorMessage = 'Không thể tải danh sách chủ đề. Vui lòng thử lại.';
       debugPrint('[TopicsProvider] Lỗi loadTopics: $e');
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (!_isDisposed && requestId == _loadRequestSeq) {
+        _isLoading = false;
+        _safeNotifyListeners();
+      }
     }
   }
 
   void setLevelFilter(String level) {
-    final normalized = level.trim().toUpperCase();
+    final candidate = level.trim().toUpperCase();
+    final normalized = (candidate == 'ALL' ||
+            TopicModel.supportedLevels.contains(candidate))
+        ? candidate
+        : 'ALL';
     if (_selectedLevel == normalized) return;
     _selectedLevel = normalized;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void setCategoryFilter(String category) {
-    final normalized = category.trim();
-    if (_selectedCategory == normalized) return;
+    final trimmed = category.trim();
+    final normalized =
+        (trimmed.isEmpty || trimmed.toUpperCase() == 'ALL') ? 'ALL' : trimmed;
+    if (_selectedCategory.toLowerCase() == normalized.toLowerCase()) return;
     _selectedCategory = normalized;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void setSearchQuery(String query) {
     if (_searchQuery == query) return;
     _searchQuery = query;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void setShowOnlyIncomplete(bool value) {
     if (_showOnlyIncomplete == value) return;
     _showOnlyIncomplete = value;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void resetFilters() {
@@ -160,7 +177,7 @@ class TopicsProvider extends ChangeNotifier {
     _selectedCategory = 'ALL';
     _searchQuery = '';
     _showOnlyIncomplete = false;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   /// Đổi trạng thái hoàn thành của một chủ đề (Optimistic UI + lưu Supabase).
@@ -184,12 +201,12 @@ class TopicsProvider extends ChangeNotifier {
     updatedList[index] = previousTopic.copyWith(isCompleted: nextCompleted);
     _topics = updatedList;
     _errorMessage = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     final effectiveUid = userId ?? _boundUserId;
     if (effectiveUid == null || effectiveUid.trim().isEmpty) {
       _updatingTopicIds.remove(topicId);
-      notifyListeners();
+      _safeNotifyListeners();
       return nextCompleted;
     }
 
@@ -216,8 +233,20 @@ class TopicsProvider extends ChangeNotifier {
       return previousTopic.isCompleted;
     } finally {
       _updatingTopicIds.remove(topicId);
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    if (!_isDisposed) {
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }
 
