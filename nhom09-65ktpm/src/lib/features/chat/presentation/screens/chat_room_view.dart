@@ -6,6 +6,8 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../auth_profile/presentation/providers/auth_provider.dart';
 import '../../../chat_online/models/translation_result.dart';
 import '../../../chat_online/services/translation_service.dart';
+import '../../../vocab_notebook/data/repositories/vocab_repository.dart';
+import '../../../vocab_notebook/presentation/providers/vocab_provider.dart';
 import '../../data/models/conversation_model.dart';
 import '../../data/models/meet_session_model.dart';
 import '../../data/models/message_model.dart';
@@ -15,6 +17,7 @@ import '../components/chat_message_composer.dart';
 import '../components/chat_room_header.dart';
 import '../components/chat_room_info_panel.dart';
 import '../components/message_translation_footer.dart';
+import '../components/message_word_picker_dialog.dart';
 import '../components/schedule_meet_dialog.dart';
 import '../helpers/chat_translate_helper.dart';
 import '../providers/chat_provider.dart';
@@ -165,6 +168,55 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       }
       _translateMessage(msg);
     }
+  }
+
+  void _openWordPicker(MessageModel msg) {
+    VocabProvider? vocabProvider;
+    try {
+      vocabProvider = Provider.of<VocabProvider>(context, listen: false);
+    } on ProviderNotFoundException {
+      vocabProvider = null;
+    }
+
+    final currentUserId = context.read<AuthProvider>().currentProfile?.userId;
+
+    MessageWordPickerDialog.show(
+      context,
+      rawMessageContent: msg.content,
+      translationService: _translationService,
+      onSaveWord: ({
+        required word,
+        required translatedMeaning,
+        required sourceLang,
+        required targetLang,
+        required exampleSentence,
+      }) async {
+        if (vocabProvider != null) {
+          final saved = await vocabProvider.addOrUpdateWord(
+            word: word,
+            translatedMeaning: translatedMeaning,
+            sourceLang: sourceLang,
+            targetLang: targetLang,
+            exampleSentence: exampleSentence,
+          );
+          return saved != null;
+        }
+        if (currentUserId == null) return false;
+        try {
+          await VocabRepository().addVocabEntry(
+            userId: currentUserId,
+            word: word,
+            translatedMeaning: translatedMeaning,
+            sourceLang: sourceLang,
+            targetLang: targetLang,
+            exampleSentence: exampleSentence,
+          );
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
+    );
   }
 
   void _scrollToBottom() {
@@ -712,6 +764,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                         MessageTranslationFooter(
                           result: _translatedByMsgId[msg.id],
                           isTranslating: _translatingMsgIds.contains(msg.id),
+                          onPickWords: () => _openWordPicker(msg),
                           onRetry: () => _translateMessage(msg),
                           onHide: () =>
                               setState(() => _translatedByMsgId.remove(msg.id)),
