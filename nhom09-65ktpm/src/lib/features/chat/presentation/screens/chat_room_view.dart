@@ -18,6 +18,7 @@ import '../components/chat_message_composer.dart';
 import '../components/chat_room_header.dart';
 import '../components/chat_room_info_panel.dart';
 import '../components/compose_translate_dialog.dart';
+import '../components/inline_correction_bubble.dart';
 import '../components/message_translation_footer.dart';
 import '../components/message_word_picker_dialog.dart';
 import '../components/schedule_meet_dialog.dart';
@@ -211,6 +212,33 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       senderName: senderName,
       senderAvatarUrl: profile.avatarUrl,
       content: bilingualContent,
+    );
+  }
+
+  Future<void> _openInlineCorrection(MessageModel msg) async {
+    final draft = await InlineCorrectionDialog.show(
+      context,
+      originalText: msg.content,
+    );
+    if (!mounted || draft == null) return;
+
+    final profile = context.read<AuthProvider>().currentProfile;
+    if (profile == null) return;
+    final senderName =
+        profile.displayName.trim().isNotEmpty ? profile.displayName : 'Bạn';
+
+    final encoded = ChatTranslateHelper.encodeCorrection(
+      originalText: draft.originalText,
+      correctedText: draft.correctedText,
+      note: draft.note,
+    );
+
+    await _chatProvider.sendMessage(
+      conversationId: widget.room.id,
+      senderId: profile.userId,
+      senderName: senderName,
+      senderAvatarUrl: profile.avatarUrl,
+      content: encoded,
     );
   }
 
@@ -797,6 +825,25 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                                 size: 15,
                               ),
                             ),
+                            const SizedBox(width: 2),
+                            IconButton(
+                              onPressed: () => _openInlineCorrection(msg),
+                              tooltip: 'Sửa lỗi câu cho bạn học',
+                              visualDensity: VisualDensity.compact,
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFF047857),
+                                minimumSize: const Size(28, 28),
+                                padding: const EdgeInsets.all(5),
+                                side: const BorderSide(
+                                  color: Color(0xFFA7F3D0),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.spellcheck_rounded,
+                                size: 15,
+                              ),
+                            ),
                           ],
                         ],
                       ),
@@ -823,6 +870,11 @@ class _ChatRoomViewState extends State<ChatRoomView> {
   }
 
   Widget _buildBubbleBody(String rawContent, bool isMine) {
+    final correction = ChatTranslateHelper.parseCorrection(rawContent);
+    if (correction != null) {
+      return InlineCorrectionBubble(data: correction, isMine: isMine);
+    }
+
     final bilingual = ChatTranslateHelper.parseBilingual(rawContent);
     if (bilingual != null) {
       return Column(
