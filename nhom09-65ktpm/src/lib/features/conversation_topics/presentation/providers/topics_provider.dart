@@ -19,6 +19,7 @@ class TopicsProvider extends ChangeNotifier {
   bool _showOnlyIncomplete = false;
   String? _boundUserId;
   bool _hasLoadedInitial = false;
+  final Set<String> _updatingTopicIds = <String>{};
 
   List<TopicModel> get allTopics => _topics;
   bool get isLoading => _isLoading;
@@ -27,6 +28,7 @@ class TopicsProvider extends ChangeNotifier {
   String get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
   bool get showOnlyIncomplete => _showOnlyIncomplete;
+  bool isUpdatingTopic(String topicId) => _updatingTopicIds.contains(topicId);
 
   int get totalCount => _topics.length;
   int get completedCount => _topics.where((t) => t.isCompleted).length;
@@ -170,9 +172,14 @@ class TopicsProvider extends ChangeNotifier {
     if (index == -1) return false;
 
     final previousTopic = _topics[index];
+    if (_updatingTopicIds.contains(topicId)) {
+      return previousTopic.isCompleted;
+    }
+
     final nextCompleted = !previousTopic.isCompleted;
 
-    // Optimistic UI update
+    // Optimistic UI update + guard against concurrent taps on the same topic
+    _updatingTopicIds.add(topicId);
     final updatedList = List<TopicModel>.from(_topics);
     updatedList[index] = previousTopic.copyWith(isCompleted: nextCompleted);
     _topics = updatedList;
@@ -181,6 +188,8 @@ class TopicsProvider extends ChangeNotifier {
 
     final effectiveUid = userId ?? _boundUserId;
     if (effectiveUid == null || effectiveUid.trim().isEmpty) {
+      _updatingTopicIds.remove(topicId);
+      notifyListeners();
       return nextCompleted;
     }
 
@@ -189,6 +198,7 @@ class TopicsProvider extends ChangeNotifier {
         userId: effectiveUid,
         topicId: topicId,
         isCompleted: nextCompleted,
+        topic: previousTopic,
       );
       return nextCompleted;
     } catch (e) {
@@ -197,9 +207,11 @@ class TopicsProvider extends ChangeNotifier {
       revertedList[index] = previousTopic;
       _topics = revertedList;
       _errorMessage = 'Không thể lưu tiến độ chủ đề lên đám mây.';
-      notifyListeners();
       debugPrint('[TopicsProvider] Lỗi toggleTopicCompleted: $e');
       return previousTopic.isCompleted;
+    } finally {
+      _updatingTopicIds.remove(topicId);
+      notifyListeners();
     }
   }
 }
