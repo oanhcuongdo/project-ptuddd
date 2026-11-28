@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-transport-10",
+  "level": "HSK1",
+  "order": 10,
+  "title": "Đi lại và phương tiện",
+  "topic": "đi lại",
+  "description": "Gọi tên phương tiện và hỏi đường đi xa hay gần.",
+  "vocabulary": [
+    {
+      "id": "che",
+      "hanzi": "车",
+      "pinyin": "chē",
+      "hanViet": "xa",
+      "meaningVi": "xe",
+      "example": {
+        "hanzi": "我坐车去学校。",
+        "pinyin": "Wǒ zuò chē qù xuéxiào.",
+        "meaningVi": "Tôi đi xe đến trường."
+      }
+    },
+    {
+      "id": "huo-che",
+      "hanzi": "火车",
+      "pinyin": "huǒchē",
+      "hanViet": "hỏa xa",
+      "meaningVi": "tàu hỏa",
+      "example": {
+        "hanzi": "我坐火车去北京。",
+        "pinyin": "Wǒ zuò huǒchē qù Běijīng.",
+        "meaningVi": "Tôi đi tàu hỏa đến Bắc Kinh."
+      }
+    },
+    {
+      "id": "fei-ji",
+      "hanzi": "飞机",
+      "pinyin": "fēijī",
+      "hanViet": "phi cơ",
+      "meaningVi": "máy bay",
+      "example": {
+        "hanzi": "他坐飞机来中国。",
+        "pinyin": "Tā zuò fēijī lái Zhōngguó.",
+        "meaningVi": "Anh ấy đi máy bay đến Trung Quốc."
+      }
+    },
+    {
+      "id": "ji-chang",
+      "hanzi": "机场",
+      "pinyin": "jīchǎng",
+      "hanViet": "cơ trường",
+      "meaningVi": "sân bay",
+      "example": {
+        "hanzi": "我爸爸在机场。",
+        "pinyin": "Wǒ bàba zài jīchǎng.",
+        "meaningVi": "Bố tôi đang ở sân bay."
+      }
+    },
+    {
+      "id": "chu-zu-che",
+      "hanzi": "出租车",
+      "pinyin": "chūzūchē",
+      "hanViet": "xuất tô xa",
+      "meaningVi": "taxi",
+      "example": {
+        "hanzi": "我们坐出租车去饭店。",
+        "pinyin": "Wǒmen zuò chūzūchē qù fàndiàn.",
+        "meaningVi": "Chúng tôi đi taxi đến nhà hàng."
+      }
+    },
+    {
+      "id": "zou",
+      "hanzi": "走",
+      "pinyin": "zǒu",
+      "hanViet": "tẩu",
+      "meaningVi": "đi bộ; đi",
+      "example": {
+        "hanzi": "我走路去学校。",
+        "pinyin": "Wǒ zǒulù qù xuéxiào.",
+        "meaningVi": "Tôi đi bộ đến trường."
+      }
+    },
+    {
+      "id": "lu",
+      "hanzi": "路",
+      "pinyin": "lù",
+      "hanViet": "lộ",
+      "meaningVi": "đường",
+      "example": {
+        "hanzi": "这条路很长。",
+        "pinyin": "Zhè tiáo lù hěn cháng.",
+        "meaningVi": "Con đường này rất dài."
+      }
+    },
+    {
+      "id": "yuan",
+      "hanzi": "远",
+      "pinyin": "yuǎn",
+      "hanViet": "viễn",
+      "meaningVi": "xa",
+      "example": {
+        "hanzi": "机场很远。",
+        "pinyin": "Jīchǎng hěn yuǎn.",
+        "meaningVi": "Sân bay rất xa."
+      }
+    },
+    {
+      "id": "jin",
+      "hanzi": "近",
+      "pinyin": "jìn",
+      "hanViet": "cận",
+      "meaningVi": "gần",
+      "example": {
+        "hanzi": "学校离我家很近。",
+        "pinyin": "Xuéxiào lí wǒ jiā hěn jìn.",
+        "meaningVi": "Trường học rất gần nhà tôi."
+      }
+    },
+    {
+      "id": "dao",
+      "hanzi": "到",
+      "pinyin": "dào",
+      "hanViet": "đáo",
+      "meaningVi": "đến; tới",
+      "example": {
+        "hanzi": "火车几点到？",
+        "pinyin": "Huǒchē jǐ diǎn dào?",
+        "meaningVi": "Tàu hỏa đến lúc mấy giờ?"
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-zuo-transport",
+      "pattern": "坐 + phương tiện + 去 / 来 + địa điểm",
+      "explanationVi": "坐 đứng trước tên phương tiện; 去 diễn tả đi đến nơi khác, còn 来 hướng về phía người nói.",
+      "examples": [
+        "我坐火车去北京。",
+        "他坐飞机来中国。"
+      ]
+    },
+    {
+      "id": "gp-distance-li",
+      "pattern": "Địa điểm + 离 + nơi + 近 / 远",
+      "explanationVi": "离 nối hai địa điểm khi nói khoảng cách gần hay xa.",
+      "examples": [
+        "学校离我家很近。",
+        "机场离这儿很远。"
+      ]
+    },
+    {
+      "id": "gp-time-dao",
+      "pattern": "Phương tiện + 几点 + 到？",
+      "explanationVi": "Đặt 到 sau thời gian để hỏi phương tiện đến nơi lúc nào.",
+      "examples": [
+        "火车几点到？",
+        "飞机上午十点到。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "người bạn đang giúp lên kế hoạch chuyến đi",
+    "learnerRole": "du khách chuẩn bị đi Bắc Kinh",
+    "situation": "Hai người chọn phương tiện, hỏi đường đến sân bay và trao đổi về thời gian đến nơi.",
+    "openingLine": "你怎么去北京？机场离这儿远吗？"
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-plans-02",
+  "level": "HSK2",
+  "order": 2,
+  "title": "Kế hoạch và thời gian",
+  "topic": "kế hoạch",
+  "description": "Nói về kế hoạch, thời điểm bắt đầu và những việc sắp diễn ra.",
+  "vocabulary": [
+    {
+      "id": "yi-qian",
+      "hanzi": "以前",
+      "pinyin": "yǐqián",
+      "hanViet": "dĩ tiền",
+      "meaningVi": "trước đây; trước kia",
+      "example": {
+        "hanzi": "我以前住在北京。",
+        "pinyin": "Wǒ yǐqián zhù zài Běijīng.",
+        "meaningVi": "Trước đây tôi sống ở Bắc Kinh."
+      }
+    },
+    {
+      "id": "yi-hou",
+      "hanzi": "以后",
+      "pinyin": "yǐhòu",
+      "hanViet": "dĩ hậu",
+      "meaningVi": "sau này; sau đó",
+      "example": {
+        "hanzi": "以后我想去中国工作。",
+        "pinyin": "Yǐhòu wǒ xiǎng qù Zhōngguó gōngzuò.",
+        "meaningVi": "Sau này tôi muốn đến Trung Quốc làm việc."
+      }
+    },
+    {
+      "id": "kai-shi",
+      "hanzi": "开始",
+      "pinyin": "kāishǐ",
+      "hanViet": "khai thủy",
+      "meaningVi": "bắt đầu",
+      "example": {
+        "hanzi": "电影八点开始。",
+        "pinyin": "Diànyǐng bā diǎn kāishǐ.",
+        "meaningVi": "Bộ phim bắt đầu lúc tám giờ."
+      }
+    },
+    {
+      "id": "wan-finish",
+      "hanzi": "完",
+      "pinyin": "wán",
+      "hanViet": "hoàn",
+      "meaningVi": "xong; hoàn thành",
+      "example": {
+        "hanzi": "我做完作业了。",
+        "pinyin": "Wǒ zuò wán zuòyè le.",
+        "meaningVi": "Tôi làm bài tập xong rồi."
+      }
+    },
+    {
+      "id": "mei-nian",
+      "hanzi": "每年",
+      "pinyin": "měinián",
+      "hanViet": "mỗi niên",
+      "meaningVi": "mỗi năm; hằng năm",
+      "example": {
+        "hanzi": "我们每年去看爷爷奶奶。",
+        "pinyin": "Wǒmen měinián qù kàn yéye nǎinai.",
+        "meaningVi": "Mỗi năm chúng tôi đều đến thăm ông bà."
+      }
+    },
+    {
+      "id": "yi-hui-er",
+      "hanzi": "一会儿",
+      "pinyin": "yíhuìr",
+      "hanViet": "nhất hội nhi",
+      "meaningVi": "một lát; một lúc",
+      "example": {
+        "hanzi": "请等我一会儿。",
+        "pinyin": "Qǐng děng wǒ yíhuìr.",
+        "meaningVi": "Xin đợi tôi một lát."
+      }
+    },
+    {
+      "id": "ma-shang",
+      "hanzi": "马上",
+      "pinyin": "mǎshàng",
+      "hanViet": "mã thượng",
+      "meaningVi": "ngay lập tức; sắp",
+      "example": {
+        "hanzi": "我马上回来。",
+        "pinyin": "Wǒ mǎshàng huílái.",
+        "meaningVi": "Tôi sẽ quay lại ngay."
+      }
+    },
+    {
+      "id": "chang-chang",
+      "hanzi": "常常",
+      "pinyin": "chángcháng",
+      "hanViet": "thường thường",
+      "meaningVi": "thường xuyên",
+      "example": {
+        "hanzi": "我常常和朋友一起运动。",
+        "pinyin": "Wǒ chángcháng hé péngyou yìqǐ yùndòng.",
+        "meaningVi": "Tôi thường tập thể thao cùng bạn."
+      }
+    },
+    {
+      "id": "zhong-yu",
+      "hanzi": "终于",
+      "pinyin": "zhōngyú",
+      "hanViet": "chung vu",
+      "meaningVi": "cuối cùng; rốt cuộc",
+      "example": {
+        "hanzi": "我终于找到我的手机了。",
+        "pinyin": "Wǒ zhōngyú zhǎodào wǒ de shǒujī le.",
+        "meaningVi": "Cuối cùng tôi cũng tìm thấy điện thoại."
+      }
+    },
+    {
+      "id": "jie-hun",
+      "hanzi": "结婚",
+      "pinyin": "jiéhūn",
+      "hanViet": "kết hôn",
+      "meaningVi": "kết hôn",
+      "example": {
+        "hanzi": "他们明年结婚。",
+        "pinyin": "Tāmen míngnián jiéhūn.",
+        "meaningVi": "Năm sau họ kết hôn."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-yihou-time",
+      "pattern": "以前 / 以后 + mệnh đề",
+      "explanationVi": "以前 nói về thời gian trước một mốc; 以后 nói về thời gian sau mốc đó.",
+      "examples": [
+        "我以前住在北京。",
+        "以后我想去中国工作。"
+      ]
+    },
+    {
+      "id": "gp-verb-wan",
+      "pattern": "Động từ + 完",
+      "explanationVi": "完 đứng sau động từ để nói hành động đã hoàn tất.",
+      "examples": [
+        "我做完作业了。",
+        "他看完这本书了。"
+      ]
+    },
+    {
+      "id": "gp-time-frequency",
+      "pattern": "常常 / 每年 + động từ",
+      "explanationVi": "Từ chỉ tần suất hoặc chu kỳ thường đứng trước động từ.",
+      "examples": [
+        "我常常和朋友一起运动。",
+        "我们每年去看爷爷奶奶。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "người bạn hỏi về kế hoạch sắp tới",
+    "learnerRole": "sinh viên đang kể về dự định của mình",
+    "situation": "Hai người nói về việc học trước đây, kế hoạch sau này và lịch hẹn.",
+    "openingLine": "你以后想做什么？你以前学过汉语吗？"
+  }
+}

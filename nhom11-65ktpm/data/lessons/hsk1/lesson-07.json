@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-daily-actions-07",
+  "level": "HSK1",
+  "order": 7,
+  "title": "Hoạt động hằng ngày",
+  "topic": "hoạt động",
+  "description": "Học các động từ thường dùng khi ăn uống, học tập và nghỉ ngơi.",
+  "vocabulary": [
+    {
+      "id": "chi",
+      "hanzi": "吃",
+      "pinyin": "chī",
+      "hanViet": "thực",
+      "meaningVi": "ăn",
+      "example": {
+        "hanzi": "我喜欢吃米饭。",
+        "pinyin": "Wǒ xǐhuan chī mǐfàn.",
+        "meaningVi": "Tôi thích ăn cơm."
+      }
+    },
+    {
+      "id": "he",
+      "hanzi": "喝",
+      "pinyin": "hē",
+      "hanViet": "hát",
+      "meaningVi": "uống",
+      "example": {
+        "hanzi": "你喝水吗？",
+        "pinyin": "Nǐ hē shuǐ ma?",
+        "meaningVi": "Bạn uống nước không?"
+      }
+    },
+    {
+      "id": "kan",
+      "hanzi": "看",
+      "pinyin": "kàn",
+      "hanViet": "khán",
+      "meaningVi": "xem; nhìn; đọc",
+      "example": {
+        "hanzi": "我晚上看书。",
+        "pinyin": "Wǒ wǎnshang kàn shū.",
+        "meaningVi": "Buổi tối tôi đọc sách."
+      }
+    },
+    {
+      "id": "ting",
+      "hanzi": "听",
+      "pinyin": "tīng",
+      "hanViet": "thính",
+      "meaningVi": "nghe",
+      "example": {
+        "hanzi": "我听老师说汉语。",
+        "pinyin": "Wǒ tīng lǎoshī shuō hànyǔ.",
+        "meaningVi": "Tôi nghe giáo viên nói tiếng Trung."
+      }
+    },
+    {
+      "id": "shuo",
+      "hanzi": "说",
+      "pinyin": "shuō",
+      "hanViet": "thuyết",
+      "meaningVi": "nói",
+      "example": {
+        "hanzi": "他会说汉语。",
+        "pinyin": "Tā huì shuō hànyǔ.",
+        "meaningVi": "Anh ấy biết nói tiếng Trung."
+      }
+    },
+    {
+      "id": "du",
+      "hanzi": "读",
+      "pinyin": "dú",
+      "hanViet": "độc",
+      "meaningVi": "đọc",
+      "example": {
+        "hanzi": "我读这本书。",
+        "pinyin": "Wǒ dú zhè běn shū.",
+        "meaningVi": "Tôi đọc quyển sách này."
+      }
+    },
+    {
+      "id": "xie",
+      "hanzi": "写",
+      "pinyin": "xiě",
+      "hanViet": "tả",
+      "meaningVi": "viết",
+      "example": {
+        "hanzi": "请写你的名字。",
+        "pinyin": "Qǐng xiě nǐ de míngzi.",
+        "meaningVi": "Xin hãy viết tên của bạn."
+      }
+    },
+    {
+      "id": "zuo",
+      "hanzi": "做",
+      "pinyin": "zuò",
+      "hanViet": "tố",
+      "meaningVi": "làm",
+      "example": {
+        "hanzi": "你在做什么？",
+        "pinyin": "Nǐ zài zuò shénme?",
+        "meaningVi": "Bạn đang làm gì?"
+      }
+    },
+    {
+      "id": "mai",
+      "hanzi": "买",
+      "pinyin": "mǎi",
+      "hanViet": "mãi",
+      "meaningVi": "mua",
+      "example": {
+        "hanzi": "我想买一本书。",
+        "pinyin": "Wǒ xiǎng mǎi yì běn shū.",
+        "meaningVi": "Tôi muốn mua một quyển sách."
+      }
+    },
+    {
+      "id": "shui-jiao",
+      "hanzi": "睡觉",
+      "pinyin": "shuìjiào",
+      "hanViet": "thụy giác",
+      "meaningVi": "ngủ",
+      "example": {
+        "hanzi": "我晚上十点睡觉。",
+        "pinyin": "Wǒ wǎnshang shí diǎn shuìjiào.",
+        "meaningVi": "Buổi tối mười giờ tôi đi ngủ."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-verb-object",
+      "pattern": "Chủ ngữ + Động từ + Tân ngữ",
+      "explanationVi": "Trong câu kể cơ bản, động từ thường đứng trước tân ngữ.",
+      "examples": [
+        "我看书。",
+        "他喝水。"
+      ]
+    },
+    {
+      "id": "gp-zai-action",
+      "pattern": "Chủ ngữ + 在 + Động từ",
+      "explanationVi": "在 đặt trước động từ có thể diễn tả hành động đang diễn ra trong ngữ cảnh.",
+      "examples": [
+        "你在做什么？",
+        "我在看书。"
+      ]
+    },
+    {
+      "id": "gp-qing-request",
+      "pattern": "请 + Động từ",
+      "explanationVi": "请 đặt trước động từ để đưa ra lời nhờ hoặc yêu cầu lịch sự.",
+      "examples": [
+        "请喝水。",
+        "请写你的名字。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng phòng ký túc xá",
+    "learnerRole": "sinh viên đang kể về một ngày của mình",
+    "situation": "Hai người nói về việc học, ăn uống và giờ đi ngủ trong ngày.",
+    "openingLine": "你今天做什么？你几点睡觉？"
+  }
+}

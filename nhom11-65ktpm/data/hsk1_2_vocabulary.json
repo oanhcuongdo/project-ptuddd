@@ -1,0 +1,4958 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "lessonCount": 30,
+  "wordCount": 298,
+  "lessons": [
+    {
+      "id": "hsk1-greetings-01",
+      "level": "HSK1",
+      "order": 1,
+      "title": "Chào hỏi cơ bản"
+    },
+    {
+      "id": "hsk1-family-02",
+      "level": "HSK1",
+      "order": 2,
+      "title": "Gia đình tôi"
+    },
+    {
+      "id": "hsk1-numbers-03",
+      "level": "HSK1",
+      "order": 3,
+      "title": "Số đếm và tuổi"
+    },
+    {
+      "id": "hsk1-time-04",
+      "level": "HSK1",
+      "order": 4,
+      "title": "Thời gian trong ngày"
+    },
+    {
+      "id": "hsk1-school-05",
+      "level": "HSK1",
+      "order": 5,
+      "title": "Ở trường"
+    },
+    {
+      "id": "hsk1-places-06",
+      "level": "HSK1",
+      "order": 6,
+      "title": "Địa điểm và nơi chốn"
+    },
+    {
+      "id": "hsk1-daily-actions-07",
+      "level": "HSK1",
+      "order": 7,
+      "title": "Hoạt động hằng ngày"
+    },
+    {
+      "id": "hsk1-food-08",
+      "level": "HSK1",
+      "order": 8,
+      "title": "Đồ ăn và thức uống"
+    },
+    {
+      "id": "hsk1-shopping-09",
+      "level": "HSK1",
+      "order": 9,
+      "title": "Mua sắm và giá cả"
+    },
+    {
+      "id": "hsk1-transport-10",
+      "level": "HSK1",
+      "order": 10,
+      "title": "Đi lại và phương tiện"
+    },
+    {
+      "id": "hsk1-weather-11",
+      "level": "HSK1",
+      "order": 11,
+      "title": "Thời tiết và thiên nhiên"
+    },
+    {
+      "id": "hsk1-health-12",
+      "level": "HSK1",
+      "order": 12,
+      "title": "Cơ thể và sức khỏe"
+    },
+    {
+      "id": "hsk1-ability-13",
+      "level": "HSK1",
+      "order": 13,
+      "title": "Sở thích và khả năng"
+    },
+    {
+      "id": "hsk1-directions-14",
+      "level": "HSK1",
+      "order": 14,
+      "title": "Vị trí và phương hướng"
+    },
+    {
+      "id": "hsk1-home-work-15",
+      "level": "HSK1",
+      "order": 15,
+      "title": "Nhà cửa và công việc"
+    },
+    {
+      "id": "hsk2-family-01",
+      "level": "HSK2",
+      "order": 1,
+      "title": "Gia đình và người thân"
+    },
+    {
+      "id": "hsk2-plans-02",
+      "level": "HSK2",
+      "order": 2,
+      "title": "Kế hoạch và thời gian"
+    },
+    {
+      "id": "hsk2-study-work-03",
+      "level": "HSK2",
+      "order": 3,
+      "title": "Học tập và công việc"
+    },
+    {
+      "id": "hsk2-restaurant-04",
+      "level": "HSK2",
+      "order": 4,
+      "title": "Gọi món ở nhà hàng"
+    },
+    {
+      "id": "hsk2-transport-05",
+      "level": "HSK2",
+      "order": 5,
+      "title": "Đi lại và hỏi đường"
+    },
+    {
+      "id": "hsk2-shopping-06",
+      "level": "HSK2",
+      "order": 6,
+      "title": "Mua sắm và quần áo"
+    },
+    {
+      "id": "hsk2-food-07",
+      "level": "HSK2",
+      "order": 7,
+      "title": "Thức ăn và bữa ăn"
+    },
+    {
+      "id": "hsk2-seasons-08",
+      "level": "HSK2",
+      "order": 8,
+      "title": "Mùa và thời tiết"
+    },
+    {
+      "id": "hsk2-health-09",
+      "level": "HSK2",
+      "order": 9,
+      "title": "Sức khỏe và chăm sóc"
+    },
+    {
+      "id": "hsk2-classroom-10",
+      "level": "HSK2",
+      "order": 10,
+      "title": "Lớp học và ôn tập"
+    },
+    {
+      "id": "hsk2-travel-11",
+      "level": "HSK2",
+      "order": 11,
+      "title": "Du lịch và tham quan"
+    },
+    {
+      "id": "hsk2-communication-12",
+      "level": "HSK2",
+      "order": 12,
+      "title": "Gặp gỡ và trò chuyện"
+    },
+    {
+      "id": "hsk2-feelings-13",
+      "level": "HSK2",
+      "order": 13,
+      "title": "Cảm xúc và tính cách"
+    },
+    {
+      "id": "hsk2-connections-14",
+      "level": "HSK2",
+      "order": 14,
+      "title": "Nối ý và đưa lời khuyên"
+    },
+    {
+      "id": "hsk2-daily-actions-15",
+      "level": "HSK2",
+      "order": 15,
+      "title": "Việc làm hằng ngày"
+    }
+  ],
+  "vocabulary": [
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-greetings-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Chào hỏi cơ bản",
+      "id": "ni-hao",
+      "hanzi": "你好",
+      "pinyin": "nǐ hǎo",
+      "hanViet": "nhĩ hảo",
+      "meaningVi": "xin chào",
+      "example": {
+        "hanzi": "你好！",
+        "pinyin": "Nǐ hǎo!",
+        "meaningVi": "Xin chào!"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-greetings-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Chào hỏi cơ bản",
+      "id": "ni",
+      "hanzi": "你",
+      "pinyin": "nǐ",
+      "hanViet": "nhĩ",
+      "meaningVi": "bạn",
+      "example": {
+        "hanzi": "你好吗？",
+        "pinyin": "Nǐ hǎo ma?",
+        "meaningVi": "Bạn khỏe không?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-greetings-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Chào hỏi cơ bản",
+      "id": "wo",
+      "hanzi": "我",
+      "pinyin": "wǒ",
+      "hanViet": "ngã",
+      "meaningVi": "tôi",
+      "example": {
+        "hanzi": "我是学生。",
+        "pinyin": "Wǒ shì xuésheng.",
+        "meaningVi": "Tôi là học sinh."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-greetings-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Chào hỏi cơ bản",
+      "id": "hao",
+      "hanzi": "好",
+      "pinyin": "hǎo",
+      "hanViet": "hảo",
+      "meaningVi": "tốt; khỏe",
+      "example": {
+        "hanzi": "我很好。",
+        "pinyin": "Wǒ hěn hǎo.",
+        "meaningVi": "Tôi rất khỏe."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-greetings-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Chào hỏi cơ bản",
+      "id": "shi",
+      "hanzi": "是",
+      "pinyin": "shì",
+      "hanViet": "thị",
+      "meaningVi": "là",
+      "example": {
+        "hanzi": "我是学生。",
+        "pinyin": "Wǒ shì xuésheng.",
+        "meaningVi": "Tôi là học sinh."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-greetings-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Chào hỏi cơ bản",
+      "id": "xue-sheng",
+      "hanzi": "学生",
+      "pinyin": "xuésheng",
+      "hanViet": "học sinh",
+      "meaningVi": "học sinh; sinh viên",
+      "example": {
+        "hanzi": "我是学生。",
+        "pinyin": "Wǒ shì xuésheng.",
+        "meaningVi": "Tôi là học sinh."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-greetings-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Chào hỏi cơ bản",
+      "id": "lao-shi",
+      "hanzi": "老师",
+      "pinyin": "lǎoshī",
+      "hanViet": "lão sư",
+      "meaningVi": "giáo viên",
+      "example": {
+        "hanzi": "老师好！",
+        "pinyin": "Lǎoshī hǎo!",
+        "meaningVi": "Em chào thầy/cô!"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-greetings-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Chào hỏi cơ bản",
+      "id": "xie-xie",
+      "hanzi": "谢谢",
+      "pinyin": "xièxie",
+      "hanViet": "tạ tạ",
+      "meaningVi": "cảm ơn",
+      "example": {
+        "hanzi": "谢谢你！",
+        "pinyin": "Xièxie nǐ!",
+        "meaningVi": "Cảm ơn bạn!"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-greetings-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Chào hỏi cơ bản",
+      "id": "zai-jian",
+      "hanzi": "再见",
+      "pinyin": "zàijiàn",
+      "hanViet": "tái kiến",
+      "meaningVi": "tạm biệt",
+      "example": {
+        "hanzi": "老师，再见！",
+        "pinyin": "Lǎoshī, zàijiàn!",
+        "meaningVi": "Em chào tạm biệt thầy/cô!"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-family-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Gia đình tôi",
+      "id": "jia",
+      "hanzi": "家",
+      "pinyin": "jiā",
+      "hanViet": "gia",
+      "meaningVi": "nhà; gia đình",
+      "example": {
+        "hanzi": "我家有四口人。",
+        "pinyin": "Wǒ jiā yǒu sì kǒu rén.",
+        "meaningVi": "Nhà tôi có bốn người."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-family-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Gia đình tôi",
+      "id": "you",
+      "hanzi": "有",
+      "pinyin": "yǒu",
+      "hanViet": "hữu",
+      "meaningVi": "có",
+      "example": {
+        "hanzi": "我有一个哥哥。",
+        "pinyin": "Wǒ yǒu yí ge gēge.",
+        "meaningVi": "Tôi có một người anh."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-family-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Gia đình tôi",
+      "id": "ba-ba",
+      "hanzi": "爸爸",
+      "pinyin": "bàba",
+      "hanViet": "ba ba",
+      "meaningVi": "bố",
+      "example": {
+        "hanzi": "我爸爸是老师。",
+        "pinyin": "Wǒ bàba shì lǎoshī.",
+        "meaningVi": "Bố tôi là giáo viên."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-family-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Gia đình tôi",
+      "id": "ma-ma",
+      "hanzi": "妈妈",
+      "pinyin": "māma",
+      "hanViet": "ma ma",
+      "meaningVi": "mẹ",
+      "example": {
+        "hanzi": "妈妈好！",
+        "pinyin": "Māma hǎo!",
+        "meaningVi": "Con chào mẹ!"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-family-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Gia đình tôi",
+      "id": "ge-ge",
+      "hanzi": "哥哥",
+      "pinyin": "gēge",
+      "hanViet": "ca ca",
+      "meaningVi": "anh trai",
+      "example": {
+        "hanzi": "我哥哥很高。",
+        "pinyin": "Wǒ gēge hěn gāo.",
+        "meaningVi": "Anh trai tôi rất cao."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-family-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Gia đình tôi",
+      "id": "mei-mei",
+      "hanzi": "妹妹",
+      "pinyin": "mèimei",
+      "hanViet": "muội muội",
+      "meaningVi": "em gái",
+      "example": {
+        "hanzi": "这是我妹妹。",
+        "pinyin": "Zhè shì wǒ mèimei.",
+        "meaningVi": "Đây là em gái tôi."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-family-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Gia đình tôi",
+      "id": "ji",
+      "hanzi": "几",
+      "pinyin": "jǐ",
+      "hanViet": "kỷ",
+      "meaningVi": "mấy",
+      "example": {
+        "hanzi": "你家有几口人？",
+        "pinyin": "Nǐ jiā yǒu jǐ kǒu rén?",
+        "meaningVi": "Nhà bạn có mấy người?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-family-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Gia đình tôi",
+      "id": "kou",
+      "hanzi": "口",
+      "pinyin": "kǒu",
+      "hanViet": "khẩu",
+      "meaningVi": "(lượng từ đếm người trong nhà)",
+      "example": {
+        "hanzi": "三口人",
+        "pinyin": "sān kǒu rén",
+        "meaningVi": "ba người"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-family-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Gia đình tôi",
+      "id": "ren",
+      "hanzi": "人",
+      "pinyin": "rén",
+      "hanViet": "nhân",
+      "meaningVi": "người",
+      "example": {
+        "hanzi": "他是中国人。",
+        "pinyin": "Tā shì Zhōngguó rén.",
+        "meaningVi": "Anh ấy là người Trung Quốc."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-numbers-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Số đếm và tuổi",
+      "id": "yi",
+      "hanzi": "一",
+      "pinyin": "yī",
+      "hanViet": "nhất",
+      "meaningVi": "một",
+      "example": {
+        "hanzi": "一个人",
+        "pinyin": "yí ge rén",
+        "meaningVi": "một người"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-numbers-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Số đếm và tuổi",
+      "id": "er",
+      "hanzi": "二",
+      "pinyin": "èr",
+      "hanViet": "nhị",
+      "meaningVi": "hai",
+      "example": {
+        "hanzi": "二月",
+        "pinyin": "èr yuè",
+        "meaningVi": "tháng hai"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-numbers-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Số đếm và tuổi",
+      "id": "san",
+      "hanzi": "三",
+      "pinyin": "sān",
+      "hanViet": "tam",
+      "meaningVi": "ba",
+      "example": {
+        "hanzi": "三口人",
+        "pinyin": "sān kǒu rén",
+        "meaningVi": "ba người"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-numbers-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Số đếm và tuổi",
+      "id": "si",
+      "hanzi": "四",
+      "pinyin": "sì",
+      "hanViet": "tứ",
+      "meaningVi": "bốn",
+      "example": {
+        "hanzi": "四个学生",
+        "pinyin": "sì ge xuésheng",
+        "meaningVi": "bốn học sinh"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-numbers-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Số đếm và tuổi",
+      "id": "wu",
+      "hanzi": "五",
+      "pinyin": "wǔ",
+      "hanViet": "ngũ",
+      "meaningVi": "năm",
+      "example": {
+        "hanzi": "五岁",
+        "pinyin": "wǔ suì",
+        "meaningVi": "năm tuổi"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-numbers-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Số đếm và tuổi",
+      "id": "shi-ten",
+      "hanzi": "十",
+      "pinyin": "shí",
+      "hanViet": "thập",
+      "meaningVi": "mười",
+      "example": {
+        "hanzi": "十个人",
+        "pinyin": "shí ge rén",
+        "meaningVi": "mười người"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-numbers-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Số đếm và tuổi",
+      "id": "sui",
+      "hanzi": "岁",
+      "pinyin": "suì",
+      "hanViet": "tuế",
+      "meaningVi": "tuổi",
+      "example": {
+        "hanzi": "我二十岁。",
+        "pinyin": "Wǒ èrshí suì.",
+        "meaningVi": "Tôi hai mươi tuổi."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-numbers-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Số đếm và tuổi",
+      "id": "duo-da",
+      "hanzi": "多大",
+      "pinyin": "duō dà",
+      "hanViet": "đa đại",
+      "meaningVi": "bao nhiêu tuổi",
+      "example": {
+        "hanzi": "你多大？",
+        "pinyin": "Nǐ duō dà?",
+        "meaningVi": "Bạn bao nhiêu tuổi?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-numbers-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Số đếm và tuổi",
+      "id": "ge",
+      "hanzi": "个",
+      "pinyin": "gè",
+      "hanViet": "cá",
+      "meaningVi": "(lượng từ chung)",
+      "example": {
+        "hanzi": "一个朋友",
+        "pinyin": "yí ge péngyou",
+        "meaningVi": "một người bạn"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "jin-tian",
+      "hanzi": "今天",
+      "pinyin": "jīntiān",
+      "hanViet": "kim thiên",
+      "meaningVi": "hôm nay",
+      "example": {
+        "hanzi": "今天我去学校。",
+        "pinyin": "Jīntiān wǒ qù xuéxiào.",
+        "meaningVi": "Hôm nay tôi đi học."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "ming-tian",
+      "hanzi": "明天",
+      "pinyin": "míngtiān",
+      "hanViet": "minh thiên",
+      "meaningVi": "ngày mai",
+      "example": {
+        "hanzi": "明天是星期二。",
+        "pinyin": "Míngtiān shì xīngqī èr.",
+        "meaningVi": "Ngày mai là thứ Ba."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "zuo-tian",
+      "hanzi": "昨天",
+      "pinyin": "zuótiān",
+      "hanViet": "tạc thiên",
+      "meaningVi": "hôm qua",
+      "example": {
+        "hanzi": "昨天我在家。",
+        "pinyin": "Zuótiān wǒ zài jiā.",
+        "meaningVi": "Hôm qua tôi ở nhà."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "xian-zai",
+      "hanzi": "现在",
+      "pinyin": "xiànzài",
+      "hanViet": "hiện tại",
+      "meaningVi": "bây giờ; hiện tại",
+      "example": {
+        "hanzi": "现在几点？",
+        "pinyin": "Xiànzài jǐ diǎn?",
+        "meaningVi": "Bây giờ là mấy giờ?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "shang-wu",
+      "hanzi": "上午",
+      "pinyin": "shàngwǔ",
+      "hanViet": "thượng ngọ",
+      "meaningVi": "buổi sáng (khoảng 8–12 giờ)",
+      "example": {
+        "hanzi": "上午我学习汉语。",
+        "pinyin": "Shàngwǔ wǒ xuéxí Hànyǔ.",
+        "meaningVi": "Buổi sáng tôi học tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "zhong-wu",
+      "hanzi": "中午",
+      "pinyin": "zhōngwǔ",
+      "hanViet": "trung ngọ",
+      "meaningVi": "buổi trưa",
+      "example": {
+        "hanzi": "中午我们吃米饭。",
+        "pinyin": "Zhōngwǔ wǒmen chī mǐfàn.",
+        "meaningVi": "Buổi trưa chúng tôi ăn cơm."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "xia-wu",
+      "hanzi": "下午",
+      "pinyin": "xiàwǔ",
+      "hanViet": "hạ ngọ",
+      "meaningVi": "buổi chiều",
+      "example": {
+        "hanzi": "下午三点见。",
+        "pinyin": "Xiàwǔ sān diǎn jiàn.",
+        "meaningVi": "Ba giờ chiều gặp nhé."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "wan-shang",
+      "hanzi": "晚上",
+      "pinyin": "wǎnshang",
+      "hanViet": "vãn thượng",
+      "meaningVi": "buổi tối",
+      "example": {
+        "hanzi": "晚上八点。",
+        "pinyin": "Wǎnshang bā diǎn.",
+        "meaningVi": "Tám giờ tối."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "dian",
+      "hanzi": "点",
+      "pinyin": "diǎn",
+      "hanViet": "điểm",
+      "meaningVi": "giờ (đơn vị xem giờ)",
+      "example": {
+        "hanzi": "现在八点。",
+        "pinyin": "Xiànzài bā diǎn.",
+        "meaningVi": "Bây giờ là tám giờ."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "fen-zhong",
+      "hanzi": "分钟",
+      "pinyin": "fēnzhōng",
+      "hanViet": "phân chung",
+      "meaningVi": "phút",
+      "example": {
+        "hanzi": "我等你十分钟。",
+        "pinyin": "Wǒ děng nǐ shí fēnzhōng.",
+        "meaningVi": "Tôi đợi bạn mười phút."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-time-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Thời gian trong ngày",
+      "id": "xing-qi",
+      "hanzi": "星期",
+      "pinyin": "xīngqī",
+      "hanViet": "tinh kỳ",
+      "meaningVi": "tuần; thứ (trong tuần)",
+      "example": {
+        "hanzi": "星期一我有课。",
+        "pinyin": "Xīngqīyī wǒ yǒu kè.",
+        "meaningVi": "Thứ Hai tôi có tiết học."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "xue-xiao",
+      "hanzi": "学校",
+      "pinyin": "xuéxiào",
+      "hanViet": "học hiệu",
+      "meaningVi": "trường học",
+      "example": {
+        "hanzi": "我在学校学习汉语。",
+        "pinyin": "Wǒ zài xuéxiào xuéxí hànyǔ.",
+        "meaningVi": "Tôi học tiếng Trung ở trường."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "han-yu",
+      "hanzi": "汉语",
+      "pinyin": "Hànyǔ",
+      "hanViet": "Hán ngữ",
+      "meaningVi": "tiếng Trung",
+      "example": {
+        "hanzi": "我会说汉语。",
+        "pinyin": "Wǒ huì shuō hànyǔ.",
+        "meaningVi": "Tôi biết nói tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "ke",
+      "hanzi": "课",
+      "pinyin": "kè",
+      "hanViet": "khóa",
+      "meaningVi": "tiết học; bài học",
+      "example": {
+        "hanzi": "今天我有汉语课。",
+        "pinyin": "Jīntiān wǒ yǒu hànyǔ kè.",
+        "meaningVi": "Hôm nay tôi có tiết tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "shu",
+      "hanzi": "书",
+      "pinyin": "shū",
+      "hanViet": "thư",
+      "meaningVi": "sách",
+      "example": {
+        "hanzi": "这是我的书。",
+        "pinyin": "Zhè shì wǒ de shū.",
+        "meaningVi": "Đây là sách của tôi."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "ming-zi",
+      "hanzi": "名字",
+      "pinyin": "míngzi",
+      "hanViet": "danh tự",
+      "meaningVi": "tên",
+      "example": {
+        "hanzi": "你的名字是什么？",
+        "pinyin": "Nǐ de míngzi shì shénme?",
+        "meaningVi": "Tên bạn là gì?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "jiao",
+      "hanzi": "叫",
+      "pinyin": "jiào",
+      "hanViet": "khiếu",
+      "meaningVi": "tên là; gọi",
+      "example": {
+        "hanzi": "我叫小明。",
+        "pinyin": "Wǒ jiào Xiǎomíng.",
+        "meaningVi": "Tôi tên là Tiểu Minh."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "shui",
+      "hanzi": "谁",
+      "pinyin": "shéi",
+      "hanViet": "thùy",
+      "meaningVi": "ai",
+      "example": {
+        "hanzi": "谁是你的老师？",
+        "pinyin": "Shéi shì nǐ de lǎoshī?",
+        "meaningVi": "Ai là giáo viên của bạn?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "tong-xue",
+      "hanzi": "同学",
+      "pinyin": "tóngxué",
+      "hanViet": "đồng học",
+      "meaningVi": "bạn học",
+      "example": {
+        "hanzi": "他是我的同学。",
+        "pinyin": "Tā shì wǒ de tóngxué.",
+        "meaningVi": "Anh ấy là bạn học của tôi."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "peng-you",
+      "hanzi": "朋友",
+      "pinyin": "péngyou",
+      "hanViet": "bằng hữu",
+      "meaningVi": "bạn bè; bạn",
+      "example": {
+        "hanzi": "她是我的朋友。",
+        "pinyin": "Tā shì wǒ de péngyou.",
+        "meaningVi": "Cô ấy là bạn của tôi."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-school-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Ở trường",
+      "id": "xian-sheng",
+      "hanzi": "先生",
+      "pinyin": "xiānsheng",
+      "hanViet": "tiên sinh",
+      "meaningVi": "ông; ngài (cách xưng hô lịch sự)",
+      "example": {
+        "hanzi": "王先生是老师。",
+        "pinyin": "Wáng xiānsheng shì lǎoshī.",
+        "meaningVi": "Thầy Vương là giáo viên."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "zhong-guo",
+      "hanzi": "中国",
+      "pinyin": "Zhōngguó",
+      "hanViet": "Trung Quốc",
+      "meaningVi": "Trung Quốc",
+      "example": {
+        "hanzi": "我是中国人。",
+        "pinyin": "Wǒ shì Zhōngguó rén.",
+        "meaningVi": "Tôi là người Trung Quốc."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "bei-jing",
+      "hanzi": "北京",
+      "pinyin": "Běijīng",
+      "hanViet": "Bắc Kinh",
+      "meaningVi": "Bắc Kinh",
+      "example": {
+        "hanzi": "我住在北京。",
+        "pinyin": "Wǒ zhù zài Běijīng.",
+        "meaningVi": "Tôi sống ở Bắc Kinh."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "zher",
+      "hanzi": "这儿",
+      "pinyin": "zhèr",
+      "hanViet": "giá nhi",
+      "meaningVi": "ở đây",
+      "example": {
+        "hanzi": "我的书在这儿。",
+        "pinyin": "Wǒ de shū zài zhèr.",
+        "meaningVi": "Sách của tôi ở đây."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "nar",
+      "hanzi": "那儿",
+      "pinyin": "nàr",
+      "hanViet": "na nhi",
+      "meaningVi": "ở kia; ở đó",
+      "example": {
+        "hanzi": "学校在那儿。",
+        "pinyin": "Xuéxiào zài nàr.",
+        "meaningVi": "Trường học ở đằng kia."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "nar-question",
+      "hanzi": "哪儿",
+      "pinyin": "nǎr",
+      "hanViet": "nả nhi",
+      "meaningVi": "ở đâu",
+      "example": {
+        "hanzi": "你住在哪儿？",
+        "pinyin": "Nǐ zhù zài nǎr?",
+        "meaningVi": "Bạn sống ở đâu?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "lai",
+      "hanzi": "来",
+      "pinyin": "lái",
+      "hanViet": "lai",
+      "meaningVi": "đến; tới",
+      "example": {
+        "hanzi": "他明天来学校。",
+        "pinyin": "Tā míngtiān lái xuéxiào.",
+        "meaningVi": "Ngày mai anh ấy đến trường."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "qu",
+      "hanzi": "去",
+      "pinyin": "qù",
+      "hanViet": "khứ",
+      "meaningVi": "đi",
+      "example": {
+        "hanzi": "我去中国。",
+        "pinyin": "Wǒ qù Zhōngguó.",
+        "meaningVi": "Tôi đi Trung Quốc."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "zai",
+      "hanzi": "在",
+      "pinyin": "zài",
+      "hanViet": "tại",
+      "meaningVi": "ở; tại",
+      "example": {
+        "hanzi": "老师在学校。",
+        "pinyin": "Lǎoshī zài xuéxiào.",
+        "meaningVi": "Giáo viên ở trường."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "zhu",
+      "hanzi": "住",
+      "pinyin": "zhù",
+      "hanViet": "trú",
+      "meaningVi": "sống; cư trú",
+      "example": {
+        "hanzi": "我住在这儿。",
+        "pinyin": "Wǒ zhù zài zhèr.",
+        "meaningVi": "Tôi sống ở đây."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-places-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Địa điểm và nơi chốn",
+      "id": "li",
+      "hanzi": "里",
+      "pinyin": "lǐ",
+      "hanViet": "lý",
+      "meaningVi": "trong; bên trong",
+      "example": {
+        "hanzi": "我在家里。",
+        "pinyin": "Wǒ zài jiālǐ.",
+        "meaningVi": "Tôi ở trong nhà."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "chi",
+      "hanzi": "吃",
+      "pinyin": "chī",
+      "hanViet": "thực",
+      "meaningVi": "ăn",
+      "example": {
+        "hanzi": "我喜欢吃米饭。",
+        "pinyin": "Wǒ xǐhuan chī mǐfàn.",
+        "meaningVi": "Tôi thích ăn cơm."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "he",
+      "hanzi": "喝",
+      "pinyin": "hē",
+      "hanViet": "hát",
+      "meaningVi": "uống",
+      "example": {
+        "hanzi": "你喝水吗？",
+        "pinyin": "Nǐ hē shuǐ ma?",
+        "meaningVi": "Bạn uống nước không?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "kan",
+      "hanzi": "看",
+      "pinyin": "kàn",
+      "hanViet": "khán",
+      "meaningVi": "xem; nhìn; đọc",
+      "example": {
+        "hanzi": "我晚上看书。",
+        "pinyin": "Wǒ wǎnshang kàn shū.",
+        "meaningVi": "Buổi tối tôi đọc sách."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "ting",
+      "hanzi": "听",
+      "pinyin": "tīng",
+      "hanViet": "thính",
+      "meaningVi": "nghe",
+      "example": {
+        "hanzi": "我听老师说汉语。",
+        "pinyin": "Wǒ tīng lǎoshī shuō hànyǔ.",
+        "meaningVi": "Tôi nghe giáo viên nói tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "shuo",
+      "hanzi": "说",
+      "pinyin": "shuō",
+      "hanViet": "thuyết",
+      "meaningVi": "nói",
+      "example": {
+        "hanzi": "他会说汉语。",
+        "pinyin": "Tā huì shuō hànyǔ.",
+        "meaningVi": "Anh ấy biết nói tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "du",
+      "hanzi": "读",
+      "pinyin": "dú",
+      "hanViet": "độc",
+      "meaningVi": "đọc",
+      "example": {
+        "hanzi": "我读这本书。",
+        "pinyin": "Wǒ dú zhè běn shū.",
+        "meaningVi": "Tôi đọc quyển sách này."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "xie",
+      "hanzi": "写",
+      "pinyin": "xiě",
+      "hanViet": "tả",
+      "meaningVi": "viết",
+      "example": {
+        "hanzi": "请写你的名字。",
+        "pinyin": "Qǐng xiě nǐ de míngzi.",
+        "meaningVi": "Xin hãy viết tên của bạn."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "zuo",
+      "hanzi": "做",
+      "pinyin": "zuò",
+      "hanViet": "tố",
+      "meaningVi": "làm",
+      "example": {
+        "hanzi": "你在做什么？",
+        "pinyin": "Nǐ zài zuò shénme?",
+        "meaningVi": "Bạn đang làm gì?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "mai",
+      "hanzi": "买",
+      "pinyin": "mǎi",
+      "hanViet": "mãi",
+      "meaningVi": "mua",
+      "example": {
+        "hanzi": "我想买一本书。",
+        "pinyin": "Wǒ xiǎng mǎi yì běn shū.",
+        "meaningVi": "Tôi muốn mua một quyển sách."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-daily-actions-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Hoạt động hằng ngày",
+      "id": "shui-jiao",
+      "hanzi": "睡觉",
+      "pinyin": "shuìjiào",
+      "hanViet": "thụy giác",
+      "meaningVi": "ngủ",
+      "example": {
+        "hanzi": "我晚上十点睡觉。",
+        "pinyin": "Wǒ wǎnshang shí diǎn shuìjiào.",
+        "meaningVi": "Buổi tối mười giờ tôi đi ngủ."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "mi-fan",
+      "hanzi": "米饭",
+      "pinyin": "mǐfàn",
+      "hanViet": "mễ phạn",
+      "meaningVi": "cơm",
+      "example": {
+        "hanzi": "我中午吃米饭。",
+        "pinyin": "Wǒ zhōngwǔ chī mǐfàn.",
+        "meaningVi": "Buổi trưa tôi ăn cơm."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "shui-water",
+      "hanzi": "水",
+      "pinyin": "shuǐ",
+      "hanViet": "thủy",
+      "meaningVi": "nước",
+      "example": {
+        "hanzi": "请喝水。",
+        "pinyin": "Qǐng hē shuǐ.",
+        "meaningVi": "Mời uống nước."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "cha",
+      "hanzi": "茶",
+      "pinyin": "chá",
+      "hanViet": "trà",
+      "meaningVi": "trà",
+      "example": {
+        "hanzi": "爸爸喜欢喝茶。",
+        "pinyin": "Bàba xǐhuan hē chá.",
+        "meaningVi": "Bố thích uống trà."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "ka-fei",
+      "hanzi": "咖啡",
+      "pinyin": "kāfēi",
+      "hanViet": "ca phê",
+      "meaningVi": "cà phê",
+      "example": {
+        "hanzi": "我早上喝咖啡。",
+        "pinyin": "Wǒ zǎoshang hē kāfēi.",
+        "meaningVi": "Buổi sáng tôi uống cà phê."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "ping-guo",
+      "hanzi": "苹果",
+      "pinyin": "píngguǒ",
+      "hanViet": "bình quả",
+      "meaningVi": "quả táo",
+      "example": {
+        "hanzi": "这个苹果很好吃。",
+        "pinyin": "Zhège píngguǒ hěn hǎochī.",
+        "meaningVi": "Quả táo này rất ngon."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "shui-guo",
+      "hanzi": "水果",
+      "pinyin": "shuǐguǒ",
+      "hanViet": "thủy quả",
+      "meaningVi": "trái cây",
+      "example": {
+        "hanzi": "我喜欢吃水果。",
+        "pinyin": "Wǒ xǐhuan chī shuǐguǒ.",
+        "meaningVi": "Tôi thích ăn trái cây."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "cai",
+      "hanzi": "菜",
+      "pinyin": "cài",
+      "hanViet": "thái",
+      "meaningVi": "món ăn; rau",
+      "example": {
+        "hanzi": "这个菜很好吃。",
+        "pinyin": "Zhège cài hěn hǎochī.",
+        "meaningVi": "Món này rất ngon."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "hao-chi",
+      "hanzi": "好吃",
+      "pinyin": "hǎochī",
+      "hanViet": "hảo cật",
+      "meaningVi": "ngon (đồ ăn)",
+      "example": {
+        "hanzi": "中国菜很好吃。",
+        "pinyin": "Zhōngguó cài hěn hǎochī.",
+        "meaningVi": "Món ăn Trung Quốc rất ngon."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "fan-dian",
+      "hanzi": "饭店",
+      "pinyin": "fàndiàn",
+      "hanViet": "phạn điếm",
+      "meaningVi": "nhà hàng",
+      "example": {
+        "hanzi": "我们去饭店吃饭。",
+        "pinyin": "Wǒmen qù fàndiàn chīfàn.",
+        "meaningVi": "Chúng tôi đến nhà hàng ăn cơm."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-food-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Đồ ăn và thức uống",
+      "id": "bei-zi",
+      "hanzi": "杯子",
+      "pinyin": "bēizi",
+      "hanViet": "bôi tử",
+      "meaningVi": "cái cốc; cái ly",
+      "example": {
+        "hanzi": "杯子里有水。",
+        "pinyin": "Bēizi lǐ yǒu shuǐ.",
+        "meaningVi": "Trong cốc có nước."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "qian",
+      "hanzi": "钱",
+      "pinyin": "qián",
+      "hanViet": "tiền",
+      "meaningVi": "tiền",
+      "example": {
+        "hanzi": "这个多少钱？",
+        "pinyin": "Zhège duōshao qián?",
+        "meaningVi": "Cái này bao nhiêu tiền?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "kuai",
+      "hanzi": "块",
+      "pinyin": "kuài",
+      "hanViet": "khối",
+      "meaningVi": "đồng; tệ (khẩu ngữ, đơn vị tiền)",
+      "example": {
+        "hanzi": "这个苹果三块钱。",
+        "pinyin": "Zhège píngguǒ sān kuài qián.",
+        "meaningVi": "Quả táo này giá ba tệ."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "gui",
+      "hanzi": "贵",
+      "pinyin": "guì",
+      "hanViet": "quý",
+      "meaningVi": "đắt",
+      "example": {
+        "hanzi": "这件衣服很贵。",
+        "pinyin": "Zhè jiàn yīfu hěn guì.",
+        "meaningVi": "Bộ quần áo này rất đắt."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "pian-yi",
+      "hanzi": "便宜",
+      "pinyin": "piányi",
+      "hanViet": "tiện nghi",
+      "meaningVi": "rẻ",
+      "example": {
+        "hanzi": "那家商店的水果很便宜。",
+        "pinyin": "Nà jiā shāngdiàn de shuǐguǒ hěn piányi.",
+        "meaningVi": "Trái cây ở cửa hàng kia rất rẻ."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "shang-dian",
+      "hanzi": "商店",
+      "pinyin": "shāngdiàn",
+      "hanViet": "thương điếm",
+      "meaningVi": "cửa hàng",
+      "example": {
+        "hanzi": "我去商店买东西。",
+        "pinyin": "Wǒ qù shāngdiàn mǎi dōngxi.",
+        "meaningVi": "Tôi đến cửa hàng mua đồ."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "yi-fu",
+      "hanzi": "衣服",
+      "pinyin": "yīfu",
+      "hanViet": "y phục",
+      "meaningVi": "quần áo",
+      "example": {
+        "hanzi": "我想买衣服。",
+        "pinyin": "Wǒ xiǎng mǎi yīfu.",
+        "meaningVi": "Tôi muốn mua quần áo."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "jian",
+      "hanzi": "件",
+      "pinyin": "jiàn",
+      "hanViet": "kiện",
+      "meaningVi": "lượng từ cho quần áo và sự việc",
+      "example": {
+        "hanzi": "我买了一件衣服。",
+        "pinyin": "Wǒ mǎi le yí jiàn yīfu.",
+        "meaningVi": "Tôi đã mua một bộ quần áo."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "duo-shao",
+      "hanzi": "多少",
+      "pinyin": "duōshao",
+      "hanViet": "đa thiểu",
+      "meaningVi": "bao nhiêu",
+      "example": {
+        "hanzi": "这本书多少钱？",
+        "pinyin": "Zhè běn shū duōshao qián?",
+        "meaningVi": "Quyển sách này bao nhiêu tiền?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "yan-se",
+      "hanzi": "颜色",
+      "pinyin": "yánsè",
+      "hanViet": "nhan sắc",
+      "meaningVi": "màu sắc",
+      "example": {
+        "hanzi": "你喜欢什么颜色？",
+        "pinyin": "Nǐ xǐhuan shénme yánsè?",
+        "meaningVi": "Bạn thích màu gì?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-shopping-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Mua sắm và giá cả",
+      "id": "hong-se",
+      "hanzi": "红色",
+      "pinyin": "hóngsè",
+      "hanViet": "hồng sắc",
+      "meaningVi": "màu đỏ",
+      "example": {
+        "hanzi": "我想买红色的衣服。",
+        "pinyin": "Wǒ xiǎng mǎi hóngsè de yīfu.",
+        "meaningVi": "Tôi muốn mua quần áo màu đỏ."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "che",
+      "hanzi": "车",
+      "pinyin": "chē",
+      "hanViet": "xa",
+      "meaningVi": "xe",
+      "example": {
+        "hanzi": "我坐车去学校。",
+        "pinyin": "Wǒ zuò chē qù xuéxiào.",
+        "meaningVi": "Tôi đi xe đến trường."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "huo-che",
+      "hanzi": "火车",
+      "pinyin": "huǒchē",
+      "hanViet": "hỏa xa",
+      "meaningVi": "tàu hỏa",
+      "example": {
+        "hanzi": "我坐火车去北京。",
+        "pinyin": "Wǒ zuò huǒchē qù Běijīng.",
+        "meaningVi": "Tôi đi tàu hỏa đến Bắc Kinh."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "fei-ji",
+      "hanzi": "飞机",
+      "pinyin": "fēijī",
+      "hanViet": "phi cơ",
+      "meaningVi": "máy bay",
+      "example": {
+        "hanzi": "他坐飞机来中国。",
+        "pinyin": "Tā zuò fēijī lái Zhōngguó.",
+        "meaningVi": "Anh ấy đi máy bay đến Trung Quốc."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "ji-chang",
+      "hanzi": "机场",
+      "pinyin": "jīchǎng",
+      "hanViet": "cơ trường",
+      "meaningVi": "sân bay",
+      "example": {
+        "hanzi": "我爸爸在机场。",
+        "pinyin": "Wǒ bàba zài jīchǎng.",
+        "meaningVi": "Bố tôi đang ở sân bay."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "chu-zu-che",
+      "hanzi": "出租车",
+      "pinyin": "chūzūchē",
+      "hanViet": "xuất tô xa",
+      "meaningVi": "taxi",
+      "example": {
+        "hanzi": "我们坐出租车去饭店。",
+        "pinyin": "Wǒmen zuò chūzūchē qù fàndiàn.",
+        "meaningVi": "Chúng tôi đi taxi đến nhà hàng."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "zou",
+      "hanzi": "走",
+      "pinyin": "zǒu",
+      "hanViet": "tẩu",
+      "meaningVi": "đi bộ; đi",
+      "example": {
+        "hanzi": "我走路去学校。",
+        "pinyin": "Wǒ zǒulù qù xuéxiào.",
+        "meaningVi": "Tôi đi bộ đến trường."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "lu",
+      "hanzi": "路",
+      "pinyin": "lù",
+      "hanViet": "lộ",
+      "meaningVi": "đường",
+      "example": {
+        "hanzi": "这条路很长。",
+        "pinyin": "Zhè tiáo lù hěn cháng.",
+        "meaningVi": "Con đường này rất dài."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "yuan",
+      "hanzi": "远",
+      "pinyin": "yuǎn",
+      "hanViet": "viễn",
+      "meaningVi": "xa",
+      "example": {
+        "hanzi": "机场很远。",
+        "pinyin": "Jīchǎng hěn yuǎn.",
+        "meaningVi": "Sân bay rất xa."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "jin",
+      "hanzi": "近",
+      "pinyin": "jìn",
+      "hanViet": "cận",
+      "meaningVi": "gần",
+      "example": {
+        "hanzi": "学校离我家很近。",
+        "pinyin": "Xuéxiào lí wǒ jiā hěn jìn.",
+        "meaningVi": "Trường học rất gần nhà tôi."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-transport-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Đi lại và phương tiện",
+      "id": "dao",
+      "hanzi": "到",
+      "pinyin": "dào",
+      "hanViet": "đáo",
+      "meaningVi": "đến; tới",
+      "example": {
+        "hanzi": "火车几点到？",
+        "pinyin": "Huǒchē jǐ diǎn dào?",
+        "meaningVi": "Tàu hỏa đến lúc mấy giờ?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "tian-qi",
+      "hanzi": "天气",
+      "pinyin": "tiānqì",
+      "hanViet": "thiên khí",
+      "meaningVi": "thời tiết",
+      "example": {
+        "hanzi": "今天天气很好。",
+        "pinyin": "Jīntiān tiānqì hěn hǎo.",
+        "meaningVi": "Hôm nay thời tiết rất đẹp."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "xia-yu",
+      "hanzi": "下雨",
+      "pinyin": "xiàyǔ",
+      "hanViet": "hạ vũ",
+      "meaningVi": "mưa; trời mưa",
+      "example": {
+        "hanzi": "今天下午下雨。",
+        "pinyin": "Jīntiān xiàwǔ xiàyǔ.",
+        "meaningVi": "Chiều nay trời mưa."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "xue-snow",
+      "hanzi": "雪",
+      "pinyin": "xuě",
+      "hanViet": "tuyết",
+      "meaningVi": "tuyết",
+      "example": {
+        "hanzi": "北京冬天有雪。",
+        "pinyin": "Běijīng dōngtiān yǒu xuě.",
+        "meaningVi": "Mùa đông ở Bắc Kinh có tuyết."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "leng",
+      "hanzi": "冷",
+      "pinyin": "lěng",
+      "hanViet": "lãnh",
+      "meaningVi": "lạnh",
+      "example": {
+        "hanzi": "今天很冷。",
+        "pinyin": "Jīntiān hěn lěng.",
+        "meaningVi": "Hôm nay trời rất lạnh."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "re",
+      "hanzi": "热",
+      "pinyin": "rè",
+      "hanViet": "nhiệt",
+      "meaningVi": "nóng",
+      "example": {
+        "hanzi": "夏天很热。",
+        "pinyin": "Xiàtiān hěn rè.",
+        "meaningVi": "Mùa hè rất nóng."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "feng",
+      "hanzi": "风",
+      "pinyin": "fēng",
+      "hanViet": "phong",
+      "meaningVi": "gió",
+      "example": {
+        "hanzi": "今天有风。",
+        "pinyin": "Jīntiān yǒu fēng.",
+        "meaningVi": "Hôm nay có gió."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "yun",
+      "hanzi": "云",
+      "pinyin": "yún",
+      "hanViet": "vân",
+      "meaningVi": "mây",
+      "example": {
+        "hanzi": "天上有很多云。",
+        "pinyin": "Tiānshang yǒu hěn duō yún.",
+        "meaningVi": "Trên trời có nhiều mây."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "tai-yang",
+      "hanzi": "太阳",
+      "pinyin": "tàiyáng",
+      "hanViet": "thái dương",
+      "meaningVi": "mặt trời",
+      "example": {
+        "hanzi": "太阳出来了。",
+        "pinyin": "Tàiyáng chūlai le.",
+        "meaningVi": "Mặt trời đã ló dạng."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "hua",
+      "hanzi": "花",
+      "pinyin": "huā",
+      "hanViet": "hoa",
+      "meaningVi": "hoa",
+      "example": {
+        "hanzi": "我喜欢红色的花。",
+        "pinyin": "Wǒ xǐhuan hóngsè de huā.",
+        "meaningVi": "Tôi thích hoa màu đỏ."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-weather-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Thời tiết và thiên nhiên",
+      "id": "shu-tree",
+      "hanzi": "树",
+      "pinyin": "shù",
+      "hanViet": "thụ",
+      "meaningVi": "cây",
+      "example": {
+        "hanzi": "学校里有很多树。",
+        "pinyin": "Xuéxiào lǐ yǒu hěn duō shù.",
+        "meaningVi": "Trong trường có nhiều cây."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "shen-ti",
+      "hanzi": "身体",
+      "pinyin": "shēntǐ",
+      "hanViet": "thân thể",
+      "meaningVi": "cơ thể; sức khỏe",
+      "example": {
+        "hanzi": "你的身体好吗？",
+        "pinyin": "Nǐ de shēntǐ hǎo ma?",
+        "meaningVi": "Sức khỏe của bạn có tốt không?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "yan-jing",
+      "hanzi": "眼睛",
+      "pinyin": "yǎnjing",
+      "hanViet": "nhãn tinh",
+      "meaningVi": "mắt",
+      "example": {
+        "hanzi": "她的眼睛很大。",
+        "pinyin": "Tā de yǎnjing hěn dà.",
+        "meaningVi": "Mắt cô ấy rất to."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "tou",
+      "hanzi": "头",
+      "pinyin": "tóu",
+      "hanViet": "đầu",
+      "meaningVi": "đầu",
+      "example": {
+        "hanzi": "我的头有点儿疼。",
+        "pinyin": "Wǒ de tóu yǒudiǎnr téng.",
+        "meaningVi": "Đầu tôi hơi đau."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "shou",
+      "hanzi": "手",
+      "pinyin": "shǒu",
+      "hanViet": "thủ",
+      "meaningVi": "tay; bàn tay",
+      "example": {
+        "hanzi": "请洗手。",
+        "pinyin": "Qǐng xǐ shǒu.",
+        "meaningVi": "Xin hãy rửa tay."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "yi-sheng",
+      "hanzi": "医生",
+      "pinyin": "yīshēng",
+      "hanViet": "y sinh",
+      "meaningVi": "bác sĩ",
+      "example": {
+        "hanzi": "她是医生。",
+        "pinyin": "Tā shì yīshēng.",
+        "meaningVi": "Cô ấy là bác sĩ."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "yi-yuan",
+      "hanzi": "医院",
+      "pinyin": "yīyuàn",
+      "hanViet": "y viện",
+      "meaningVi": "bệnh viện",
+      "example": {
+        "hanzi": "我去医院看医生。",
+        "pinyin": "Wǒ qù yīyuàn kàn yīshēng.",
+        "meaningVi": "Tôi đến bệnh viện khám bác sĩ."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "sheng-bing",
+      "hanzi": "生病",
+      "pinyin": "shēngbìng",
+      "hanViet": "sinh bệnh",
+      "meaningVi": "bị ốm; mắc bệnh",
+      "example": {
+        "hanzi": "我今天生病了。",
+        "pinyin": "Wǒ jīntiān shēngbìng le.",
+        "meaningVi": "Hôm nay tôi bị ốm."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "yao",
+      "hanzi": "药",
+      "pinyin": "yào",
+      "hanViet": "dược",
+      "meaningVi": "thuốc",
+      "example": {
+        "hanzi": "医生给我药。",
+        "pinyin": "Yīshēng gěi wǒ yào.",
+        "meaningVi": "Bác sĩ đưa thuốc cho tôi."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "xiu-xi",
+      "hanzi": "休息",
+      "pinyin": "xiūxi",
+      "hanViet": "hưu tức",
+      "meaningVi": "nghỉ ngơi",
+      "example": {
+        "hanzi": "你应该多休息。",
+        "pinyin": "Nǐ yīnggāi duō xiūxi.",
+        "meaningVi": "Bạn nên nghỉ ngơi nhiều."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-health-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Cơ thể và sức khỏe",
+      "id": "teng",
+      "hanzi": "疼",
+      "pinyin": "téng",
+      "hanViet": "đằng",
+      "meaningVi": "đau",
+      "example": {
+        "hanzi": "我的手很疼。",
+        "pinyin": "Wǒ de shǒu hěn téng.",
+        "meaningVi": "Tay tôi rất đau."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "xi-huan",
+      "hanzi": "喜欢",
+      "pinyin": "xǐhuan",
+      "hanViet": "hỷ hoan",
+      "meaningVi": "thích",
+      "example": {
+        "hanzi": "我喜欢学习汉语。",
+        "pinyin": "Wǒ xǐhuan xuéxí Hànyǔ.",
+        "meaningVi": "Tôi thích học tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "xiang",
+      "hanzi": "想",
+      "pinyin": "xiǎng",
+      "hanViet": "tưởng",
+      "meaningVi": "muốn; nghĩ",
+      "example": {
+        "hanzi": "我想喝茶。",
+        "pinyin": "Wǒ xiǎng hē chá.",
+        "meaningVi": "Tôi muốn uống trà."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "hui",
+      "hanzi": "会",
+      "pinyin": "huì",
+      "hanViet": "hội",
+      "meaningVi": "biết; có thể (do đã học)",
+      "example": {
+        "hanzi": "我会说汉语。",
+        "pinyin": "Wǒ huì shuō Hànyǔ.",
+        "meaningVi": "Tôi biết nói tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "neng",
+      "hanzi": "能",
+      "pinyin": "néng",
+      "hanViet": "năng",
+      "meaningVi": "có thể; có khả năng",
+      "example": {
+        "hanzi": "你今天能来吗？",
+        "pinyin": "Nǐ jīntiān néng lái ma?",
+        "meaningVi": "Hôm nay bạn có thể đến không?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "ke-yi",
+      "hanzi": "可以",
+      "pinyin": "kěyǐ",
+      "hanViet": "khả dĩ",
+      "meaningVi": "có thể; được phép",
+      "example": {
+        "hanzi": "我可以坐这儿吗？",
+        "pinyin": "Wǒ kěyǐ zuò zhèr ma?",
+        "meaningVi": "Tôi có thể ngồi đây không?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "jue-de",
+      "hanzi": "觉得",
+      "pinyin": "juéde",
+      "hanViet": "giác đắc",
+      "meaningVi": "cảm thấy; cho rằng",
+      "example": {
+        "hanzi": "我觉得这本书很好。",
+        "pinyin": "Wǒ juéde zhè běn shū hěn hǎo.",
+        "meaningVi": "Tôi thấy quyển sách này rất hay."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "zhi-dao",
+      "hanzi": "知道",
+      "pinyin": "zhīdào",
+      "hanViet": "tri đạo",
+      "meaningVi": "biết; biết thông tin",
+      "example": {
+        "hanzi": "你知道他在哪儿吗？",
+        "pinyin": "Nǐ zhīdào tā zài nǎr ma?",
+        "meaningVi": "Bạn có biết anh ấy ở đâu không?"
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "ren-shi",
+      "hanzi": "认识",
+      "pinyin": "rènshi",
+      "hanViet": "nhận thức",
+      "meaningVi": "quen; biết (một người)",
+      "example": {
+        "hanzi": "我认识王老师。",
+        "pinyin": "Wǒ rènshi Wáng lǎoshī.",
+        "meaningVi": "Tôi quen thầy Vương."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "jie-shao",
+      "hanzi": "介绍",
+      "pinyin": "jièshào",
+      "hanViet": "giới thiệu",
+      "meaningVi": "giới thiệu",
+      "example": {
+        "hanzi": "请介绍一下你的朋友。",
+        "pinyin": "Qǐng jièshào yíxià nǐ de péngyou.",
+        "meaningVi": "Xin hãy giới thiệu một chút về bạn của bạn."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-ability-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Sở thích và khả năng",
+      "id": "xi-wang",
+      "hanzi": "希望",
+      "pinyin": "xīwàng",
+      "hanViet": "hy vọng",
+      "meaningVi": "hy vọng; mong muốn",
+      "example": {
+        "hanzi": "我希望明天有好天气。",
+        "pinyin": "Wǒ xīwàng míngtiān yǒu hǎo tiānqì.",
+        "meaningVi": "Tôi hy vọng ngày mai thời tiết đẹp."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "shang",
+      "hanzi": "上",
+      "pinyin": "shàng",
+      "hanViet": "thượng",
+      "meaningVi": "trên; lên",
+      "example": {
+        "hanzi": "书在桌子上。",
+        "pinyin": "Shū zài zhuōzi shàng.",
+        "meaningVi": "Sách ở trên bàn."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "xia",
+      "hanzi": "下",
+      "pinyin": "xià",
+      "hanViet": "hạ",
+      "meaningVi": "dưới; xuống",
+      "example": {
+        "hanzi": "猫在椅子下。",
+        "pinyin": "Māo zài yǐzi xià.",
+        "meaningVi": "Con mèo ở dưới ghế."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "qian-mian",
+      "hanzi": "前面",
+      "pinyin": "qiánmiàn",
+      "hanViet": "tiền diện",
+      "meaningVi": "phía trước",
+      "example": {
+        "hanzi": "学校前面有商店。",
+        "pinyin": "Xuéxiào qiánmiàn yǒu shāngdiàn.",
+        "meaningVi": "Phía trước trường có cửa hàng."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "hou-mian",
+      "hanzi": "后面",
+      "pinyin": "hòumiàn",
+      "hanViet": "hậu diện",
+      "meaningVi": "phía sau",
+      "example": {
+        "hanzi": "医院在饭店后面。",
+        "pinyin": "Yīyuàn zài fàndiàn hòumiàn.",
+        "meaningVi": "Bệnh viện ở phía sau nhà hàng."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "zuo-bian",
+      "hanzi": "左边",
+      "pinyin": "zuǒbian",
+      "hanViet": "tả biên",
+      "meaningVi": "bên trái",
+      "example": {
+        "hanzi": "商店在学校左边。",
+        "pinyin": "Shāngdiàn zài xuéxiào zuǒbian.",
+        "meaningVi": "Cửa hàng ở bên trái trường học."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "you-bian",
+      "hanzi": "右边",
+      "pinyin": "yòubian",
+      "hanViet": "hữu biên",
+      "meaningVi": "bên phải",
+      "example": {
+        "hanzi": "饭店在医院右边。",
+        "pinyin": "Fàndiàn zài yīyuàn yòubian.",
+        "meaningVi": "Nhà hàng ở bên phải bệnh viện."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "pang-bian",
+      "hanzi": "旁边",
+      "pinyin": "pángbiān",
+      "hanViet": "bàng biên",
+      "meaningVi": "bên cạnh",
+      "example": {
+        "hanzi": "我家旁边有学校。",
+        "pinyin": "Wǒ jiā pángbiān yǒu xuéxiào.",
+        "meaningVi": "Bên cạnh nhà tôi có trường học."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "yi-qi",
+      "hanzi": "一起",
+      "pinyin": "yìqǐ",
+      "hanViet": "nhất khởi",
+      "meaningVi": "cùng nhau",
+      "example": {
+        "hanzi": "我们一起去学校。",
+        "pinyin": "Wǒmen yìqǐ qù xuéxiào.",
+        "meaningVi": "Chúng tôi cùng nhau đến trường."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "yun-dong",
+      "hanzi": "运动",
+      "pinyin": "yùndòng",
+      "hanViet": "vận động",
+      "meaningVi": "vận động; thể thao",
+      "example": {
+        "hanzi": "我每天做运动。",
+        "pinyin": "Wǒ měitiān zuò yùndòng.",
+        "meaningVi": "Mỗi ngày tôi tập thể dục."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-directions-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Vị trí và phương hướng",
+      "id": "pao-bu",
+      "hanzi": "跑步",
+      "pinyin": "pǎobù",
+      "hanViet": "bào bộ",
+      "meaningVi": "chạy bộ",
+      "example": {
+        "hanzi": "早上我和朋友一起跑步。",
+        "pinyin": "Zǎoshang wǒ hé péngyou yìqǐ pǎobù.",
+        "meaningVi": "Buổi sáng tôi chạy bộ cùng bạn."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "fang-jian",
+      "hanzi": "房间",
+      "pinyin": "fángjiān",
+      "hanViet": "phòng gian",
+      "meaningVi": "căn phòng",
+      "example": {
+        "hanzi": "我的房间很大。",
+        "pinyin": "Wǒ de fángjiān hěn dà.",
+        "meaningVi": "Phòng của tôi rất rộng."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "zhuo-zi",
+      "hanzi": "桌子",
+      "pinyin": "zhuōzi",
+      "hanViet": "trác tử",
+      "meaningVi": "cái bàn",
+      "example": {
+        "hanzi": "书在桌子上。",
+        "pinyin": "Shū zài zhuōzi shàng.",
+        "meaningVi": "Sách ở trên bàn."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "yi-zi",
+      "hanzi": "椅子",
+      "pinyin": "yǐzi",
+      "hanViet": "ỷ tử",
+      "meaningVi": "cái ghế",
+      "example": {
+        "hanzi": "请坐在椅子上。",
+        "pinyin": "Qǐng zuò zài yǐzi shàng.",
+        "meaningVi": "Xin hãy ngồi lên ghế."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "men",
+      "hanzi": "门",
+      "pinyin": "mén",
+      "hanViet": "môn",
+      "meaningVi": "cửa",
+      "example": {
+        "hanzi": "请开门。",
+        "pinyin": "Qǐng kāi mén.",
+        "meaningVi": "Xin hãy mở cửa."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "dian-shi",
+      "hanzi": "电视",
+      "pinyin": "diànshì",
+      "hanViet": "điện thị",
+      "meaningVi": "tivi",
+      "example": {
+        "hanzi": "爸爸在看电视。",
+        "pinyin": "Bàba zài kàn diànshì.",
+        "meaningVi": "Bố đang xem tivi."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "dian-nao",
+      "hanzi": "电脑",
+      "pinyin": "diànnǎo",
+      "hanViet": "điện não",
+      "meaningVi": "máy tính",
+      "example": {
+        "hanzi": "我的电脑在房间里。",
+        "pinyin": "Wǒ de diànnǎo zài fángjiān lǐ.",
+        "meaningVi": "Máy tính của tôi ở trong phòng."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "shou-ji",
+      "hanzi": "手机",
+      "pinyin": "shǒujī",
+      "hanViet": "thủ cơ",
+      "meaningVi": "điện thoại di động",
+      "example": {
+        "hanzi": "我的手机在桌子上。",
+        "pinyin": "Wǒ de shǒujī zài zhuōzi shàng.",
+        "meaningVi": "Điện thoại của tôi ở trên bàn."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "gong-zuo",
+      "hanzi": "工作",
+      "pinyin": "gōngzuò",
+      "hanViet": "công tác",
+      "meaningVi": "công việc; làm việc",
+      "example": {
+        "hanzi": "我爸爸在医院工作。",
+        "pinyin": "Wǒ bàba zài yīyuàn gōngzuò.",
+        "meaningVi": "Bố tôi làm việc ở bệnh viện."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "mei-tian",
+      "hanzi": "每天",
+      "pinyin": "měitiān",
+      "hanViet": "mỗi thiên",
+      "meaningVi": "mỗi ngày; hằng ngày",
+      "example": {
+        "hanzi": "我每天学习汉语。",
+        "pinyin": "Wǒ měitiān xuéxí Hànyǔ.",
+        "meaningVi": "Mỗi ngày tôi học tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK1",
+      "lessonId": "hsk1-home-work-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Nhà cửa và công việc",
+      "id": "shi-qing",
+      "hanzi": "事情",
+      "pinyin": "shìqing",
+      "hanViet": "sự tình",
+      "meaningVi": "sự việc; công việc",
+      "example": {
+        "hanzi": "我有一件事情要说。",
+        "pinyin": "Wǒ yǒu yí jiàn shìqing yào shuō.",
+        "meaningVi": "Tôi có một việc muốn nói."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "ye-ye",
+      "hanzi": "爷爷",
+      "pinyin": "yéye",
+      "hanViet": "gia gia",
+      "meaningVi": "ông nội",
+      "example": {
+        "hanzi": "我爷爷今年七十岁。",
+        "pinyin": "Wǒ yéye jīnnián qīshí suì.",
+        "meaningVi": "Ông nội tôi năm nay bảy mươi tuổi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "nai-nai",
+      "hanzi": "奶奶",
+      "pinyin": "nǎinai",
+      "hanViet": "nãi nãi",
+      "meaningVi": "bà nội",
+      "example": {
+        "hanzi": "奶奶在家休息。",
+        "pinyin": "Nǎinai zài jiā xiūxi.",
+        "meaningVi": "Bà nội đang nghỉ ngơi ở nhà."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "jie-jie",
+      "hanzi": "姐姐",
+      "pinyin": "jiějie",
+      "hanViet": "tỷ tỷ",
+      "meaningVi": "chị gái",
+      "example": {
+        "hanzi": "我姐姐是医生。",
+        "pinyin": "Wǒ jiějie shì yīshēng.",
+        "meaningVi": "Chị gái tôi là bác sĩ."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "di-di",
+      "hanzi": "弟弟",
+      "pinyin": "dìdi",
+      "hanViet": "đệ đệ",
+      "meaningVi": "em trai",
+      "example": {
+        "hanzi": "弟弟喜欢跑步。",
+        "pinyin": "Dìdi xǐhuan pǎobù.",
+        "meaningVi": "Em trai thích chạy bộ."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "er-zi",
+      "hanzi": "儿子",
+      "pinyin": "érzi",
+      "hanViet": "nhi tử",
+      "meaningVi": "con trai",
+      "example": {
+        "hanzi": "他们有一个儿子。",
+        "pinyin": "Tāmen yǒu yí ge érzi.",
+        "meaningVi": "Họ có một người con trai."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "nu-er",
+      "hanzi": "女儿",
+      "pinyin": "nǚ'ér",
+      "hanViet": "nữ nhi",
+      "meaningVi": "con gái",
+      "example": {
+        "hanzi": "她女儿今年十岁。",
+        "pinyin": "Tā nǚ'ér jīnnián shí suì.",
+        "meaningVi": "Con gái cô ấy năm nay mười tuổi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "zhang-fu",
+      "hanzi": "丈夫",
+      "pinyin": "zhàngfu",
+      "hanViet": "trượng phu",
+      "meaningVi": "chồng",
+      "example": {
+        "hanzi": "她丈夫在北京工作。",
+        "pinyin": "Tā zhàngfu zài Běijīng gōngzuò.",
+        "meaningVi": "Chồng cô ấy làm việc ở Bắc Kinh."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "qi-zi",
+      "hanzi": "妻子",
+      "pinyin": "qīzi",
+      "hanViet": "thê tử",
+      "meaningVi": "vợ",
+      "example": {
+        "hanzi": "他和妻子一起去商店。",
+        "pinyin": "Tā hé qīzi yìqǐ qù shāngdiàn.",
+        "meaningVi": "Anh ấy cùng vợ đi cửa hàng."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "hai-zi",
+      "hanzi": "孩子",
+      "pinyin": "háizi",
+      "hanViet": "hài tử",
+      "meaningVi": "trẻ con; con",
+      "example": {
+        "hanzi": "孩子在房间里看书。",
+        "pinyin": "Háizi zài fángjiān lǐ kàn shū.",
+        "meaningVi": "Đứa trẻ đang đọc sách trong phòng."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-family-01",
+      "lessonOrder": 1,
+      "lessonTitle": "Gia đình và người thân",
+      "id": "da-ren",
+      "hanzi": "大人",
+      "pinyin": "dàrén",
+      "hanViet": "đại nhân",
+      "meaningVi": "người lớn",
+      "example": {
+        "hanzi": "小孩子要听大人的话。",
+        "pinyin": "Xiǎo háizi yào tīng dàrén de huà.",
+        "meaningVi": "Trẻ nhỏ cần nghe lời người lớn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "yi-qian",
+      "hanzi": "以前",
+      "pinyin": "yǐqián",
+      "hanViet": "dĩ tiền",
+      "meaningVi": "trước đây; trước kia",
+      "example": {
+        "hanzi": "我以前住在北京。",
+        "pinyin": "Wǒ yǐqián zhù zài Běijīng.",
+        "meaningVi": "Trước đây tôi sống ở Bắc Kinh."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "yi-hou",
+      "hanzi": "以后",
+      "pinyin": "yǐhòu",
+      "hanViet": "dĩ hậu",
+      "meaningVi": "sau này; sau đó",
+      "example": {
+        "hanzi": "以后我想去中国工作。",
+        "pinyin": "Yǐhòu wǒ xiǎng qù Zhōngguó gōngzuò.",
+        "meaningVi": "Sau này tôi muốn đến Trung Quốc làm việc."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "kai-shi",
+      "hanzi": "开始",
+      "pinyin": "kāishǐ",
+      "hanViet": "khai thủy",
+      "meaningVi": "bắt đầu",
+      "example": {
+        "hanzi": "电影八点开始。",
+        "pinyin": "Diànyǐng bā diǎn kāishǐ.",
+        "meaningVi": "Bộ phim bắt đầu lúc tám giờ."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "wan-finish",
+      "hanzi": "完",
+      "pinyin": "wán",
+      "hanViet": "hoàn",
+      "meaningVi": "xong; hoàn thành",
+      "example": {
+        "hanzi": "我做完作业了。",
+        "pinyin": "Wǒ zuò wán zuòyè le.",
+        "meaningVi": "Tôi làm bài tập xong rồi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "mei-nian",
+      "hanzi": "每年",
+      "pinyin": "měinián",
+      "hanViet": "mỗi niên",
+      "meaningVi": "mỗi năm; hằng năm",
+      "example": {
+        "hanzi": "我们每年去看爷爷奶奶。",
+        "pinyin": "Wǒmen měinián qù kàn yéye nǎinai.",
+        "meaningVi": "Mỗi năm chúng tôi đều đến thăm ông bà."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "yi-hui-er",
+      "hanzi": "一会儿",
+      "pinyin": "yíhuìr",
+      "hanViet": "nhất hội nhi",
+      "meaningVi": "một lát; một lúc",
+      "example": {
+        "hanzi": "请等我一会儿。",
+        "pinyin": "Qǐng děng wǒ yíhuìr.",
+        "meaningVi": "Xin đợi tôi một lát."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "ma-shang",
+      "hanzi": "马上",
+      "pinyin": "mǎshàng",
+      "hanViet": "mã thượng",
+      "meaningVi": "ngay lập tức; sắp",
+      "example": {
+        "hanzi": "我马上回来。",
+        "pinyin": "Wǒ mǎshàng huílái.",
+        "meaningVi": "Tôi sẽ quay lại ngay."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "chang-chang",
+      "hanzi": "常常",
+      "pinyin": "chángcháng",
+      "hanViet": "thường thường",
+      "meaningVi": "thường xuyên",
+      "example": {
+        "hanzi": "我常常和朋友一起运动。",
+        "pinyin": "Wǒ chángcháng hé péngyou yìqǐ yùndòng.",
+        "meaningVi": "Tôi thường tập thể thao cùng bạn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "zhong-yu",
+      "hanzi": "终于",
+      "pinyin": "zhōngyú",
+      "hanViet": "chung vu",
+      "meaningVi": "cuối cùng; rốt cuộc",
+      "example": {
+        "hanzi": "我终于找到我的手机了。",
+        "pinyin": "Wǒ zhōngyú zhǎodào wǒ de shǒujī le.",
+        "meaningVi": "Cuối cùng tôi cũng tìm thấy điện thoại."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-plans-02",
+      "lessonOrder": 2,
+      "lessonTitle": "Kế hoạch và thời gian",
+      "id": "jie-hun",
+      "hanzi": "结婚",
+      "pinyin": "jiéhūn",
+      "hanViet": "kết hôn",
+      "meaningVi": "kết hôn",
+      "example": {
+        "hanzi": "他们明年结婚。",
+        "pinyin": "Tāmen míngnián jiéhūn.",
+        "meaningVi": "Năm sau họ kết hôn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "kao-shi",
+      "hanzi": "考试",
+      "pinyin": "kǎoshì",
+      "hanViet": "khảo thí",
+      "meaningVi": "kỳ thi; thi",
+      "example": {
+        "hanzi": "明天我们有汉语考试。",
+        "pinyin": "Míngtiān wǒmen yǒu Hànyǔ kǎoshì.",
+        "meaningVi": "Ngày mai chúng tôi có bài thi tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "wen-ti",
+      "hanzi": "问题",
+      "pinyin": "wèntí",
+      "hanViet": "vấn đề",
+      "meaningVi": "câu hỏi; vấn đề",
+      "example": {
+        "hanzi": "你有什么问题吗？",
+        "pinyin": "Nǐ yǒu shénme wèntí ma?",
+        "meaningVi": "Bạn có câu hỏi nào không?"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "fu-xi",
+      "hanzi": "复习",
+      "pinyin": "fùxí",
+      "hanViet": "phục tập",
+      "meaningVi": "ôn tập",
+      "example": {
+        "hanzi": "我晚上复习今天的课。",
+        "pinyin": "Wǒ wǎnshang fùxí jīntiān de kè.",
+        "meaningVi": "Buổi tối tôi ôn bài học hôm nay."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "ren-zhen",
+      "hanzi": "认真",
+      "pinyin": "rènzhēn",
+      "hanViet": "nhận chân",
+      "meaningVi": "nghiêm túc; chăm chú",
+      "example": {
+        "hanzi": "她认真地学习汉语。",
+        "pinyin": "Tā rènzhēn de xuéxí Hànyǔ.",
+        "meaningVi": "Cô ấy học tiếng Trung rất chăm chỉ."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "nu-li",
+      "hanzi": "努力",
+      "pinyin": "nǔlì",
+      "hanViet": "nỗ lực",
+      "meaningVi": "nỗ lực; cố gắng",
+      "example": {
+        "hanzi": "他努力学习汉语。",
+        "pinyin": "Tā nǔlì xuéxí Hànyǔ.",
+        "meaningVi": "Anh ấy cố gắng học tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "ke-ben",
+      "hanzi": "课本",
+      "pinyin": "kèběn",
+      "hanViet": "khóa bản",
+      "meaningVi": "sách giáo khoa",
+      "example": {
+        "hanzi": "请打开课本。",
+        "pinyin": "Qǐng dǎkāi kèběn.",
+        "meaningVi": "Xin hãy mở sách giáo khoa."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "zuo-ye",
+      "hanzi": "作业",
+      "pinyin": "zuòyè",
+      "hanViet": "tác nghiệp",
+      "meaningVi": "bài tập về nhà",
+      "example": {
+        "hanzi": "我已经做完作业了。",
+        "pinyin": "Wǒ yǐjīng zuò wán zuòyè le.",
+        "meaningVi": "Tôi làm xong bài tập rồi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "ci-dian",
+      "hanzi": "词典",
+      "pinyin": "cídiǎn",
+      "hanViet": "từ điển",
+      "meaningVi": "từ điển",
+      "example": {
+        "hanzi": "这个词我在词典里找到了。",
+        "pinyin": "Zhège cí wǒ zài cídiǎn lǐ zhǎodào le.",
+        "meaningVi": "Tôi đã tìm thấy từ này trong từ điển."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "lian-xi",
+      "hanzi": "练习",
+      "pinyin": "liànxí",
+      "hanViet": "luyện tập",
+      "meaningVi": "luyện tập; bài luyện tập",
+      "example": {
+        "hanzi": "我们每天练习说汉语。",
+        "pinyin": "Wǒmen měitiān liànxí shuō Hànyǔ.",
+        "meaningVi": "Mỗi ngày chúng tôi luyện nói tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-study-work-03",
+      "lessonOrder": 3,
+      "lessonTitle": "Học tập và công việc",
+      "id": "ban-gong-shi",
+      "hanzi": "办公室",
+      "pinyin": "bàngōngshì",
+      "hanViet": "ban công thất",
+      "meaningVi": "văn phòng",
+      "example": {
+        "hanzi": "老师在办公室。",
+        "pinyin": "Lǎoshī zài bàngōngshì.",
+        "meaningVi": "Giáo viên ở văn phòng."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "fu-wu-yuan",
+      "hanzi": "服务员",
+      "pinyin": "fúwùyuán",
+      "hanViet": "phục vụ viên",
+      "meaningVi": "nhân viên phục vụ",
+      "example": {
+        "hanzi": "服务员，请给我菜单。",
+        "pinyin": "Fúwùyuán, qǐng gěi wǒ càidān.",
+        "meaningVi": "Nhân viên phục vụ ơi, cho tôi xin thực đơn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "cai-dan",
+      "hanzi": "菜单",
+      "pinyin": "càidān",
+      "hanViet": "thái đơn",
+      "meaningVi": "thực đơn",
+      "example": {
+        "hanzi": "请看一下菜单。",
+        "pinyin": "Qǐng kàn yíxià càidān.",
+        "meaningVi": "Xin hãy xem thực đơn một chút."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "pan-zi",
+      "hanzi": "盘子",
+      "pinyin": "pánzi",
+      "hanViet": "bàn tử",
+      "meaningVi": "cái đĩa",
+      "example": {
+        "hanzi": "桌子上有两个盘子。",
+        "pinyin": "Zhuōzi shàng yǒu liǎng ge pánzi.",
+        "meaningVi": "Trên bàn có hai cái đĩa."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "tian-sweet",
+      "hanzi": "甜",
+      "pinyin": "tián",
+      "hanViet": "điềm",
+      "meaningVi": "ngọt",
+      "example": {
+        "hanzi": "这个水果很甜。",
+        "pinyin": "Zhège shuǐguǒ hěn tián.",
+        "meaningVi": "Trái cây này rất ngọt."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "xian-salty",
+      "hanzi": "咸",
+      "pinyin": "xián",
+      "hanViet": "hàm",
+      "meaningVi": "mặn",
+      "example": {
+        "hanzi": "这个菜有一点儿咸。",
+        "pinyin": "Zhège cài yǒu yìdiǎnr xián.",
+        "meaningVi": "Món này hơi mặn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "bao",
+      "hanzi": "饱",
+      "pinyin": "bǎo",
+      "hanViet": "bão",
+      "meaningVi": "no",
+      "example": {
+        "hanzi": "我吃饱了。",
+        "pinyin": "Wǒ chī bǎo le.",
+        "meaningVi": "Tôi ăn no rồi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "yin-liao",
+      "hanzi": "饮料",
+      "pinyin": "yǐnliào",
+      "hanViet": "ẩm liệu",
+      "meaningVi": "đồ uống",
+      "example": {
+        "hanzi": "你想喝什么饮料？",
+        "pinyin": "Nǐ xiǎng hē shénme yǐnliào?",
+        "meaningVi": "Bạn muốn uống đồ uống gì?"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "kou-ke",
+      "hanzi": "口渴",
+      "pinyin": "kǒukě",
+      "hanViet": "khẩu khát",
+      "meaningVi": "khát nước",
+      "example": {
+        "hanzi": "我有点儿口渴。",
+        "pinyin": "Wǒ yǒudiǎnr kǒukě.",
+        "meaningVi": "Tôi hơi khát nước."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "xuan-ze",
+      "hanzi": "选择",
+      "pinyin": "xuǎnzé",
+      "hanViet": "tuyển trạch",
+      "meaningVi": "lựa chọn",
+      "example": {
+        "hanzi": "你可以选择一个菜。",
+        "pinyin": "Nǐ kěyǐ xuǎnzé yí ge cài.",
+        "meaningVi": "Bạn có thể chọn một món ăn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-restaurant-04",
+      "lessonOrder": 4,
+      "lessonTitle": "Gọi món ở nhà hàng",
+      "id": "xu-yao",
+      "hanzi": "需要",
+      "pinyin": "xūyào",
+      "hanViet": "nhu yếu",
+      "meaningVi": "cần; cần phải",
+      "example": {
+        "hanzi": "我们还需要一杯水。",
+        "pinyin": "Wǒmen hái xūyào yì bēi shuǐ.",
+        "meaningVi": "Chúng tôi còn cần một cốc nước."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "di-fang",
+      "hanzi": "地方",
+      "pinyin": "dìfang",
+      "hanViet": "địa phương",
+      "meaningVi": "nơi; địa điểm",
+      "example": {
+        "hanzi": "这个地方很安静。",
+        "pinyin": "Zhège dìfang hěn ānjìng.",
+        "meaningVi": "Nơi này rất yên tĩnh."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "fu-jin",
+      "hanzi": "附近",
+      "pinyin": "fùjìn",
+      "hanViet": "phụ cận",
+      "meaningVi": "gần đây; vùng lân cận",
+      "example": {
+        "hanzi": "学校附近有一个商店。",
+        "pinyin": "Xuéxiào fùjìn yǒu yí ge shāngdiàn.",
+        "meaningVi": "Gần trường học có một cửa hàng."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "zhong-jian",
+      "hanzi": "中间",
+      "pinyin": "zhōngjiān",
+      "hanViet": "trung gian",
+      "meaningVi": "ở giữa",
+      "example": {
+        "hanzi": "银行在学校和商店中间。",
+        "pinyin": "Yínháng zài xuéxiào hé shāngdiàn zhōngjiān.",
+        "meaningVi": "Ngân hàng ở giữa trường học và cửa hàng."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "dui-mian",
+      "hanzi": "对面",
+      "pinyin": "duìmiàn",
+      "hanViet": "đối diện",
+      "meaningVi": "đối diện",
+      "example": {
+        "hanzi": "我家在学校对面。",
+        "pinyin": "Wǒ jiā zài xuéxiào duìmiàn.",
+        "meaningVi": "Nhà tôi ở đối diện trường học."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "di-tu",
+      "hanzi": "地图",
+      "pinyin": "dìtú",
+      "hanViet": "địa đồ",
+      "meaningVi": "bản đồ",
+      "example": {
+        "hanzi": "请看一下地图。",
+        "pinyin": "Qǐng kàn yíxià dìtú.",
+        "meaningVi": "Xin hãy xem bản đồ một chút."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "di-tie",
+      "hanzi": "地铁",
+      "pinyin": "dìtiě",
+      "hanViet": "địa thiết",
+      "meaningVi": "tàu điện ngầm",
+      "example": {
+        "hanzi": "我坐地铁去公司。",
+        "pinyin": "Wǒ zuò dìtiě qù gōngsī.",
+        "meaningVi": "Tôi đi tàu điện ngầm đến công ty."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "gong-gong-qi-che",
+      "hanzi": "公共汽车",
+      "pinyin": "gōnggòng qìchē",
+      "hanViet": "công cộng khí xa",
+      "meaningVi": "xe buýt",
+      "example": {
+        "hanzi": "公共汽车来了。",
+        "pinyin": "Gōnggòng qìchē lái le.",
+        "meaningVi": "Xe buýt đến rồi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "lu-kou",
+      "hanzi": "路口",
+      "pinyin": "lùkǒu",
+      "hanViet": "lộ khẩu",
+      "meaningVi": "ngã đường; giao lộ",
+      "example": {
+        "hanzi": "请在前面的路口等我。",
+        "pinyin": "Qǐng zài qiánmiàn de lùkǒu děng wǒ.",
+        "meaningVi": "Xin đợi tôi ở giao lộ phía trước."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "li-distance",
+      "hanzi": "离",
+      "pinyin": "lí",
+      "hanViet": "ly",
+      "meaningVi": "cách; cách xa",
+      "example": {
+        "hanzi": "我家离学校不远。",
+        "pinyin": "Wǒ jiā lí xuéxiào bù yuǎn.",
+        "meaningVi": "Nhà tôi cách trường không xa."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-transport-05",
+      "lessonOrder": 5,
+      "lessonTitle": "Đi lại và hỏi đường",
+      "id": "zou-lu",
+      "hanzi": "走路",
+      "pinyin": "zǒulù",
+      "hanViet": "tẩu lộ",
+      "meaningVi": "đi bộ",
+      "example": {
+        "hanzi": "我每天走路去学校。",
+        "pinyin": "Wǒ měitiān zǒulù qù xuéxiào.",
+        "meaningVi": "Mỗi ngày tôi đi bộ đến trường."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "chao-shi",
+      "hanzi": "超市",
+      "pinyin": "chāoshì",
+      "hanViet": "siêu thị",
+      "meaningVi": "siêu thị",
+      "example": {
+        "hanzi": "我下午去超市买东西。",
+        "pinyin": "Wǒ xiàwǔ qù chāoshì mǎi dōngxi.",
+        "meaningVi": "Chiều nay tôi đi siêu thị mua đồ."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "shi-chang",
+      "hanzi": "市场",
+      "pinyin": "shìchǎng",
+      "hanViet": "thị trường",
+      "meaningVi": "chợ; thị trường",
+      "example": {
+        "hanzi": "这个市场很大。",
+        "pinyin": "Zhège shìchǎng hěn dà.",
+        "meaningVi": "Khu chợ này rất lớn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "mao-zi",
+      "hanzi": "帽子",
+      "pinyin": "màozi",
+      "hanViet": "mạo tử",
+      "meaningVi": "mũ",
+      "example": {
+        "hanzi": "这顶帽子很漂亮。",
+        "pinyin": "Zhè dǐng màozi hěn piàoliang.",
+        "meaningVi": "Chiếc mũ này rất đẹp."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "xie-shoes",
+      "hanzi": "鞋",
+      "pinyin": "xié",
+      "hanViet": "hài",
+      "meaningVi": "giày",
+      "example": {
+        "hanzi": "我想买一双鞋。",
+        "pinyin": "Wǒ xiǎng mǎi yì shuāng xié.",
+        "meaningVi": "Tôi muốn mua một đôi giày."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "qun-zi",
+      "hanzi": "裙子",
+      "pinyin": "qúnzi",
+      "hanViet": "quần tử",
+      "meaningVi": "váy",
+      "example": {
+        "hanzi": "她穿着一条红裙子。",
+        "pinyin": "Tā chuānzhe yì tiáo hóng qúnzi.",
+        "meaningVi": "Cô ấy đang mặc một chiếc váy đỏ."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "ku-zi",
+      "hanzi": "裤子",
+      "pinyin": "kùzi",
+      "hanViet": "khố tử",
+      "meaningVi": "quần",
+      "example": {
+        "hanzi": "这条裤子太长了。",
+        "pinyin": "Zhè tiáo kùzi tài cháng le.",
+        "meaningVi": "Chiếc quần này dài quá."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "chuan",
+      "hanzi": "穿",
+      "pinyin": "chuān",
+      "hanViet": "xuyên",
+      "meaningVi": "mặc; đi (giày)",
+      "example": {
+        "hanzi": "今天我穿蓝色的衣服。",
+        "pinyin": "Jīntiān wǒ chuān lánsè de yīfu.",
+        "meaningVi": "Hôm nay tôi mặc quần áo màu xanh."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "chang-long",
+      "hanzi": "长",
+      "pinyin": "cháng",
+      "hanViet": "trường",
+      "meaningVi": "dài",
+      "example": {
+        "hanzi": "这件衣服有一点儿长。",
+        "pinyin": "Zhè jiàn yīfu yǒu yìdiǎnr cháng.",
+        "meaningVi": "Bộ quần áo này hơi dài."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "duan",
+      "hanzi": "短",
+      "pinyin": "duǎn",
+      "hanViet": "đoản",
+      "meaningVi": "ngắn",
+      "example": {
+        "hanzi": "这条裙子太短了。",
+        "pinyin": "Zhè tiáo qúnzi tài duǎn le.",
+        "meaningVi": "Chiếc váy này ngắn quá."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-shopping-06",
+      "lessonOrder": 6,
+      "lessonTitle": "Mua sắm và quần áo",
+      "id": "shi-try",
+      "hanzi": "试",
+      "pinyin": "shì",
+      "hanViet": "thí",
+      "meaningVi": "thử",
+      "example": {
+        "hanzi": "我可以试一下这件衣服吗？",
+        "pinyin": "Wǒ kěyǐ shì yíxià zhè jiàn yīfu ma?",
+        "meaningVi": "Tôi có thể thử bộ quần áo này không?"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "mian-bao",
+      "hanzi": "面包",
+      "pinyin": "miànbāo",
+      "hanViet": "diện bao",
+      "meaningVi": "bánh mì",
+      "example": {
+        "hanzi": "早上我吃面包和鸡蛋。",
+        "pinyin": "Zǎoshang wǒ chī miànbāo hé jīdàn.",
+        "meaningVi": "Buổi sáng tôi ăn bánh mì và trứng."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "dan-gao",
+      "hanzi": "蛋糕",
+      "pinyin": "dàngāo",
+      "hanViet": "đản cao",
+      "meaningVi": "bánh ngọt; bánh kem",
+      "example": {
+        "hanzi": "这是我妈妈做的蛋糕。",
+        "pinyin": "Zhè shì wǒ māma zuò de dàngāo.",
+        "meaningVi": "Đây là bánh mẹ tôi làm."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "niu-nai",
+      "hanzi": "牛奶",
+      "pinyin": "niúnǎi",
+      "hanViet": "ngưu nãi",
+      "meaningVi": "sữa bò",
+      "example": {
+        "hanzi": "孩子每天早上喝牛奶。",
+        "pinyin": "Háizi měitiān zǎoshang hē niúnǎi.",
+        "meaningVi": "Đứa trẻ uống sữa mỗi sáng."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "ji-dan",
+      "hanzi": "鸡蛋",
+      "pinyin": "jīdàn",
+      "hanViet": "kê đản",
+      "meaningVi": "trứng gà",
+      "example": {
+        "hanzi": "桌子上有几个鸡蛋。",
+        "pinyin": "Zhuōzi shàng yǒu jǐ ge jīdàn.",
+        "meaningVi": "Trên bàn có vài quả trứng."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "xiang-jiao",
+      "hanzi": "香蕉",
+      "pinyin": "xiāngjiāo",
+      "hanViet": "hương tiêu",
+      "meaningVi": "chuối",
+      "example": {
+        "hanzi": "我想买一些香蕉。",
+        "pinyin": "Wǒ xiǎng mǎi yìxiē xiāngjiāo.",
+        "meaningVi": "Tôi muốn mua một ít chuối."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "xi-gua",
+      "hanzi": "西瓜",
+      "pinyin": "xīguā",
+      "hanViet": "tây qua",
+      "meaningVi": "dưa hấu",
+      "example": {
+        "hanzi": "夏天吃西瓜很好。",
+        "pinyin": "Xiàtiān chī xīguā hěn hǎo.",
+        "meaningVi": "Mùa hè ăn dưa hấu rất ngon."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "pu-tao",
+      "hanzi": "葡萄",
+      "pinyin": "pútao",
+      "hanViet": "bồ đào",
+      "meaningVi": "nho",
+      "example": {
+        "hanzi": "这些葡萄很甜。",
+        "pinyin": "Zhèxiē pútao hěn tián.",
+        "meaningVi": "Những quả nho này rất ngọt."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "niu-rou",
+      "hanzi": "牛肉",
+      "pinyin": "niúròu",
+      "hanViet": "ngưu nhục",
+      "meaningVi": "thịt bò",
+      "example": {
+        "hanzi": "我爸爸喜欢吃牛肉。",
+        "pinyin": "Wǒ bàba xǐhuan chī niúròu.",
+        "meaningVi": "Bố tôi thích ăn thịt bò."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "mian-tiao",
+      "hanzi": "面条",
+      "pinyin": "miàntiáo",
+      "hanViet": "diện điều",
+      "meaningVi": "mì sợi",
+      "example": {
+        "hanzi": "这家饭店的面条很好吃。",
+        "pinyin": "Zhè jiā fàndiàn de miàntiáo hěn hǎochī.",
+        "meaningVi": "Mì sợi ở nhà hàng này rất ngon."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-food-07",
+      "lessonOrder": 7,
+      "lessonTitle": "Thức ăn và bữa ăn",
+      "id": "e-hungry",
+      "hanzi": "饿",
+      "pinyin": "è",
+      "hanViet": "ngạ",
+      "meaningVi": "đói",
+      "example": {
+        "hanzi": "我现在很饿，想吃饭。",
+        "pinyin": "Wǒ xiànzài hěn è, xiǎng chīfàn.",
+        "meaningVi": "Bây giờ tôi rất đói, muốn ăn cơm."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "chun-tian",
+      "hanzi": "春天",
+      "pinyin": "chūntiān",
+      "hanViet": "xuân thiên",
+      "meaningVi": "mùa xuân",
+      "example": {
+        "hanzi": "春天的天气很好。",
+        "pinyin": "Chūntiān de tiānqì hěn hǎo.",
+        "meaningVi": "Thời tiết mùa xuân rất đẹp."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "xia-tian",
+      "hanzi": "夏天",
+      "pinyin": "xiàtiān",
+      "hanViet": "hạ thiên",
+      "meaningVi": "mùa hè",
+      "example": {
+        "hanzi": "夏天我常常吃西瓜。",
+        "pinyin": "Xiàtiān wǒ chángcháng chī xīguā.",
+        "meaningVi": "Mùa hè tôi thường ăn dưa hấu."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "qiu-tian",
+      "hanzi": "秋天",
+      "pinyin": "qiūtiān",
+      "hanViet": "thu thiên",
+      "meaningVi": "mùa thu",
+      "example": {
+        "hanzi": "秋天这里不太热。",
+        "pinyin": "Qiūtiān zhèlǐ bú tài rè.",
+        "meaningVi": "Mùa thu ở đây không nóng lắm."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "dong-tian",
+      "hanzi": "冬天",
+      "pinyin": "dōngtiān",
+      "hanViet": "đông thiên",
+      "meaningVi": "mùa đông",
+      "example": {
+        "hanzi": "冬天北京很冷。",
+        "pinyin": "Dōngtiān Běijīng hěn lěng.",
+        "meaningVi": "Mùa đông Bắc Kinh rất lạnh."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "ji-jie",
+      "hanzi": "季节",
+      "pinyin": "jìjié",
+      "hanViet": "quý tiết",
+      "meaningVi": "mùa; mùa trong năm",
+      "example": {
+        "hanzi": "你最喜欢哪个季节？",
+        "pinyin": "Nǐ zuì xǐhuan nǎ ge jìjié?",
+        "meaningVi": "Bạn thích mùa nào nhất?"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "qing-tian",
+      "hanzi": "晴天",
+      "pinyin": "qíngtiān",
+      "hanViet": "tình thiên",
+      "meaningVi": "trời nắng; ngày nắng",
+      "example": {
+        "hanzi": "明天是晴天，我们去公园吧。",
+        "pinyin": "Míngtiān shì qíngtiān, wǒmen qù gōngyuán ba.",
+        "meaningVi": "Ngày mai trời nắng, chúng ta đi công viên nhé."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "yin-tian",
+      "hanzi": "阴天",
+      "pinyin": "yīntiān",
+      "hanViet": "âm thiên",
+      "meaningVi": "trời âm u",
+      "example": {
+        "hanzi": "今天是阴天，可能要下雨。",
+        "pinyin": "Jīntiān shì yīntiān, kěnéng yào xiàyǔ.",
+        "meaningVi": "Hôm nay trời âm u, có thể sắp mưa."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "duo-yun",
+      "hanzi": "多云",
+      "pinyin": "duōyún",
+      "hanViet": "đa vân",
+      "meaningVi": "nhiều mây",
+      "example": {
+        "hanzi": "今天多云，不太冷。",
+        "pinyin": "Jīntiān duōyún, bú tài lěng.",
+        "meaningVi": "Hôm nay nhiều mây, không lạnh lắm."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "gua-feng",
+      "hanzi": "刮风",
+      "pinyin": "guāfēng",
+      "hanViet": "quát phong",
+      "meaningVi": "có gió; gió thổi",
+      "example": {
+        "hanzi": "外面刮风了。",
+        "pinyin": "Wàimiàn guāfēng le.",
+        "meaningVi": "Bên ngoài có gió rồi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-seasons-08",
+      "lessonOrder": 8,
+      "lessonTitle": "Mùa và thời tiết",
+      "id": "liang-kuai",
+      "hanzi": "凉快",
+      "pinyin": "liángkuai",
+      "hanViet": "lương khoái",
+      "meaningVi": "mát mẻ",
+      "example": {
+        "hanzi": "今天晚上很凉快。",
+        "pinyin": "Jīntiān wǎnshang hěn liángkuai.",
+        "meaningVi": "Tối nay trời rất mát."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "gan-mao",
+      "hanzi": "感冒",
+      "pinyin": "gǎnmào",
+      "hanViet": "cảm mạo",
+      "meaningVi": "cảm lạnh",
+      "example": {
+        "hanzi": "我感冒了，今天不去学校。",
+        "pinyin": "Wǒ gǎnmào le, jīntiān bú qù xuéxiào.",
+        "meaningVi": "Tôi bị cảm, hôm nay không đi học."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "fa-shao",
+      "hanzi": "发烧",
+      "pinyin": "fāshāo",
+      "hanViet": "phát thiêu",
+      "meaningVi": "bị sốt",
+      "example": {
+        "hanzi": "孩子发烧了，妈妈带他去医院。",
+        "pinyin": "Háizi fāshāo le, māma dài tā qù yīyuàn.",
+        "meaningVi": "Đứa trẻ bị sốt, mẹ đưa em đến bệnh viện."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "tou-fa",
+      "hanzi": "头发",
+      "pinyin": "tóufa",
+      "hanViet": "đầu phát",
+      "meaningVi": "tóc",
+      "example": {
+        "hanzi": "她的头发很长。",
+        "pinyin": "Tā de tóufa hěn cháng.",
+        "meaningVi": "Tóc cô ấy rất dài."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "ya-tooth",
+      "hanzi": "牙",
+      "pinyin": "yá",
+      "hanViet": "nha",
+      "meaningVi": "răng",
+      "example": {
+        "hanzi": "我的牙有一点儿疼。",
+        "pinyin": "Wǒ de yá yǒu yìdiǎnr téng.",
+        "meaningVi": "Răng tôi hơi đau."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "bing-ren",
+      "hanzi": "病人",
+      "pinyin": "bìngrén",
+      "hanViet": "bệnh nhân",
+      "meaningVi": "bệnh nhân",
+      "example": {
+        "hanzi": "医生正在看病人。",
+        "pinyin": "Yīshēng zhèngzài kàn bìngrén.",
+        "meaningVi": "Bác sĩ đang khám cho bệnh nhân."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "nan-shou",
+      "hanzi": "难受",
+      "pinyin": "nánshòu",
+      "hanViet": "nan thụ",
+      "meaningVi": "khó chịu; không khỏe",
+      "example": {
+        "hanzi": "我今天有一点儿难受。",
+        "pinyin": "Wǒ jīntiān yǒu yìdiǎnr nánshòu.",
+        "meaningVi": "Hôm nay tôi hơi khó chịu."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "yao-dian",
+      "hanzi": "药店",
+      "pinyin": "yàodiàn",
+      "hanViet": "dược điếm",
+      "meaningVi": "hiệu thuốc",
+      "example": {
+        "hanzi": "医院旁边有一个药店。",
+        "pinyin": "Yīyuàn pángbiān yǒu yí ge yàodiàn.",
+        "meaningVi": "Bên cạnh bệnh viện có một hiệu thuốc."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "hu-shi",
+      "hanzi": "护士",
+      "pinyin": "hùshi",
+      "hanViet": "hộ sĩ",
+      "meaningVi": "y tá",
+      "example": {
+        "hanzi": "护士在帮助病人。",
+        "pinyin": "Hùshi zài bāngzhù bìngrén.",
+        "meaningVi": "Y tá đang giúp bệnh nhân."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "kou-zhao",
+      "hanzi": "口罩",
+      "pinyin": "kǒuzhào",
+      "hanViet": "khẩu tráo",
+      "meaningVi": "khẩu trang",
+      "example": {
+        "hanzi": "感冒的时候要戴口罩。",
+        "pinyin": "Gǎnmào de shíhou yào dài kǒuzhào.",
+        "meaningVi": "Khi bị cảm cần đeo khẩu trang."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-health-09",
+      "lessonOrder": 9,
+      "lessonTitle": "Sức khỏe và chăm sóc",
+      "id": "zhao-gu",
+      "hanzi": "照顾",
+      "pinyin": "zhàogù",
+      "hanViet": "chiếu cố",
+      "meaningVi": "chăm sóc",
+      "example": {
+        "hanzi": "姐姐在家照顾奶奶。",
+        "pinyin": "Jiějie zài jiā zhàogù nǎinai.",
+        "meaningVi": "Chị gái ở nhà chăm sóc bà."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "jiao-shi",
+      "hanzi": "教室",
+      "pinyin": "jiàoshì",
+      "hanViet": "giáo thất",
+      "meaningVi": "phòng học",
+      "example": {
+        "hanzi": "老师在教室里等我们。",
+        "pinyin": "Lǎoshī zài jiàoshì lǐ děng wǒmen.",
+        "meaningVi": "Giáo viên đang đợi chúng tôi trong lớp."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "tu-shu-guan",
+      "hanzi": "图书馆",
+      "pinyin": "túshūguǎn",
+      "hanViet": "đồ thư quán",
+      "meaningVi": "thư viện",
+      "example": {
+        "hanzi": "我常常在图书馆看书。",
+        "pinyin": "Wǒ chángcháng zài túshūguǎn kàn shū.",
+        "meaningVi": "Tôi thường đọc sách ở thư viện."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "ju-zi",
+      "hanzi": "句子",
+      "pinyin": "jùzi",
+      "hanViet": "cú tử",
+      "meaningVi": "câu",
+      "example": {
+        "hanzi": "请读这个句子。",
+        "pinyin": "Qǐng dú zhège jùzi.",
+        "meaningVi": "Xin hãy đọc câu này."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "sheng-ci",
+      "hanzi": "生词",
+      "pinyin": "shēngcí",
+      "hanViet": "sinh từ",
+      "meaningVi": "từ mới",
+      "example": {
+        "hanzi": "我把生词写在本子上。",
+        "pinyin": "Wǒ bǎ shēngcí xiě zài běnzi shàng.",
+        "meaningVi": "Tôi viết từ mới vào vở."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "yu-fa",
+      "hanzi": "语法",
+      "pinyin": "yǔfǎ",
+      "hanViet": "ngữ pháp",
+      "meaningVi": "ngữ pháp",
+      "example": {
+        "hanzi": "这个语法不太难。",
+        "pinyin": "Zhège yǔfǎ bú tài nán.",
+        "meaningVi": "Ngữ pháp này không khó lắm."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "ke-wen",
+      "hanzi": "课文",
+      "pinyin": "kèwén",
+      "hanViet": "khóa văn",
+      "meaningVi": "bài khóa",
+      "example": {
+        "hanzi": "我们一起读课文吧。",
+        "pinyin": "Wǒmen yìqǐ dú kèwén ba.",
+        "meaningVi": "Chúng ta cùng đọc bài khóa nhé."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "ban-fa",
+      "hanzi": "办法",
+      "pinyin": "bànfǎ",
+      "hanViet": "biện pháp",
+      "meaningVi": "cách; biện pháp",
+      "example": {
+        "hanzi": "我有一个好办法。",
+        "pinyin": "Wǒ yǒu yí ge hǎo bànfǎ.",
+        "meaningVi": "Tôi có một cách hay."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "bang-zhu",
+      "hanzi": "帮助",
+      "pinyin": "bāngzhù",
+      "hanViet": "bang trợ",
+      "meaningVi": "giúp đỡ",
+      "example": {
+        "hanzi": "同学帮助我学习汉语。",
+        "pinyin": "Tóngxué bāngzhù wǒ xuéxí Hànyǔ.",
+        "meaningVi": "Bạn cùng lớp giúp tôi học tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "hui-da",
+      "hanzi": "回答",
+      "pinyin": "huídá",
+      "hanViet": "hồi đáp",
+      "meaningVi": "trả lời",
+      "example": {
+        "hanzi": "请回答老师的问题。",
+        "pinyin": "Qǐng huídá lǎoshī de wèntí.",
+        "meaningVi": "Xin hãy trả lời câu hỏi của giáo viên."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-classroom-10",
+      "lessonOrder": 10,
+      "lessonTitle": "Lớp học và ôn tập",
+      "id": "ming-bai",
+      "hanzi": "明白",
+      "pinyin": "míngbai",
+      "hanViet": "minh bạch",
+      "meaningVi": "hiểu; rõ",
+      "example": {
+        "hanzi": "我明白这个句子的意思。",
+        "pinyin": "Wǒ míngbai zhège jùzi de yìsi.",
+        "meaningVi": "Tôi hiểu nghĩa của câu này."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "lv-xing",
+      "hanzi": "旅行",
+      "pinyin": "lǚxíng",
+      "hanViet": "lữ hành",
+      "meaningVi": "du lịch; chuyến đi",
+      "example": {
+        "hanzi": "我想和朋友一起旅行。",
+        "pinyin": "Wǒ xiǎng hé péngyou yìqǐ lǚxíng.",
+        "meaningVi": "Tôi muốn đi du lịch cùng bạn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "bin-guan",
+      "hanzi": "宾馆",
+      "pinyin": "bīnguǎn",
+      "hanViet": "tân quán",
+      "meaningVi": "khách sạn",
+      "example": {
+        "hanzi": "我们晚上住在宾馆。",
+        "pinyin": "Wǒmen wǎnshang zhù zài bīnguǎn.",
+        "meaningVi": "Buổi tối chúng tôi ở khách sạn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "chu-fa",
+      "hanzi": "出发",
+      "pinyin": "chūfā",
+      "hanViet": "xuất phát",
+      "meaningVi": "khởi hành",
+      "example": {
+        "hanzi": "我们明天早上出发。",
+        "pinyin": "Wǒmen míngtiān zǎoshang chūfā.",
+        "meaningVi": "Sáng mai chúng tôi khởi hành."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "dao-da",
+      "hanzi": "到达",
+      "pinyin": "dàodá",
+      "hanViet": "đáo đạt",
+      "meaningVi": "đến nơi",
+      "example": {
+        "hanzi": "火车下午三点到达。",
+        "pinyin": "Huǒchē xiàwǔ sān diǎn dàodá.",
+        "meaningVi": "Tàu hỏa đến nơi lúc ba giờ chiều."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "xing-li",
+      "hanzi": "行李",
+      "pinyin": "xíngli",
+      "hanViet": "hành lý",
+      "meaningVi": "hành lý",
+      "example": {
+        "hanzi": "我的行李不多。",
+        "pinyin": "Wǒ de xíngli bù duō.",
+        "meaningVi": "Hành lý của tôi không nhiều."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "hu-zhao",
+      "hanzi": "护照",
+      "pinyin": "hùzhào",
+      "hanViet": "hộ chiếu",
+      "meaningVi": "hộ chiếu",
+      "example": {
+        "hanzi": "请带好你的护照。",
+        "pinyin": "Qǐng dài hǎo nǐ de hùzhào.",
+        "meaningVi": "Xin hãy mang theo hộ chiếu."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "men-piao",
+      "hanzi": "门票",
+      "pinyin": "ménpiào",
+      "hanViet": "môn phiếu",
+      "meaningVi": "vé vào cửa",
+      "example": {
+        "hanzi": "公园门票多少钱？",
+        "pinyin": "Gōngyuán ménpiào duōshao qián?",
+        "meaningVi": "Vé vào công viên bao nhiêu tiền?"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "zhao-xiang",
+      "hanzi": "照相",
+      "pinyin": "zhàoxiàng",
+      "hanViet": "chiếu tướng",
+      "meaningVi": "chụp ảnh",
+      "example": {
+        "hanzi": "我喜欢在公园照相。",
+        "pinyin": "Wǒ xǐhuan zài gōngyuán zhàoxiàng.",
+        "meaningVi": "Tôi thích chụp ảnh ở công viên."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "can-guan",
+      "hanzi": "参观",
+      "pinyin": "cānguān",
+      "hanViet": "tham quan",
+      "meaningVi": "tham quan",
+      "example": {
+        "hanzi": "我们明天去参观博物馆。",
+        "pinyin": "Wǒmen míngtiān qù cānguān bówùguǎn.",
+        "meaningVi": "Ngày mai chúng tôi đi tham quan bảo tàng."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-travel-11",
+      "lessonOrder": 11,
+      "lessonTitle": "Du lịch và tham quan",
+      "id": "dao-you",
+      "hanzi": "导游",
+      "pinyin": "dǎoyóu",
+      "hanViet": "đạo du",
+      "meaningVi": "hướng dẫn viên du lịch",
+      "example": {
+        "hanzi": "导游给我们介绍这个地方。",
+        "pinyin": "Dǎoyóu gěi wǒmen jièshào zhège dìfang.",
+        "meaningVi": "Hướng dẫn viên giới thiệu nơi này cho chúng tôi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "jian-mian",
+      "hanzi": "见面",
+      "pinyin": "jiànmiàn",
+      "hanViet": "kiến diện",
+      "meaningVi": "gặp mặt",
+      "example": {
+        "hanzi": "我们星期六见面吧。",
+        "pinyin": "Wǒmen xīngqīliù jiànmiàn ba.",
+        "meaningVi": "Chúng ta gặp nhau vào thứ Bảy nhé."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "liao-tian",
+      "hanzi": "聊天",
+      "pinyin": "liáotiān",
+      "hanViet": "liêu thiên",
+      "meaningVi": "trò chuyện",
+      "example": {
+        "hanzi": "我常常和朋友聊天。",
+        "pinyin": "Wǒ chángcháng hé péngyou liáotiān.",
+        "meaningVi": "Tôi thường trò chuyện với bạn bè."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "gao-su",
+      "hanzi": "告诉",
+      "pinyin": "gàosu",
+      "hanViet": "cáo tố",
+      "meaningVi": "nói cho biết; kể",
+      "example": {
+        "hanzi": "请告诉我你的名字。",
+        "pinyin": "Qǐng gàosu wǒ nǐ de míngzi.",
+        "meaningVi": "Xin hãy cho tôi biết tên của bạn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "ren-wei",
+      "hanzi": "认为",
+      "pinyin": "rènwéi",
+      "hanViet": "nhận vi",
+      "meaningVi": "cho rằng",
+      "example": {
+        "hanzi": "我认为这个办法很好。",
+        "pinyin": "Wǒ rènwéi zhège bànfǎ hěn hǎo.",
+        "meaningVi": "Tôi cho rằng cách này rất hay."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "tong-yi",
+      "hanzi": "同意",
+      "pinyin": "tóngyì",
+      "hanViet": "đồng ý",
+      "meaningVi": "đồng ý",
+      "example": {
+        "hanzi": "我同意你的想法。",
+        "pinyin": "Wǒ tóngyì nǐ de xiǎngfǎ.",
+        "meaningVi": "Tôi đồng ý với ý kiến của bạn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "can-jia",
+      "hanzi": "参加",
+      "pinyin": "cānjiā",
+      "hanViet": "tham gia",
+      "meaningVi": "tham gia",
+      "example": {
+        "hanzi": "她想参加学校的活动。",
+        "pinyin": "Tā xiǎng cānjiā xuéxiào de huódòng.",
+        "meaningVi": "Cô ấy muốn tham gia hoạt động của trường."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "ji-hui",
+      "hanzi": "机会",
+      "pinyin": "jīhuì",
+      "hanViet": "cơ hội",
+      "meaningVi": "cơ hội",
+      "example": {
+        "hanzi": "这是一个学习汉语的机会。",
+        "pinyin": "Zhè shì yí ge xuéxí Hànyǔ de jīhuì.",
+        "meaningVi": "Đây là một cơ hội học tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "guan-xi",
+      "hanzi": "关系",
+      "pinyin": "guānxi",
+      "hanViet": "quan hệ",
+      "meaningVi": "quan hệ; mối quan hệ",
+      "example": {
+        "hanzi": "我和他是好朋友，关系很好。",
+        "pinyin": "Wǒ hé tā shì hǎo péngyou, guānxi hěn hǎo.",
+        "meaningVi": "Tôi và anh ấy là bạn tốt, quan hệ rất thân."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "ke-ren",
+      "hanzi": "客人",
+      "pinyin": "kèrén",
+      "hanViet": "khách nhân",
+      "meaningVi": "khách",
+      "example": {
+        "hanzi": "客人已经到了。",
+        "pinyin": "Kèrén yǐjīng dào le.",
+        "meaningVi": "Khách đã đến rồi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-communication-12",
+      "lessonOrder": 12,
+      "lessonTitle": "Gặp gỡ và trò chuyện",
+      "id": "jian-dao",
+      "hanzi": "见到",
+      "pinyin": "jiàndào",
+      "hanViet": "kiến đáo",
+      "meaningVi": "gặp; nhìn thấy",
+      "example": {
+        "hanzi": "我很高兴见到你。",
+        "pinyin": "Wǒ hěn gāoxìng jiàndào nǐ.",
+        "meaningVi": "Tôi rất vui được gặp bạn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "kuai-le",
+      "hanzi": "快乐",
+      "pinyin": "kuàilè",
+      "hanViet": "khoái lạc",
+      "meaningVi": "vui vẻ",
+      "example": {
+        "hanzi": "祝你生日快乐！",
+        "pinyin": "Zhù nǐ shēngrì kuàilè!",
+        "meaningVi": "Chúc bạn sinh nhật vui vẻ!"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "nan-guo",
+      "hanzi": "难过",
+      "pinyin": "nánguò",
+      "hanViet": "nan quá",
+      "meaningVi": "buồn; khó chịu",
+      "example": {
+        "hanzi": "他今天有一点儿难过。",
+        "pinyin": "Tā jīntiān yǒu yìdiǎnr nánguò.",
+        "meaningVi": "Hôm nay anh ấy hơi buồn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "zhao-ji",
+      "hanzi": "着急",
+      "pinyin": "zháojí",
+      "hanViet": "trước cấp",
+      "meaningVi": "sốt ruột; lo lắng",
+      "example": {
+        "hanzi": "别着急，车还没来。",
+        "pinyin": "Bié zháojí, chē hái méi lái.",
+        "meaningVi": "Đừng sốt ruột, xe vẫn chưa đến."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "dan-xin",
+      "hanzi": "担心",
+      "pinyin": "dānxīn",
+      "hanViet": "đảm tâm",
+      "meaningVi": "lo lắng",
+      "example": {
+        "hanzi": "妈妈担心孩子的身体。",
+        "pinyin": "Māma dānxīn háizi de shēntǐ.",
+        "meaningVi": "Mẹ lo cho sức khỏe của đứa trẻ."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "sheng-qi",
+      "hanzi": "生气",
+      "pinyin": "shēngqì",
+      "hanViet": "sinh khí",
+      "meaningVi": "tức giận",
+      "example": {
+        "hanzi": "他没有生气，只是有一点儿累。",
+        "pinyin": "Tā méiyǒu shēngqì, zhǐshì yǒu yìdiǎnr lèi.",
+        "meaningVi": "Anh ấy không tức giận, chỉ hơi mệt."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "cong-ming",
+      "hanzi": "聪明",
+      "pinyin": "cōngming",
+      "hanViet": "thông minh",
+      "meaningVi": "thông minh",
+      "example": {
+        "hanzi": "这个孩子很聪明。",
+        "pinyin": "Zhège háizi hěn cōngming.",
+        "meaningVi": "Đứa trẻ này rất thông minh."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "ke-ai",
+      "hanzi": "可爱",
+      "pinyin": "kě'ài",
+      "hanViet": "khả ái",
+      "meaningVi": "đáng yêu",
+      "example": {
+        "hanzi": "你的小狗很可爱。",
+        "pinyin": "Nǐ de xiǎo gǒu hěn kě'ài.",
+        "meaningVi": "Chú chó nhỏ của bạn rất đáng yêu."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "piao-liang",
+      "hanzi": "漂亮",
+      "pinyin": "piàoliang",
+      "hanViet": "phiêu lượng",
+      "meaningVi": "đẹp",
+      "example": {
+        "hanzi": "这件衣服很漂亮。",
+        "pinyin": "Zhè jiàn yīfu hěn piàoliang.",
+        "meaningVi": "Bộ quần áo này rất đẹp."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "zhong-yao",
+      "hanzi": "重要",
+      "pinyin": "zhòngyào",
+      "hanViet": "trọng yếu",
+      "meaningVi": "quan trọng",
+      "example": {
+        "hanzi": "健康对每个人都很重要。",
+        "pinyin": "Jiànkāng duì měi ge rén dōu hěn zhòngyào.",
+        "meaningVi": "Sức khỏe rất quan trọng với mọi người."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-feelings-13",
+      "lessonOrder": 13,
+      "lessonTitle": "Cảm xúc và tính cách",
+      "id": "fang-bian",
+      "hanzi": "方便",
+      "pinyin": "fāngbiàn",
+      "hanViet": "phương tiện",
+      "meaningVi": "tiện; thuận tiện",
+      "example": {
+        "hanzi": "坐地铁去很方便。",
+        "pinyin": "Zuò dìtiě qù hěn fāngbiàn.",
+        "meaningVi": "Đi bằng tàu điện ngầm rất tiện."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "sui-ran",
+      "hanzi": "虽然",
+      "pinyin": "suīrán",
+      "hanViet": "tuy nhiên",
+      "meaningVi": "tuy rằng; mặc dù",
+      "example": {
+        "hanzi": "虽然今天很冷，但是我想出去。",
+        "pinyin": "Suīrán jīntiān hěn lěng, dànshì wǒ xiǎng chūqù.",
+        "meaningVi": "Tuy hôm nay rất lạnh nhưng tôi muốn ra ngoài."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "dan-shi",
+      "hanzi": "但是",
+      "pinyin": "dànshì",
+      "hanViet": "đãn thị",
+      "meaningVi": "nhưng",
+      "example": {
+        "hanzi": "我想去，但是今天没有时间。",
+        "pinyin": "Wǒ xiǎng qù, dànshì jīntiān méiyǒu shíjiān.",
+        "meaningVi": "Tôi muốn đi nhưng hôm nay không có thời gian."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "suo-yi",
+      "hanzi": "所以",
+      "pinyin": "suǒyǐ",
+      "hanViet": "sở dĩ",
+      "meaningVi": "cho nên; vì vậy",
+      "example": {
+        "hanzi": "今天下雨，所以我坐公共汽车。",
+        "pinyin": "Jīntiān xiàyǔ, suǒyǐ wǒ zuò gōnggòng qìchē.",
+        "meaningVi": "Hôm nay trời mưa nên tôi đi xe buýt."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "yin-wei",
+      "hanzi": "因为",
+      "pinyin": "yīnwèi",
+      "hanViet": "nhân vị",
+      "meaningVi": "bởi vì",
+      "example": {
+        "hanzi": "因为我很累，所以想休息。",
+        "pinyin": "Yīnwèi wǒ hěn lèi, suǒyǐ xiǎng xiūxi.",
+        "meaningVi": "Vì tôi rất mệt nên muốn nghỉ ngơi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "ru-guo",
+      "hanzi": "如果",
+      "pinyin": "rúguǒ",
+      "hanViet": "như quả",
+      "meaningVi": "nếu",
+      "example": {
+        "hanzi": "如果明天是晴天，我们就去公园。",
+        "pinyin": "Rúguǒ míngtiān shì qíngtiān, wǒmen jiù qù gōngyuán.",
+        "meaningVi": "Nếu ngày mai trời nắng thì chúng ta đi công viên."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "ran-hou",
+      "hanzi": "然后",
+      "pinyin": "ránhòu",
+      "hanViet": "nhiên hậu",
+      "meaningVi": "sau đó",
+      "example": {
+        "hanzi": "我先吃饭，然后去上课。",
+        "pinyin": "Wǒ xiān chīfàn, ránhòu qù shàngkè.",
+        "meaningVi": "Tôi ăn cơm trước, sau đó đi học."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "huo-zhe",
+      "hanzi": "或者",
+      "pinyin": "huòzhě",
+      "hanViet": "hoặc giả",
+      "meaningVi": "hoặc",
+      "example": {
+        "hanzi": "你想喝茶或者咖啡？",
+        "pinyin": "Nǐ xiǎng hē chá huòzhě kāfēi?",
+        "meaningVi": "Bạn muốn uống trà hay cà phê?"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "hai-shi",
+      "hanzi": "还是",
+      "pinyin": "háishi",
+      "hanViet": "hoàn thị",
+      "meaningVi": "hay là (trong câu hỏi lựa chọn)",
+      "example": {
+        "hanzi": "你坐地铁还是公共汽车？",
+        "pinyin": "Nǐ zuò dìtiě háishi gōnggòng qìchē?",
+        "meaningVi": "Bạn đi tàu điện ngầm hay xe buýt?"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "bi-xu",
+      "hanzi": "必须",
+      "pinyin": "bìxū",
+      "hanViet": "tất tu",
+      "meaningVi": "bắt buộc; phải",
+      "example": {
+        "hanzi": "我们必须按时到学校。",
+        "pinyin": "Wǒmen bìxū ànshí dào xuéxiào.",
+        "meaningVi": "Chúng tôi phải đến trường đúng giờ."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-connections-14",
+      "lessonOrder": 14,
+      "lessonTitle": "Nối ý và đưa lời khuyên",
+      "id": "ying-gai",
+      "hanzi": "应该",
+      "pinyin": "yīnggāi",
+      "hanViet": "ưng cai",
+      "meaningVi": "nên; cần phải",
+      "example": {
+        "hanzi": "你应该多喝水。",
+        "pinyin": "Nǐ yīnggāi duō hē shuǐ.",
+        "meaningVi": "Bạn nên uống nhiều nước."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "wang-ji",
+      "hanzi": "忘记",
+      "pinyin": "wàngjì",
+      "hanViet": "vong ký",
+      "meaningVi": "quên",
+      "example": {
+        "hanzi": "我忘记带课本了。",
+        "pinyin": "Wǒ wàngjì dài kèběn le.",
+        "meaningVi": "Tôi quên mang sách giáo khoa rồi."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "ji-de",
+      "hanzi": "记得",
+      "pinyin": "jìde",
+      "hanViet": "ký đắc",
+      "meaningVi": "nhớ",
+      "example": {
+        "hanzi": "你记得今天有考试吗？",
+        "pinyin": "Nǐ jìde jīntiān yǒu kǎoshì ma?",
+        "meaningVi": "Bạn có nhớ hôm nay có bài thi không?"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "ji-zhu",
+      "hanzi": "记住",
+      "pinyin": "jìzhù",
+      "hanViet": "ký trụ",
+      "meaningVi": "ghi nhớ",
+      "example": {
+        "hanzi": "请记住这个电话号码。",
+        "pinyin": "Qǐng jìzhù zhège diànhuà hàomǎ.",
+        "meaningVi": "Xin hãy nhớ số điện thoại này."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "dai-carry",
+      "hanzi": "带",
+      "pinyin": "dài",
+      "hanViet": "đới",
+      "meaningVi": "mang theo",
+      "example": {
+        "hanzi": "出门的时候请带上雨伞。",
+        "pinyin": "Chūmén de shíhou qǐng dài shàng yǔsǎn.",
+        "meaningVi": "Khi ra ngoài xin hãy mang theo ô."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "na",
+      "hanzi": "拿",
+      "pinyin": "ná",
+      "hanViet": "nã",
+      "meaningVi": "cầm; lấy",
+      "example": {
+        "hanzi": "请拿一本书给我。",
+        "pinyin": "Qǐng ná yì běn shū gěi wǒ.",
+        "meaningVi": "Xin lấy cho tôi một quyển sách."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "jie-borrow",
+      "hanzi": "借",
+      "pinyin": "jiè",
+      "hanViet": "tá",
+      "meaningVi": "mượn; cho mượn",
+      "example": {
+        "hanzi": "我可以借你的词典吗？",
+        "pinyin": "Wǒ kěyǐ jiè nǐ de cídiǎn ma?",
+        "meaningVi": "Tôi có thể mượn từ điển của bạn không?"
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "huan-return",
+      "hanzi": "还",
+      "pinyin": "huán",
+      "hanViet": "hoàn",
+      "meaningVi": "trả lại",
+      "example": {
+        "hanzi": "我明天把书还给你。",
+        "pinyin": "Wǒ míngtiān bǎ shū huán gěi nǐ.",
+        "meaningVi": "Ngày mai tôi trả sách cho bạn."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "song-give",
+      "hanzi": "送",
+      "pinyin": "sòng",
+      "hanViet": "tống",
+      "meaningVi": "tặng; đưa",
+      "example": {
+        "hanzi": "朋友送我一本中文书。",
+        "pinyin": "Péngyou sòng wǒ yì běn Zhōngwén shū.",
+        "meaningVi": "Bạn tặng tôi một quyển sách tiếng Trung."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "xi-zao",
+      "hanzi": "洗澡",
+      "pinyin": "xǐzǎo",
+      "hanViet": "tẩy táo",
+      "meaningVi": "tắm",
+      "example": {
+        "hanzi": "我每天晚上洗澡。",
+        "pinyin": "Wǒ měitiān wǎnshang xǐzǎo.",
+        "meaningVi": "Tối nào tôi cũng tắm."
+      }
+    },
+    {
+      "level": "HSK2",
+      "lessonId": "hsk2-daily-actions-15",
+      "lessonOrder": 15,
+      "lessonTitle": "Việc làm hằng ngày",
+      "id": "qi-chuang",
+      "hanzi": "起床",
+      "pinyin": "qǐchuáng",
+      "hanViet": "khởi sàng",
+      "meaningVi": "thức dậy; ra khỏi giường",
+      "example": {
+        "hanzi": "我每天七点起床。",
+        "pinyin": "Wǒ měitiān qī diǎn qǐchuáng.",
+        "meaningVi": "Mỗi ngày tôi thức dậy lúc bảy giờ."
+      }
+    }
+  ]
+}

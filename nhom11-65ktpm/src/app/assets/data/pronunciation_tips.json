@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "_note": "Mau 3 meo de dung man phan hoi. Hoa bo sung day du o issue #22 (zh ch sh z c s j q x u, cac thanh dieu).",
+  "tips": [
+    {
+      "sound": "zh",
+      "title": "Âm zh (uốn lưỡi)",
+      "mouthVi": "Môi hơi tròn, răng gần khép.",
+      "tongueVi": "Cong đầu lưỡi lên chạm phần lợi cứng phía sau răng cửa trên, rồi bật nhẹ ra, không bật hơi.",
+      "compareVi": "Gần giống 'tr' trong tiếng Việt nhưng lưỡi cong hơn. Đừng đọc thành 'z' (lưỡi thẳng).",
+      "examples": ["中 zhōng", "这 zhè", "老师 lǎoshī → so sánh 知道 zhīdào"]
+    },
+    {
+      "sound": "x",
+      "title": "Âm x",
+      "mouthVi": "Khoé miệng kéo sang hai bên như đang cười.",
+      "tongueVi": "Mặt lưỡi áp gần ngạc cứng, đầu lưỡi tì sau răng cửa dưới, đẩy hơi ra nhẹ.",
+      "compareVi": "Không phải 'x' tiếng Việt. Gần với 'si' đọc nhẹ, lưỡi bè. Đừng nhầm với 's'.",
+      "examples": ["谢谢 xièxie", "学生 xuésheng"]
+    },
+    {
+      "sound": "tone3",
+      "title": "Thanh 3",
+      "mouthVi": "Thả lỏng cổ họng.",
+      "tongueVi": "Giọng xuống thấp rồi lên nhẹ (2-1-4). Đứng trước thanh khác thường chỉ đọc nửa đầu (xuống thấp).",
+      "compareVi": "Gần thanh hỏi tiếng Việt. Hai thanh 3 liền nhau thì thanh đầu đọc thành thanh 2: 你好 → ní hǎo.",
+      "examples": ["你好 nǐ hǎo", "我 wǒ"]
+    }
+  ]
+}

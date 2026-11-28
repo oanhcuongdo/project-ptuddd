@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-numbers-03",
+  "level": "HSK1",
+  "order": 3,
+  "title": "Số đếm và tuổi",
+  "topic": "số đếm",
+  "description": "Đếm từ 1 đến 10, hỏi và trả lời về tuổi.",
+  "vocabulary": [
+    {
+      "id": "yi",
+      "hanzi": "一",
+      "pinyin": "yī",
+      "hanViet": "nhất",
+      "meaningVi": "một",
+      "example": {
+        "hanzi": "一个人",
+        "pinyin": "yí ge rén",
+        "meaningVi": "một người"
+      }
+    },
+    {
+      "id": "er",
+      "hanzi": "二",
+      "pinyin": "èr",
+      "hanViet": "nhị",
+      "meaningVi": "hai",
+      "example": {
+        "hanzi": "二月",
+        "pinyin": "èr yuè",
+        "meaningVi": "tháng hai"
+      }
+    },
+    {
+      "id": "san",
+      "hanzi": "三",
+      "pinyin": "sān",
+      "hanViet": "tam",
+      "meaningVi": "ba",
+      "example": {
+        "hanzi": "三口人",
+        "pinyin": "sān kǒu rén",
+        "meaningVi": "ba người"
+      }
+    },
+    {
+      "id": "si",
+      "hanzi": "四",
+      "pinyin": "sì",
+      "hanViet": "tứ",
+      "meaningVi": "bốn",
+      "example": {
+        "hanzi": "四个学生",
+        "pinyin": "sì ge xuésheng",
+        "meaningVi": "bốn học sinh"
+      }
+    },
+    {
+      "id": "wu",
+      "hanzi": "五",
+      "pinyin": "wǔ",
+      "hanViet": "ngũ",
+      "meaningVi": "năm",
+      "example": {
+        "hanzi": "五岁",
+        "pinyin": "wǔ suì",
+        "meaningVi": "năm tuổi"
+      }
+    },
+    {
+      "id": "shi-ten",
+      "hanzi": "十",
+      "pinyin": "shí",
+      "hanViet": "thập",
+      "meaningVi": "mười",
+      "example": {
+        "hanzi": "十个人",
+        "pinyin": "shí ge rén",
+        "meaningVi": "mười người"
+      }
+    },
+    {
+      "id": "sui",
+      "hanzi": "岁",
+      "pinyin": "suì",
+      "hanViet": "tuế",
+      "meaningVi": "tuổi",
+      "example": {
+        "hanzi": "我二十岁。",
+        "pinyin": "Wǒ èrshí suì.",
+        "meaningVi": "Tôi hai mươi tuổi."
+      }
+    },
+    {
+      "id": "duo-da",
+      "hanzi": "多大",
+      "pinyin": "duō dà",
+      "hanViet": "đa đại",
+      "meaningVi": "bao nhiêu tuổi",
+      "example": {
+        "hanzi": "你多大？",
+        "pinyin": "Nǐ duō dà?",
+        "meaningVi": "Bạn bao nhiêu tuổi?"
+      }
+    },
+    {
+      "id": "ge",
+      "hanzi": "个",
+      "pinyin": "gè",
+      "hanViet": "cá",
+      "meaningVi": "(lượng từ chung)",
+      "example": {
+        "hanzi": "一个朋友",
+        "pinyin": "yí ge péngyou",
+        "meaningVi": "một người bạn"
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-age",
+      "pattern": "S + (今年) + số + 岁",
+      "explanationVi": "Nói tuổi không cần 是: 我二十岁, không nói 我是二十岁 trong câu thông thường.",
+      "examples": [
+        "我今年二十岁。",
+        "你多大？"
+      ]
+    },
+    {
+      "id": "gp-measure-ge",
+      "pattern": "Số + 个 + Danh từ",
+      "explanationVi": "Giữa số và danh từ phải có lượng từ, 个 là lượng từ chung.",
+      "examples": [
+        "三个学生",
+        "一个老师"
+      ]
+    },
+    {
+      "id": "gp-liang",
+      "pattern": "两 + lượng từ",
+      "explanationVi": "Đếm 'hai cái' dùng 两, không dùng 二: 两个人.",
+      "examples": [
+        "两个人",
+        "两口人"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "nhân viên đăng ký câu lạc bộ tiếng Trung, thân thiện",
+    "learnerRole": "sinh viên muốn đăng ký tham gia câu lạc bộ",
+    "situation": "Nhân viên hỏi thông tin để điền phiếu: tên, tuổi, nhà có mấy người.",
+    "openingLine": "你好！请问你叫什么名字？你多大？"
+  }
+}

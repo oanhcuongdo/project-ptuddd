@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-communication-12",
+  "level": "HSK2",
+  "order": 12,
+  "title": "Gặp gỡ và trò chuyện",
+  "topic": "giao tiếp",
+  "description": "Bắt đầu cuộc trò chuyện, chia sẻ ý kiến và tham gia hoạt động.",
+  "vocabulary": [
+    {
+      "id": "jian-mian",
+      "hanzi": "见面",
+      "pinyin": "jiànmiàn",
+      "hanViet": "kiến diện",
+      "meaningVi": "gặp mặt",
+      "example": {
+        "hanzi": "我们星期六见面吧。",
+        "pinyin": "Wǒmen xīngqīliù jiànmiàn ba.",
+        "meaningVi": "Chúng ta gặp nhau vào thứ Bảy nhé."
+      }
+    },
+    {
+      "id": "liao-tian",
+      "hanzi": "聊天",
+      "pinyin": "liáotiān",
+      "hanViet": "liêu thiên",
+      "meaningVi": "trò chuyện",
+      "example": {
+        "hanzi": "我常常和朋友聊天。",
+        "pinyin": "Wǒ chángcháng hé péngyou liáotiān.",
+        "meaningVi": "Tôi thường trò chuyện với bạn bè."
+      }
+    },
+    {
+      "id": "gao-su",
+      "hanzi": "告诉",
+      "pinyin": "gàosu",
+      "hanViet": "cáo tố",
+      "meaningVi": "nói cho biết; kể",
+      "example": {
+        "hanzi": "请告诉我你的名字。",
+        "pinyin": "Qǐng gàosu wǒ nǐ de míngzi.",
+        "meaningVi": "Xin hãy cho tôi biết tên của bạn."
+      }
+    },
+    {
+      "id": "ren-wei",
+      "hanzi": "认为",
+      "pinyin": "rènwéi",
+      "hanViet": "nhận vi",
+      "meaningVi": "cho rằng",
+      "example": {
+        "hanzi": "我认为这个办法很好。",
+        "pinyin": "Wǒ rènwéi zhège bànfǎ hěn hǎo.",
+        "meaningVi": "Tôi cho rằng cách này rất hay."
+      }
+    },
+    {
+      "id": "tong-yi",
+      "hanzi": "同意",
+      "pinyin": "tóngyì",
+      "hanViet": "đồng ý",
+      "meaningVi": "đồng ý",
+      "example": {
+        "hanzi": "我同意你的想法。",
+        "pinyin": "Wǒ tóngyì nǐ de xiǎngfǎ.",
+        "meaningVi": "Tôi đồng ý với ý kiến của bạn."
+      }
+    },
+    {
+      "id": "can-jia",
+      "hanzi": "参加",
+      "pinyin": "cānjiā",
+      "hanViet": "tham gia",
+      "meaningVi": "tham gia",
+      "example": {
+        "hanzi": "她想参加学校的活动。",
+        "pinyin": "Tā xiǎng cānjiā xuéxiào de huódòng.",
+        "meaningVi": "Cô ấy muốn tham gia hoạt động của trường."
+      }
+    },
+    {
+      "id": "ji-hui",
+      "hanzi": "机会",
+      "pinyin": "jīhuì",
+      "hanViet": "cơ hội",
+      "meaningVi": "cơ hội",
+      "example": {
+        "hanzi": "这是一个学习汉语的机会。",
+        "pinyin": "Zhè shì yí ge xuéxí Hànyǔ de jīhuì.",
+        "meaningVi": "Đây là một cơ hội học tiếng Trung."
+      }
+    },
+    {
+      "id": "guan-xi",
+      "hanzi": "关系",
+      "pinyin": "guānxi",
+      "hanViet": "quan hệ",
+      "meaningVi": "quan hệ; mối quan hệ",
+      "example": {
+        "hanzi": "我和他是好朋友，关系很好。",
+        "pinyin": "Wǒ hé tā shì hǎo péngyou, guānxi hěn hǎo.",
+        "meaningVi": "Tôi và anh ấy là bạn tốt, quan hệ rất thân."
+      }
+    },
+    {
+      "id": "ke-ren",
+      "hanzi": "客人",
+      "pinyin": "kèrén",
+      "hanViet": "khách nhân",
+      "meaningVi": "khách",
+      "example": {
+        "hanzi": "客人已经到了。",
+        "pinyin": "Kèrén yǐjīng dào le.",
+        "meaningVi": "Khách đã đến rồi."
+      }
+    },
+    {
+      "id": "jian-dao",
+      "hanzi": "见到",
+      "pinyin": "jiàndào",
+      "hanViet": "kiến đáo",
+      "meaningVi": "gặp; nhìn thấy",
+      "example": {
+        "hanzi": "我很高兴见到你。",
+        "pinyin": "Wǒ hěn gāoxìng jiàndào nǐ.",
+        "meaningVi": "Tôi rất vui được gặp bạn."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-renwei-clause",
+      "pattern": "认为 + mệnh đề",
+      "explanationVi": "认为 đứng trước ý kiến hoặc nhận định của người nói.",
+      "examples": [
+        "我认为这个办法很好。",
+        "她认为汉语不太难。"
+      ]
+    },
+    {
+      "id": "gp-can-jia",
+      "pattern": "参加 + hoạt động",
+      "explanationVi": "参加 đi trước tên hoạt động hoặc sự kiện mà một người tham gia.",
+      "examples": [
+        "她想参加学校的活动。",
+        "我参加了一个汉语比赛。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn mới quen ở câu lạc bộ",
+    "learnerRole": "người tham gia buổi gặp mặt",
+    "situation": "Hai người làm quen, trò chuyện và rủ nhau tham gia một hoạt động.",
+    "openingLine": "很高兴见到你！你想参加我们的活动吗？"
+  }
+}

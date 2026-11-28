@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-health-09",
+  "level": "HSK2",
+  "order": 9,
+  "title": "Sức khỏe và chăm sóc",
+  "topic": "sức khỏe",
+  "description": "Diễn tả một số triệu chứng và cách chăm sóc người không khỏe.",
+  "vocabulary": [
+    {
+      "id": "gan-mao",
+      "hanzi": "感冒",
+      "pinyin": "gǎnmào",
+      "hanViet": "cảm mạo",
+      "meaningVi": "cảm lạnh",
+      "example": {
+        "hanzi": "我感冒了，今天不去学校。",
+        "pinyin": "Wǒ gǎnmào le, jīntiān bú qù xuéxiào.",
+        "meaningVi": "Tôi bị cảm, hôm nay không đi học."
+      }
+    },
+    {
+      "id": "fa-shao",
+      "hanzi": "发烧",
+      "pinyin": "fāshāo",
+      "hanViet": "phát thiêu",
+      "meaningVi": "bị sốt",
+      "example": {
+        "hanzi": "孩子发烧了，妈妈带他去医院。",
+        "pinyin": "Háizi fāshāo le, māma dài tā qù yīyuàn.",
+        "meaningVi": "Đứa trẻ bị sốt, mẹ đưa em đến bệnh viện."
+      }
+    },
+    {
+      "id": "tou-fa",
+      "hanzi": "头发",
+      "pinyin": "tóufa",
+      "hanViet": "đầu phát",
+      "meaningVi": "tóc",
+      "example": {
+        "hanzi": "她的头发很长。",
+        "pinyin": "Tā de tóufa hěn cháng.",
+        "meaningVi": "Tóc cô ấy rất dài."
+      }
+    },
+    {
+      "id": "ya-tooth",
+      "hanzi": "牙",
+      "pinyin": "yá",
+      "hanViet": "nha",
+      "meaningVi": "răng",
+      "example": {
+        "hanzi": "我的牙有一点儿疼。",
+        "pinyin": "Wǒ de yá yǒu yìdiǎnr téng.",
+        "meaningVi": "Răng tôi hơi đau."
+      }
+    },
+    {
+      "id": "bing-ren",
+      "hanzi": "病人",
+      "pinyin": "bìngrén",
+      "hanViet": "bệnh nhân",
+      "meaningVi": "bệnh nhân",
+      "example": {
+        "hanzi": "医生正在看病人。",
+        "pinyin": "Yīshēng zhèngzài kàn bìngrén.",
+        "meaningVi": "Bác sĩ đang khám cho bệnh nhân."
+      }
+    },
+    {
+      "id": "nan-shou",
+      "hanzi": "难受",
+      "pinyin": "nánshòu",
+      "hanViet": "nan thụ",
+      "meaningVi": "khó chịu; không khỏe",
+      "example": {
+        "hanzi": "我今天有一点儿难受。",
+        "pinyin": "Wǒ jīntiān yǒu yìdiǎnr nánshòu.",
+        "meaningVi": "Hôm nay tôi hơi khó chịu."
+      }
+    },
+    {
+      "id": "yao-dian",
+      "hanzi": "药店",
+      "pinyin": "yàodiàn",
+      "hanViet": "dược điếm",
+      "meaningVi": "hiệu thuốc",
+      "example": {
+        "hanzi": "医院旁边有一个药店。",
+        "pinyin": "Yīyuàn pángbiān yǒu yí ge yàodiàn.",
+        "meaningVi": "Bên cạnh bệnh viện có một hiệu thuốc."
+      }
+    },
+    {
+      "id": "hu-shi",
+      "hanzi": "护士",
+      "pinyin": "hùshi",
+      "hanViet": "hộ sĩ",
+      "meaningVi": "y tá",
+      "example": {
+        "hanzi": "护士在帮助病人。",
+        "pinyin": "Hùshi zài bāngzhù bìngrén.",
+        "meaningVi": "Y tá đang giúp bệnh nhân."
+      }
+    },
+    {
+      "id": "kou-zhao",
+      "hanzi": "口罩",
+      "pinyin": "kǒuzhào",
+      "hanViet": "khẩu tráo",
+      "meaningVi": "khẩu trang",
+      "example": {
+        "hanzi": "感冒的时候要戴口罩。",
+        "pinyin": "Gǎnmào de shíhou yào dài kǒuzhào.",
+        "meaningVi": "Khi bị cảm cần đeo khẩu trang."
+      }
+    },
+    {
+      "id": "zhao-gu",
+      "hanzi": "照顾",
+      "pinyin": "zhàogù",
+      "hanViet": "chiếu cố",
+      "meaningVi": "chăm sóc",
+      "example": {
+        "hanzi": "姐姐在家照顾奶奶。",
+        "pinyin": "Jiějie zài jiā zhàogù nǎinai.",
+        "meaningVi": "Chị gái ở nhà chăm sóc bà."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-sick-le",
+      "pattern": "Chủ ngữ + triệu chứng + 了",
+      "explanationVi": "了 ở cuối câu báo hiệu tình trạng mới phát sinh.",
+      "examples": [
+        "我感冒了。",
+        "孩子发烧了。"
+      ]
+    },
+    {
+      "id": "gp-shihou",
+      "pattern": "...的时候",
+      "explanationVi": "的时候 đặt sau cụm thời gian hoặc tình huống, nghĩa là 'khi'.",
+      "examples": [
+        "感冒的时候要戴口罩。",
+        "有时间的时候我去看奶奶。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng lớp đang hỏi thăm",
+    "learnerRole": "người vừa bị cảm",
+    "situation": "Hai người nói về triệu chứng và cách chăm sóc sức khỏe.",
+    "openingLine": "你怎么了？你感冒了吗？"
+  }
+}

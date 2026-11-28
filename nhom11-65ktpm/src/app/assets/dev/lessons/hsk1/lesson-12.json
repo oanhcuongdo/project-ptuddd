@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-health-12",
+  "level": "HSK1",
+  "order": 12,
+  "title": "Cơ thể và sức khỏe",
+  "topic": "sức khỏe",
+  "description": "Gọi tên một số bộ phận cơ thể và nói khi không khỏe.",
+  "vocabulary": [
+    {
+      "id": "shen-ti",
+      "hanzi": "身体",
+      "pinyin": "shēntǐ",
+      "hanViet": "thân thể",
+      "meaningVi": "cơ thể; sức khỏe",
+      "example": {
+        "hanzi": "你的身体好吗？",
+        "pinyin": "Nǐ de shēntǐ hǎo ma?",
+        "meaningVi": "Sức khỏe của bạn có tốt không?"
+      }
+    },
+    {
+      "id": "yan-jing",
+      "hanzi": "眼睛",
+      "pinyin": "yǎnjing",
+      "hanViet": "nhãn tinh",
+      "meaningVi": "mắt",
+      "example": {
+        "hanzi": "她的眼睛很大。",
+        "pinyin": "Tā de yǎnjing hěn dà.",
+        "meaningVi": "Mắt cô ấy rất to."
+      }
+    },
+    {
+      "id": "tou",
+      "hanzi": "头",
+      "pinyin": "tóu",
+      "hanViet": "đầu",
+      "meaningVi": "đầu",
+      "example": {
+        "hanzi": "我的头有点儿疼。",
+        "pinyin": "Wǒ de tóu yǒudiǎnr téng.",
+        "meaningVi": "Đầu tôi hơi đau."
+      }
+    },
+    {
+      "id": "shou",
+      "hanzi": "手",
+      "pinyin": "shǒu",
+      "hanViet": "thủ",
+      "meaningVi": "tay; bàn tay",
+      "example": {
+        "hanzi": "请洗手。",
+        "pinyin": "Qǐng xǐ shǒu.",
+        "meaningVi": "Xin hãy rửa tay."
+      }
+    },
+    {
+      "id": "yi-sheng",
+      "hanzi": "医生",
+      "pinyin": "yīshēng",
+      "hanViet": "y sinh",
+      "meaningVi": "bác sĩ",
+      "example": {
+        "hanzi": "她是医生。",
+        "pinyin": "Tā shì yīshēng.",
+        "meaningVi": "Cô ấy là bác sĩ."
+      }
+    },
+    {
+      "id": "yi-yuan",
+      "hanzi": "医院",
+      "pinyin": "yīyuàn",
+      "hanViet": "y viện",
+      "meaningVi": "bệnh viện",
+      "example": {
+        "hanzi": "我去医院看医生。",
+        "pinyin": "Wǒ qù yīyuàn kàn yīshēng.",
+        "meaningVi": "Tôi đến bệnh viện khám bác sĩ."
+      }
+    },
+    {
+      "id": "sheng-bing",
+      "hanzi": "生病",
+      "pinyin": "shēngbìng",
+      "hanViet": "sinh bệnh",
+      "meaningVi": "bị ốm; mắc bệnh",
+      "example": {
+        "hanzi": "我今天生病了。",
+        "pinyin": "Wǒ jīntiān shēngbìng le.",
+        "meaningVi": "Hôm nay tôi bị ốm."
+      }
+    },
+    {
+      "id": "yao",
+      "hanzi": "药",
+      "pinyin": "yào",
+      "hanViet": "dược",
+      "meaningVi": "thuốc",
+      "example": {
+        "hanzi": "医生给我药。",
+        "pinyin": "Yīshēng gěi wǒ yào.",
+        "meaningVi": "Bác sĩ đưa thuốc cho tôi."
+      }
+    },
+    {
+      "id": "xiu-xi",
+      "hanzi": "休息",
+      "pinyin": "xiūxi",
+      "hanViet": "hưu tức",
+      "meaningVi": "nghỉ ngơi",
+      "example": {
+        "hanzi": "你应该多休息。",
+        "pinyin": "Nǐ yīnggāi duō xiūxi.",
+        "meaningVi": "Bạn nên nghỉ ngơi nhiều."
+      }
+    },
+    {
+      "id": "teng",
+      "hanzi": "疼",
+      "pinyin": "téng",
+      "hanViet": "đằng",
+      "meaningVi": "đau",
+      "example": {
+        "hanzi": "我的手很疼。",
+        "pinyin": "Wǒ de shǒu hěn téng.",
+        "meaningVi": "Tay tôi rất đau."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-body-hen-adjective",
+      "pattern": "Bộ phận cơ thể + 很 + tính từ",
+      "explanationVi": "Đặt tính từ sau chủ ngữ để miêu tả tình trạng cơ thể.",
+      "examples": [
+        "我的手很疼。",
+        "她的眼睛很大。"
+      ]
+    },
+    {
+      "id": "gp-qu-le",
+      "pattern": "Động từ + 了",
+      "explanationVi": "了 ở cuối câu có thể đánh dấu tình trạng mới phát sinh hoặc sự việc đã xảy ra.",
+      "examples": [
+        "我今天生病了。",
+        "他吃药了。"
+      ]
+    },
+    {
+      "id": "gp-qing-verb",
+      "pattern": "请 + động từ",
+      "explanationVi": "请 đứng trước động từ để đưa ra lời nhờ hoặc yêu cầu lịch sự.",
+      "examples": [
+        "请洗手。",
+        "请休息。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bác sĩ tại phòng khám",
+    "learnerRole": "người bệnh đến khám vì đau đầu",
+    "situation": "Bác sĩ hỏi về tình trạng sức khỏe và khuyên người bệnh nghỉ ngơi.",
+    "openingLine": "你好，你哪里不舒服？"
+  }
+}

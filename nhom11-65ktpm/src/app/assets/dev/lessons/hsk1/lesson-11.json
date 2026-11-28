@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-weather-11",
+  "level": "HSK1",
+  "order": 11,
+  "title": "Thời tiết và thiên nhiên",
+  "topic": "thời tiết",
+  "description": "Miêu tả thời tiết nóng, lạnh, mưa và một số cảnh vật.",
+  "vocabulary": [
+    {
+      "id": "tian-qi",
+      "hanzi": "天气",
+      "pinyin": "tiānqì",
+      "hanViet": "thiên khí",
+      "meaningVi": "thời tiết",
+      "example": {
+        "hanzi": "今天天气很好。",
+        "pinyin": "Jīntiān tiānqì hěn hǎo.",
+        "meaningVi": "Hôm nay thời tiết rất đẹp."
+      }
+    },
+    {
+      "id": "xia-yu",
+      "hanzi": "下雨",
+      "pinyin": "xiàyǔ",
+      "hanViet": "hạ vũ",
+      "meaningVi": "mưa; trời mưa",
+      "example": {
+        "hanzi": "今天下午下雨。",
+        "pinyin": "Jīntiān xiàwǔ xiàyǔ.",
+        "meaningVi": "Chiều nay trời mưa."
+      }
+    },
+    {
+      "id": "xue-snow",
+      "hanzi": "雪",
+      "pinyin": "xuě",
+      "hanViet": "tuyết",
+      "meaningVi": "tuyết",
+      "example": {
+        "hanzi": "北京冬天有雪。",
+        "pinyin": "Běijīng dōngtiān yǒu xuě.",
+        "meaningVi": "Mùa đông ở Bắc Kinh có tuyết."
+      }
+    },
+    {
+      "id": "leng",
+      "hanzi": "冷",
+      "pinyin": "lěng",
+      "hanViet": "lãnh",
+      "meaningVi": "lạnh",
+      "example": {
+        "hanzi": "今天很冷。",
+        "pinyin": "Jīntiān hěn lěng.",
+        "meaningVi": "Hôm nay trời rất lạnh."
+      }
+    },
+    {
+      "id": "re",
+      "hanzi": "热",
+      "pinyin": "rè",
+      "hanViet": "nhiệt",
+      "meaningVi": "nóng",
+      "example": {
+        "hanzi": "夏天很热。",
+        "pinyin": "Xiàtiān hěn rè.",
+        "meaningVi": "Mùa hè rất nóng."
+      }
+    },
+    {
+      "id": "feng",
+      "hanzi": "风",
+      "pinyin": "fēng",
+      "hanViet": "phong",
+      "meaningVi": "gió",
+      "example": {
+        "hanzi": "今天有风。",
+        "pinyin": "Jīntiān yǒu fēng.",
+        "meaningVi": "Hôm nay có gió."
+      }
+    },
+    {
+      "id": "yun",
+      "hanzi": "云",
+      "pinyin": "yún",
+      "hanViet": "vân",
+      "meaningVi": "mây",
+      "example": {
+        "hanzi": "天上有很多云。",
+        "pinyin": "Tiānshang yǒu hěn duō yún.",
+        "meaningVi": "Trên trời có nhiều mây."
+      }
+    },
+    {
+      "id": "tai-yang",
+      "hanzi": "太阳",
+      "pinyin": "tàiyáng",
+      "hanViet": "thái dương",
+      "meaningVi": "mặt trời",
+      "example": {
+        "hanzi": "太阳出来了。",
+        "pinyin": "Tàiyáng chūlai le.",
+        "meaningVi": "Mặt trời đã ló dạng."
+      }
+    },
+    {
+      "id": "hua",
+      "hanzi": "花",
+      "pinyin": "huā",
+      "hanViet": "hoa",
+      "meaningVi": "hoa",
+      "example": {
+        "hanzi": "我喜欢红色的花。",
+        "pinyin": "Wǒ xǐhuan hóngsè de huā.",
+        "meaningVi": "Tôi thích hoa màu đỏ."
+      }
+    },
+    {
+      "id": "shu-tree",
+      "hanzi": "树",
+      "pinyin": "shù",
+      "hanViet": "thụ",
+      "meaningVi": "cây",
+      "example": {
+        "hanzi": "学校里有很多树。",
+        "pinyin": "Xuéxiào lǐ yǒu hěn duō shù.",
+        "meaningVi": "Trong trường có nhiều cây."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-weather-adjective",
+      "pattern": "天气 + 很 + tính từ",
+      "explanationVi": "Dùng 很 trước tính từ để miêu tả thời tiết.",
+      "examples": [
+        "今天天气很好。",
+        "今天很冷。"
+      ]
+    },
+    {
+      "id": "gp-weather-xia-yu",
+      "pattern": "Thời gian + 下雨",
+      "explanationVi": "下雨 là động từ chỉ trời mưa; thời gian có thể đứng trước cụm động từ.",
+      "examples": [
+        "今天下午下雨。",
+        "明天不下雨。"
+      ]
+    },
+    {
+      "id": "gp-you-weather",
+      "pattern": "Địa điểm / thời gian + 有 + danh từ",
+      "explanationVi": "有 diễn tả sự tồn tại hoặc có một hiện tượng ở nơi, thời điểm nào đó.",
+      "examples": [
+        "今天有风。",
+        "北京冬天有雪。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng lớp đang lên kế hoạch đi chơi",
+    "learnerRole": "người bạn muốn chọn ngày phù hợp để ra ngoài",
+    "situation": "Hai người hỏi về thời tiết hôm nay và ngày mai, rồi quyết định có đi dạo hay không.",
+    "openingLine": "今天天气怎么样？下午下雨吗？"
+  }
+}

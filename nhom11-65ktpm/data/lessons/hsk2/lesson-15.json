@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-daily-actions-15",
+  "level": "HSK2",
+  "order": 15,
+  "title": "Việc làm hằng ngày",
+  "topic": "sinh hoạt",
+  "description": "Nói về việc nhớ, quên, mượn đồ và chuẩn bị cho ngày mới.",
+  "vocabulary": [
+    {
+      "id": "wang-ji",
+      "hanzi": "忘记",
+      "pinyin": "wàngjì",
+      "hanViet": "vong ký",
+      "meaningVi": "quên",
+      "example": {
+        "hanzi": "我忘记带课本了。",
+        "pinyin": "Wǒ wàngjì dài kèběn le.",
+        "meaningVi": "Tôi quên mang sách giáo khoa rồi."
+      }
+    },
+    {
+      "id": "ji-de",
+      "hanzi": "记得",
+      "pinyin": "jìde",
+      "hanViet": "ký đắc",
+      "meaningVi": "nhớ",
+      "example": {
+        "hanzi": "你记得今天有考试吗？",
+        "pinyin": "Nǐ jìde jīntiān yǒu kǎoshì ma?",
+        "meaningVi": "Bạn có nhớ hôm nay có bài thi không?"
+      }
+    },
+    {
+      "id": "ji-zhu",
+      "hanzi": "记住",
+      "pinyin": "jìzhù",
+      "hanViet": "ký trụ",
+      "meaningVi": "ghi nhớ",
+      "example": {
+        "hanzi": "请记住这个电话号码。",
+        "pinyin": "Qǐng jìzhù zhège diànhuà hàomǎ.",
+        "meaningVi": "Xin hãy nhớ số điện thoại này."
+      }
+    },
+    {
+      "id": "dai-carry",
+      "hanzi": "带",
+      "pinyin": "dài",
+      "hanViet": "đới",
+      "meaningVi": "mang theo",
+      "example": {
+        "hanzi": "出门的时候请带上雨伞。",
+        "pinyin": "Chūmén de shíhou qǐng dài shàng yǔsǎn.",
+        "meaningVi": "Khi ra ngoài xin hãy mang theo ô."
+      }
+    },
+    {
+      "id": "na",
+      "hanzi": "拿",
+      "pinyin": "ná",
+      "hanViet": "nã",
+      "meaningVi": "cầm; lấy",
+      "example": {
+        "hanzi": "请拿一本书给我。",
+        "pinyin": "Qǐng ná yì běn shū gěi wǒ.",
+        "meaningVi": "Xin lấy cho tôi một quyển sách."
+      }
+    },
+    {
+      "id": "jie-borrow",
+      "hanzi": "借",
+      "pinyin": "jiè",
+      "hanViet": "tá",
+      "meaningVi": "mượn; cho mượn",
+      "example": {
+        "hanzi": "我可以借你的词典吗？",
+        "pinyin": "Wǒ kěyǐ jiè nǐ de cídiǎn ma?",
+        "meaningVi": "Tôi có thể mượn từ điển của bạn không?"
+      }
+    },
+    {
+      "id": "huan-return",
+      "hanzi": "还",
+      "pinyin": "huán",
+      "hanViet": "hoàn",
+      "meaningVi": "trả lại",
+      "example": {
+        "hanzi": "我明天把书还给你。",
+        "pinyin": "Wǒ míngtiān bǎ shū huán gěi nǐ.",
+        "meaningVi": "Ngày mai tôi trả sách cho bạn."
+      }
+    },
+    {
+      "id": "song-give",
+      "hanzi": "送",
+      "pinyin": "sòng",
+      "hanViet": "tống",
+      "meaningVi": "tặng; đưa",
+      "example": {
+        "hanzi": "朋友送我一本中文书。",
+        "pinyin": "Péngyou sòng wǒ yì běn Zhōngwén shū.",
+        "meaningVi": "Bạn tặng tôi một quyển sách tiếng Trung."
+      }
+    },
+    {
+      "id": "xi-zao",
+      "hanzi": "洗澡",
+      "pinyin": "xǐzǎo",
+      "hanViet": "tẩy táo",
+      "meaningVi": "tắm",
+      "example": {
+        "hanzi": "我每天晚上洗澡。",
+        "pinyin": "Wǒ měitiān wǎnshang xǐzǎo.",
+        "meaningVi": "Tối nào tôi cũng tắm."
+      }
+    },
+    {
+      "id": "qi-chuang",
+      "hanzi": "起床",
+      "pinyin": "qǐchuáng",
+      "hanViet": "khởi sàng",
+      "meaningVi": "thức dậy; ra khỏi giường",
+      "example": {
+        "hanzi": "我每天七点起床。",
+        "pinyin": "Wǒ měitiān qī diǎn qǐchuáng.",
+        "meaningVi": "Mỗi ngày tôi thức dậy lúc bảy giờ."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-ji-de-clause",
+      "pattern": "记得 / 忘记 + động từ / mệnh đề",
+      "explanationVi": "记得 nói nhớ làm hoặc nhớ một việc; 忘记 diễn tả quên.",
+      "examples": [
+        "你记得今天有考试吗？",
+        "我忘记带课本了。"
+      ]
+    },
+    {
+      "id": "gp-jie-huan",
+      "pattern": "借 + đồ vật + 给 + người",
+      "explanationVi": "借 có thể nói việc mượn hoặc cho mượn; ngữ cảnh làm rõ hướng hành động.",
+      "examples": [
+        "我可以借你的词典吗？",
+        "我把书借给朋友了。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng lớp đang mượn sách",
+    "learnerRole": "người cho mượn sách",
+    "situation": "Hai người hỏi mượn đồ học tập và thống nhất khi nào trả lại.",
+    "openingLine": "我忘记带词典了，可以借你的词典吗？"
+  }
+}

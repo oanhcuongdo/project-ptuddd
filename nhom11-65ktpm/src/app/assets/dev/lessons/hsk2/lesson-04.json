@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-restaurant-04",
+  "level": "HSK2",
+  "order": 4,
+  "title": "Gọi món ở nhà hàng",
+  "topic": "nhà hàng",
+  "description": "Đọc thực đơn, gọi món và nói về khẩu vị khi ăn ở nhà hàng.",
+  "vocabulary": [
+    {
+      "id": "fu-wu-yuan",
+      "hanzi": "服务员",
+      "pinyin": "fúwùyuán",
+      "hanViet": "phục vụ viên",
+      "meaningVi": "nhân viên phục vụ",
+      "example": {
+        "hanzi": "服务员，请给我菜单。",
+        "pinyin": "Fúwùyuán, qǐng gěi wǒ càidān.",
+        "meaningVi": "Nhân viên phục vụ ơi, cho tôi xin thực đơn."
+      }
+    },
+    {
+      "id": "cai-dan",
+      "hanzi": "菜单",
+      "pinyin": "càidān",
+      "hanViet": "thái đơn",
+      "meaningVi": "thực đơn",
+      "example": {
+        "hanzi": "请看一下菜单。",
+        "pinyin": "Qǐng kàn yíxià càidān.",
+        "meaningVi": "Xin hãy xem thực đơn một chút."
+      }
+    },
+    {
+      "id": "pan-zi",
+      "hanzi": "盘子",
+      "pinyin": "pánzi",
+      "hanViet": "bàn tử",
+      "meaningVi": "cái đĩa",
+      "example": {
+        "hanzi": "桌子上有两个盘子。",
+        "pinyin": "Zhuōzi shàng yǒu liǎng ge pánzi.",
+        "meaningVi": "Trên bàn có hai cái đĩa."
+      }
+    },
+    {
+      "id": "tian-sweet",
+      "hanzi": "甜",
+      "pinyin": "tián",
+      "hanViet": "điềm",
+      "meaningVi": "ngọt",
+      "example": {
+        "hanzi": "这个水果很甜。",
+        "pinyin": "Zhège shuǐguǒ hěn tián.",
+        "meaningVi": "Trái cây này rất ngọt."
+      }
+    },
+    {
+      "id": "xian-salty",
+      "hanzi": "咸",
+      "pinyin": "xián",
+      "hanViet": "hàm",
+      "meaningVi": "mặn",
+      "example": {
+        "hanzi": "这个菜有一点儿咸。",
+        "pinyin": "Zhège cài yǒu yìdiǎnr xián.",
+        "meaningVi": "Món này hơi mặn."
+      }
+    },
+    {
+      "id": "bao",
+      "hanzi": "饱",
+      "pinyin": "bǎo",
+      "hanViet": "bão",
+      "meaningVi": "no",
+      "example": {
+        "hanzi": "我吃饱了。",
+        "pinyin": "Wǒ chī bǎo le.",
+        "meaningVi": "Tôi ăn no rồi."
+      }
+    },
+    {
+      "id": "yin-liao",
+      "hanzi": "饮料",
+      "pinyin": "yǐnliào",
+      "hanViet": "ẩm liệu",
+      "meaningVi": "đồ uống",
+      "example": {
+        "hanzi": "你想喝什么饮料？",
+        "pinyin": "Nǐ xiǎng hē shénme yǐnliào?",
+        "meaningVi": "Bạn muốn uống đồ uống gì?"
+      }
+    },
+    {
+      "id": "kou-ke",
+      "hanzi": "口渴",
+      "pinyin": "kǒukě",
+      "hanViet": "khẩu khát",
+      "meaningVi": "khát nước",
+      "example": {
+        "hanzi": "我有点儿口渴。",
+        "pinyin": "Wǒ yǒudiǎnr kǒukě.",
+        "meaningVi": "Tôi hơi khát nước."
+      }
+    },
+    {
+      "id": "xuan-ze",
+      "hanzi": "选择",
+      "pinyin": "xuǎnzé",
+      "hanViet": "tuyển trạch",
+      "meaningVi": "lựa chọn",
+      "example": {
+        "hanzi": "你可以选择一个菜。",
+        "pinyin": "Nǐ kěyǐ xuǎnzé yí ge cài.",
+        "meaningVi": "Bạn có thể chọn một món ăn."
+      }
+    },
+    {
+      "id": "xu-yao",
+      "hanzi": "需要",
+      "pinyin": "xūyào",
+      "hanViet": "nhu yếu",
+      "meaningVi": "cần; cần phải",
+      "example": {
+        "hanzi": "我们还需要一杯水。",
+        "pinyin": "Wǒmen hái xūyào yì bēi shuǐ.",
+        "meaningVi": "Chúng tôi còn cần một cốc nước."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-you-yidian",
+      "pattern": "有一点儿 + tính từ",
+      "explanationVi": "有一点儿 đứng trước tính từ để diễn tả mức độ hơi hoặc một chút.",
+      "examples": [
+        "这个菜有一点儿咸。",
+        "我有点儿口渴。"
+      ]
+    },
+    {
+      "id": "gp-chibao-result",
+      "pattern": "Động từ + bổ ngữ kết quả",
+      "explanationVi": "Bổ ngữ đặt sau động từ để nêu kết quả; 吃饱 nghĩa là ăn đến no.",
+      "examples": [
+        "我吃饱了。",
+        "他喝完水了。"
+      ]
+    },
+    {
+      "id": "gp-need-object",
+      "pattern": "需要 + danh từ / động từ",
+      "explanationVi": "需要 đứng trước danh từ hoặc động từ để nói về thứ hoặc việc cần thiết.",
+      "examples": [
+        "我们还需要一杯水。",
+        "我需要休息。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "nhân viên phục vụ thân thiện",
+    "learnerRole": "khách đang gọi món",
+    "situation": "Nhân viên đưa thực đơn, hỏi món ăn và đồ uống khách muốn chọn.",
+    "openingLine": "你好！这是菜单。你想选择什么菜？"
+  }
+}

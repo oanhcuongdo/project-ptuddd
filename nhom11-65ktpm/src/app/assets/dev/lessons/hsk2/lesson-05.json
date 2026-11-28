@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-transport-05",
+  "level": "HSK2",
+  "order": 5,
+  "title": "Đi lại và hỏi đường",
+  "topic": "đi lại",
+  "description": "Hỏi vị trí các địa điểm và chọn phương tiện đi lại phù hợp.",
+  "vocabulary": [
+    {
+      "id": "di-fang",
+      "hanzi": "地方",
+      "pinyin": "dìfang",
+      "hanViet": "địa phương",
+      "meaningVi": "nơi; địa điểm",
+      "example": {
+        "hanzi": "这个地方很安静。",
+        "pinyin": "Zhège dìfang hěn ānjìng.",
+        "meaningVi": "Nơi này rất yên tĩnh."
+      }
+    },
+    {
+      "id": "fu-jin",
+      "hanzi": "附近",
+      "pinyin": "fùjìn",
+      "hanViet": "phụ cận",
+      "meaningVi": "gần đây; vùng lân cận",
+      "example": {
+        "hanzi": "学校附近有一个商店。",
+        "pinyin": "Xuéxiào fùjìn yǒu yí ge shāngdiàn.",
+        "meaningVi": "Gần trường học có một cửa hàng."
+      }
+    },
+    {
+      "id": "zhong-jian",
+      "hanzi": "中间",
+      "pinyin": "zhōngjiān",
+      "hanViet": "trung gian",
+      "meaningVi": "ở giữa",
+      "example": {
+        "hanzi": "银行在学校和商店中间。",
+        "pinyin": "Yínháng zài xuéxiào hé shāngdiàn zhōngjiān.",
+        "meaningVi": "Ngân hàng ở giữa trường học và cửa hàng."
+      }
+    },
+    {
+      "id": "dui-mian",
+      "hanzi": "对面",
+      "pinyin": "duìmiàn",
+      "hanViet": "đối diện",
+      "meaningVi": "đối diện",
+      "example": {
+        "hanzi": "我家在学校对面。",
+        "pinyin": "Wǒ jiā zài xuéxiào duìmiàn.",
+        "meaningVi": "Nhà tôi ở đối diện trường học."
+      }
+    },
+    {
+      "id": "di-tu",
+      "hanzi": "地图",
+      "pinyin": "dìtú",
+      "hanViet": "địa đồ",
+      "meaningVi": "bản đồ",
+      "example": {
+        "hanzi": "请看一下地图。",
+        "pinyin": "Qǐng kàn yíxià dìtú.",
+        "meaningVi": "Xin hãy xem bản đồ một chút."
+      }
+    },
+    {
+      "id": "di-tie",
+      "hanzi": "地铁",
+      "pinyin": "dìtiě",
+      "hanViet": "địa thiết",
+      "meaningVi": "tàu điện ngầm",
+      "example": {
+        "hanzi": "我坐地铁去公司。",
+        "pinyin": "Wǒ zuò dìtiě qù gōngsī.",
+        "meaningVi": "Tôi đi tàu điện ngầm đến công ty."
+      }
+    },
+    {
+      "id": "gong-gong-qi-che",
+      "hanzi": "公共汽车",
+      "pinyin": "gōnggòng qìchē",
+      "hanViet": "công cộng khí xa",
+      "meaningVi": "xe buýt",
+      "example": {
+        "hanzi": "公共汽车来了。",
+        "pinyin": "Gōnggòng qìchē lái le.",
+        "meaningVi": "Xe buýt đến rồi."
+      }
+    },
+    {
+      "id": "lu-kou",
+      "hanzi": "路口",
+      "pinyin": "lùkǒu",
+      "hanViet": "lộ khẩu",
+      "meaningVi": "ngã đường; giao lộ",
+      "example": {
+        "hanzi": "请在前面的路口等我。",
+        "pinyin": "Qǐng zài qiánmiàn de lùkǒu děng wǒ.",
+        "meaningVi": "Xin đợi tôi ở giao lộ phía trước."
+      }
+    },
+    {
+      "id": "li-distance",
+      "hanzi": "离",
+      "pinyin": "lí",
+      "hanViet": "ly",
+      "meaningVi": "cách; cách xa",
+      "example": {
+        "hanzi": "我家离学校不远。",
+        "pinyin": "Wǒ jiā lí xuéxiào bù yuǎn.",
+        "meaningVi": "Nhà tôi cách trường không xa."
+      }
+    },
+    {
+      "id": "zou-lu",
+      "hanzi": "走路",
+      "pinyin": "zǒulù",
+      "hanViet": "tẩu lộ",
+      "meaningVi": "đi bộ",
+      "example": {
+        "hanzi": "我每天走路去学校。",
+        "pinyin": "Wǒ měitiān zǒulù qù xuéxiào.",
+        "meaningVi": "Mỗi ngày tôi đi bộ đến trường."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-place-positions",
+      "pattern": "在 + địa điểm + phương vị từ",
+      "explanationVi": "Dùng 在 cùng từ chỉ vị trí để mô tả một nơi nằm ở đâu.",
+      "examples": [
+        "银行在学校和商店中间。",
+        "我家在学校对面。"
+      ]
+    },
+    {
+      "id": "gp-distance-li",
+      "pattern": "A + 离 + B + (不)远",
+      "explanationVi": "离 dùng để nói khoảng cách giữa hai địa điểm.",
+      "examples": [
+        "我家离学校不远。",
+        "地铁站离这里很近。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "người dân địa phương",
+    "learnerRole": "khách đang tìm đường",
+    "situation": "Khách hỏi đường đến ga tàu điện ngầm và chọn cách đi.",
+    "openingLine": "你要去哪里？我可以看地图帮你。"
+  }
+}

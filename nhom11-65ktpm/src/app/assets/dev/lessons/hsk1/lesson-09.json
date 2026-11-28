@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-shopping-09",
+  "level": "HSK1",
+  "order": 9,
+  "title": "Mua sắm và giá cả",
+  "topic": "mua sắm",
+  "description": "Hỏi giá, nhận xét giá cả và chọn quần áo khi mua sắm.",
+  "vocabulary": [
+    {
+      "id": "qian",
+      "hanzi": "钱",
+      "pinyin": "qián",
+      "hanViet": "tiền",
+      "meaningVi": "tiền",
+      "example": {
+        "hanzi": "这个多少钱？",
+        "pinyin": "Zhège duōshao qián?",
+        "meaningVi": "Cái này bao nhiêu tiền?"
+      }
+    },
+    {
+      "id": "kuai",
+      "hanzi": "块",
+      "pinyin": "kuài",
+      "hanViet": "khối",
+      "meaningVi": "đồng; tệ (khẩu ngữ, đơn vị tiền)",
+      "example": {
+        "hanzi": "这个苹果三块钱。",
+        "pinyin": "Zhège píngguǒ sān kuài qián.",
+        "meaningVi": "Quả táo này giá ba tệ."
+      }
+    },
+    {
+      "id": "gui",
+      "hanzi": "贵",
+      "pinyin": "guì",
+      "hanViet": "quý",
+      "meaningVi": "đắt",
+      "example": {
+        "hanzi": "这件衣服很贵。",
+        "pinyin": "Zhè jiàn yīfu hěn guì.",
+        "meaningVi": "Bộ quần áo này rất đắt."
+      }
+    },
+    {
+      "id": "pian-yi",
+      "hanzi": "便宜",
+      "pinyin": "piányi",
+      "hanViet": "tiện nghi",
+      "meaningVi": "rẻ",
+      "example": {
+        "hanzi": "那家商店的水果很便宜。",
+        "pinyin": "Nà jiā shāngdiàn de shuǐguǒ hěn piányi.",
+        "meaningVi": "Trái cây ở cửa hàng kia rất rẻ."
+      }
+    },
+    {
+      "id": "shang-dian",
+      "hanzi": "商店",
+      "pinyin": "shāngdiàn",
+      "hanViet": "thương điếm",
+      "meaningVi": "cửa hàng",
+      "example": {
+        "hanzi": "我去商店买东西。",
+        "pinyin": "Wǒ qù shāngdiàn mǎi dōngxi.",
+        "meaningVi": "Tôi đến cửa hàng mua đồ."
+      }
+    },
+    {
+      "id": "yi-fu",
+      "hanzi": "衣服",
+      "pinyin": "yīfu",
+      "hanViet": "y phục",
+      "meaningVi": "quần áo",
+      "example": {
+        "hanzi": "我想买衣服。",
+        "pinyin": "Wǒ xiǎng mǎi yīfu.",
+        "meaningVi": "Tôi muốn mua quần áo."
+      }
+    },
+    {
+      "id": "jian",
+      "hanzi": "件",
+      "pinyin": "jiàn",
+      "hanViet": "kiện",
+      "meaningVi": "lượng từ cho quần áo và sự việc",
+      "example": {
+        "hanzi": "我买了一件衣服。",
+        "pinyin": "Wǒ mǎi le yí jiàn yīfu.",
+        "meaningVi": "Tôi đã mua một bộ quần áo."
+      }
+    },
+    {
+      "id": "duo-shao",
+      "hanzi": "多少",
+      "pinyin": "duōshao",
+      "hanViet": "đa thiểu",
+      "meaningVi": "bao nhiêu",
+      "example": {
+        "hanzi": "这本书多少钱？",
+        "pinyin": "Zhè běn shū duōshao qián?",
+        "meaningVi": "Quyển sách này bao nhiêu tiền?"
+      }
+    },
+    {
+      "id": "yan-se",
+      "hanzi": "颜色",
+      "pinyin": "yánsè",
+      "hanViet": "nhan sắc",
+      "meaningVi": "màu sắc",
+      "example": {
+        "hanzi": "你喜欢什么颜色？",
+        "pinyin": "Nǐ xǐhuan shénme yánsè?",
+        "meaningVi": "Bạn thích màu gì?"
+      }
+    },
+    {
+      "id": "hong-se",
+      "hanzi": "红色",
+      "pinyin": "hóngsè",
+      "hanViet": "hồng sắc",
+      "meaningVi": "màu đỏ",
+      "example": {
+        "hanzi": "我想买红色的衣服。",
+        "pinyin": "Wǒ xiǎng mǎi hóngsè de yīfu.",
+        "meaningVi": "Tôi muốn mua quần áo màu đỏ."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-price-question",
+      "pattern": "Danh từ + 多少钱？",
+      "explanationVi": "Dùng 多少钱 để hỏi giá của một món đồ.",
+      "examples": [
+        "这个多少钱？",
+        "这本书多少钱？"
+      ]
+    },
+    {
+      "id": "gp-measure-before-noun",
+      "pattern": "Số + lượng từ + danh từ",
+      "explanationVi": "Lượng từ đứng giữa số đếm và danh từ, ví dụ 一件衣服.",
+      "examples": [
+        "一件衣服",
+        "两本书"
+      ]
+    },
+    {
+      "id": "gp-color-de",
+      "pattern": "Màu sắc + 的 + danh từ",
+      "explanationVi": "的 có thể nối cụm chỉ màu với danh từ được miêu tả.",
+      "examples": [
+        "红色的衣服",
+        "白色的书"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "nhân viên bán hàng ở cửa hàng quần áo",
+    "learnerRole": "khách muốn mua một bộ quần áo",
+    "situation": "Khách hỏi giá, màu sắc và chọn món đồ phù hợp trong cửa hàng.",
+    "openingLine": "你好！你想买什么颜色的衣服？"
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-family-02",
+  "level": "HSK1",
+  "order": 2,
+  "title": "Gia đình tôi",
+  "topic": "gia đình",
+  "description": "Giới thiệu các thành viên trong gia đình và hỏi nhà có mấy người.",
+  "vocabulary": [
+    {
+      "id": "jia",
+      "hanzi": "家",
+      "pinyin": "jiā",
+      "hanViet": "gia",
+      "meaningVi": "nhà; gia đình",
+      "example": {
+        "hanzi": "我家有四口人。",
+        "pinyin": "Wǒ jiā yǒu sì kǒu rén.",
+        "meaningVi": "Nhà tôi có bốn người."
+      }
+    },
+    {
+      "id": "you",
+      "hanzi": "有",
+      "pinyin": "yǒu",
+      "hanViet": "hữu",
+      "meaningVi": "có",
+      "example": {
+        "hanzi": "我有一个哥哥。",
+        "pinyin": "Wǒ yǒu yí ge gēge.",
+        "meaningVi": "Tôi có một người anh."
+      }
+    },
+    {
+      "id": "ba-ba",
+      "hanzi": "爸爸",
+      "pinyin": "bàba",
+      "hanViet": "ba ba",
+      "meaningVi": "bố",
+      "example": {
+        "hanzi": "我爸爸是老师。",
+        "pinyin": "Wǒ bàba shì lǎoshī.",
+        "meaningVi": "Bố tôi là giáo viên."
+      }
+    },
+    {
+      "id": "ma-ma",
+      "hanzi": "妈妈",
+      "pinyin": "māma",
+      "hanViet": "ma ma",
+      "meaningVi": "mẹ",
+      "example": {
+        "hanzi": "妈妈好！",
+        "pinyin": "Māma hǎo!",
+        "meaningVi": "Con chào mẹ!"
+      }
+    },
+    {
+      "id": "ge-ge",
+      "hanzi": "哥哥",
+      "pinyin": "gēge",
+      "hanViet": "ca ca",
+      "meaningVi": "anh trai",
+      "example": {
+        "hanzi": "我哥哥很高。",
+        "pinyin": "Wǒ gēge hěn gāo.",
+        "meaningVi": "Anh trai tôi rất cao."
+      }
+    },
+    {
+      "id": "mei-mei",
+      "hanzi": "妹妹",
+      "pinyin": "mèimei",
+      "hanViet": "muội muội",
+      "meaningVi": "em gái",
+      "example": {
+        "hanzi": "这是我妹妹。",
+        "pinyin": "Zhè shì wǒ mèimei.",
+        "meaningVi": "Đây là em gái tôi."
+      }
+    },
+    {
+      "id": "ji",
+      "hanzi": "几",
+      "pinyin": "jǐ",
+      "hanViet": "kỷ",
+      "meaningVi": "mấy",
+      "example": {
+        "hanzi": "你家有几口人？",
+        "pinyin": "Nǐ jiā yǒu jǐ kǒu rén?",
+        "meaningVi": "Nhà bạn có mấy người?"
+      }
+    },
+    {
+      "id": "kou",
+      "hanzi": "口",
+      "pinyin": "kǒu",
+      "hanViet": "khẩu",
+      "meaningVi": "(lượng từ đếm người trong nhà)",
+      "example": {
+        "hanzi": "三口人",
+        "pinyin": "sān kǒu rén",
+        "meaningVi": "ba người"
+      }
+    },
+    {
+      "id": "ren",
+      "hanzi": "人",
+      "pinyin": "rén",
+      "hanViet": "nhân",
+      "meaningVi": "người",
+      "example": {
+        "hanzi": "他是中国人。",
+        "pinyin": "Tā shì Zhōngguó rén.",
+        "meaningVi": "Anh ấy là người Trung Quốc."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-you",
+      "pattern": "S + 有 + O",
+      "explanationVi": "有 diễn tả sở hữu; phủ định dùng 没有, không dùng 不有.",
+      "examples": [
+        "我有一个妹妹。",
+        "我没有哥哥。"
+      ]
+    },
+    {
+      "id": "gp-ji-kou",
+      "pattern": "你家有几口人？",
+      "explanationVi": "几 hỏi số lượng nhỏ (dưới 10), đi kèm lượng từ.",
+      "examples": [
+        "你家有几口人？",
+        "我家有三口人。"
+      ]
+    },
+    {
+      "id": "gp-de",
+      "pattern": "Đại từ + (的) + người thân",
+      "explanationVi": "Với người thân có thể bỏ 的: 我妈妈 = 我的妈妈.",
+      "examples": [
+        "我妈妈",
+        "我的老师"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng phòng ký túc xá người Bắc Kinh",
+    "learnerRole": "sinh viên Việt Nam đang cho bạn xem ảnh gia đình",
+    "situation": "Buổi tối ở ký túc xá, hai người xem ảnh gia đình và hỏi nhau về người thân.",
+    "openingLine": "这是你家人吗？你家有几口人？"
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-family-01",
+  "level": "HSK2",
+  "order": 1,
+  "title": "Gia đình và người thân",
+  "topic": "gia đình",
+  "description": "Mở rộng vốn từ về các thành viên trong gia đình và cuộc sống gia đình.",
+  "vocabulary": [
+    {
+      "id": "ye-ye",
+      "hanzi": "爷爷",
+      "pinyin": "yéye",
+      "hanViet": "gia gia",
+      "meaningVi": "ông nội",
+      "example": {
+        "hanzi": "我爷爷今年七十岁。",
+        "pinyin": "Wǒ yéye jīnnián qīshí suì.",
+        "meaningVi": "Ông nội tôi năm nay bảy mươi tuổi."
+      }
+    },
+    {
+      "id": "nai-nai",
+      "hanzi": "奶奶",
+      "pinyin": "nǎinai",
+      "hanViet": "nãi nãi",
+      "meaningVi": "bà nội",
+      "example": {
+        "hanzi": "奶奶在家休息。",
+        "pinyin": "Nǎinai zài jiā xiūxi.",
+        "meaningVi": "Bà nội đang nghỉ ngơi ở nhà."
+      }
+    },
+    {
+      "id": "jie-jie",
+      "hanzi": "姐姐",
+      "pinyin": "jiějie",
+      "hanViet": "tỷ tỷ",
+      "meaningVi": "chị gái",
+      "example": {
+        "hanzi": "我姐姐是医生。",
+        "pinyin": "Wǒ jiějie shì yīshēng.",
+        "meaningVi": "Chị gái tôi là bác sĩ."
+      }
+    },
+    {
+      "id": "di-di",
+      "hanzi": "弟弟",
+      "pinyin": "dìdi",
+      "hanViet": "đệ đệ",
+      "meaningVi": "em trai",
+      "example": {
+        "hanzi": "弟弟喜欢跑步。",
+        "pinyin": "Dìdi xǐhuan pǎobù.",
+        "meaningVi": "Em trai thích chạy bộ."
+      }
+    },
+    {
+      "id": "er-zi",
+      "hanzi": "儿子",
+      "pinyin": "érzi",
+      "hanViet": "nhi tử",
+      "meaningVi": "con trai",
+      "example": {
+        "hanzi": "他们有一个儿子。",
+        "pinyin": "Tāmen yǒu yí ge érzi.",
+        "meaningVi": "Họ có một người con trai."
+      }
+    },
+    {
+      "id": "nu-er",
+      "hanzi": "女儿",
+      "pinyin": "nǚ'ér",
+      "hanViet": "nữ nhi",
+      "meaningVi": "con gái",
+      "example": {
+        "hanzi": "她女儿今年十岁。",
+        "pinyin": "Tā nǚ'ér jīnnián shí suì.",
+        "meaningVi": "Con gái cô ấy năm nay mười tuổi."
+      }
+    },
+    {
+      "id": "zhang-fu",
+      "hanzi": "丈夫",
+      "pinyin": "zhàngfu",
+      "hanViet": "trượng phu",
+      "meaningVi": "chồng",
+      "example": {
+        "hanzi": "她丈夫在北京工作。",
+        "pinyin": "Tā zhàngfu zài Běijīng gōngzuò.",
+        "meaningVi": "Chồng cô ấy làm việc ở Bắc Kinh."
+      }
+    },
+    {
+      "id": "qi-zi",
+      "hanzi": "妻子",
+      "pinyin": "qīzi",
+      "hanViet": "thê tử",
+      "meaningVi": "vợ",
+      "example": {
+        "hanzi": "他和妻子一起去商店。",
+        "pinyin": "Tā hé qīzi yìqǐ qù shāngdiàn.",
+        "meaningVi": "Anh ấy cùng vợ đi cửa hàng."
+      }
+    },
+    {
+      "id": "hai-zi",
+      "hanzi": "孩子",
+      "pinyin": "háizi",
+      "hanViet": "hài tử",
+      "meaningVi": "trẻ con; con",
+      "example": {
+        "hanzi": "孩子在房间里看书。",
+        "pinyin": "Háizi zài fángjiān lǐ kàn shū.",
+        "meaningVi": "Đứa trẻ đang đọc sách trong phòng."
+      }
+    },
+    {
+      "id": "da-ren",
+      "hanzi": "大人",
+      "pinyin": "dàrén",
+      "hanViet": "đại nhân",
+      "meaningVi": "người lớn",
+      "example": {
+        "hanzi": "小孩子要听大人的话。",
+        "pinyin": "Xiǎo háizi yào tīng dàrén de huà.",
+        "meaningVi": "Trẻ nhỏ cần nghe lời người lớn."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-family-and",
+      "pattern": "A 和 B",
+      "explanationVi": "和 nối hai danh từ hoặc đại từ với nghĩa là 'và'.",
+      "examples": [
+        "他和妻子一起去商店。",
+        "爸爸和妈妈在家。"
+      ]
+    },
+    {
+      "id": "gp-together-action",
+      "pattern": "Chủ ngữ + 和 + người + 一起 + động từ",
+      "explanationVi": "一起 đứng trước động từ để nói hai hay nhiều người cùng làm việc gì.",
+      "examples": [
+        "我和姐姐一起吃饭。",
+        "他和妻子一起去商店。"
+      ]
+    },
+    {
+      "id": "gp-nian-age",
+      "pattern": "Chủ ngữ + 今年 + số tuổi",
+      "explanationVi": "今年 nêu năm hiện tại khi nói tuổi hoặc việc xảy ra trong năm nay.",
+      "examples": [
+        "我爷爷今年七十岁。",
+        "她女儿今年十岁。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "người bạn đang kể về gia đình",
+    "learnerRole": "người bạn mới quen",
+    "situation": "Hai người giới thiệu người thân và hỏi về gia đình của nhau.",
+    "openingLine": "你家有几口人？你有姐姐或者弟弟吗？"
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-seasons-08",
+  "level": "HSK2",
+  "order": 8,
+  "title": "Mùa và thời tiết",
+  "topic": "thời tiết",
+  "description": "Nói về bốn mùa và mô tả một số kiểu thời tiết thường gặp.",
+  "vocabulary": [
+    {
+      "id": "chun-tian",
+      "hanzi": "春天",
+      "pinyin": "chūntiān",
+      "hanViet": "xuân thiên",
+      "meaningVi": "mùa xuân",
+      "example": {
+        "hanzi": "春天的天气很好。",
+        "pinyin": "Chūntiān de tiānqì hěn hǎo.",
+        "meaningVi": "Thời tiết mùa xuân rất đẹp."
+      }
+    },
+    {
+      "id": "xia-tian",
+      "hanzi": "夏天",
+      "pinyin": "xiàtiān",
+      "hanViet": "hạ thiên",
+      "meaningVi": "mùa hè",
+      "example": {
+        "hanzi": "夏天我常常吃西瓜。",
+        "pinyin": "Xiàtiān wǒ chángcháng chī xīguā.",
+        "meaningVi": "Mùa hè tôi thường ăn dưa hấu."
+      }
+    },
+    {
+      "id": "qiu-tian",
+      "hanzi": "秋天",
+      "pinyin": "qiūtiān",
+      "hanViet": "thu thiên",
+      "meaningVi": "mùa thu",
+      "example": {
+        "hanzi": "秋天这里不太热。",
+        "pinyin": "Qiūtiān zhèlǐ bú tài rè.",
+        "meaningVi": "Mùa thu ở đây không nóng lắm."
+      }
+    },
+    {
+      "id": "dong-tian",
+      "hanzi": "冬天",
+      "pinyin": "dōngtiān",
+      "hanViet": "đông thiên",
+      "meaningVi": "mùa đông",
+      "example": {
+        "hanzi": "冬天北京很冷。",
+        "pinyin": "Dōngtiān Běijīng hěn lěng.",
+        "meaningVi": "Mùa đông Bắc Kinh rất lạnh."
+      }
+    },
+    {
+      "id": "ji-jie",
+      "hanzi": "季节",
+      "pinyin": "jìjié",
+      "hanViet": "quý tiết",
+      "meaningVi": "mùa; mùa trong năm",
+      "example": {
+        "hanzi": "你最喜欢哪个季节？",
+        "pinyin": "Nǐ zuì xǐhuan nǎ ge jìjié?",
+        "meaningVi": "Bạn thích mùa nào nhất?"
+      }
+    },
+    {
+      "id": "qing-tian",
+      "hanzi": "晴天",
+      "pinyin": "qíngtiān",
+      "hanViet": "tình thiên",
+      "meaningVi": "trời nắng; ngày nắng",
+      "example": {
+        "hanzi": "明天是晴天，我们去公园吧。",
+        "pinyin": "Míngtiān shì qíngtiān, wǒmen qù gōngyuán ba.",
+        "meaningVi": "Ngày mai trời nắng, chúng ta đi công viên nhé."
+      }
+    },
+    {
+      "id": "yin-tian",
+      "hanzi": "阴天",
+      "pinyin": "yīntiān",
+      "hanViet": "âm thiên",
+      "meaningVi": "trời âm u",
+      "example": {
+        "hanzi": "今天是阴天，可能要下雨。",
+        "pinyin": "Jīntiān shì yīntiān, kěnéng yào xiàyǔ.",
+        "meaningVi": "Hôm nay trời âm u, có thể sắp mưa."
+      }
+    },
+    {
+      "id": "duo-yun",
+      "hanzi": "多云",
+      "pinyin": "duōyún",
+      "hanViet": "đa vân",
+      "meaningVi": "nhiều mây",
+      "example": {
+        "hanzi": "今天多云，不太冷。",
+        "pinyin": "Jīntiān duōyún, bú tài lěng.",
+        "meaningVi": "Hôm nay nhiều mây, không lạnh lắm."
+      }
+    },
+    {
+      "id": "gua-feng",
+      "hanzi": "刮风",
+      "pinyin": "guāfēng",
+      "hanViet": "quát phong",
+      "meaningVi": "có gió; gió thổi",
+      "example": {
+        "hanzi": "外面刮风了。",
+        "pinyin": "Wàimiàn guāfēng le.",
+        "meaningVi": "Bên ngoài có gió rồi."
+      }
+    },
+    {
+      "id": "liang-kuai",
+      "hanzi": "凉快",
+      "pinyin": "liángkuai",
+      "hanViet": "lương khoái",
+      "meaningVi": "mát mẻ",
+      "example": {
+        "hanzi": "今天晚上很凉快。",
+        "pinyin": "Jīntiān wǎnshang hěn liángkuai.",
+        "meaningVi": "Tối nay trời rất mát."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-season-de",
+      "pattern": "季节 + 的 + thời tiết",
+      "explanationVi": "的 nối mùa với danh từ hoặc cụm miêu tả thời tiết.",
+      "examples": [
+        "春天的天气很好。",
+        "冬天的北京很冷。"
+      ]
+    },
+    {
+      "id": "gp-weather-ba",
+      "pattern": "Mệnh đề + 吧",
+      "explanationVi": "吧 ở cuối câu có thể dùng để đưa ra lời rủ hoặc đề nghị nhẹ nhàng.",
+      "examples": [
+        "明天是晴天，我们去公园吧。",
+        "我们一起走吧。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn đang lên kế hoạch cuối tuần",
+    "learnerRole": "người bạn cùng đi chơi",
+    "situation": "Hai người xem thời tiết và chọn hoạt động phù hợp với mùa.",
+    "openingLine": "你最喜欢哪个季节？明天我们去公园吧。"
+  }
+}

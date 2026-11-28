@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-home-work-15",
+  "level": "HSK1",
+  "order": 15,
+  "title": "Nhà cửa và công việc",
+  "topic": "nhà cửa",
+  "description": "Gọi tên một số đồ vật trong nhà và nói về công việc hằng ngày.",
+  "vocabulary": [
+    {
+      "id": "fang-jian",
+      "hanzi": "房间",
+      "pinyin": "fángjiān",
+      "hanViet": "phòng gian",
+      "meaningVi": "căn phòng",
+      "example": {
+        "hanzi": "我的房间很大。",
+        "pinyin": "Wǒ de fángjiān hěn dà.",
+        "meaningVi": "Phòng của tôi rất rộng."
+      }
+    },
+    {
+      "id": "zhuo-zi",
+      "hanzi": "桌子",
+      "pinyin": "zhuōzi",
+      "hanViet": "trác tử",
+      "meaningVi": "cái bàn",
+      "example": {
+        "hanzi": "书在桌子上。",
+        "pinyin": "Shū zài zhuōzi shàng.",
+        "meaningVi": "Sách ở trên bàn."
+      }
+    },
+    {
+      "id": "yi-zi",
+      "hanzi": "椅子",
+      "pinyin": "yǐzi",
+      "hanViet": "ỷ tử",
+      "meaningVi": "cái ghế",
+      "example": {
+        "hanzi": "请坐在椅子上。",
+        "pinyin": "Qǐng zuò zài yǐzi shàng.",
+        "meaningVi": "Xin hãy ngồi lên ghế."
+      }
+    },
+    {
+      "id": "men",
+      "hanzi": "门",
+      "pinyin": "mén",
+      "hanViet": "môn",
+      "meaningVi": "cửa",
+      "example": {
+        "hanzi": "请开门。",
+        "pinyin": "Qǐng kāi mén.",
+        "meaningVi": "Xin hãy mở cửa."
+      }
+    },
+    {
+      "id": "dian-shi",
+      "hanzi": "电视",
+      "pinyin": "diànshì",
+      "hanViet": "điện thị",
+      "meaningVi": "tivi",
+      "example": {
+        "hanzi": "爸爸在看电视。",
+        "pinyin": "Bàba zài kàn diànshì.",
+        "meaningVi": "Bố đang xem tivi."
+      }
+    },
+    {
+      "id": "dian-nao",
+      "hanzi": "电脑",
+      "pinyin": "diànnǎo",
+      "hanViet": "điện não",
+      "meaningVi": "máy tính",
+      "example": {
+        "hanzi": "我的电脑在房间里。",
+        "pinyin": "Wǒ de diànnǎo zài fángjiān lǐ.",
+        "meaningVi": "Máy tính của tôi ở trong phòng."
+      }
+    },
+    {
+      "id": "shou-ji",
+      "hanzi": "手机",
+      "pinyin": "shǒujī",
+      "hanViet": "thủ cơ",
+      "meaningVi": "điện thoại di động",
+      "example": {
+        "hanzi": "我的手机在桌子上。",
+        "pinyin": "Wǒ de shǒujī zài zhuōzi shàng.",
+        "meaningVi": "Điện thoại của tôi ở trên bàn."
+      }
+    },
+    {
+      "id": "gong-zuo",
+      "hanzi": "工作",
+      "pinyin": "gōngzuò",
+      "hanViet": "công tác",
+      "meaningVi": "công việc; làm việc",
+      "example": {
+        "hanzi": "我爸爸在医院工作。",
+        "pinyin": "Wǒ bàba zài yīyuàn gōngzuò.",
+        "meaningVi": "Bố tôi làm việc ở bệnh viện."
+      }
+    },
+    {
+      "id": "mei-tian",
+      "hanzi": "每天",
+      "pinyin": "měitiān",
+      "hanViet": "mỗi thiên",
+      "meaningVi": "mỗi ngày; hằng ngày",
+      "example": {
+        "hanzi": "我每天学习汉语。",
+        "pinyin": "Wǒ měitiān xuéxí Hànyǔ.",
+        "meaningVi": "Mỗi ngày tôi học tiếng Trung."
+      }
+    },
+    {
+      "id": "shi-qing",
+      "hanzi": "事情",
+      "pinyin": "shìqing",
+      "hanViet": "sự tình",
+      "meaningVi": "sự việc; công việc",
+      "example": {
+        "hanzi": "我有一件事情要说。",
+        "pinyin": "Wǒ yǒu yí jiàn shìqing yào shuō.",
+        "meaningVi": "Tôi có một việc muốn nói."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-daily-time",
+      "pattern": "每天 + động từ",
+      "explanationVi": "每天 đứng trước động từ để nói một việc diễn ra hằng ngày.",
+      "examples": [
+        "我每天学习汉语。",
+        "我每天做运动。"
+      ]
+    },
+    {
+      "id": "gp-zai-work",
+      "pattern": "Chủ ngữ + 在 + địa điểm + 工作",
+      "explanationVi": "Đặt địa điểm sau 在 để nói một người làm việc ở đâu.",
+      "examples": [
+        "我爸爸在医院工作。",
+        "她在学校工作。"
+      ]
+    },
+    {
+      "id": "gp-yijian-classifier",
+      "pattern": "一 + 件 + danh từ",
+      "explanationVi": "件 là lượng từ dùng với quần áo và một số sự việc.",
+      "examples": [
+        "一件衣服",
+        "一件事情"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng phòng đang trò chuyện ở nhà",
+    "learnerRole": "người bạn vừa chuyển đến căn phòng mới",
+    "situation": "Hai người giới thiệu đồ vật trong phòng và kể về công việc hằng ngày.",
+    "openingLine": "你的房间里有什么？你每天做什么？"
+  }
+}

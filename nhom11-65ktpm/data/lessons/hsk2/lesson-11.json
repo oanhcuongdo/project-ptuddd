@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-travel-11",
+  "level": "HSK2",
+  "order": 11,
+  "title": "Du lịch và tham quan",
+  "topic": "du lịch",
+  "description": "Chuẩn bị hành lý, đi tham quan và hỏi về chuyến đi.",
+  "vocabulary": [
+    {
+      "id": "lv-xing",
+      "hanzi": "旅行",
+      "pinyin": "lǚxíng",
+      "hanViet": "lữ hành",
+      "meaningVi": "du lịch; chuyến đi",
+      "example": {
+        "hanzi": "我想和朋友一起旅行。",
+        "pinyin": "Wǒ xiǎng hé péngyou yìqǐ lǚxíng.",
+        "meaningVi": "Tôi muốn đi du lịch cùng bạn."
+      }
+    },
+    {
+      "id": "bin-guan",
+      "hanzi": "宾馆",
+      "pinyin": "bīnguǎn",
+      "hanViet": "tân quán",
+      "meaningVi": "khách sạn",
+      "example": {
+        "hanzi": "我们晚上住在宾馆。",
+        "pinyin": "Wǒmen wǎnshang zhù zài bīnguǎn.",
+        "meaningVi": "Buổi tối chúng tôi ở khách sạn."
+      }
+    },
+    {
+      "id": "chu-fa",
+      "hanzi": "出发",
+      "pinyin": "chūfā",
+      "hanViet": "xuất phát",
+      "meaningVi": "khởi hành",
+      "example": {
+        "hanzi": "我们明天早上出发。",
+        "pinyin": "Wǒmen míngtiān zǎoshang chūfā.",
+        "meaningVi": "Sáng mai chúng tôi khởi hành."
+      }
+    },
+    {
+      "id": "dao-da",
+      "hanzi": "到达",
+      "pinyin": "dàodá",
+      "hanViet": "đáo đạt",
+      "meaningVi": "đến nơi",
+      "example": {
+        "hanzi": "火车下午三点到达。",
+        "pinyin": "Huǒchē xiàwǔ sān diǎn dàodá.",
+        "meaningVi": "Tàu hỏa đến nơi lúc ba giờ chiều."
+      }
+    },
+    {
+      "id": "xing-li",
+      "hanzi": "行李",
+      "pinyin": "xíngli",
+      "hanViet": "hành lý",
+      "meaningVi": "hành lý",
+      "example": {
+        "hanzi": "我的行李不多。",
+        "pinyin": "Wǒ de xíngli bù duō.",
+        "meaningVi": "Hành lý của tôi không nhiều."
+      }
+    },
+    {
+      "id": "hu-zhao",
+      "hanzi": "护照",
+      "pinyin": "hùzhào",
+      "hanViet": "hộ chiếu",
+      "meaningVi": "hộ chiếu",
+      "example": {
+        "hanzi": "请带好你的护照。",
+        "pinyin": "Qǐng dài hǎo nǐ de hùzhào.",
+        "meaningVi": "Xin hãy mang theo hộ chiếu."
+      }
+    },
+    {
+      "id": "men-piao",
+      "hanzi": "门票",
+      "pinyin": "ménpiào",
+      "hanViet": "môn phiếu",
+      "meaningVi": "vé vào cửa",
+      "example": {
+        "hanzi": "公园门票多少钱？",
+        "pinyin": "Gōngyuán ménpiào duōshao qián?",
+        "meaningVi": "Vé vào công viên bao nhiêu tiền?"
+      }
+    },
+    {
+      "id": "zhao-xiang",
+      "hanzi": "照相",
+      "pinyin": "zhàoxiàng",
+      "hanViet": "chiếu tướng",
+      "meaningVi": "chụp ảnh",
+      "example": {
+        "hanzi": "我喜欢在公园照相。",
+        "pinyin": "Wǒ xǐhuan zài gōngyuán zhàoxiàng.",
+        "meaningVi": "Tôi thích chụp ảnh ở công viên."
+      }
+    },
+    {
+      "id": "can-guan",
+      "hanzi": "参观",
+      "pinyin": "cānguān",
+      "hanViet": "tham quan",
+      "meaningVi": "tham quan",
+      "example": {
+        "hanzi": "我们明天去参观博物馆。",
+        "pinyin": "Wǒmen míngtiān qù cānguān bówùguǎn.",
+        "meaningVi": "Ngày mai chúng tôi đi tham quan bảo tàng."
+      }
+    },
+    {
+      "id": "dao-you",
+      "hanzi": "导游",
+      "pinyin": "dǎoyóu",
+      "hanViet": "đạo du",
+      "meaningVi": "hướng dẫn viên du lịch",
+      "example": {
+        "hanzi": "导游给我们介绍这个地方。",
+        "pinyin": "Dǎoyóu gěi wǒmen jièshào zhège dìfang.",
+        "meaningVi": "Hướng dẫn viên giới thiệu nơi này cho chúng tôi."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-chulai-dao",
+      "pattern": "从 + nơi đi + 到 + nơi đến",
+      "explanationVi": "从 và 到 nêu điểm bắt đầu và điểm đến của hành trình.",
+      "examples": [
+        "我们从北京到上海旅行。",
+        "火车从这里到机场。"
+      ]
+    },
+    {
+      "id": "gp-dai-hao",
+      "pattern": "Động từ + 好",
+      "explanationVi": "好 sau động từ nhấn mạnh việc chuẩn bị hoặc hoàn thành tốt.",
+      "examples": [
+        "请带好你的护照。",
+        "我准备好行李了。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "nhân viên hướng dẫn du lịch",
+    "learnerRole": "du khách đang chuẩn bị đi chơi",
+    "situation": "Du khách hỏi lịch khởi hành, vé tham quan và nơi lưu trú.",
+    "openingLine": "你准备好行李了吗？我们明天早上出发。"
+  }
+}

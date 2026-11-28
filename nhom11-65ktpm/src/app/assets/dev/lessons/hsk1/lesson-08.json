@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-food-08",
+  "level": "HSK1",
+  "order": 8,
+  "title": "Đồ ăn và thức uống",
+  "topic": "đồ ăn",
+  "description": "Gọi tên một số món ăn, đồ uống và nói về khẩu vị.",
+  "vocabulary": [
+    {
+      "id": "mi-fan",
+      "hanzi": "米饭",
+      "pinyin": "mǐfàn",
+      "hanViet": "mễ phạn",
+      "meaningVi": "cơm",
+      "example": {
+        "hanzi": "我中午吃米饭。",
+        "pinyin": "Wǒ zhōngwǔ chī mǐfàn.",
+        "meaningVi": "Buổi trưa tôi ăn cơm."
+      }
+    },
+    {
+      "id": "shui-water",
+      "hanzi": "水",
+      "pinyin": "shuǐ",
+      "hanViet": "thủy",
+      "meaningVi": "nước",
+      "example": {
+        "hanzi": "请喝水。",
+        "pinyin": "Qǐng hē shuǐ.",
+        "meaningVi": "Mời uống nước."
+      }
+    },
+    {
+      "id": "cha",
+      "hanzi": "茶",
+      "pinyin": "chá",
+      "hanViet": "trà",
+      "meaningVi": "trà",
+      "example": {
+        "hanzi": "爸爸喜欢喝茶。",
+        "pinyin": "Bàba xǐhuan hē chá.",
+        "meaningVi": "Bố thích uống trà."
+      }
+    },
+    {
+      "id": "ka-fei",
+      "hanzi": "咖啡",
+      "pinyin": "kāfēi",
+      "hanViet": "ca phê",
+      "meaningVi": "cà phê",
+      "example": {
+        "hanzi": "我早上喝咖啡。",
+        "pinyin": "Wǒ zǎoshang hē kāfēi.",
+        "meaningVi": "Buổi sáng tôi uống cà phê."
+      }
+    },
+    {
+      "id": "ping-guo",
+      "hanzi": "苹果",
+      "pinyin": "píngguǒ",
+      "hanViet": "bình quả",
+      "meaningVi": "quả táo",
+      "example": {
+        "hanzi": "这个苹果很好吃。",
+        "pinyin": "Zhège píngguǒ hěn hǎochī.",
+        "meaningVi": "Quả táo này rất ngon."
+      }
+    },
+    {
+      "id": "shui-guo",
+      "hanzi": "水果",
+      "pinyin": "shuǐguǒ",
+      "hanViet": "thủy quả",
+      "meaningVi": "trái cây",
+      "example": {
+        "hanzi": "我喜欢吃水果。",
+        "pinyin": "Wǒ xǐhuan chī shuǐguǒ.",
+        "meaningVi": "Tôi thích ăn trái cây."
+      }
+    },
+    {
+      "id": "cai",
+      "hanzi": "菜",
+      "pinyin": "cài",
+      "hanViet": "thái",
+      "meaningVi": "món ăn; rau",
+      "example": {
+        "hanzi": "这个菜很好吃。",
+        "pinyin": "Zhège cài hěn hǎochī.",
+        "meaningVi": "Món này rất ngon."
+      }
+    },
+    {
+      "id": "hao-chi",
+      "hanzi": "好吃",
+      "pinyin": "hǎochī",
+      "hanViet": "hảo cật",
+      "meaningVi": "ngon (đồ ăn)",
+      "example": {
+        "hanzi": "中国菜很好吃。",
+        "pinyin": "Zhōngguó cài hěn hǎochī.",
+        "meaningVi": "Món ăn Trung Quốc rất ngon."
+      }
+    },
+    {
+      "id": "fan-dian",
+      "hanzi": "饭店",
+      "pinyin": "fàndiàn",
+      "hanViet": "phạn điếm",
+      "meaningVi": "nhà hàng",
+      "example": {
+        "hanzi": "我们去饭店吃饭。",
+        "pinyin": "Wǒmen qù fàndiàn chīfàn.",
+        "meaningVi": "Chúng tôi đến nhà hàng ăn cơm."
+      }
+    },
+    {
+      "id": "bei-zi",
+      "hanzi": "杯子",
+      "pinyin": "bēizi",
+      "hanViet": "bôi tử",
+      "meaningVi": "cái cốc; cái ly",
+      "example": {
+        "hanzi": "杯子里有水。",
+        "pinyin": "Bēizi lǐ yǒu shuǐ.",
+        "meaningVi": "Trong cốc có nước."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-xihuan-verb",
+      "pattern": "喜欢 + Động từ",
+      "explanationVi": "喜欢 đứng trước động từ để nói mình thích làm việc gì.",
+      "examples": [
+        "我喜欢吃水果。",
+        "爸爸喜欢喝茶。"
+      ]
+    },
+    {
+      "id": "gp-hen-haochi",
+      "pattern": "Chủ ngữ + 很 + 好吃",
+      "explanationVi": "好吃 miêu tả món ăn ngon; 很 thường đứng trước tính từ trong câu kể.",
+      "examples": [
+        "这个苹果很好吃。",
+        "中国菜很好吃。"
+      ]
+    },
+    {
+      "id": "gp-place-verb",
+      "pattern": "去 + địa điểm + động từ",
+      "explanationVi": "Đặt địa điểm sau 去 và trước động từ để nói đi đâu làm gì.",
+      "examples": [
+        "我们去饭店吃饭。",
+        "我去学校学习。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "nhân viên phục vụ tại một quán ăn",
+    "learnerRole": "khách đến quán cùng bạn",
+    "situation": "Hai người chọn đồ ăn, trái cây và thức uống cho bữa trưa.",
+    "openingLine": "你好！你想吃什么？要喝茶还是咖啡？"
+  }
+}

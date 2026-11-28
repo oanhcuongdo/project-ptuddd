@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-ability-13",
+  "level": "HSK1",
+  "order": 13,
+  "title": "Sở thích và khả năng",
+  "topic": "sở thích",
+  "description": "Nói về điều mình thích, muốn làm và có thể làm.",
+  "vocabulary": [
+    {
+      "id": "xi-huan",
+      "hanzi": "喜欢",
+      "pinyin": "xǐhuan",
+      "hanViet": "hỷ hoan",
+      "meaningVi": "thích",
+      "example": {
+        "hanzi": "我喜欢学习汉语。",
+        "pinyin": "Wǒ xǐhuan xuéxí Hànyǔ.",
+        "meaningVi": "Tôi thích học tiếng Trung."
+      }
+    },
+    {
+      "id": "xiang",
+      "hanzi": "想",
+      "pinyin": "xiǎng",
+      "hanViet": "tưởng",
+      "meaningVi": "muốn; nghĩ",
+      "example": {
+        "hanzi": "我想喝茶。",
+        "pinyin": "Wǒ xiǎng hē chá.",
+        "meaningVi": "Tôi muốn uống trà."
+      }
+    },
+    {
+      "id": "hui",
+      "hanzi": "会",
+      "pinyin": "huì",
+      "hanViet": "hội",
+      "meaningVi": "biết; có thể (do đã học)",
+      "example": {
+        "hanzi": "我会说汉语。",
+        "pinyin": "Wǒ huì shuō Hànyǔ.",
+        "meaningVi": "Tôi biết nói tiếng Trung."
+      }
+    },
+    {
+      "id": "neng",
+      "hanzi": "能",
+      "pinyin": "néng",
+      "hanViet": "năng",
+      "meaningVi": "có thể; có khả năng",
+      "example": {
+        "hanzi": "你今天能来吗？",
+        "pinyin": "Nǐ jīntiān néng lái ma?",
+        "meaningVi": "Hôm nay bạn có thể đến không?"
+      }
+    },
+    {
+      "id": "ke-yi",
+      "hanzi": "可以",
+      "pinyin": "kěyǐ",
+      "hanViet": "khả dĩ",
+      "meaningVi": "có thể; được phép",
+      "example": {
+        "hanzi": "我可以坐这儿吗？",
+        "pinyin": "Wǒ kěyǐ zuò zhèr ma?",
+        "meaningVi": "Tôi có thể ngồi đây không?"
+      }
+    },
+    {
+      "id": "jue-de",
+      "hanzi": "觉得",
+      "pinyin": "juéde",
+      "hanViet": "giác đắc",
+      "meaningVi": "cảm thấy; cho rằng",
+      "example": {
+        "hanzi": "我觉得这本书很好。",
+        "pinyin": "Wǒ juéde zhè běn shū hěn hǎo.",
+        "meaningVi": "Tôi thấy quyển sách này rất hay."
+      }
+    },
+    {
+      "id": "zhi-dao",
+      "hanzi": "知道",
+      "pinyin": "zhīdào",
+      "hanViet": "tri đạo",
+      "meaningVi": "biết; biết thông tin",
+      "example": {
+        "hanzi": "你知道他在哪儿吗？",
+        "pinyin": "Nǐ zhīdào tā zài nǎr ma?",
+        "meaningVi": "Bạn có biết anh ấy ở đâu không?"
+      }
+    },
+    {
+      "id": "ren-shi",
+      "hanzi": "认识",
+      "pinyin": "rènshi",
+      "hanViet": "nhận thức",
+      "meaningVi": "quen; biết (một người)",
+      "example": {
+        "hanzi": "我认识王老师。",
+        "pinyin": "Wǒ rènshi Wáng lǎoshī.",
+        "meaningVi": "Tôi quen thầy Vương."
+      }
+    },
+    {
+      "id": "jie-shao",
+      "hanzi": "介绍",
+      "pinyin": "jièshào",
+      "hanViet": "giới thiệu",
+      "meaningVi": "giới thiệu",
+      "example": {
+        "hanzi": "请介绍一下你的朋友。",
+        "pinyin": "Qǐng jièshào yíxià nǐ de péngyou.",
+        "meaningVi": "Xin hãy giới thiệu một chút về bạn của bạn."
+      }
+    },
+    {
+      "id": "xi-wang",
+      "hanzi": "希望",
+      "pinyin": "xīwàng",
+      "hanViet": "hy vọng",
+      "meaningVi": "hy vọng; mong muốn",
+      "example": {
+        "hanzi": "我希望明天有好天气。",
+        "pinyin": "Wǒ xīwàng míngtiān yǒu hǎo tiānqì.",
+        "meaningVi": "Tôi hy vọng ngày mai thời tiết đẹp."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-modal-before-verb",
+      "pattern": "会 / 能 / 可以 + động từ",
+      "explanationVi": "Động từ năng nguyện đứng trước động từ chính; 会 thường nói kỹ năng đã học, 能 nói khả năng hoặc điều kiện, 可以 nói sự cho phép.",
+      "examples": [
+        "我会说汉语。",
+        "你今天能来吗？",
+        "我可以坐这儿吗？"
+      ]
+    },
+    {
+      "id": "gp-xiang-verb",
+      "pattern": "想 + động từ",
+      "explanationVi": "想 đứng trước động từ để diễn tả mong muốn làm việc gì.",
+      "examples": [
+        "我想喝茶。",
+        "我想去中国。"
+      ]
+    },
+    {
+      "id": "gp-juede-clause",
+      "pattern": "觉得 + nhận xét",
+      "explanationVi": "觉得 đứng trước một mệnh đề hoặc nhận xét để nêu cảm nhận, ý kiến.",
+      "examples": [
+        "我觉得这本书很好。",
+        "我觉得汉语很有意思。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng lớp đang tìm bạn tham gia câu lạc bộ",
+    "learnerRole": "sinh viên mới muốn tìm hiểu câu lạc bộ tiếng Trung",
+    "situation": "Hai bạn hỏi về sở thích và khả năng tham gia một buổi sinh hoạt.",
+    "openingLine": "你喜欢学习汉语吗？你今天能来吗？"
+  }
+}

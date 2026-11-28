@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-study-work-03",
+  "level": "HSK2",
+  "order": 3,
+  "title": "Học tập và công việc",
+  "topic": "học tập",
+  "description": "Trao đổi về bài tập, việc ôn luyện và các hoạt động ở trường.",
+  "vocabulary": [
+    {
+      "id": "kao-shi",
+      "hanzi": "考试",
+      "pinyin": "kǎoshì",
+      "hanViet": "khảo thí",
+      "meaningVi": "kỳ thi; thi",
+      "example": {
+        "hanzi": "明天我们有汉语考试。",
+        "pinyin": "Míngtiān wǒmen yǒu Hànyǔ kǎoshì.",
+        "meaningVi": "Ngày mai chúng tôi có bài thi tiếng Trung."
+      }
+    },
+    {
+      "id": "wen-ti",
+      "hanzi": "问题",
+      "pinyin": "wèntí",
+      "hanViet": "vấn đề",
+      "meaningVi": "câu hỏi; vấn đề",
+      "example": {
+        "hanzi": "你有什么问题吗？",
+        "pinyin": "Nǐ yǒu shénme wèntí ma?",
+        "meaningVi": "Bạn có câu hỏi nào không?"
+      }
+    },
+    {
+      "id": "fu-xi",
+      "hanzi": "复习",
+      "pinyin": "fùxí",
+      "hanViet": "phục tập",
+      "meaningVi": "ôn tập",
+      "example": {
+        "hanzi": "我晚上复习今天的课。",
+        "pinyin": "Wǒ wǎnshang fùxí jīntiān de kè.",
+        "meaningVi": "Buổi tối tôi ôn bài học hôm nay."
+      }
+    },
+    {
+      "id": "ren-zhen",
+      "hanzi": "认真",
+      "pinyin": "rènzhēn",
+      "hanViet": "nhận chân",
+      "meaningVi": "nghiêm túc; chăm chú",
+      "example": {
+        "hanzi": "她认真地学习汉语。",
+        "pinyin": "Tā rènzhēn de xuéxí Hànyǔ.",
+        "meaningVi": "Cô ấy học tiếng Trung rất chăm chỉ."
+      }
+    },
+    {
+      "id": "nu-li",
+      "hanzi": "努力",
+      "pinyin": "nǔlì",
+      "hanViet": "nỗ lực",
+      "meaningVi": "nỗ lực; cố gắng",
+      "example": {
+        "hanzi": "他努力学习汉语。",
+        "pinyin": "Tā nǔlì xuéxí Hànyǔ.",
+        "meaningVi": "Anh ấy cố gắng học tiếng Trung."
+      }
+    },
+    {
+      "id": "ke-ben",
+      "hanzi": "课本",
+      "pinyin": "kèběn",
+      "hanViet": "khóa bản",
+      "meaningVi": "sách giáo khoa",
+      "example": {
+        "hanzi": "请打开课本。",
+        "pinyin": "Qǐng dǎkāi kèběn.",
+        "meaningVi": "Xin hãy mở sách giáo khoa."
+      }
+    },
+    {
+      "id": "zuo-ye",
+      "hanzi": "作业",
+      "pinyin": "zuòyè",
+      "hanViet": "tác nghiệp",
+      "meaningVi": "bài tập về nhà",
+      "example": {
+        "hanzi": "我已经做完作业了。",
+        "pinyin": "Wǒ yǐjīng zuò wán zuòyè le.",
+        "meaningVi": "Tôi làm xong bài tập rồi."
+      }
+    },
+    {
+      "id": "ci-dian",
+      "hanzi": "词典",
+      "pinyin": "cídiǎn",
+      "hanViet": "từ điển",
+      "meaningVi": "từ điển",
+      "example": {
+        "hanzi": "这个词我在词典里找到了。",
+        "pinyin": "Zhège cí wǒ zài cídiǎn lǐ zhǎodào le.",
+        "meaningVi": "Tôi đã tìm thấy từ này trong từ điển."
+      }
+    },
+    {
+      "id": "lian-xi",
+      "hanzi": "练习",
+      "pinyin": "liànxí",
+      "hanViet": "luyện tập",
+      "meaningVi": "luyện tập; bài luyện tập",
+      "example": {
+        "hanzi": "我们每天练习说汉语。",
+        "pinyin": "Wǒmen měitiān liànxí shuō Hànyǔ.",
+        "meaningVi": "Mỗi ngày chúng tôi luyện nói tiếng Trung."
+      }
+    },
+    {
+      "id": "ban-gong-shi",
+      "hanzi": "办公室",
+      "pinyin": "bàngōngshì",
+      "hanViet": "ban công thất",
+      "meaningVi": "văn phòng",
+      "example": {
+        "hanzi": "老师在办公室。",
+        "pinyin": "Lǎoshī zài bàngōngshì.",
+        "meaningVi": "Giáo viên ở văn phòng."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-yijing-le",
+      "pattern": "已经 + động từ + 了",
+      "explanationVi": "已经 nhấn mạnh việc đã xảy ra hoặc hoàn tất; 了 có thể đặt ở cuối câu.",
+      "examples": [
+        "我已经做完作业了。",
+        "他已经回家了。"
+      ]
+    },
+    {
+      "id": "gp-de-adverb",
+      "pattern": "Tính từ + 地 + động từ",
+      "explanationVi": "地 nối từ miêu tả cách thức với động từ, thường dịch là 'một cách...'.",
+      "examples": [
+        "她认真地学习汉语。",
+        "他高兴地说话。"
+      ]
+    },
+    {
+      "id": "gp-daily-practice",
+      "pattern": "每天 + động từ",
+      "explanationVi": "每天 đứng trước động từ để nói về thói quen hằng ngày.",
+      "examples": [
+        "我们每天练习说汉语。",
+        "我每天复习生词。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng lớp đang chuẩn bị cho kỳ thi",
+    "learnerRole": "sinh viên cùng ôn bài",
+    "situation": "Hai bạn hỏi về bài tập, cách ôn tập và những câu hỏi chưa hiểu.",
+    "openingLine": "你准备好明天的考试了吗？"
+  }
+}

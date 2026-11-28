@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-school-05",
+  "level": "HSK1",
+  "order": 5,
+  "title": "Ở trường",
+  "topic": "trường học",
+  "description": "Làm quen với từ vựng về lớp học, tên gọi và bạn học.",
+  "vocabulary": [
+    {
+      "id": "xue-xiao",
+      "hanzi": "学校",
+      "pinyin": "xuéxiào",
+      "hanViet": "học hiệu",
+      "meaningVi": "trường học",
+      "example": {
+        "hanzi": "我在学校学习汉语。",
+        "pinyin": "Wǒ zài xuéxiào xuéxí hànyǔ.",
+        "meaningVi": "Tôi học tiếng Trung ở trường."
+      }
+    },
+    {
+      "id": "han-yu",
+      "hanzi": "汉语",
+      "pinyin": "Hànyǔ",
+      "hanViet": "Hán ngữ",
+      "meaningVi": "tiếng Trung",
+      "example": {
+        "hanzi": "我会说汉语。",
+        "pinyin": "Wǒ huì shuō hànyǔ.",
+        "meaningVi": "Tôi biết nói tiếng Trung."
+      }
+    },
+    {
+      "id": "ke",
+      "hanzi": "课",
+      "pinyin": "kè",
+      "hanViet": "khóa",
+      "meaningVi": "tiết học; bài học",
+      "example": {
+        "hanzi": "今天我有汉语课。",
+        "pinyin": "Jīntiān wǒ yǒu hànyǔ kè.",
+        "meaningVi": "Hôm nay tôi có tiết tiếng Trung."
+      }
+    },
+    {
+      "id": "shu",
+      "hanzi": "书",
+      "pinyin": "shū",
+      "hanViet": "thư",
+      "meaningVi": "sách",
+      "example": {
+        "hanzi": "这是我的书。",
+        "pinyin": "Zhè shì wǒ de shū.",
+        "meaningVi": "Đây là sách của tôi."
+      }
+    },
+    {
+      "id": "ming-zi",
+      "hanzi": "名字",
+      "pinyin": "míngzi",
+      "hanViet": "danh tự",
+      "meaningVi": "tên",
+      "example": {
+        "hanzi": "你的名字是什么？",
+        "pinyin": "Nǐ de míngzi shì shénme?",
+        "meaningVi": "Tên bạn là gì?"
+      }
+    },
+    {
+      "id": "jiao",
+      "hanzi": "叫",
+      "pinyin": "jiào",
+      "hanViet": "khiếu",
+      "meaningVi": "tên là; gọi",
+      "example": {
+        "hanzi": "我叫小明。",
+        "pinyin": "Wǒ jiào Xiǎomíng.",
+        "meaningVi": "Tôi tên là Tiểu Minh."
+      }
+    },
+    {
+      "id": "shui",
+      "hanzi": "谁",
+      "pinyin": "shéi",
+      "hanViet": "thùy",
+      "meaningVi": "ai",
+      "example": {
+        "hanzi": "谁是你的老师？",
+        "pinyin": "Shéi shì nǐ de lǎoshī?",
+        "meaningVi": "Ai là giáo viên của bạn?"
+      }
+    },
+    {
+      "id": "tong-xue",
+      "hanzi": "同学",
+      "pinyin": "tóngxué",
+      "hanViet": "đồng học",
+      "meaningVi": "bạn học",
+      "example": {
+        "hanzi": "他是我的同学。",
+        "pinyin": "Tā shì wǒ de tóngxué.",
+        "meaningVi": "Anh ấy là bạn học của tôi."
+      }
+    },
+    {
+      "id": "peng-you",
+      "hanzi": "朋友",
+      "pinyin": "péngyou",
+      "hanViet": "bằng hữu",
+      "meaningVi": "bạn bè; bạn",
+      "example": {
+        "hanzi": "她是我的朋友。",
+        "pinyin": "Tā shì wǒ de péngyou.",
+        "meaningVi": "Cô ấy là bạn của tôi."
+      }
+    },
+    {
+      "id": "xian-sheng",
+      "hanzi": "先生",
+      "pinyin": "xiānsheng",
+      "hanViet": "tiên sinh",
+      "meaningVi": "ông; ngài (cách xưng hô lịch sự)",
+      "example": {
+        "hanzi": "王先生是老师。",
+        "pinyin": "Wáng xiānsheng shì lǎoshī.",
+        "meaningVi": "Thầy Vương là giáo viên."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-jiao-name",
+      "pattern": "Chủ ngữ + 叫 + tên",
+      "explanationVi": "叫 dùng để giới thiệu tên của mình hoặc hỏi tên người khác.",
+      "examples": [
+        "我叫小明。",
+        "你叫什么名字？"
+      ]
+    },
+    {
+      "id": "gp-wh-word-shui",
+      "pattern": "谁 + 是 + ...？",
+      "explanationVi": "谁 là từ để hỏi người; câu hỏi có từ để hỏi không cần thêm 吗.",
+      "examples": [
+        "谁是你的老师？",
+        "他是谁？"
+      ]
+    },
+    {
+      "id": "gp-de-possession",
+      "pattern": "Đại từ + 的 + danh từ",
+      "explanationVi": "的 đứng giữa người sở hữu và danh từ, ví dụ 我的书 là sách của tôi.",
+      "examples": [
+        "这是我的书。",
+        "他是我的同学。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn học mới quen trong lớp tiếng Trung",
+    "learnerRole": "sinh viên Việt Nam mới đến lớp",
+    "situation": "Hai bạn tự giới thiệu tên, hỏi về lớp học và làm quen với bạn học.",
+    "openingLine": "你好！你叫什么名字？"
+  }
+}

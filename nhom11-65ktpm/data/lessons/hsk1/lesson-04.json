@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-time-04",
+  "level": "HSK1",
+  "order": 4,
+  "title": "Thời gian trong ngày",
+  "topic": "thời gian",
+  "description": "Học cách nói về hôm qua, hôm nay, ngày mai và hỏi giờ.",
+  "vocabulary": [
+    {
+      "id": "jin-tian",
+      "hanzi": "今天",
+      "pinyin": "jīntiān",
+      "hanViet": "kim thiên",
+      "meaningVi": "hôm nay",
+      "example": {
+        "hanzi": "今天我去学校。",
+        "pinyin": "Jīntiān wǒ qù xuéxiào.",
+        "meaningVi": "Hôm nay tôi đi học."
+      }
+    },
+    {
+      "id": "ming-tian",
+      "hanzi": "明天",
+      "pinyin": "míngtiān",
+      "hanViet": "minh thiên",
+      "meaningVi": "ngày mai",
+      "example": {
+        "hanzi": "明天是星期二。",
+        "pinyin": "Míngtiān shì xīngqī èr.",
+        "meaningVi": "Ngày mai là thứ Ba."
+      }
+    },
+    {
+      "id": "zuo-tian",
+      "hanzi": "昨天",
+      "pinyin": "zuótiān",
+      "hanViet": "tạc thiên",
+      "meaningVi": "hôm qua",
+      "example": {
+        "hanzi": "昨天我在家。",
+        "pinyin": "Zuótiān wǒ zài jiā.",
+        "meaningVi": "Hôm qua tôi ở nhà."
+      }
+    },
+    {
+      "id": "xian-zai",
+      "hanzi": "现在",
+      "pinyin": "xiànzài",
+      "hanViet": "hiện tại",
+      "meaningVi": "bây giờ; hiện tại",
+      "example": {
+        "hanzi": "现在几点？",
+        "pinyin": "Xiànzài jǐ diǎn?",
+        "meaningVi": "Bây giờ là mấy giờ?"
+      }
+    },
+    {
+      "id": "shang-wu",
+      "hanzi": "上午",
+      "pinyin": "shàngwǔ",
+      "hanViet": "thượng ngọ",
+      "meaningVi": "buổi sáng (khoảng 8–12 giờ)",
+      "example": {
+        "hanzi": "上午我学习汉语。",
+        "pinyin": "Shàngwǔ wǒ xuéxí Hànyǔ.",
+        "meaningVi": "Buổi sáng tôi học tiếng Trung."
+      }
+    },
+    {
+      "id": "zhong-wu",
+      "hanzi": "中午",
+      "pinyin": "zhōngwǔ",
+      "hanViet": "trung ngọ",
+      "meaningVi": "buổi trưa",
+      "example": {
+        "hanzi": "中午我们吃米饭。",
+        "pinyin": "Zhōngwǔ wǒmen chī mǐfàn.",
+        "meaningVi": "Buổi trưa chúng tôi ăn cơm."
+      }
+    },
+    {
+      "id": "xia-wu",
+      "hanzi": "下午",
+      "pinyin": "xiàwǔ",
+      "hanViet": "hạ ngọ",
+      "meaningVi": "buổi chiều",
+      "example": {
+        "hanzi": "下午三点见。",
+        "pinyin": "Xiàwǔ sān diǎn jiàn.",
+        "meaningVi": "Ba giờ chiều gặp nhé."
+      }
+    },
+    {
+      "id": "wan-shang",
+      "hanzi": "晚上",
+      "pinyin": "wǎnshang",
+      "hanViet": "vãn thượng",
+      "meaningVi": "buổi tối",
+      "example": {
+        "hanzi": "晚上八点。",
+        "pinyin": "Wǎnshang bā diǎn.",
+        "meaningVi": "Tám giờ tối."
+      }
+    },
+    {
+      "id": "dian",
+      "hanzi": "点",
+      "pinyin": "diǎn",
+      "hanViet": "điểm",
+      "meaningVi": "giờ (đơn vị xem giờ)",
+      "example": {
+        "hanzi": "现在八点。",
+        "pinyin": "Xiànzài bā diǎn.",
+        "meaningVi": "Bây giờ là tám giờ."
+      }
+    },
+    {
+      "id": "fen-zhong",
+      "hanzi": "分钟",
+      "pinyin": "fēnzhōng",
+      "hanViet": "phân chung",
+      "meaningVi": "phút",
+      "example": {
+        "hanzi": "我等你十分钟。",
+        "pinyin": "Wǒ děng nǐ shí fēnzhōng.",
+        "meaningVi": "Tôi đợi bạn mười phút."
+      }
+    },
+    {
+      "id": "xing-qi",
+      "hanzi": "星期",
+      "pinyin": "xīngqī",
+      "hanViet": "tinh kỳ",
+      "meaningVi": "tuần; thứ (trong tuần)",
+      "example": {
+        "hanzi": "星期一我有课。",
+        "pinyin": "Xīngqīyī wǒ yǒu kè.",
+        "meaningVi": "Thứ Hai tôi có tiết học."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-time-before-subject",
+      "pattern": "Thời gian + Chủ ngữ + Động từ",
+      "explanationVi": "Từ chỉ thời gian thường đứng trước chủ ngữ hoặc sau chủ ngữ để nêu thời điểm xảy ra hành động.",
+      "examples": [
+        "今天我去学校。",
+        "我今天去学校。"
+      ]
+    },
+    {
+      "id": "gp-ask-time",
+      "pattern": "现在 + 几点？",
+      "explanationVi": "Dùng 几点 để hỏi giờ; khi trả lời, đặt số đứng trước 点.",
+      "examples": [
+        "现在几点？",
+        "现在八点。"
+      ]
+    },
+    {
+      "id": "gp-duration-minutes",
+      "pattern": "Số + 分钟",
+      "explanationVi": "Đặt số trước 分钟 để nói một khoảng thời gian tính bằng phút.",
+      "examples": [
+        "我等你十分钟。",
+        "我学习二十分钟。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng lớp người Trung Quốc",
+    "learnerRole": "sinh viên Việt Nam đang lên kế hoạch học",
+    "situation": "Hai bạn hỏi giờ, nói về lịch học hôm nay và hẹn gặp vào ngày mai.",
+    "openingLine": "现在几点？你今天上午有课吗？"
+  }
+}

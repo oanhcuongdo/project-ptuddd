@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-shopping-06",
+  "level": "HSK2",
+  "order": 6,
+  "title": "Mua sắm và quần áo",
+  "topic": "mua sắm",
+  "description": "Hỏi giá, thử quần áo và miêu tả độ dài khi mua sắm.",
+  "vocabulary": [
+    {
+      "id": "chao-shi",
+      "hanzi": "超市",
+      "pinyin": "chāoshì",
+      "hanViet": "siêu thị",
+      "meaningVi": "siêu thị",
+      "example": {
+        "hanzi": "我下午去超市买东西。",
+        "pinyin": "Wǒ xiàwǔ qù chāoshì mǎi dōngxi.",
+        "meaningVi": "Chiều nay tôi đi siêu thị mua đồ."
+      }
+    },
+    {
+      "id": "shi-chang",
+      "hanzi": "市场",
+      "pinyin": "shìchǎng",
+      "hanViet": "thị trường",
+      "meaningVi": "chợ; thị trường",
+      "example": {
+        "hanzi": "这个市场很大。",
+        "pinyin": "Zhège shìchǎng hěn dà.",
+        "meaningVi": "Khu chợ này rất lớn."
+      }
+    },
+    {
+      "id": "mao-zi",
+      "hanzi": "帽子",
+      "pinyin": "màozi",
+      "hanViet": "mạo tử",
+      "meaningVi": "mũ",
+      "example": {
+        "hanzi": "这顶帽子很漂亮。",
+        "pinyin": "Zhè dǐng màozi hěn piàoliang.",
+        "meaningVi": "Chiếc mũ này rất đẹp."
+      }
+    },
+    {
+      "id": "xie-shoes",
+      "hanzi": "鞋",
+      "pinyin": "xié",
+      "hanViet": "hài",
+      "meaningVi": "giày",
+      "example": {
+        "hanzi": "我想买一双鞋。",
+        "pinyin": "Wǒ xiǎng mǎi yì shuāng xié.",
+        "meaningVi": "Tôi muốn mua một đôi giày."
+      }
+    },
+    {
+      "id": "qun-zi",
+      "hanzi": "裙子",
+      "pinyin": "qúnzi",
+      "hanViet": "quần tử",
+      "meaningVi": "váy",
+      "example": {
+        "hanzi": "她穿着一条红裙子。",
+        "pinyin": "Tā chuānzhe yì tiáo hóng qúnzi.",
+        "meaningVi": "Cô ấy đang mặc một chiếc váy đỏ."
+      }
+    },
+    {
+      "id": "ku-zi",
+      "hanzi": "裤子",
+      "pinyin": "kùzi",
+      "hanViet": "khố tử",
+      "meaningVi": "quần",
+      "example": {
+        "hanzi": "这条裤子太长了。",
+        "pinyin": "Zhè tiáo kùzi tài cháng le.",
+        "meaningVi": "Chiếc quần này dài quá."
+      }
+    },
+    {
+      "id": "chuan",
+      "hanzi": "穿",
+      "pinyin": "chuān",
+      "hanViet": "xuyên",
+      "meaningVi": "mặc; đi (giày)",
+      "example": {
+        "hanzi": "今天我穿蓝色的衣服。",
+        "pinyin": "Jīntiān wǒ chuān lánsè de yīfu.",
+        "meaningVi": "Hôm nay tôi mặc quần áo màu xanh."
+      }
+    },
+    {
+      "id": "chang-long",
+      "hanzi": "长",
+      "pinyin": "cháng",
+      "hanViet": "trường",
+      "meaningVi": "dài",
+      "example": {
+        "hanzi": "这件衣服有一点儿长。",
+        "pinyin": "Zhè jiàn yīfu yǒu yìdiǎnr cháng.",
+        "meaningVi": "Bộ quần áo này hơi dài."
+      }
+    },
+    {
+      "id": "duan",
+      "hanzi": "短",
+      "pinyin": "duǎn",
+      "hanViet": "đoản",
+      "meaningVi": "ngắn",
+      "example": {
+        "hanzi": "这条裙子太短了。",
+        "pinyin": "Zhè tiáo qúnzi tài duǎn le.",
+        "meaningVi": "Chiếc váy này ngắn quá."
+      }
+    },
+    {
+      "id": "shi-try",
+      "hanzi": "试",
+      "pinyin": "shì",
+      "hanViet": "thí",
+      "meaningVi": "thử",
+      "example": {
+        "hanzi": "我可以试一下这件衣服吗？",
+        "pinyin": "Wǒ kěyǐ shì yíxià zhè jiàn yīfu ma?",
+        "meaningVi": "Tôi có thể thử bộ quần áo này không?"
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-yi-shuang",
+      "pattern": "一 + lượng từ + đôi",
+      "explanationVi": "鞋 thường đi với lượng từ 双 khi đếm theo đôi.",
+      "examples": [
+        "我想买一双鞋。",
+        "他有两双黑鞋。"
+      ]
+    },
+    {
+      "id": "gp-chuan-zhe",
+      "pattern": "穿着 + quần áo",
+      "explanationVi": "着 sau động từ diễn tả trạng thái đang duy trì, như đang mặc.",
+      "examples": [
+        "她穿着一条红裙子。",
+        "他穿着蓝色的衣服。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "nhân viên cửa hàng quần áo",
+    "learnerRole": "khách đang chọn quần áo",
+    "situation": "Khách hỏi giá, chọn cỡ và xin thử quần áo.",
+    "openingLine": "你好！你想买什么？可以先试一下。"
+  }
+}

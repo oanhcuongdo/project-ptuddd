@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-classroom-10",
+  "level": "HSK2",
+  "order": 10,
+  "title": "Lớp học và ôn tập",
+  "topic": "học tập",
+  "description": "Trao đổi về lớp học, câu tiếng Trung và cách giải quyết bài tập.",
+  "vocabulary": [
+    {
+      "id": "jiao-shi",
+      "hanzi": "教室",
+      "pinyin": "jiàoshì",
+      "hanViet": "giáo thất",
+      "meaningVi": "phòng học",
+      "example": {
+        "hanzi": "老师在教室里等我们。",
+        "pinyin": "Lǎoshī zài jiàoshì lǐ děng wǒmen.",
+        "meaningVi": "Giáo viên đang đợi chúng tôi trong lớp."
+      }
+    },
+    {
+      "id": "tu-shu-guan",
+      "hanzi": "图书馆",
+      "pinyin": "túshūguǎn",
+      "hanViet": "đồ thư quán",
+      "meaningVi": "thư viện",
+      "example": {
+        "hanzi": "我常常在图书馆看书。",
+        "pinyin": "Wǒ chángcháng zài túshūguǎn kàn shū.",
+        "meaningVi": "Tôi thường đọc sách ở thư viện."
+      }
+    },
+    {
+      "id": "ju-zi",
+      "hanzi": "句子",
+      "pinyin": "jùzi",
+      "hanViet": "cú tử",
+      "meaningVi": "câu",
+      "example": {
+        "hanzi": "请读这个句子。",
+        "pinyin": "Qǐng dú zhège jùzi.",
+        "meaningVi": "Xin hãy đọc câu này."
+      }
+    },
+    {
+      "id": "sheng-ci",
+      "hanzi": "生词",
+      "pinyin": "shēngcí",
+      "hanViet": "sinh từ",
+      "meaningVi": "từ mới",
+      "example": {
+        "hanzi": "我把生词写在本子上。",
+        "pinyin": "Wǒ bǎ shēngcí xiě zài běnzi shàng.",
+        "meaningVi": "Tôi viết từ mới vào vở."
+      }
+    },
+    {
+      "id": "yu-fa",
+      "hanzi": "语法",
+      "pinyin": "yǔfǎ",
+      "hanViet": "ngữ pháp",
+      "meaningVi": "ngữ pháp",
+      "example": {
+        "hanzi": "这个语法不太难。",
+        "pinyin": "Zhège yǔfǎ bú tài nán.",
+        "meaningVi": "Ngữ pháp này không khó lắm."
+      }
+    },
+    {
+      "id": "ke-wen",
+      "hanzi": "课文",
+      "pinyin": "kèwén",
+      "hanViet": "khóa văn",
+      "meaningVi": "bài khóa",
+      "example": {
+        "hanzi": "我们一起读课文吧。",
+        "pinyin": "Wǒmen yìqǐ dú kèwén ba.",
+        "meaningVi": "Chúng ta cùng đọc bài khóa nhé."
+      }
+    },
+    {
+      "id": "ban-fa",
+      "hanzi": "办法",
+      "pinyin": "bànfǎ",
+      "hanViet": "biện pháp",
+      "meaningVi": "cách; biện pháp",
+      "example": {
+        "hanzi": "我有一个好办法。",
+        "pinyin": "Wǒ yǒu yí ge hǎo bànfǎ.",
+        "meaningVi": "Tôi có một cách hay."
+      }
+    },
+    {
+      "id": "bang-zhu",
+      "hanzi": "帮助",
+      "pinyin": "bāngzhù",
+      "hanViet": "bang trợ",
+      "meaningVi": "giúp đỡ",
+      "example": {
+        "hanzi": "同学帮助我学习汉语。",
+        "pinyin": "Tóngxué bāngzhù wǒ xuéxí Hànyǔ.",
+        "meaningVi": "Bạn cùng lớp giúp tôi học tiếng Trung."
+      }
+    },
+    {
+      "id": "hui-da",
+      "hanzi": "回答",
+      "pinyin": "huídá",
+      "hanViet": "hồi đáp",
+      "meaningVi": "trả lời",
+      "example": {
+        "hanzi": "请回答老师的问题。",
+        "pinyin": "Qǐng huídá lǎoshī de wèntí.",
+        "meaningVi": "Xin hãy trả lời câu hỏi của giáo viên."
+      }
+    },
+    {
+      "id": "ming-bai",
+      "hanzi": "明白",
+      "pinyin": "míngbai",
+      "hanViet": "minh bạch",
+      "meaningVi": "hiểu; rõ",
+      "example": {
+        "hanzi": "我明白这个句子的意思。",
+        "pinyin": "Wǒ míngbai zhège jùzi de yìsi.",
+        "meaningVi": "Tôi hiểu nghĩa của câu này."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-ba-disposal",
+      "pattern": "主语 + 把 + 宾语 + 动词",
+      "explanationVi": "把 đưa tân ngữ lên trước động từ để nhấn mạnh cách xử lý hoặc kết quả.",
+      "examples": [
+        "我把生词写在本子上。",
+        "请把课本放在桌子上。"
+      ]
+    },
+    {
+      "id": "gp-ba-method",
+      "pattern": "有 + số lượng + 个 + 办法",
+      "explanationVi": "Có thể dùng 有一个办法 để giới thiệu một cách giải quyết.",
+      "examples": [
+        "我有一个好办法。",
+        "老师有办法帮助我们。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn học cùng lớp",
+    "learnerRole": "người đang hỏi bài",
+    "situation": "Hai bạn cùng đọc bài khóa, giải nghĩa từ mới và trả lời câu hỏi.",
+    "openingLine": "这个句子你明白吗？我可以帮助你。"
+  }
+}

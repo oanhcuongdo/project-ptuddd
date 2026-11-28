@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-directions-14",
+  "level": "HSK1",
+  "order": 14,
+  "title": "Vị trí và phương hướng",
+  "topic": "phương hướng",
+  "description": "Hỏi vị trí của đồ vật và chỉ đường bằng các từ chỉ phương hướng.",
+  "vocabulary": [
+    {
+      "id": "shang",
+      "hanzi": "上",
+      "pinyin": "shàng",
+      "hanViet": "thượng",
+      "meaningVi": "trên; lên",
+      "example": {
+        "hanzi": "书在桌子上。",
+        "pinyin": "Shū zài zhuōzi shàng.",
+        "meaningVi": "Sách ở trên bàn."
+      }
+    },
+    {
+      "id": "xia",
+      "hanzi": "下",
+      "pinyin": "xià",
+      "hanViet": "hạ",
+      "meaningVi": "dưới; xuống",
+      "example": {
+        "hanzi": "猫在椅子下。",
+        "pinyin": "Māo zài yǐzi xià.",
+        "meaningVi": "Con mèo ở dưới ghế."
+      }
+    },
+    {
+      "id": "qian-mian",
+      "hanzi": "前面",
+      "pinyin": "qiánmiàn",
+      "hanViet": "tiền diện",
+      "meaningVi": "phía trước",
+      "example": {
+        "hanzi": "学校前面有商店。",
+        "pinyin": "Xuéxiào qiánmiàn yǒu shāngdiàn.",
+        "meaningVi": "Phía trước trường có cửa hàng."
+      }
+    },
+    {
+      "id": "hou-mian",
+      "hanzi": "后面",
+      "pinyin": "hòumiàn",
+      "hanViet": "hậu diện",
+      "meaningVi": "phía sau",
+      "example": {
+        "hanzi": "医院在饭店后面。",
+        "pinyin": "Yīyuàn zài fàndiàn hòumiàn.",
+        "meaningVi": "Bệnh viện ở phía sau nhà hàng."
+      }
+    },
+    {
+      "id": "zuo-bian",
+      "hanzi": "左边",
+      "pinyin": "zuǒbian",
+      "hanViet": "tả biên",
+      "meaningVi": "bên trái",
+      "example": {
+        "hanzi": "商店在学校左边。",
+        "pinyin": "Shāngdiàn zài xuéxiào zuǒbian.",
+        "meaningVi": "Cửa hàng ở bên trái trường học."
+      }
+    },
+    {
+      "id": "you-bian",
+      "hanzi": "右边",
+      "pinyin": "yòubian",
+      "hanViet": "hữu biên",
+      "meaningVi": "bên phải",
+      "example": {
+        "hanzi": "饭店在医院右边。",
+        "pinyin": "Fàndiàn zài yīyuàn yòubian.",
+        "meaningVi": "Nhà hàng ở bên phải bệnh viện."
+      }
+    },
+    {
+      "id": "pang-bian",
+      "hanzi": "旁边",
+      "pinyin": "pángbiān",
+      "hanViet": "bàng biên",
+      "meaningVi": "bên cạnh",
+      "example": {
+        "hanzi": "我家旁边有学校。",
+        "pinyin": "Wǒ jiā pángbiān yǒu xuéxiào.",
+        "meaningVi": "Bên cạnh nhà tôi có trường học."
+      }
+    },
+    {
+      "id": "yi-qi",
+      "hanzi": "一起",
+      "pinyin": "yìqǐ",
+      "hanViet": "nhất khởi",
+      "meaningVi": "cùng nhau",
+      "example": {
+        "hanzi": "我们一起去学校。",
+        "pinyin": "Wǒmen yìqǐ qù xuéxiào.",
+        "meaningVi": "Chúng tôi cùng nhau đến trường."
+      }
+    },
+    {
+      "id": "yun-dong",
+      "hanzi": "运动",
+      "pinyin": "yùndòng",
+      "hanViet": "vận động",
+      "meaningVi": "vận động; thể thao",
+      "example": {
+        "hanzi": "我每天做运动。",
+        "pinyin": "Wǒ měitiān zuò yùndòng.",
+        "meaningVi": "Mỗi ngày tôi tập thể dục."
+      }
+    },
+    {
+      "id": "pao-bu",
+      "hanzi": "跑步",
+      "pinyin": "pǎobù",
+      "hanViet": "bào bộ",
+      "meaningVi": "chạy bộ",
+      "example": {
+        "hanzi": "早上我和朋友一起跑步。",
+        "pinyin": "Zǎoshang wǒ hé péngyou yìqǐ pǎobù.",
+        "meaningVi": "Buổi sáng tôi chạy bộ cùng bạn."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-location-noun",
+      "pattern": "Danh từ + 在 + phương vị",
+      "explanationVi": "在 nối đồ vật hoặc địa điểm với từ chỉ vị trí.",
+      "examples": [
+        "书在桌子上。",
+        "商店在学校左边。"
+      ]
+    },
+    {
+      "id": "gp-place-you",
+      "pattern": "Địa điểm + phương vị + 有 + danh từ",
+      "explanationVi": "Nêu vị trí trước 有 để nói ở đó có người hoặc vật.",
+      "examples": [
+        "学校前面有商店。",
+        "我家旁边有学校。"
+      ]
+    },
+    {
+      "id": "gp-yuqi-together",
+      "pattern": "一起 + động từ",
+      "explanationVi": "一起 đứng trước động từ để diễn tả cùng nhau làm việc gì.",
+      "examples": [
+        "我们一起去学校。",
+        "我和朋友一起跑步。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn đang giúp tìm đường trong khu phố",
+    "learnerRole": "người mới đến và đang tìm cửa hàng",
+    "situation": "Hai người hỏi vị trí trường học, bệnh viện và cửa hàng trong khu phố.",
+    "openingLine": "商店在哪儿？在学校的左边还是右边？"
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk1-places-06",
+  "level": "HSK1",
+  "order": 6,
+  "title": "Địa điểm và nơi chốn",
+  "topic": "địa điểm",
+  "description": "Nói về Trung Quốc, Bắc Kinh và vị trí của người hoặc vật.",
+  "vocabulary": [
+    {
+      "id": "zhong-guo",
+      "hanzi": "中国",
+      "pinyin": "Zhōngguó",
+      "hanViet": "Trung Quốc",
+      "meaningVi": "Trung Quốc",
+      "example": {
+        "hanzi": "我是中国人。",
+        "pinyin": "Wǒ shì Zhōngguó rén.",
+        "meaningVi": "Tôi là người Trung Quốc."
+      }
+    },
+    {
+      "id": "bei-jing",
+      "hanzi": "北京",
+      "pinyin": "Běijīng",
+      "hanViet": "Bắc Kinh",
+      "meaningVi": "Bắc Kinh",
+      "example": {
+        "hanzi": "我住在北京。",
+        "pinyin": "Wǒ zhù zài Běijīng.",
+        "meaningVi": "Tôi sống ở Bắc Kinh."
+      }
+    },
+    {
+      "id": "zher",
+      "hanzi": "这儿",
+      "pinyin": "zhèr",
+      "hanViet": "giá nhi",
+      "meaningVi": "ở đây",
+      "example": {
+        "hanzi": "我的书在这儿。",
+        "pinyin": "Wǒ de shū zài zhèr.",
+        "meaningVi": "Sách của tôi ở đây."
+      }
+    },
+    {
+      "id": "nar",
+      "hanzi": "那儿",
+      "pinyin": "nàr",
+      "hanViet": "na nhi",
+      "meaningVi": "ở kia; ở đó",
+      "example": {
+        "hanzi": "学校在那儿。",
+        "pinyin": "Xuéxiào zài nàr.",
+        "meaningVi": "Trường học ở đằng kia."
+      }
+    },
+    {
+      "id": "nar-question",
+      "hanzi": "哪儿",
+      "pinyin": "nǎr",
+      "hanViet": "nả nhi",
+      "meaningVi": "ở đâu",
+      "example": {
+        "hanzi": "你住在哪儿？",
+        "pinyin": "Nǐ zhù zài nǎr?",
+        "meaningVi": "Bạn sống ở đâu?"
+      }
+    },
+    {
+      "id": "lai",
+      "hanzi": "来",
+      "pinyin": "lái",
+      "hanViet": "lai",
+      "meaningVi": "đến; tới",
+      "example": {
+        "hanzi": "他明天来学校。",
+        "pinyin": "Tā míngtiān lái xuéxiào.",
+        "meaningVi": "Ngày mai anh ấy đến trường."
+      }
+    },
+    {
+      "id": "qu",
+      "hanzi": "去",
+      "pinyin": "qù",
+      "hanViet": "khứ",
+      "meaningVi": "đi",
+      "example": {
+        "hanzi": "我去中国。",
+        "pinyin": "Wǒ qù Zhōngguó.",
+        "meaningVi": "Tôi đi Trung Quốc."
+      }
+    },
+    {
+      "id": "zai",
+      "hanzi": "在",
+      "pinyin": "zài",
+      "hanViet": "tại",
+      "meaningVi": "ở; tại",
+      "example": {
+        "hanzi": "老师在学校。",
+        "pinyin": "Lǎoshī zài xuéxiào.",
+        "meaningVi": "Giáo viên ở trường."
+      }
+    },
+    {
+      "id": "zhu",
+      "hanzi": "住",
+      "pinyin": "zhù",
+      "hanViet": "trú",
+      "meaningVi": "sống; cư trú",
+      "example": {
+        "hanzi": "我住在这儿。",
+        "pinyin": "Wǒ zhù zài zhèr.",
+        "meaningVi": "Tôi sống ở đây."
+      }
+    },
+    {
+      "id": "li",
+      "hanzi": "里",
+      "pinyin": "lǐ",
+      "hanViet": "lý",
+      "meaningVi": "trong; bên trong",
+      "example": {
+        "hanzi": "我在家里。",
+        "pinyin": "Wǒ zài jiālǐ.",
+        "meaningVi": "Tôi ở trong nhà."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-zai-location",
+      "pattern": "Chủ ngữ + 在 + địa điểm",
+      "explanationVi": "在 đứng trước địa điểm để nói người hoặc vật đang ở đâu.",
+      "examples": [
+        "我在学校。",
+        "书在这儿。"
+      ]
+    },
+    {
+      "id": "gp-zai-verb",
+      "pattern": "Chủ ngữ + 在 + địa điểm + động từ",
+      "explanationVi": "Khi nêu nơi diễn ra hành động, đặt 在 và địa điểm trước động từ.",
+      "examples": [
+        "我在学校学习汉语。",
+        "他在北京工作。"
+      ]
+    },
+    {
+      "id": "gp-zhe-na-near-far",
+      "pattern": "这儿 / 那儿 / 哪儿",
+      "explanationVi": "这儿 chỉ nơi gần, 那儿 chỉ nơi xa, còn 哪儿 dùng để hỏi địa điểm.",
+      "examples": [
+        "我的书在这儿。",
+        "你住在哪儿？"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn cùng lớp người Trung Quốc",
+    "learnerRole": "sinh viên Việt Nam lần đầu đến Bắc Kinh",
+    "situation": "Người học hỏi đường đến trường và giới thiệu nơi mình đang sống.",
+    "openingLine": "你住在哪儿？你明天去学校吗？"
+  }
+}

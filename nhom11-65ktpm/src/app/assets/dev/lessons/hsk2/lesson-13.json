@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-feelings-13",
+  "level": "HSK2",
+  "order": 13,
+  "title": "Cảm xúc và tính cách",
+  "topic": "cảm xúc",
+  "description": "Diễn tả cảm xúc, tính cách và đánh giá một số sự vật.",
+  "vocabulary": [
+    {
+      "id": "kuai-le",
+      "hanzi": "快乐",
+      "pinyin": "kuàilè",
+      "hanViet": "khoái lạc",
+      "meaningVi": "vui vẻ",
+      "example": {
+        "hanzi": "祝你生日快乐！",
+        "pinyin": "Zhù nǐ shēngrì kuàilè!",
+        "meaningVi": "Chúc bạn sinh nhật vui vẻ!"
+      }
+    },
+    {
+      "id": "nan-guo",
+      "hanzi": "难过",
+      "pinyin": "nánguò",
+      "hanViet": "nan quá",
+      "meaningVi": "buồn; khó chịu",
+      "example": {
+        "hanzi": "他今天有一点儿难过。",
+        "pinyin": "Tā jīntiān yǒu yìdiǎnr nánguò.",
+        "meaningVi": "Hôm nay anh ấy hơi buồn."
+      }
+    },
+    {
+      "id": "zhao-ji",
+      "hanzi": "着急",
+      "pinyin": "zháojí",
+      "hanViet": "trước cấp",
+      "meaningVi": "sốt ruột; lo lắng",
+      "example": {
+        "hanzi": "别着急，车还没来。",
+        "pinyin": "Bié zháojí, chē hái méi lái.",
+        "meaningVi": "Đừng sốt ruột, xe vẫn chưa đến."
+      }
+    },
+    {
+      "id": "dan-xin",
+      "hanzi": "担心",
+      "pinyin": "dānxīn",
+      "hanViet": "đảm tâm",
+      "meaningVi": "lo lắng",
+      "example": {
+        "hanzi": "妈妈担心孩子的身体。",
+        "pinyin": "Māma dānxīn háizi de shēntǐ.",
+        "meaningVi": "Mẹ lo cho sức khỏe của đứa trẻ."
+      }
+    },
+    {
+      "id": "sheng-qi",
+      "hanzi": "生气",
+      "pinyin": "shēngqì",
+      "hanViet": "sinh khí",
+      "meaningVi": "tức giận",
+      "example": {
+        "hanzi": "他没有生气，只是有一点儿累。",
+        "pinyin": "Tā méiyǒu shēngqì, zhǐshì yǒu yìdiǎnr lèi.",
+        "meaningVi": "Anh ấy không tức giận, chỉ hơi mệt."
+      }
+    },
+    {
+      "id": "cong-ming",
+      "hanzi": "聪明",
+      "pinyin": "cōngming",
+      "hanViet": "thông minh",
+      "meaningVi": "thông minh",
+      "example": {
+        "hanzi": "这个孩子很聪明。",
+        "pinyin": "Zhège háizi hěn cōngming.",
+        "meaningVi": "Đứa trẻ này rất thông minh."
+      }
+    },
+    {
+      "id": "ke-ai",
+      "hanzi": "可爱",
+      "pinyin": "kě'ài",
+      "hanViet": "khả ái",
+      "meaningVi": "đáng yêu",
+      "example": {
+        "hanzi": "你的小狗很可爱。",
+        "pinyin": "Nǐ de xiǎo gǒu hěn kě'ài.",
+        "meaningVi": "Chú chó nhỏ của bạn rất đáng yêu."
+      }
+    },
+    {
+      "id": "piao-liang",
+      "hanzi": "漂亮",
+      "pinyin": "piàoliang",
+      "hanViet": "phiêu lượng",
+      "meaningVi": "đẹp",
+      "example": {
+        "hanzi": "这件衣服很漂亮。",
+        "pinyin": "Zhè jiàn yīfu hěn piàoliang.",
+        "meaningVi": "Bộ quần áo này rất đẹp."
+      }
+    },
+    {
+      "id": "zhong-yao",
+      "hanzi": "重要",
+      "pinyin": "zhòngyào",
+      "hanViet": "trọng yếu",
+      "meaningVi": "quan trọng",
+      "example": {
+        "hanzi": "健康对每个人都很重要。",
+        "pinyin": "Jiànkāng duì měi ge rén dōu hěn zhòngyào.",
+        "meaningVi": "Sức khỏe rất quan trọng với mọi người."
+      }
+    },
+    {
+      "id": "fang-bian",
+      "hanzi": "方便",
+      "pinyin": "fāngbiàn",
+      "hanViet": "phương tiện",
+      "meaningVi": "tiện; thuận tiện",
+      "example": {
+        "hanzi": "坐地铁去很方便。",
+        "pinyin": "Zuò dìtiě qù hěn fāngbiàn.",
+        "meaningVi": "Đi bằng tàu điện ngầm rất tiện."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-dui-important",
+      "pattern": "A + 对 + B + 很重要",
+      "explanationVi": "对 nêu đối tượng chịu ảnh hưởng hoặc với ai điều gì quan trọng.",
+      "examples": [
+        "健康对每个人都很重要。",
+        "学习对我很重要。"
+      ]
+    },
+    {
+      "id": "gp-bie-imperative",
+      "pattern": "别 + động từ / tính từ",
+      "explanationVi": "别 đứng trước động từ hoặc trạng thái để khuyên ai đừng làm việc gì.",
+      "examples": [
+        "别着急，车还没来。",
+        "别生气。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "người bạn đang an ủi",
+    "learnerRole": "người đang hơi lo",
+    "situation": "Hai người chia sẻ cảm xúc và động viên nhau trước một việc quan trọng.",
+    "openingLine": "你怎么了？别着急，我可以帮助你。"
+  }
+}

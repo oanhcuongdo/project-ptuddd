@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-food-07",
+  "level": "HSK2",
+  "order": 7,
+  "title": "Thức ăn và bữa ăn",
+  "topic": "thức ăn",
+  "description": "Gọi tên một số món ăn và nói về cảm giác khi đói.",
+  "vocabulary": [
+    {
+      "id": "mian-bao",
+      "hanzi": "面包",
+      "pinyin": "miànbāo",
+      "hanViet": "diện bao",
+      "meaningVi": "bánh mì",
+      "example": {
+        "hanzi": "早上我吃面包和鸡蛋。",
+        "pinyin": "Zǎoshang wǒ chī miànbāo hé jīdàn.",
+        "meaningVi": "Buổi sáng tôi ăn bánh mì và trứng."
+      }
+    },
+    {
+      "id": "dan-gao",
+      "hanzi": "蛋糕",
+      "pinyin": "dàngāo",
+      "hanViet": "đản cao",
+      "meaningVi": "bánh ngọt; bánh kem",
+      "example": {
+        "hanzi": "这是我妈妈做的蛋糕。",
+        "pinyin": "Zhè shì wǒ māma zuò de dàngāo.",
+        "meaningVi": "Đây là bánh mẹ tôi làm."
+      }
+    },
+    {
+      "id": "niu-nai",
+      "hanzi": "牛奶",
+      "pinyin": "niúnǎi",
+      "hanViet": "ngưu nãi",
+      "meaningVi": "sữa bò",
+      "example": {
+        "hanzi": "孩子每天早上喝牛奶。",
+        "pinyin": "Háizi měitiān zǎoshang hē niúnǎi.",
+        "meaningVi": "Đứa trẻ uống sữa mỗi sáng."
+      }
+    },
+    {
+      "id": "ji-dan",
+      "hanzi": "鸡蛋",
+      "pinyin": "jīdàn",
+      "hanViet": "kê đản",
+      "meaningVi": "trứng gà",
+      "example": {
+        "hanzi": "桌子上有几个鸡蛋。",
+        "pinyin": "Zhuōzi shàng yǒu jǐ ge jīdàn.",
+        "meaningVi": "Trên bàn có vài quả trứng."
+      }
+    },
+    {
+      "id": "xiang-jiao",
+      "hanzi": "香蕉",
+      "pinyin": "xiāngjiāo",
+      "hanViet": "hương tiêu",
+      "meaningVi": "chuối",
+      "example": {
+        "hanzi": "我想买一些香蕉。",
+        "pinyin": "Wǒ xiǎng mǎi yìxiē xiāngjiāo.",
+        "meaningVi": "Tôi muốn mua một ít chuối."
+      }
+    },
+    {
+      "id": "xi-gua",
+      "hanzi": "西瓜",
+      "pinyin": "xīguā",
+      "hanViet": "tây qua",
+      "meaningVi": "dưa hấu",
+      "example": {
+        "hanzi": "夏天吃西瓜很好。",
+        "pinyin": "Xiàtiān chī xīguā hěn hǎo.",
+        "meaningVi": "Mùa hè ăn dưa hấu rất ngon."
+      }
+    },
+    {
+      "id": "pu-tao",
+      "hanzi": "葡萄",
+      "pinyin": "pútao",
+      "hanViet": "bồ đào",
+      "meaningVi": "nho",
+      "example": {
+        "hanzi": "这些葡萄很甜。",
+        "pinyin": "Zhèxiē pútao hěn tián.",
+        "meaningVi": "Những quả nho này rất ngọt."
+      }
+    },
+    {
+      "id": "niu-rou",
+      "hanzi": "牛肉",
+      "pinyin": "niúròu",
+      "hanViet": "ngưu nhục",
+      "meaningVi": "thịt bò",
+      "example": {
+        "hanzi": "我爸爸喜欢吃牛肉。",
+        "pinyin": "Wǒ bàba xǐhuan chī niúròu.",
+        "meaningVi": "Bố tôi thích ăn thịt bò."
+      }
+    },
+    {
+      "id": "mian-tiao",
+      "hanzi": "面条",
+      "pinyin": "miàntiáo",
+      "hanViet": "diện điều",
+      "meaningVi": "mì sợi",
+      "example": {
+        "hanzi": "这家饭店的面条很好吃。",
+        "pinyin": "Zhè jiā fàndiàn de miàntiáo hěn hǎochī.",
+        "meaningVi": "Mì sợi ở nhà hàng này rất ngon."
+      }
+    },
+    {
+      "id": "e-hungry",
+      "hanzi": "饿",
+      "pinyin": "è",
+      "hanViet": "ngạ",
+      "meaningVi": "đói",
+      "example": {
+        "hanzi": "我现在很饿，想吃饭。",
+        "pinyin": "Wǒ xiànzài hěn è, xiǎng chīfàn.",
+        "meaningVi": "Bây giờ tôi rất đói, muốn ăn cơm."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-xiang-eat",
+      "pattern": "想 + động từ",
+      "explanationVi": "想 đứng trước động từ để nói mong muốn làm việc gì.",
+      "examples": [
+        "我想买一些香蕉。",
+        "我想吃面条。"
+      ]
+    },
+    {
+      "id": "gp-ji-ge",
+      "pattern": "几 + lượng từ + danh từ",
+      "explanationVi": "几 dùng để hỏi hoặc nói về số lượng nhỏ chưa xác định.",
+      "examples": [
+        "桌子上有几个鸡蛋。",
+        "你要几个苹果？"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "người bạn đang chuẩn bị bữa sáng",
+    "learnerRole": "người cùng ăn sáng",
+    "situation": "Hai người chọn đồ ăn và nói mình muốn ăn gì.",
+    "openingLine": "你早上想吃什么？我有面包和牛奶。"
+  }
+}

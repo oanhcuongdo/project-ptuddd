@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "id": "hsk2-connections-14",
+  "level": "HSK2",
+  "order": 14,
+  "title": "Nối ý và đưa lời khuyên",
+  "topic": "liên từ",
+  "description": "Dùng từ nối để giải thích nguyên nhân, kết quả và lựa chọn.",
+  "vocabulary": [
+    {
+      "id": "sui-ran",
+      "hanzi": "虽然",
+      "pinyin": "suīrán",
+      "hanViet": "tuy nhiên",
+      "meaningVi": "tuy rằng; mặc dù",
+      "example": {
+        "hanzi": "虽然今天很冷，但是我想出去。",
+        "pinyin": "Suīrán jīntiān hěn lěng, dànshì wǒ xiǎng chūqù.",
+        "meaningVi": "Tuy hôm nay rất lạnh nhưng tôi muốn ra ngoài."
+      }
+    },
+    {
+      "id": "dan-shi",
+      "hanzi": "但是",
+      "pinyin": "dànshì",
+      "hanViet": "đãn thị",
+      "meaningVi": "nhưng",
+      "example": {
+        "hanzi": "我想去，但是今天没有时间。",
+        "pinyin": "Wǒ xiǎng qù, dànshì jīntiān méiyǒu shíjiān.",
+        "meaningVi": "Tôi muốn đi nhưng hôm nay không có thời gian."
+      }
+    },
+    {
+      "id": "suo-yi",
+      "hanzi": "所以",
+      "pinyin": "suǒyǐ",
+      "hanViet": "sở dĩ",
+      "meaningVi": "cho nên; vì vậy",
+      "example": {
+        "hanzi": "今天下雨，所以我坐公共汽车。",
+        "pinyin": "Jīntiān xiàyǔ, suǒyǐ wǒ zuò gōnggòng qìchē.",
+        "meaningVi": "Hôm nay trời mưa nên tôi đi xe buýt."
+      }
+    },
+    {
+      "id": "yin-wei",
+      "hanzi": "因为",
+      "pinyin": "yīnwèi",
+      "hanViet": "nhân vị",
+      "meaningVi": "bởi vì",
+      "example": {
+        "hanzi": "因为我很累，所以想休息。",
+        "pinyin": "Yīnwèi wǒ hěn lèi, suǒyǐ xiǎng xiūxi.",
+        "meaningVi": "Vì tôi rất mệt nên muốn nghỉ ngơi."
+      }
+    },
+    {
+      "id": "ru-guo",
+      "hanzi": "如果",
+      "pinyin": "rúguǒ",
+      "hanViet": "như quả",
+      "meaningVi": "nếu",
+      "example": {
+        "hanzi": "如果明天是晴天，我们就去公园。",
+        "pinyin": "Rúguǒ míngtiān shì qíngtiān, wǒmen jiù qù gōngyuán.",
+        "meaningVi": "Nếu ngày mai trời nắng thì chúng ta đi công viên."
+      }
+    },
+    {
+      "id": "ran-hou",
+      "hanzi": "然后",
+      "pinyin": "ránhòu",
+      "hanViet": "nhiên hậu",
+      "meaningVi": "sau đó",
+      "example": {
+        "hanzi": "我先吃饭，然后去上课。",
+        "pinyin": "Wǒ xiān chīfàn, ránhòu qù shàngkè.",
+        "meaningVi": "Tôi ăn cơm trước, sau đó đi học."
+      }
+    },
+    {
+      "id": "huo-zhe",
+      "hanzi": "或者",
+      "pinyin": "huòzhě",
+      "hanViet": "hoặc giả",
+      "meaningVi": "hoặc",
+      "example": {
+        "hanzi": "你想喝茶或者咖啡？",
+        "pinyin": "Nǐ xiǎng hē chá huòzhě kāfēi?",
+        "meaningVi": "Bạn muốn uống trà hay cà phê?"
+      }
+    },
+    {
+      "id": "hai-shi",
+      "hanzi": "还是",
+      "pinyin": "háishi",
+      "hanViet": "hoàn thị",
+      "meaningVi": "hay là (trong câu hỏi lựa chọn)",
+      "example": {
+        "hanzi": "你坐地铁还是公共汽车？",
+        "pinyin": "Nǐ zuò dìtiě háishi gōnggòng qìchē?",
+        "meaningVi": "Bạn đi tàu điện ngầm hay xe buýt?"
+      }
+    },
+    {
+      "id": "bi-xu",
+      "hanzi": "必须",
+      "pinyin": "bìxū",
+      "hanViet": "tất tu",
+      "meaningVi": "bắt buộc; phải",
+      "example": {
+        "hanzi": "我们必须按时到学校。",
+        "pinyin": "Wǒmen bìxū ànshí dào xuéxiào.",
+        "meaningVi": "Chúng tôi phải đến trường đúng giờ."
+      }
+    },
+    {
+      "id": "ying-gai",
+      "hanzi": "应该",
+      "pinyin": "yīnggāi",
+      "hanViet": "ưng cai",
+      "meaningVi": "nên; cần phải",
+      "example": {
+        "hanzi": "你应该多喝水。",
+        "pinyin": "Nǐ yīnggāi duō hē shuǐ.",
+        "meaningVi": "Bạn nên uống nhiều nước."
+      }
+    }
+  ],
+  "grammarPoints": [
+    {
+      "id": "gp-suiran-danshi",
+      "pattern": "虽然 + mệnh đề, 但是 + mệnh đề",
+      "explanationVi": "Cặp từ này nối hai ý tương phản: tuy... nhưng...",
+      "examples": [
+        "虽然今天很冷，但是我想出去。",
+        "虽然他很忙，但是每天学习汉语。"
+      ]
+    },
+    {
+      "id": "gp-yinwei-suoyi",
+      "pattern": "因为 + nguyên nhân，所以 + kết quả",
+      "explanationVi": "因为 nêu lý do, 所以 giới thiệu kết quả.",
+      "examples": [
+        "因为我很累，所以想休息。",
+        "因为下雨，所以我们坐车。"
+      ]
+    },
+    {
+      "id": "gp-ruguo-jiu",
+      "pattern": "如果 + điều kiện，(就) + kết quả",
+      "explanationVi": "如果 nêu điều kiện; 就 có thể đứng trước kết quả.",
+      "examples": [
+        "如果明天是晴天，我们就去公园。",
+        "如果你有时间，就给我打电话。"
+      ]
+    }
+  ],
+  "aiScenario": {
+    "aiRole": "bạn đang bàn kế hoạch đi chơi",
+    "learnerRole": "người cùng chọn phương tiện",
+    "situation": "Hai người xem thời tiết, nêu lý do và quyết định cách đi.",
+    "openingLine": "如果明天不下雨，我们去公园吧。你坐地铁还是公共汽车？"
+  }
+}
