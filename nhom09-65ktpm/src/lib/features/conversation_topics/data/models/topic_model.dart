@@ -108,7 +108,13 @@ class TopicModel {
     required this.createdAt,
   });
 
+  int get starterCount => conversationStarters.length;
+  int get dialogueCount => sampleDialogues.length;
+  bool get hasScript =>
+      conversationStarters.isNotEmpty || sampleDialogues.isNotEmpty;
+
   TopicModel copyWith({
+    String? id,
     String? title,
     String? titleEn,
     String? level,
@@ -123,7 +129,7 @@ class TopicModel {
     DateTime? createdAt,
   }) {
     return TopicModel(
-      id: id,
+      id: id ?? this.id,
       title: title ?? this.title,
       titleEn: titleEn ?? this.titleEn,
       level: level ?? this.level,
@@ -187,6 +193,25 @@ class TopicModel {
             sampleDialogues.map((item) => item.toMap()).toList(),
         'created_at': createdAt.toIso8601String(),
       };
+
+  /// Trả về Map chỉ gồm các cột hợp lệ của bảng `conversation_topics` trên Supabase.
+  Map<String, dynamic> toDatabaseMap() => toMap();
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is TopicModel &&
+        other.id == id &&
+        other.title == title &&
+        other.titleEn == titleEn &&
+        other.level == level &&
+        other.category == category &&
+        other.isCompleted == isCompleted;
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, title, titleEn, level, category, isCompleted);
 
   static List<dynamic> _decodeJsonList(dynamic value) {
     if (value is List) return value;
