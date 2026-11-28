@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "498748171599",
+    "project_id": "travel-buddy-flutter",
+    "storage_bucket": "travel-buddy-flutter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498748171599:android:ce6f3e5430c14b2df8d13a",
+        "android_client_info": {
+          "package_name": "com.example.btl_mobile_g8"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "498748171599-dej6ubida981c2roqqa8fv6vt7r2u9hb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.btl_mobile_g8",
+            "certificate_hash": "ed5a4bb84c2a9e0ea253107af06bbc5fedd0cf9c"
+          }
+        },
+        {
+          "client_id": "498748171599-8aebndc2h4trrq910jo19aikrj0shk6c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmGEGhm35gpjsnOZwnSHYf8w9kbgKt4cU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "498748171599-8aebndc2h4trrq910jo19aikrj0shk6c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "498748171599-udtovamr5pch1knodeem1c96kmu6j4kn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.btlMobileG8"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498748171599:android:ab5bb48c2ebec041f8d13a",
+        "android_client_info": {
+          "package_name": "vn.edu.tlu.travel_buddy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "498748171599-8aebndc2h4trrq910jo19aikrj0shk6c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmGEGhm35gpjsnOZwnSHYf8w9kbgKt4cU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "498748171599-8aebndc2h4trrq910jo19aikrj0shk6c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "498748171599-udtovamr5pch1knodeem1c96kmu6j4kn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.btlMobileG8"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,29 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "travel-buddy-flutter",
+          "appId": "1:498748171599:android:ab5bb48c2ebec041f8d13a",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "travel-buddy-flutter",
+          "configurations": {
+            "android": "1:498748171599:android:ab5bb48c2ebec041f8d13a",
+            "ios": "1:498748171599:ios:2e2bbecbd7a4fd91f8d13a",
+            "macos": "1:498748171599:ios:2e2bbecbd7a4fd91f8d13a",
+            "web": "1:498748171599:web:dcd78ca8fe27b576f8d13a",
+            "windows": "1:498748171599:web:dfeed8479a4ccf19f8d13a"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}
