@@ -157,5 +157,32 @@ void main() {
       expect(result.installmentAmount, 0);
       expect(result.schedule, isEmpty);
     });
+
+    test('Calculates monthly installments across exact calendar months and clamps month-end dates', () {
+      // 2 calendar months across Feb (non-leap year = 59 days total)
+      final febSpan = SavingCalculator.calculateInstallments(
+        targetAmount: 2000000,
+        startDate: DateTime(2026, 1, 1),
+        deadlineDate: DateTime(2026, 3, 1),
+        preferredFrequency: SavingFrequency.monthly,
+      );
+      expect(febSpan.frequency, SavingFrequency.monthly);
+      expect(febSpan.totalInstallments, 2);
+      expect(febSpan.schedule[0].dueDate, DateTime(2026, 2, 1));
+      expect(febSpan.schedule[1].dueDate, DateTime(2026, 3, 1));
+
+      // Month-end clamping: Jan 31 -> Feb 28 -> Mar 31 -> Apr 30
+      final monthEndSpan = SavingCalculator.calculateInstallments(
+        targetAmount: 3000000,
+        startDate: DateTime(2026, 1, 31),
+        deadlineDate: DateTime(2026, 4, 30),
+        preferredFrequency: SavingFrequency.monthly,
+      );
+      expect(monthEndSpan.frequency, SavingFrequency.monthly);
+      expect(monthEndSpan.totalInstallments, 3);
+      expect(monthEndSpan.schedule[0].dueDate, DateTime(2026, 2, 28));
+      expect(monthEndSpan.schedule[1].dueDate, DateTime(2026, 3, 31));
+      expect(monthEndSpan.schedule[2].dueDate, DateTime(2026, 4, 30));
+    });
   });
 }

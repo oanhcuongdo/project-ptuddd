@@ -499,6 +499,25 @@ class _ReceiptImage extends StatelessWidget {
       return Image.network(
         url,
         fit: fit,
+        loadingBuilder: (_, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          final expected = loadingProgress.expectedTotalBytes;
+          final progress = expected != null && expected > 0
+              ? loadingProgress.cumulativeBytesLoaded / expected
+              : null;
+          return Container(
+            color: AppColors.surfaceContainerLow,
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.2,
+                value: progress,
+              ),
+            ),
+          );
+        },
         errorBuilder: (_, _, _) => Container(
           color: AppColors.momoContainer,
           alignment: Alignment.center,

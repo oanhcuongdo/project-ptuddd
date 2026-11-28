@@ -72,6 +72,9 @@ class MoMoLauncher {
 
   static Future<bool> _tryLaunch(Uri uri, LaunchMode mode) async {
     try {
+      if (!await canLaunchUrl(uri)) {
+        return false;
+      }
       return await launchUrl(uri, mode: mode);
     } catch (_) {
       return false;

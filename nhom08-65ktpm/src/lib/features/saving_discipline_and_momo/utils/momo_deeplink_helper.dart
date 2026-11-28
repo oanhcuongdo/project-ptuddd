@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 /// Structured result from parsing a scanned or uploaded MoMo QR payload.
 class MoMoQrParseResult {
   final String rawPayload;
@@ -95,12 +97,17 @@ class MoMoDeeplinkHelper {
     if (lower.startsWith('http://') ||
         lower.startsWith('https://') ||
         lower.startsWith('momo://')) {
+      final parsedUri = Uri.tryParse(raw);
       final phoneMatch = RegExp(r'(0[35789]\d{8})').firstMatch(raw);
       final phone = phoneMatch?.group(1);
+      final validDeeplink =
+          (parsedUri != null && parsedUri.hasAuthority && parsedUri.host.trim().isNotEmpty)
+              ? raw
+              : null;
       return MoMoQrParseResult(
         rawPayload: raw,
         phoneNumber: phone,
-        deeplink: raw,
+        deeplink: validDeeplink,
       );
     }
 
@@ -183,8 +190,8 @@ class MoMoDeeplinkHelper {
     return RegExp(r'^(0|\+84)\d{9}$').hasMatch(cleaned);
   }
 
-  /// Formats an integer VND amount with dot separators (e.g. 212.000đ).
-  static String formatVnd(int amount) {
+  /// Formats an integer with dot thousands separators (e.g. 212000 -> 212.000).
+  static String formatDigitsWithDots(int amount) {
     final digits = amount.abs().toString();
     final buffer = StringBuffer();
     for (var i = 0; i < digits.length; i++) {
@@ -193,7 +200,12 @@ class MoMoDeeplinkHelper {
       }
       buffer.write(digits[i]);
     }
-    return '${amount < 0 ? '-' : ''}${buffer.toString()}đ';
+    return '${amount < 0 ? '-' : ''}${buffer.toString()}';
+  }
+
+  /// Formats an integer VND amount with dot separators (e.g. 212.000đ).
+  static String formatVnd(int amount) {
+    return '${formatDigitsWithDots(amount)}đ';
   }
 
   /// Extracts up to two uppercase initials from a member's full name.
@@ -202,5 +214,52 @@ class MoMoDeeplinkHelper {
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
     return '${parts[parts.length - 2][0]}${parts.last[0]}'.toUpperCase();
+  }
+}
+
+/// Automatically inserts `.` thousands separators while typing numeric VND amounts
+/// and keeps the text cursor anchored to the corresponding digit position.
+class ThousandsDotInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final rawDigits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (rawDigits.isEmpty) {
+      return const TextEditingValue(text: '');
+    }
+
+    final selectionIndex = newValue.selection.end.clamp(0, newValue.text.length);
+    var digitsBeforeCursor = newValue.text
+        .substring(0, selectionIndex)
+        .replaceAll(RegExp(r'[^0-9]'), '')
+        .length;
+
+    final parsed = int.tryParse(rawDigits);
+    final formatted = parsed != null
+        ? MoMoDeeplinkHelper.formatDigitsWithDots(parsed)
+        : rawDigits;
+
+    // Adjust target digit count if leading zeros were stripped during integer parsing.
+    final strippedZeros = rawDigits.length - parsed.toString().length;
+    if (strippedZeros > 0 && parsed != null) {
+      digitsBeforeCursor = (digitsBeforeCursor - strippedZeros).clamp(0, formatted.length);
+    }
+
+    var cursorOffset = 0;
+    var digitsSeen = 0;
+    while (cursorOffset < formatted.length && digitsSeen < digitsBeforeCursor) {
+      if (formatted.codeUnitAt(cursorOffset) >= 48 &&
+          formatted.codeUnitAt(cursorOffset) <= 57) {
+        digitsSeen += 1;
+      }
+      cursorOffset += 1;
+    }
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: cursorOffset),
+    );
   }
 }

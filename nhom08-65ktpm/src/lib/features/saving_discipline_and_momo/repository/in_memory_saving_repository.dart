@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import '../../../models/trip_member.dart';
+import '../../../models/trip_model.dart';
 import '../models/deposit_record.dart';
 import '../models/member_streak.dart';
 import '../models/momo_fund_config.dart';
@@ -16,6 +18,12 @@ class InMemorySavingRepository implements SavingRepository {
       _seedDemoTrip('trip_demo_01');
     }
   }
+
+  final Map<String, TripModel> _trips = {};
+  final Map<String, StreamController<TripModel?>> _tripControllers = {};
+
+  final Map<String, List<TripMember>> _tripMembers = {};
+  final Map<String, StreamController<List<TripMember>>> _tripMembersControllers = {};
 
   final Map<String, MoMoFundConfig> _fundConfigs = {};
   final Map<String, StreamController<MoMoFundConfig?>> _fundControllers = {};
@@ -33,6 +41,15 @@ class InMemorySavingRepository implements SavingRepository {
 
   StreamController<MoMoFundConfig?> _fundController(String tripId) =>
       _fundControllers.putIfAbsent(tripId, () => StreamController<MoMoFundConfig?>.broadcast());
+
+  StreamController<TripModel?> _tripController(String tripId) =>
+      _tripControllers.putIfAbsent(tripId, () => StreamController<TripModel?>.broadcast());
+
+  StreamController<List<TripMember>> _tripMembersController(String tripId) =>
+      _tripMembersControllers.putIfAbsent(
+        tripId,
+        () => StreamController<List<TripMember>>.broadcast(),
+      );
 
   StreamController<SavingPlan?> _planController(String key) =>
       _planControllers.putIfAbsent(key, () => StreamController<SavingPlan?>.broadcast());
@@ -146,6 +163,35 @@ class InMemorySavingRepository implements SavingRepository {
     for (final plan in demoPlans) {
       _savingPlans['${tripId}_${plan.memberId}'] = plan;
     }
+
+    _trips[tripId] = TripModel(
+      id: tripId,
+      title: 'Đà Lạt 4N3Đ - Nhóm 8',
+      destination: 'Đà Lạt',
+      startDate: deadline,
+      endDate: deadline.add(const Duration(days: 3)),
+      hostId: 'member_demo_01',
+      memberIds: demoPlans.map((p) => p.memberId).toList(),
+      inviteCode: 'TBDL08',
+      targetBudget: 8450000,
+      perMemberTarget: 2112500,
+      totalSavedAmount: 5070000,
+      createdAt: start,
+      updatedAt: now,
+    );
+
+    _tripMembers[tripId] = [
+      for (var i = 0; i < demoPlans.length; i++)
+        TripMember(
+          userId: demoPlans[i].memberId,
+          displayName: demoPlans[i].memberName,
+          role: i == 0 ? TripRole.host : TripRole.member,
+          targetContribution: demoPlans[i].targetAmount.round(),
+          contributedAmount: demoPlans[i].paidAmount.round(),
+          currentStreak: i == 0 ? 6 : (i == 3 ? 4 : 5),
+          joinedAt: start.add(Duration(minutes: i)),
+        ),
+    ];
 
     String isoDaysAgo(int days) =>
         SavingStreakCalculator.formatIsoDate(now.subtract(Duration(days: days)));
@@ -299,6 +345,28 @@ class InMemorySavingRepository implements SavingRepository {
     ];
   }
 
+  void seedTripSummary(TripModel trip) {
+    _trips[trip.id] = trip;
+    _tripController(trip.id).add(trip);
+  }
+
+  void seedTripMembers(String tripId, List<TripMember> members) {
+    _tripMembers[tripId] = List<TripMember>.from(members);
+    _tripMembersController(tripId).add(List.unmodifiable(_tripMembers[tripId]!));
+  }
+
+  @override
+  Stream<TripModel?> watchTripSummary(String tripId) async* {
+    yield _trips[tripId];
+    yield* _tripController(tripId).stream;
+  }
+
+  @override
+  Stream<List<TripMember>> watchTripMembers(String tripId) async* {
+    yield List.unmodifiable(_tripMembers[tripId] ?? const <TripMember>[]);
+    yield* _tripMembersController(tripId).stream;
+  }
+
   @override
   Future<MoMoFundConfig?> getFundConfig(String tripId) async => _fundConfigs[tripId];
 
@@ -310,8 +378,51 @@ class InMemorySavingRepository implements SavingRepository {
 
   @override
   Future<void> saveFundConfig(MoMoFundConfig config) async {
-    _fundConfigs[config.tripId] = config;
-    _fundController(config.tripId).add(config);
+    final members = _tripMembers[config.tripId];
+    final memberCount = members?.length ?? 0;
+    final effectiveConfig = (memberCount > 0 &&
+            config.targetTotalAmount > 0 &&
+            config.suggestedPerMemberAmount != null)
+        ? config.copyWith(
+            suggestedPerMemberAmount: MoMoFundConfig.computeSuggestedPerMemberAmount(
+              targetTotalAmount: config.targetTotalAmount,
+              memberCount: memberCount,
+              frequency: config.defaultFrequency,
+            ),
+          )
+        : config;
+
+    _fundConfigs[effectiveConfig.tripId] = effectiveConfig;
+    _fundController(effectiveConfig.tripId).add(effectiveConfig);
+
+    final perMemberTotal = (memberCount > 0 && effectiveConfig.targetTotalAmount > 0)
+        ? (effectiveConfig.targetTotalAmount / memberCount).round()
+        : 0;
+
+    if (perMemberTotal > 0 && members != null) {
+      for (var i = 0; i < members.length; i++) {
+        members[i] = members[i].copyWith(targetContribution: perMemberTotal);
+      }
+      _tripMembersController(effectiveConfig.tripId)
+          .add(List.unmodifiable(members));
+    }
+
+    final tripPlans = _plansForTrip(effectiveConfig.tripId);
+    if (tripPlans.isNotEmpty) {
+      for (final plan in tripPlans) {
+        final updatedPlan = MoMoFundConfig.applyGroupConfigToPlan(
+          plan: plan,
+          perMemberTotalTarget:
+              perMemberTotal > 0 ? perMemberTotal.toDouble() : plan.targetAmount,
+          defaultFrequency: effectiveConfig.defaultFrequency,
+        );
+        final key = '${plan.tripId}_${plan.memberId}';
+        _savingPlans[key] = updatedPlan;
+        _planController(key).add(updatedPlan);
+      }
+      _tripPlansController(effectiveConfig.tripId)
+          .add(List.unmodifiable(_plansForTrip(effectiveConfig.tripId)));
+    }
   }
 
   @override

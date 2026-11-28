@@ -8,6 +8,7 @@ class MemberStreak {
   final DateTime? lastDepositDate;
   final List<String> depositDates; // ISO format: ['YYYY-MM-DD']
   final int totalDisciplinedDays;
+  final Map<String, ({String emoji, String note})> journalEntries;
 
   const MemberStreak({
     required this.memberId,
@@ -17,6 +18,7 @@ class MemberStreak {
     this.lastDepositDate,
     this.depositDates = const [],
     this.totalDisciplinedDays = 0,
+    this.journalEntries = const {},
   });
 
   factory MemberStreak.fromMap(Map<String, dynamic> map, {String? memberId, String? tripId}) {
@@ -33,6 +35,21 @@ class MemberStreak {
       dates = rawList.map((e) => e.toString()).toList();
     }
 
+    final rawJournals = map['journalEntries'];
+    final journals = <String, ({String emoji, String note})>{};
+    if (rawJournals is Map) {
+      for (final entry in rawJournals.entries) {
+        final val = entry.value;
+        if (val is Map) {
+          final emoji = val['emoji']?.toString() ?? '';
+          final note = val['note']?.toString() ?? '';
+          if (emoji.isNotEmpty || note.isNotEmpty) {
+            journals[entry.key.toString()] = (emoji: emoji, note: note);
+          }
+        }
+      }
+    }
+
     return MemberStreak(
       memberId: memberId ?? (map['memberId'] as String? ?? ''),
       tripId: tripId ?? (map['tripId'] as String? ?? ''),
@@ -41,6 +58,7 @@ class MemberStreak {
       lastDepositDate: parseNullableDate(map['lastDepositDate']),
       depositDates: dates,
       totalDisciplinedDays: (map['totalDisciplinedDays'] as num?)?.toInt() ?? dates.length,
+      journalEntries: journals,
     );
   }
 
@@ -53,6 +71,14 @@ class MemberStreak {
       if (lastDepositDate != null) 'lastDepositDate': Timestamp.fromDate(lastDepositDate!),
       'depositDates': depositDates,
       'totalDisciplinedDays': totalDisciplinedDays,
+      if (journalEntries.isNotEmpty)
+        'journalEntries': {
+          for (final entry in journalEntries.entries)
+            entry.key: {
+              'emoji': entry.value.emoji,
+              'note': entry.value.note,
+            },
+        },
     };
   }
 
@@ -64,6 +90,7 @@ class MemberStreak {
     DateTime? lastDepositDate,
     List<String>? depositDates,
     int? totalDisciplinedDays,
+    Map<String, ({String emoji, String note})>? journalEntries,
   }) {
     return MemberStreak(
       memberId: memberId ?? this.memberId,
@@ -73,6 +100,7 @@ class MemberStreak {
       lastDepositDate: lastDepositDate ?? this.lastDepositDate,
       depositDates: depositDates ?? this.depositDates,
       totalDisciplinedDays: totalDisciplinedDays ?? this.totalDisciplinedDays,
+      journalEntries: journalEntries ?? this.journalEntries,
     );
   }
 }

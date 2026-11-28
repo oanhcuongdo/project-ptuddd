@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/supabase_storage_service.dart';
+import '../../../models/trip_member.dart';
+import '../../../models/trip_model.dart';
 import '../models/deposit_record.dart';
 import '../models/member_streak.dart';
 import '../models/momo_fund_config.dart';
@@ -57,6 +59,29 @@ class SavingRepositoryImpl implements SavingRepository {
   DocumentReference _memberStreakDoc(String tripId, String memberId) =>
       _memberStreaksColl(tripId).doc(memberId);
 
+  // --- Trip & Members (Read-only sync) ---
+  @override
+  Stream<TripModel?> watchTripSummary(String tripId) {
+    return _tripDoc(tripId).snapshots().map((doc) {
+      if (!doc.exists || doc.data() == null) return null;
+      return TripModel.fromJson({
+        ...(doc.data() as Map<String, dynamic>),
+        'id': doc.id,
+      });
+    });
+  }
+
+  @override
+  Stream<List<TripMember>> watchTripMembers(String tripId) {
+    return _tripDoc(tripId).collection('members').snapshots().map((snapshot) {
+      final list = snapshot.docs
+          .map((d) => TripMember.fromJson({...d.data(), 'userId': d.id}))
+          .toList();
+      list.sort((a, b) => a.joinedAt.compareTo(b.joinedAt));
+      return list;
+    });
+  }
+
   // --- MoMo Fund Config ---
   @override
   Future<MoMoFundConfig?> getFundConfig(String tripId) async {
@@ -75,7 +100,63 @@ class SavingRepositoryImpl implements SavingRepository {
 
   @override
   Future<void> saveFundConfig(MoMoFundConfig config) async {
-    await _fundConfigDoc(config.tripId).set(config.toMap(), SetOptions(merge: true));
+    final membersSnap = await _tripDoc(config.tripId).collection('members').get();
+    final plansSnap = await _savingPlansColl(config.tripId).get();
+
+    final memberCount = membersSnap.docs.length;
+    final effectiveConfig = (memberCount > 0 &&
+            config.targetTotalAmount > 0 &&
+            config.suggestedPerMemberAmount != null)
+        ? config.copyWith(
+            suggestedPerMemberAmount: MoMoFundConfig.computeSuggestedPerMemberAmount(
+              targetTotalAmount: config.targetTotalAmount,
+              memberCount: memberCount,
+              frequency: config.defaultFrequency,
+            ),
+          )
+        : config;
+
+    // shortcut: single WriteBatch assumes <= 240 trip members (< 500 Firestore ops), chunk if trips grow larger.
+    final batch = _firestore.batch();
+    batch.set(
+      _fundConfigDoc(effectiveConfig.tripId),
+      effectiveConfig.toMap(),
+      SetOptions(merge: true),
+    );
+
+    final perMemberTotal = (memberCount > 0 && effectiveConfig.targetTotalAmount > 0)
+        ? (effectiveConfig.targetTotalAmount / memberCount).round()
+        : 0;
+
+    if (perMemberTotal > 0) {
+      for (final memberDoc in membersSnap.docs) {
+        batch.update(memberDoc.reference, {
+          'targetContribution': perMemberTotal,
+        });
+      }
+    }
+
+    for (final planDoc in plansSnap.docs) {
+      final plan = SavingPlan.fromMap(
+        planDoc.data() as Map<String, dynamic>,
+        id: planDoc.id,
+      );
+      final updatedPlan = MoMoFundConfig.applyGroupConfigToPlan(
+        plan: plan,
+        perMemberTotalTarget:
+            perMemberTotal > 0 ? perMemberTotal.toDouble() : plan.targetAmount,
+        defaultFrequency: effectiveConfig.defaultFrequency,
+      );
+      batch.update(planDoc.reference, {
+        'targetAmount': updatedPlan.targetAmount,
+        'frequency': updatedPlan.frequency.name,
+        'installmentAmount': updatedPlan.installmentAmount,
+        'totalInstallments': updatedPlan.totalInstallments,
+        'status': updatedPlan.status.name,
+      });
+    }
+
+    await batch.commit();
   }
 
   // --- Saving Plan ---
@@ -112,17 +193,30 @@ class SavingRepositoryImpl implements SavingRepository {
   @override
   Future<void> submitDeposit(DepositRecord record, {File? receiptImage}) async {
     String? imageUrl = record.receiptImageUrl;
+    String? uploadedPath;
 
     if (receiptImage != null) {
       final fileName = '${DateTime.now().millisecondsSinceEpoch}_${record.id}.jpg';
+      uploadedPath = 'trips/${record.tripId}/receipts/$fileName';
       imageUrl = await _storageService.uploadFile(
-        path: 'trips/${record.tripId}/receipts/$fileName',
+        path: uploadedPath,
         file: receiptImage,
       );
     }
 
     final recordToSave = record.copyWith(receiptImageUrl: imageUrl);
-    await _depositRecordsColl(record.tripId).doc(record.id).set(recordToSave.toMap());
+    try {
+      await _depositRecordsColl(record.tripId).doc(record.id).set(recordToSave.toMap());
+    } catch (_) {
+      if (uploadedPath != null) {
+        try {
+          await _storageService.deleteFile(uploadedPath);
+        } catch (_) {
+          // Best-effort cleanup so the original Firestore error is preserved.
+        }
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -168,9 +262,13 @@ class SavingRepositoryImpl implements SavingRepository {
     return _depositRecordsColl(tripId)
         .where('memberId', isEqualTo: memberId)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((d) => DepositRecord.fromMap(d.data() as Map<String, dynamic>, id: d.id))
-            .toList());
+        .map((snapshot) {
+      final list = snapshot.docs
+          .map((d) => DepositRecord.fromMap(d.data() as Map<String, dynamic>, id: d.id))
+          .toList();
+      list.sort((a, b) => b.depositDate.compareTo(a.depositDate));
+      return list;
+    });
   }
 
   @override

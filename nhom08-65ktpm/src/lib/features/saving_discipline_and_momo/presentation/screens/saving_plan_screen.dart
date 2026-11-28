@@ -20,6 +20,7 @@ class SavingPlanScreen extends StatelessWidget {
   final String memberId;
   final String memberName;
   final double defaultTargetAmount;
+  final SavingFrequency defaultFrequency;
   final DateTime? tripDepartureDate;
 
   const SavingPlanScreen({
@@ -28,6 +29,7 @@ class SavingPlanScreen extends StatelessWidget {
     required this.memberId,
     required this.memberName,
     this.defaultTargetAmount = 3000000,
+    this.defaultFrequency = SavingFrequency.weekly,
     this.tripDepartureDate,
   });
 
@@ -39,6 +41,7 @@ class SavingPlanScreen extends StatelessWidget {
         memberId: memberId,
         memberName: memberName,
         defaultTargetAmount: defaultTargetAmount,
+        defaultFrequency: defaultFrequency,
         tripDepartureDate: tripDepartureDate,
       ),
     );
@@ -50,6 +53,7 @@ class _SavingPlanContent extends ConsumerStatefulWidget {
   final String memberId;
   final String memberName;
   final double defaultTargetAmount;
+  final SavingFrequency defaultFrequency;
   final DateTime? tripDepartureDate;
 
   const _SavingPlanContent({
@@ -57,6 +61,7 @@ class _SavingPlanContent extends ConsumerStatefulWidget {
     required this.memberId,
     required this.memberName,
     required this.defaultTargetAmount,
+    required this.defaultFrequency,
     this.tripDepartureDate,
   });
 
@@ -72,15 +77,19 @@ class _SavingPlanContentState extends ConsumerState<_SavingPlanContent> {
   SavingFrequency _frequency = SavingFrequency.weekly;
   SavingPlanCalculationResult? _calculationPreview;
   bool _isSaving = false;
+  bool _initializedFromPlan = false;
 
   @override
   void initState() {
     super.initState();
     _amountController = TextEditingController(
-      text: widget.defaultTargetAmount.toStringAsFixed(0),
+      text: MoMoDeeplinkHelper.formatDigitsWithDots(
+        widget.defaultTargetAmount.round(),
+      ),
     );
     _startDate = DateTime.now();
     _deadlineDate = widget.tripDepartureDate ?? _startDate.add(const Duration(days: 30));
+    _frequency = widget.defaultFrequency;
     _updateCalculationPreview();
   }
 
@@ -124,7 +133,9 @@ class _SavingPlanContentState extends ConsumerState<_SavingPlanContent> {
 
   Future<void> _savePlan() async {
     if (_isSaving || !_formKey.currentState!.validate()) return;
-    final amount = double.parse(_amountController.text.trim());
+    final sanitized = _amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final amount = double.tryParse(sanitized) ?? 0.0;
+    if (amount <= 0) return;
     final params = SavingPlanParams(tripId: widget.tripId, memberId: widget.memberId);
 
     setState(() => _isSaving = true);
@@ -163,7 +174,7 @@ class _SavingPlanContentState extends ConsumerState<_SavingPlanContent> {
   @override
   Widget build(BuildContext context) {
     final params = SavingPlanParams(tripId: widget.tripId, memberId: widget.memberId);
-    final planAsync = ref.watch(savingPlanProvider(params));
+    final planAsync = ref.watch(savingPlanStreamProvider(params));
 
     return Scaffold(
       appBar: AppBar(
@@ -183,6 +194,17 @@ class _SavingPlanContentState extends ConsumerState<_SavingPlanContent> {
           ),
         ),
         data: (existingPlan) {
+          if (existingPlan != null && !_initializedFromPlan) {
+            _initializedFromPlan = true;
+            _amountController.text = MoMoDeeplinkHelper.formatDigitsWithDots(
+              existingPlan.targetAmount.round(),
+            );
+            _startDate = existingPlan.startDate;
+            _deadlineDate = existingPlan.deadlineDate.isAfter(existingPlan.startDate)
+                ? existingPlan.deadlineDate
+                : existingPlan.startDate.add(const Duration(days: 1));
+            _frequency = existingPlan.frequency;
+          }
           final amountText = _amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
           final parsedAmount = double.tryParse(amountText) ?? 0.0;
           final effectivePreview = (parsedAmount > 0 && _deadlineDate.isAfter(_startDate))
@@ -323,6 +345,7 @@ class _SavingPlanContentState extends ConsumerState<_SavingPlanContent> {
             TextFormField(
               controller: _amountController,
               keyboardType: TextInputType.number,
+              inputFormatters: [ThousandsDotInputFormatter()],
               decoration: const InputDecoration(
                 labelText: 'Mục tiêu tích góp cá nhân (VND)',
                 suffixText: 'đ',
@@ -330,7 +353,8 @@ class _SavingPlanContentState extends ConsumerState<_SavingPlanContent> {
               ),
               validator: (val) {
                 if (val == null || val.trim().isEmpty) return 'Vui lòng nhập số tiền';
-                final num = double.tryParse(val.trim());
+                final digits = val.replaceAll(RegExp(r'[^0-9]'), '');
+                final num = double.tryParse(digits);
                 if (num == null || num <= 0) return 'Số tiền phải lớn hơn 0';
                 return null;
               },

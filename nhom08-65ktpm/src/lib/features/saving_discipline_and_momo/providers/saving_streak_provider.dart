@@ -81,22 +81,30 @@ class SavingStreakNotifier extends AsyncNotifier<MemberStreak> {
           state.value ?? await repository.getMemberStreak(_params.tripId, _params.memberId);
 
       state = const AsyncLoading();
+      final iso = SavingStreakCalculator.formatIsoDate(date);
       final result = await AsyncValue.guard(() async {
-        final updated = SavingStreakCalculator.recordCheckIn(
+        final computed = SavingStreakCalculator.recordCheckIn(
           current,
           date,
           referenceDate: DateTime.now(),
+        );
+        final updated = computed.copyWith(
+          journalEntries: {
+            ...computed.journalEntries,
+            iso: (emoji: emoji, note: note.trim()),
+          },
         );
         await repository.updateMemberStreak(updated);
         return updated;
       });
 
-      final iso = SavingStreakCalculator.formatIsoDate(date);
-      ref.read(savingJournalProvider(_params).notifier).saveEntry(
-            isoDate: iso,
-            emoji: emoji,
-            note: note,
-          );
+      if (!result.hasError) {
+        ref.read(savingJournalProvider(_params).notifier).saveEntry(
+              isoDate: iso,
+              emoji: emoji,
+              note: note,
+            );
+      }
 
       if (!ref.mounted) {
         if (result.hasError) {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -35,6 +36,7 @@ class DepositReceiptSheet extends StatelessWidget {
     this.momoLink,
     this.phoneNumber,
     this.qrData,
+    this.allowAmountEdit = false,
   });
 
   final String fundName;
@@ -49,6 +51,7 @@ class DepositReceiptSheet extends StatelessWidget {
   final String? momoLink;
   final String? phoneNumber;
   final String? qrData;
+  final bool allowAmountEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +69,7 @@ class DepositReceiptSheet extends StatelessWidget {
         momoLink: momoLink,
         phoneNumber: phoneNumber,
         qrData: qrData,
+        allowAmountEdit: allowAmountEdit,
       ),
     );
   }
@@ -85,6 +89,7 @@ class _DepositReceiptContent extends ConsumerStatefulWidget {
     this.momoLink,
     this.phoneNumber,
     this.qrData,
+    this.allowAmountEdit = false,
   });
 
   final String fundName;
@@ -99,6 +104,7 @@ class _DepositReceiptContent extends ConsumerStatefulWidget {
   final String? momoLink;
   final String? phoneNumber;
   final String? qrData;
+  final bool allowAmountEdit;
 
   @override
   ConsumerState<_DepositReceiptContent> createState() => _DepositReceiptContentState();
@@ -106,12 +112,29 @@ class _DepositReceiptContent extends ConsumerStatefulWidget {
 
 class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> {
   final _noteCtrl = TextEditingController(text: 'Nhịn 2 ly trà sữa góp quỹ đúng hạn!');
+  late final TextEditingController _amountCtrl;
   final _moods = const ['🔥', '😎', '🚀', '💪', '🎉'];
   int _selectedMood = 0;
   bool _showQrFallback = false;
   bool _isSubmitting = false;
+  bool _cameraPermanentlyDenied = false;
   File? _receiptImage;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _amountCtrl = TextEditingController(
+      text: MoMoDeeplinkHelper.formatDigitsWithDots(widget.amount.round()),
+    );
+  }
+
+  double get _effectiveAmount {
+    if (!widget.allowAmountEdit) return widget.amount;
+    final digits = _amountCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return 0.0;
+    return double.tryParse(digits) ?? 0.0;
+  }
 
   Future<void> _launchMoMo(String link, String copySummary) async {
     final launched = await MoMoLauncher.openMoMo(
@@ -147,6 +170,11 @@ class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> 
     );
     if (source == null || !mounted) return;
 
+    if (source == ImageSource.camera) {
+      final hasPermission = await _ensureCameraPermission();
+      if (!hasPermission || !mounted) return;
+    }
+
     try {
       final picker = ImagePicker();
       final picked = await picker.pickImage(
@@ -158,7 +186,19 @@ class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> 
         setState(() {
           _receiptImage = File(picked.path);
           _errorMessage = null;
+          _cameraPermanentlyDenied = false;
         });
+      }
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      if (e.code == 'camera_access_denied') {
+        setState(() {
+          _cameraPermanentlyDenied = true;
+          _errorMessage =
+              'Cần quyền truy cập camera để chụp ảnh biên lai. Vui lòng bật quyền Camera trong Cài đặt.';
+        });
+      } else {
+        setState(() => _errorMessage = 'Không thể chọn ảnh biên lai: ${e.message ?? e.code}');
       }
     } catch (e) {
       if (!mounted) return;
@@ -166,11 +206,41 @@ class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> 
     }
   }
 
+  Future<bool> _ensureCameraPermission() async {
+    var status = await Permission.camera.status;
+    if (!status.isGranted &&
+        !status.isPermanentlyDenied &&
+        !status.isRestricted) {
+      status = await Permission.camera.request();
+    }
+    if (!mounted) return false;
+    if (status.isGranted) {
+      setState(() => _cameraPermanentlyDenied = false);
+      return true;
+    }
+
+    final permDenied = status.isPermanentlyDenied || status.isRestricted;
+    setState(() {
+      _cameraPermanentlyDenied = permDenied;
+      _errorMessage = permDenied
+          ? 'Quyền camera đã bị từ chối vĩnh viễn. Vui lòng bật quyền Camera trong Cài đặt ứng dụng.'
+          : 'Cần quyền truy cập camera để chụp ảnh biên lai.';
+    });
+    return false;
+  }
+
   Future<void> _submitReceipt() async {
     if (_isSubmitting) return;
     if (_receiptImage == null) {
       setState(() {
         _errorMessage = 'Vui lòng chọn ảnh chụp biên lai giao dịch MoMo';
+      });
+      return;
+    }
+
+    if (_effectiveAmount <= 0) {
+      setState(() {
+        _errorMessage = 'Vui lòng nhập số tiền nạp quỹ hợp lệ (> 0đ)';
       });
       return;
     }
@@ -183,7 +253,7 @@ class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> 
       await ref.read(receiptApprovalProvider(widget.tripId).notifier).submitDeposit(
             memberId: widget.memberId,
             memberName: widget.memberName,
-            amount: widget.amount,
+            amount: _effectiveAmount,
             installmentIndex: widget.installmentIndex,
             termDueDate: widget.termDueDate,
             termFrequency: widget.termFrequency,
@@ -211,6 +281,7 @@ class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> 
   @override
   void dispose() {
     _noteCtrl.dispose();
+    _amountCtrl.dispose();
     super.dispose();
   }
 
@@ -220,7 +291,7 @@ class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> 
       tripId: widget.tripId,
       memberName: widget.memberName,
     );
-    final formattedAmount = MoMoDeeplinkHelper.formatVnd(widget.amount.round());
+    final formattedAmount = MoMoDeeplinkHelper.formatVnd(_effectiveAmount.round());
     final effectiveLink = (widget.momoLink?.isNotEmpty == true)
         ? widget.momoLink!
         : (widget.phoneNumber?.isNotEmpty == true
@@ -321,6 +392,25 @@ class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> 
                       formattedAmount,
                       style: AppTheme.monoAmount(fontSize: 30, fontWeight: FontWeight.w800),
                     ),
+                    if (widget.allowAmountEdit) ...[
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _amountCtrl,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [ThousandsDotInputFormatter()],
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          labelText: 'Số tiền nộp quỹ (VNĐ)',
+                          isDense: true,
+                          filled: true,
+                          fillColor: AppColors.surfaceContainerLow,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: AppColors.outlineVariantSoft),
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -391,7 +481,7 @@ class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> 
                           child: OutlinedButton.icon(
                             onPressed: () {
                               Clipboard.setData(
-                                ClipboardData(text: '${widget.amount.round()} - $transferNote'),
+                                ClipboardData(text: '${_effectiveAmount.round()} - $transferNote'),
                               );
                               ModuleNotification.info(
                                 context,
@@ -616,6 +706,18 @@ class _DepositReceiptContentState extends ConsumerState<_DepositReceiptContent> 
                           ),
                         ),
                       ),
+                      if (_cameraPermanentlyDenied) ...[
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: openAppSettings,
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('Mở Cài đặt'),
+                        ),
+                      ],
                     ],
                   ),
                 ),

@@ -9,6 +9,7 @@ import '../../../core/widgets/app_inset_card.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_section_header.dart';
 import '../../../core/widgets/app_status_badge.dart';
+import '../../../models/trip_member.dart';
 import '../models/deposit_record.dart';
 import '../models/member_streak.dart';
 import '../models/momo_fund_config.dart';
@@ -25,6 +26,7 @@ import 'setup_momo_sheet.dart';
 import 'widgets/daily_you_streak_calendar.dart';
 import 'widgets/deposit_due_warning_banner.dart';
 import 'widgets/fund_progress_card.dart';
+import 'widgets/module_notification.dart';
 import 'widgets/module_provider_scope.dart';
 
 /// Tab 2 — Quỹ MoMo (Module 2 — Trọng tâm Liên kết Quỹ trong app với Quỹ nhóm MoMo).
@@ -90,8 +92,19 @@ class _MomoFundContent extends ConsumerStatefulWidget {
 }
 
 class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
-  Future<void> _openSetupMoMoSheet([MoMoFundConfig? currentConfig]) async {
-    await showModalBottomSheet<String>(
+  Future<void> _openSetupMoMoSheet([
+    MoMoFundConfig? currentConfig,
+    int memberCount = 1,
+    double? fallbackTarget,
+  ]) async {
+    final realTarget = (fallbackTarget != null && fallbackTarget > 0)
+        ? fallbackTarget
+        : ((widget.tripTargetBudget != null && widget.tripTargetBudget! > 0)
+            ? widget.tripTargetBudget!
+            : (currentConfig != null && currentConfig.targetTotalAmount > 0
+                ? currentConfig.targetTotalAmount
+                : 8450000.0));
+    final savedName = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -99,13 +112,22 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
         tripId: widget.tripId,
         hostUserId: currentConfig?.hostUserId ?? widget.memberId,
         hostName: currentConfig?.hostName ?? widget.memberName,
-        targetTotalAmount:
-            currentConfig?.targetTotalAmount ?? widget.tripTargetBudget ?? 8450000,
+        targetTotalAmount: realTarget,
+        memberCount: memberCount,
+        initialFrequency:
+            currentConfig?.defaultFrequency ?? SavingFrequency.weekly,
         initialFundName: currentConfig?.fundName ?? 'Quỹ chuyến đi',
         initialPhoneNumber: currentConfig?.momoPhoneNumber ?? '',
         initialFundLink: currentConfig?.momoFundDeeplink ?? '',
+        initialQrCodeUrl: currentConfig?.qrCodeUrl,
       ),
     );
+    if (savedName != null && mounted) {
+      ModuleNotification.success(
+        context,
+        'Đã lưu cấu hình "$savedName" & đồng bộ mức chia quỹ!',
+      );
+    }
   }
 
   void _openPaymentScreen(MoMoFundConfig config, {double? suggestedAmount}) {
@@ -141,11 +163,13 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
   void _openSavingPlanScreen({
     MoMoFundConfig? fundConfig,
     int memberCount = 1,
+    double? tripTargetBudget,
+    DateTime? tripDepartureDate,
   }) {
     final totalTarget =
         (fundConfig != null && fundConfig.targetTotalAmount > 0)
             ? fundConfig.targetTotalAmount
-            : (widget.tripTargetBudget ?? 3000000);
+            : (tripTargetBudget ?? widget.tripTargetBudget ?? 3000000);
     final divisor = (widget.tripMemberCount ?? memberCount).clamp(1, 100);
     final perMemberDefault = (totalTarget / divisor).roundToDouble();
 
@@ -156,7 +180,9 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
           memberId: widget.memberId,
           memberName: widget.memberName,
           defaultTargetAmount: perMemberDefault,
-          tripDepartureDate: widget.tripDepartureDate,
+          defaultFrequency:
+              fundConfig?.defaultFrequency ?? SavingFrequency.weekly,
+          tripDepartureDate: tripDepartureDate ?? widget.tripDepartureDate,
         ),
       ),
     );
@@ -165,19 +191,21 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
   Future<void> _openDepositSheet({
     required MoMoFundConfig? fundConfig,
     required SavingPlan? memberPlan,
+    required double targetAmount,
+    required int memberCount,
+    double fallbackAmount = 212000.0,
   }) async {
-    final nextInstallment = (memberPlan?.completedInstallments ?? 0) + 1;
-    final totalInstallments = memberPlan?.totalInstallments ?? 0;
-    final cycleLabel = totalInstallments > 0
-        ? 'Kỳ $nextInstallment/$totalInstallments'
-        : 'Kỳ hiện tại';
-    final amount = (memberPlan != null && memberPlan.installmentAmount > 0)
-        ? memberPlan.installmentAmount
-        : 212000.0;
+    final defaults = MoMoFundConfig.resolveDepositDefaults(
+      config: fundConfig,
+      plan: memberPlan,
+      targetTotalAmount: targetAmount,
+      memberCount: memberCount,
+      fallbackAmount: fallbackAmount,
+    );
     final termDueDate = memberPlan != null
         ? SavingStreakCalculator.termDueDateForInstallment(
             plan: memberPlan,
-            installmentIndex: nextInstallment,
+            installmentIndex: defaults.installmentIndex,
           )
         : null;
 
@@ -190,14 +218,15 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
         memberId: widget.memberId,
         memberName: memberPlan?.memberName ?? widget.memberName,
         fundName: fundConfig?.fundName ?? 'Quỹ nhóm MoMo',
-        amount: amount,
-        installmentIndex: nextInstallment,
-        cycleLabel: cycleLabel,
+        amount: defaults.amount,
+        installmentIndex: defaults.installmentIndex,
+        cycleLabel: defaults.cycleLabel,
         termDueDate: termDueDate,
-        termFrequency: memberPlan?.frequency,
+        termFrequency: defaults.frequency,
         momoLink: fundConfig?.momoFundDeeplink,
         phoneNumber: fundConfig?.momoPhoneNumber,
         qrData: fundConfig?.qrCodeUrl,
+        allowAmountEdit: true,
       ),
     );
   }
@@ -220,6 +249,8 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
     final depositsAsync = ref.watch(tripDepositsStreamProvider(widget.tripId));
     final plansAsync = ref.watch(tripSavingPlansStreamProvider(widget.tripId));
     final streaksAsync = ref.watch(tripStreaksStreamProvider(widget.tripId));
+    final tripSummaryAsync = ref.watch(tripSummaryStreamProvider(widget.tripId));
+    final tripMembersAsync = ref.watch(tripMembersStreamProvider(widget.tripId));
 
     ref.listen(tripSavingPlansStreamProvider(widget.tripId), (_, next) {
       final planList = next.asData?.value;
@@ -258,55 +289,148 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
     final plans = List<SavingPlan>.from(plansAsync.value ?? const <SavingPlan>[]);
     final memberPlan = plans.where((p) => p.memberId == widget.memberId).firstOrNull;
     final streaks = streaksAsync.value ?? const <MemberStreak>[];
+    final tripSummary = tripSummaryAsync.value;
+    final tripMembers = tripMembersAsync.value ?? const <TripMember>[];
+
+    final isInitialLoading =
+        (fundConfigAsync.isLoading && !fundConfigAsync.hasValue) ||
+        (plansAsync.isLoading && !plansAsync.hasValue) ||
+        (depositsAsync.isLoading && !depositsAsync.hasValue);
+    final firstError = fundConfigAsync.error ??
+        depositsAsync.error ??
+        plansAsync.error ??
+        streaksAsync.error ??
+        tripSummaryAsync.error ??
+        tripMembersAsync.error;
 
     final isLinked = fundConfig != null &&
         (fundConfig.momoPhoneNumber.isNotEmpty ||
             (fundConfig.momoFundDeeplink?.isNotEmpty ?? false) ||
             (fundConfig.qrCodeUrl?.isNotEmpty ?? false));
     final fundName = fundConfig?.fundName ?? 'Quỹ nhóm MoMo';
-    final isHost = widget.isHost ?? (fundConfig == null || fundConfig.hostUserId == widget.memberId);
+    final isHost = widget.isHost ??
+        (tripSummary != null
+            ? tripSummary.hostId == widget.memberId
+            : (fundConfig != null && fundConfig.hostUserId == widget.memberId));
 
     final pendingCount =
         deposits.where((r) => r.status == DepositStatus.pending).length;
 
+    final effectiveTargetBudget = widget.tripTargetBudget ??
+        (tripSummary != null && tripSummary.targetBudget > 0
+            ? tripSummary.targetBudget.toDouble()
+            : null);
+    final effectiveDepartureDate = widget.tripDepartureDate ?? tripSummary?.startDate;
+
     final totalPlanTarget = plans.fold<double>(0.0, (sum, p) => sum + p.targetAmount);
     final totalPlanPaid = plans.fold<double>(0.0, (sum, p) => sum + p.paidAmount);
-    final collectedAmount = fundConfig?.currentCollectedAmount ?? totalPlanPaid;
-    final targetAmount = (fundConfig != null && fundConfig.targetTotalAmount > 0)
-        ? fundConfig.targetTotalAmount
-        : (totalPlanTarget > 0
-            ? totalPlanTarget
-            : (widget.tripTargetBudget ?? 0.0));
-    final memberCount = plans.isNotEmpty
-        ? plans.length
-        : (widget.tripMemberCount ?? 1);
+    final collectedAmount = fundConfig?.currentCollectedAmount ??
+        (tripSummary != null && tripSummary.totalSavedAmount > 0
+            ? tripSummary.totalSavedAmount.toDouble()
+            : totalPlanPaid);
+    final targetAmount = (effectiveTargetBudget != null && effectiveTargetBudget > 0)
+        ? effectiveTargetBudget
+        : ((fundConfig != null && fundConfig.targetTotalAmount > 0)
+            ? fundConfig.targetTotalAmount
+            : (totalPlanTarget > 0 ? totalPlanTarget : 0.0));
+    final memberCount = tripMembers.isNotEmpty
+        ? tripMembers.length
+        : (plans.isNotEmpty ? plans.length : (widget.tripMemberCount ?? 1));
+    final groupDefaultFrequency =
+        fundConfig?.defaultFrequency ?? SavingFrequency.weekly;
+    final groupSplitAmount = MoMoFundConfig.resolveGroupSplitAmount(
+      config: fundConfig,
+      targetTotalAmount: targetAmount,
+      memberCount: memberCount,
+    );
+    final perMemberTotalTarget = (tripSummary != null && tripSummary.perMemberTarget > 0)
+        ? tripSummary.perMemberTarget.toDouble()
+        : (targetAmount > 0
+            ? (targetAmount / memberCount.clamp(1, 100)).roundToDouble()
+            : 212000.0);
+    final fallbackDepositAmount =
+        groupSplitAmount > 0 ? groupSplitAmount : perMemberTotalTarget;
 
     final cycleLabel = (memberPlan != null && memberPlan.totalInstallments > 0)
         ? 'Kỳ hiện tại (Kỳ ${memberPlan.completedInstallments + 1}/${memberPlan.totalInstallments})'
         : 'Kỳ hiện tại';
     final installmentText = (memberPlan != null && memberPlan.installmentAmount > 0)
         ? '${MoMoDeeplinkHelper.formatVnd(memberPlan.installmentAmount.round())} / kỳ'
-        : 'Chạm Nộp biên lai để đóng quỹ';
+        : (groupSplitAmount > 0
+            ? '${MoMoDeeplinkHelper.formatVnd(groupSplitAmount.round())} / ${MoMoFundConfig.cycleUnitLabel(groupDefaultFrequency)} (đề xuất)'
+            : 'Chạm Nộp biên lai để đóng quỹ');
     final currentMemberDeposits =
         deposits.where((d) => d.memberId == widget.memberId).toList();
+    final currentMember = tripMembers
+        .where((m) => m.userId == widget.memberId)
+        .firstOrNull;
+    final currentMemberSaved = currentMember?.contributedAmount.toDouble() ?? 0.0;
+    final currentMemberTarget =
+        (currentMember != null && currentMember.targetContribution > 0)
+            ? currentMember.targetContribution.toDouble()
+            : perMemberTotalTarget;
     final depositReminder = memberPlan != null
         ? SavingStreakCalculator.evaluateTodayDepositWarning(
             plan: memberPlan,
             deposits: currentMemberDeposits,
           )
-        : null;
+        : (groupSplitAmount > 0
+            ? SavingStreakCalculator.evaluateGroupDefaultDepositWarning(
+                frequency: groupDefaultFrequency,
+                amount: groupSplitAmount,
+                anchorDate: fundConfig?.updatedAt ?? DateTime.now(),
+                deposits: currentMemberDeposits,
+                totalTargetAmount: currentMemberTarget,
+                alreadySavedAmount: currentMemberSaved,
+                deadlineDate: effectiveDepartureDate,
+              )
+            : null);
     final nextIncoming = memberPlan != null
         ? SavingStreakCalculator.nextIncomingDeposit(
             plan: memberPlan,
             deposits: currentMemberDeposits,
           )
-        : null;
+        : (groupSplitAmount > 0
+            ? SavingStreakCalculator.nextIncomingDepositFromGroupDefault(
+                frequency: groupDefaultFrequency,
+                amount: groupSplitAmount,
+                anchorDate: fundConfig?.updatedAt ?? DateTime.now(),
+                deposits: currentMemberDeposits,
+                totalTargetAmount: currentMemberTarget,
+                alreadySavedAmount: currentMemberSaved,
+                deadlineDate: effectiveDepartureDate,
+              )
+            : null);
     final nextDepositText = nextIncoming != null
         ? 'Kỳ tới: ${SavingStreakCalculator.formatIncomingDepositDate(nextIncoming)}'
         : null;
 
     final streakByMember = {for (final s in streaks) s.memberId: s};
-    plans.sort((a, b) {
+    final planByMember = {for (final p in plans) p.memberId: p};
+    final leaderboardEntries = <_LeaderboardEntry>[
+      for (final plan in plans)
+        _LeaderboardEntry(
+          memberId: plan.memberId,
+          memberName: plan.memberName,
+          paidAmount: plan.paidAmount,
+          targetAmount: plan.targetAmount,
+          plan: plan,
+          fallbackStreak: 0,
+        ),
+      for (final member in tripMembers)
+        if (!planByMember.containsKey(member.userId))
+          _LeaderboardEntry(
+            memberId: member.userId,
+            memberName: member.displayName,
+            paidAmount: member.contributedAmount.toDouble(),
+            targetAmount: member.targetContribution > 0
+                ? member.targetContribution.toDouble()
+                : perMemberTotalTarget,
+            plan: null,
+            fallbackStreak: member.currentStreak,
+          ),
+    ];
+    leaderboardEntries.sort((a, b) {
       final ratioA = a.targetAmount > 0 ? a.paidAmount / a.targetAmount : 0.0;
       final ratioB = b.targetAmount > 0 ? b.paidAmount / b.targetAmount : 0.0;
       final cmp = ratioB.compareTo(ratioA);
@@ -335,21 +459,30 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
         actions: [
           IconButton(
             tooltip: 'Kế hoạch tích góp',
-            icon: const Icon(Icons.event_repeat_rounded, color: AppColors.primary),
+            icon: const Icon(Icons.event_repeat_rounded, color: AppColors.onPrimaryContainer),
             onPressed: () => _openSavingPlanScreen(
               fundConfig: fundConfig,
               memberCount: memberCount,
+              tripTargetBudget: effectiveTargetBudget,
+              tripDepartureDate: effectiveDepartureDate,
             ),
           ),
-          IconButton(
-            tooltip: 'Thiết lập kế hoạch & Liên kết MoMo',
-            icon: const Icon(Icons.settings_outlined, color: AppColors.primary),
-            onPressed: () => _openSetupMoMoSheet(fundConfig),
-          ),
+          if (isHost)
+            IconButton(
+              tooltip: 'Thiết lập kế hoạch & Liên kết MoMo',
+              icon: const Icon(Icons.settings_outlined, color: AppColors.onPrimaryContainer),
+              onPressed: () => _openSetupMoMoSheet(
+                fundConfig,
+                memberCount,
+                effectiveTargetBudget,
+              ),
+            ),
         ],
       ),
       body: Column(
         children: [
+          if (isInitialLoading)
+            const LinearProgressIndicator(minHeight: 2),
           if (isHost && pendingCount > 0)
             Material(
               color: AppColors.amberContainer,
@@ -398,6 +531,39 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+          if (firstError != null) ...[
+            AppInsetCard(
+              borderRadius: 12,
+              padding: const EdgeInsets.all(12),
+              borderColor: AppColors.error,
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Không thể đồng bộ dữ liệu quỹ: $firstError',
+                      style: const TextStyle(fontSize: 12, color: AppColors.error),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      ref.invalidate(momoFundStreamProvider(widget.tripId));
+                      ref.invalidate(tripDepositsStreamProvider(widget.tripId));
+                      ref.invalidate(tripSavingPlansStreamProvider(widget.tripId));
+                      ref.invalidate(tripStreaksStreamProvider(widget.tripId));
+                      ref.invalidate(tripSummaryStreamProvider(widget.tripId));
+                      ref.invalidate(tripMembersStreamProvider(widget.tripId));
+                    },
+                    child: const Text('Thử lại'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           // 1. Thẻ Liên kết Quỹ nhóm MoMo
           AppInsetCard(
             borderRadius: 16,
@@ -446,23 +612,28 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
                         ],
                       ),
                     ),
-                    SizedBox(
-                      width: 34,
-                      height: 34,
-                      child: IconButton(
-                        tooltip: 'Cấu hình liên kết MoMo',
-                        padding: EdgeInsets.zero,
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.surfaceContainerLow,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: const BorderSide(color: AppColors.outlineVariantSoft),
+                    if (isHost)
+                      SizedBox(
+                        width: 34,
+                        height: 34,
+                        child: IconButton(
+                          tooltip: 'Cấu hình liên kết MoMo',
+                          padding: EdgeInsets.zero,
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppColors.surfaceContainerLow,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: const BorderSide(color: AppColors.outlineVariantSoft),
+                            ),
+                          ),
+                          icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.onSurfaceVariant),
+                          onPressed: () => _openSetupMoMoSheet(
+                            fundConfig,
+                            memberCount,
+                            effectiveTargetBudget,
                           ),
                         ),
-                        icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.onSurfaceVariant),
-                        onPressed: () => _openSetupMoMoSheet(fundConfig),
                       ),
-                    ),
                   ],
                 ),
                 if (isLinked && fundConfig.momoPhoneNumber.isNotEmpty) ...[
@@ -489,15 +660,26 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
                   children: [
                     Expanded(
                       child: AppPrimaryButton(
-                        label: isLinked ? 'Mở MoMo nạp quỹ' : 'Gắn link / QR MoMo',
+                        label: isLinked
+                            ? 'Mở MoMo nạp quỹ'
+                            : (isHost
+                                ? 'Gắn link / QR MoMo'
+                                : 'Chờ Trưởng nhóm liên kết MoMo'),
                         icon: isLinked ? Icons.open_in_new : Icons.qr_code_scanner,
                         backgroundColor: AppColors.momo,
                         onPressed: isLinked
                             ? () => _openPaymentScreen(
                                   fundConfig,
-                                  suggestedAmount: memberPlan?.installmentAmount,
+                                  suggestedAmount:
+                                      memberPlan?.installmentAmount ?? fallbackDepositAmount,
                                 )
-                            : () => _openSetupMoMoSheet(fundConfig),
+                            : (isHost
+                                ? () => _openSetupMoMoSheet(
+                                      fundConfig,
+                                      memberCount,
+                                      effectiveTargetBudget,
+                                    )
+                                : null),
                       ),
                     ),
                   ],
@@ -513,6 +695,9 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
               onDepositTap: () => _openDepositSheet(
                 fundConfig: fundConfig,
                 memberPlan: memberPlan,
+                targetAmount: targetAmount,
+                memberCount: memberCount,
+                fallbackAmount: fallbackDepositAmount,
               ),
             ),
             const SizedBox(height: 16),
@@ -529,6 +714,9 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
             onDepositPressed: () => _openDepositSheet(
               fundConfig: fundConfig,
               memberPlan: memberPlan,
+              targetAmount: targetAmount,
+              memberCount: memberCount,
+              fallbackAmount: fallbackDepositAmount,
             ),
           ),
           const SizedBox(height: 24),
@@ -559,7 +747,7 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
                 : null,
           ),
           AppInsetCard(
-            child: plans.isEmpty
+            child: leaderboardEntries.isEmpty
                 ? const Padding(
                     padding: EdgeInsets.all(20),
                     child: Center(
@@ -570,17 +758,19 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
                     ),
                   )
                 : Column(
-                    children: List.generate(plans.length, (idx) {
-                      final plan = plans[idx];
+                    children: List.generate(leaderboardEntries.length, (idx) {
+                      final entry = leaderboardEntries[idx];
                       final memberDeposits =
-                          deposits.where((d) => d.memberId == plan.memberId).toList();
+                          deposits.where((d) => d.memberId == entry.memberId).toList();
                       final (badgeText, tone) = _memberCycleBadge(memberDeposits);
-                      final memberStreak = streakByMember[plan.memberId];
-                      final streakCount = SavingStreakCalculator.calculateTermStreak(
-                        plan: plan,
-                        deposits: memberDeposits,
-                        streak: memberStreak,
-                      ).currentStreak;
+                      final memberStreak = streakByMember[entry.memberId];
+                      final streakCount = entry.plan != null
+                          ? SavingStreakCalculator.calculateTermStreak(
+                              plan: entry.plan!,
+                              deposits: memberDeposits,
+                              streak: memberStreak,
+                            ).currentStreak
+                          : (memberStreak?.currentStreak ?? entry.fallbackStreak);
 
                       return Column(
                         children: [
@@ -592,7 +782,7 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
                                   ? AppColors.amberContainer
                                   : AppColors.surfaceContainerHigh,
                               child: Text(
-                                MoMoDeeplinkHelper.formatInitials(plan.memberName),
+                                MoMoDeeplinkHelper.formatInitials(entry.memberName),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -603,13 +793,13 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
                               ),
                             ),
                             title: Text(
-                              '${idx + 1}. ${plan.memberName}',
+                              '${idx + 1}. ${entry.memberName}',
                               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             subtitle: Text(
-                              '${MoMoDeeplinkHelper.formatVnd(plan.paidAmount.round())} / ${MoMoDeeplinkHelper.formatVnd(plan.targetAmount.round())}',
+                              '${MoMoDeeplinkHelper.formatVnd(entry.paidAmount.round())} / ${MoMoDeeplinkHelper.formatVnd(entry.targetAmount.round())}',
                               style: AppTheme.monoAmount(
                                 fontSize: 12,
                                 color: AppColors.onSurfaceVariant,
@@ -648,7 +838,7 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
                               ],
                             ),
                           ),
-                          if (idx < plans.length - 1) const Divider(indent: 72),
+                          if (idx < leaderboardEntries.length - 1) const Divider(indent: 72),
                         ],
                       );
                     }),
@@ -661,4 +851,22 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
       ),
     );
   }
+}
+
+class _LeaderboardEntry {
+  const _LeaderboardEntry({
+    required this.memberId,
+    required this.memberName,
+    required this.paidAmount,
+    required this.targetAmount,
+    required this.plan,
+    required this.fallbackStreak,
+  });
+
+  final String memberId;
+  final String memberName;
+  final double paidAmount;
+  final double targetAmount;
+  final SavingPlan? plan;
+  final int fallbackStreak;
 }

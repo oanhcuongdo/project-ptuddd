@@ -56,13 +56,25 @@ class SavingPlanCalculationResult {
 class SavingCalculator {
   const SavingCalculator();
 
+  /// Adds [monthsToAdd] calendar months while clamping day-of-month to month length
+  /// (e.g. Jan 31 + 1 month -> Feb 28/29 instead of overflowing into March).
+  static DateTime addCalendarMonths(DateTime date, int monthsToAdd) {
+    final zeroBasedMonth = (date.month - 1) + monthsToAdd;
+    final targetYear = date.year + (zeroBasedMonth ~/ 12);
+    final targetMonth = (zeroBasedMonth % 12) + 1;
+    final lastDayOfTargetMonth = DateTime(targetYear, targetMonth + 1, 0).day;
+    final clampedDay =
+        date.day <= lastDayOfTargetMonth ? date.day : lastDayOfTargetMonth;
+    return DateTime(targetYear, targetMonth, clampedDay);
+  }
+
   /// Calculates saving installments partitioned over the countdown to departure.
   /// 
   /// Rules:
   /// - [targetAmount] must be > 0.
   /// - [deadlineDate] must be after [startDate].
   /// - If days remaining < 7, frequency automatically defaults to [SavingFrequency.daily].
-  /// - If days remaining < 30 and frequency is [SavingFrequency.monthly], defaults to [SavingFrequency.weekly] or [SavingFrequency.daily].
+  /// - If days remaining < 28 and frequency is [SavingFrequency.monthly], defaults to [SavingFrequency.weekly] or [SavingFrequency.daily].
   /// - Standard installments are rounded to the nearest 1,000 VND: `((raw / 1000).round() * 1000)`.
   /// - Any fractional remainder is adjusted into the final installment so that the sum matches [targetAmount] exactly.
   static SavingPlanCalculationResult calculateInstallments({
@@ -88,7 +100,7 @@ class SavingCalculator {
     SavingFrequency effectiveFrequency = preferredFrequency;
     if (totalDays < 7) {
       effectiveFrequency = SavingFrequency.daily;
-    } else if (totalDays < 30 && preferredFrequency == SavingFrequency.monthly) {
+    } else if (totalDays < 28 && preferredFrequency == SavingFrequency.monthly) {
       effectiveFrequency = SavingFrequency.weekly;
     }
 
@@ -119,8 +131,16 @@ class SavingCalculator {
         dayStep = 7;
         break;
       case SavingFrequency.monthly:
-        intervals = (totalDays / 30).floor();
-        if (intervals < 1) intervals = 1;
+        var monthCount = 0;
+        while (!addCalendarMonths(start, monthCount + 1).isAfter(deadline)) {
+          monthCount += 1;
+        }
+        final lastFullMonthEnd =
+            monthCount == 0 ? start : addCalendarMonths(start, monthCount);
+        if (deadline.difference(lastFullMonthEnd).inDays >= 28) {
+          monthCount += 1;
+        }
+        intervals = monthCount < 1 ? 1 : monthCount;
         dayStep = 30;
         break;
     }
@@ -154,7 +174,9 @@ class SavingCalculator {
 
     final schedule = <InstallmentItem>[];
     for (int i = 1; i < intervals; i++) {
-      final dueDate = start.add(Duration(days: i * dayStep));
+      final dueDate = effectiveFrequency == SavingFrequency.monthly
+          ? addCalendarMonths(start, i)
+          : start.add(Duration(days: i * dayStep));
       schedule.add(
         InstallmentItem(
           index: i,

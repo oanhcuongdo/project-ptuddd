@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../models/momo_fund_config.dart';
+import '../models/saving_plan.dart';
 import '../providers/momo_fund_provider.dart';
 import '../providers/receipt_approval_provider.dart';
 import '../utils/saving_streak_calculator.dart';
@@ -204,16 +206,26 @@ class _SetupMomoRouteBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(momoFundStreamProvider(args.tripId)).value;
+    final members = ref.watch(tripMembersStreamProvider(args.tripId)).value ?? const [];
+    final tripSummary = ref.watch(tripSummaryStreamProvider(args.tripId)).value;
+    final realTarget = (tripSummary != null && tripSummary.targetBudget > 0)
+        ? tripSummary.targetBudget.toDouble()
+        : (args.targetAmount ?? config?.targetTotalAmount ?? 8450000.0);
+
     return Scaffold(
       body: SafeArea(
         child: SetupMomoSheet(
           tripId: args.tripId,
           hostUserId: config?.hostUserId ?? args.memberId,
           hostName: config?.hostName ?? args.memberName,
-          targetTotalAmount: config?.targetTotalAmount ?? args.targetAmount ?? 8450000,
+          targetTotalAmount: realTarget,
+          memberCount: members.isNotEmpty ? members.length : 1,
+          initialFrequency:
+              config?.defaultFrequency ?? SavingFrequency.weekly,
           initialFundName: config?.fundName ?? 'Quỹ chuyến đi',
           initialPhoneNumber: config?.momoPhoneNumber ?? '',
           initialFundLink: config?.momoFundDeeplink ?? '',
+          initialQrCodeUrl: config?.qrCodeUrl,
         ),
       ),
     );
@@ -242,11 +254,21 @@ class _DepositReceiptRouteBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(momoFundStreamProvider(args.tripId)).value;
     final plans = ref.watch(tripSavingPlansStreamProvider(args.tripId)).value ?? const [];
+    final tripSummary = ref.watch(tripSummaryStreamProvider(args.tripId)).value;
+    final members = ref.watch(tripMembersStreamProvider(args.tripId)).value ?? const [];
     final plan = plans.where((p) => p.memberId == args.memberId).firstOrNull;
-    final nextInstallment = (plan?.completedInstallments ?? 0) + 1;
-    final cycleLabel = (plan != null && plan.totalInstallments > 0)
-        ? 'Kỳ $nextInstallment/${plan.totalInstallments}'
-        : 'Kỳ hiện tại';
+    final targetAmount = (tripSummary != null && tripSummary.targetBudget > 0)
+        ? tripSummary.targetBudget.toDouble()
+        : (config?.targetTotalAmount ?? args.targetAmount ?? 0.0);
+    final memberCount = members.isNotEmpty
+        ? members.length
+        : (plans.isNotEmpty ? plans.length : 1);
+    final defaults = MoMoFundConfig.resolveDepositDefaults(
+      config: config,
+      plan: plan,
+      targetTotalAmount: targetAmount,
+      memberCount: memberCount,
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -255,21 +277,20 @@ class _DepositReceiptRouteBody extends ConsumerWidget {
           memberId: args.memberId,
           memberName: plan?.memberName ?? args.memberName,
           fundName: config?.fundName ?? 'Quỹ nhóm MoMo',
-          amount: (plan != null && plan.installmentAmount > 0)
-              ? plan.installmentAmount
-              : 212000,
-          installmentIndex: nextInstallment,
-          cycleLabel: cycleLabel,
+          amount: defaults.amount,
+          installmentIndex: defaults.installmentIndex,
+          cycleLabel: defaults.cycleLabel,
           termDueDate: plan != null
               ? SavingStreakCalculator.termDueDateForInstallment(
                   plan: plan,
-                  installmentIndex: nextInstallment,
+                  installmentIndex: defaults.installmentIndex,
                 )
               : null,
-          termFrequency: plan?.frequency,
+          termFrequency: defaults.frequency,
           momoLink: config?.momoFundDeeplink,
           phoneNumber: config?.momoPhoneNumber,
           qrData: config?.qrCodeUrl,
+          allowAmountEdit: true,
         ),
       ),
     );

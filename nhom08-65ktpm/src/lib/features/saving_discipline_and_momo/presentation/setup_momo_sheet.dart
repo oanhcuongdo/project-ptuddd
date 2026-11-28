@@ -9,9 +9,12 @@ import '../../../core/widgets/app_inset_card.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_section_header.dart';
 import '../../../core/widgets/app_segmented_control.dart';
+import '../models/momo_fund_config.dart';
+import '../models/saving_plan.dart';
 import '../providers/momo_fund_provider.dart';
 import '../utils/momo_deeplink_helper.dart';
 import 'screens/momo_qr_scanner_screen.dart';
+import 'widgets/module_notification.dart';
 import 'widgets/module_provider_scope.dart';
 
 /// Modal Sheet Thiết lập Kế hoạch & Liên kết Quỹ nhóm MoMo (Dành cho Trưởng nhóm).
@@ -23,8 +26,11 @@ class SetupMomoSheet extends StatelessWidget {
     this.hostUserId = 'host_01',
     this.hostName = 'Trưởng nhóm',
     this.targetTotalAmount = 8450000,
+    this.memberCount = 1,
+    this.initialFrequency = SavingFrequency.weekly,
     this.initialPhoneNumber = '',
     this.initialFundLink = '',
+    this.initialQrCodeUrl,
   });
 
   final String initialFundName;
@@ -32,8 +38,11 @@ class SetupMomoSheet extends StatelessWidget {
   final String hostUserId;
   final String hostName;
   final double targetTotalAmount;
+  final int memberCount;
+  final SavingFrequency initialFrequency;
   final String initialPhoneNumber;
   final String initialFundLink;
+  final String? initialQrCodeUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +53,11 @@ class SetupMomoSheet extends StatelessWidget {
         hostUserId: hostUserId,
         hostName: hostName,
         targetTotalAmount: targetTotalAmount,
+        memberCount: memberCount,
+        initialFrequency: initialFrequency,
         initialPhoneNumber: initialPhoneNumber,
         initialFundLink: initialFundLink,
+        initialQrCodeUrl: initialQrCodeUrl,
       ),
     );
   }
@@ -58,8 +70,11 @@ class _SetupMomoContent extends ConsumerStatefulWidget {
     required this.hostUserId,
     required this.hostName,
     required this.targetTotalAmount,
+    required this.memberCount,
+    required this.initialFrequency,
     required this.initialPhoneNumber,
     required this.initialFundLink,
+    this.initialQrCodeUrl,
   });
 
   final String initialFundName;
@@ -67,8 +82,11 @@ class _SetupMomoContent extends ConsumerStatefulWidget {
   final String hostUserId;
   final String hostName;
   final double targetTotalAmount;
+  final int memberCount;
+  final SavingFrequency initialFrequency;
   final String initialPhoneNumber;
   final String initialFundLink;
+  final String? initialQrCodeUrl;
 
   @override
   ConsumerState<_SetupMomoContent> createState() => _SetupMomoContentState();
@@ -84,13 +102,55 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
   String? _errorMessage;
   bool _isSaving = false;
   bool _isAnalyzingImage = false;
+  bool _dirtyCycle = false;
+  bool _dirtyName = false;
+  bool _dirtyPhone = false;
+  bool _dirtyLink = false;
+  bool _dirtyQr = false;
+
+  SavingFrequency get _selectedFrequency =>
+      SavingFrequency.values[_cycleMode.clamp(0, SavingFrequency.values.length - 1)];
 
   @override
   void initState() {
     super.initState();
+    _cycleMode = widget.initialFrequency.index;
     _fundNameCtrl = TextEditingController(text: widget.initialFundName);
     _phoneCtrl = TextEditingController(text: widget.initialPhoneNumber);
     _fundLinkCtrl = TextEditingController(text: widget.initialFundLink);
+    if (widget.initialQrCodeUrl?.isNotEmpty == true) {
+      _scannedQrPayload = widget.initialQrCodeUrl;
+      _parsedQrResult = MoMoDeeplinkHelper.parseMoMoQr(widget.initialQrCodeUrl!);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _SetupMomoContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_dirtyCycle && widget.initialFrequency != oldWidget.initialFrequency) {
+      _cycleMode = widget.initialFrequency.index;
+    }
+    if (!_dirtyName &&
+        widget.initialFundName != oldWidget.initialFundName &&
+        _fundNameCtrl.text == oldWidget.initialFundName) {
+      _fundNameCtrl.text = widget.initialFundName;
+    }
+    if (!_dirtyPhone &&
+        widget.initialPhoneNumber != oldWidget.initialPhoneNumber &&
+        _phoneCtrl.text == oldWidget.initialPhoneNumber) {
+      _phoneCtrl.text = widget.initialPhoneNumber;
+    }
+    if (!_dirtyLink &&
+        widget.initialFundLink != oldWidget.initialFundLink &&
+        _fundLinkCtrl.text == oldWidget.initialFundLink) {
+      _fundLinkCtrl.text = widget.initialFundLink;
+    }
+    if (!_dirtyQr && widget.initialQrCodeUrl != oldWidget.initialQrCodeUrl) {
+      _scannedQrPayload = widget.initialQrCodeUrl;
+      _parsedQrResult = (widget.initialQrCodeUrl?.isNotEmpty == true)
+          ? MoMoDeeplinkHelper.parseMoMoQr(widget.initialQrCodeUrl!)
+          : null;
+    }
   }
 
   @override
@@ -104,13 +164,16 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
   void _applyQrPayload(String rawPayload) {
     final parsed = MoMoDeeplinkHelper.parseMoMoQr(rawPayload);
     setState(() {
+      _dirtyQr = true;
       _scannedQrPayload = parsed.rawPayload;
       _parsedQrResult = parsed;
       _errorMessage = null;
       if (parsed.phoneNumber != null && parsed.phoneNumber!.isNotEmpty) {
+        _dirtyPhone = true;
         _phoneCtrl.text = parsed.phoneNumber!;
       }
       if (parsed.deeplink != null && parsed.deeplink!.isNotEmpty) {
+        _dirtyLink = true;
         _fundLinkCtrl.text = parsed.deeplink!;
       }
     });
@@ -175,7 +238,8 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
   Future<void> _saveConfig() async {
     if (_isSaving) return;
     final fundName = _fundNameCtrl.text.trim();
-    final phone = _phoneCtrl.text.trim();
+    final rawPhone = _phoneCtrl.text.trim();
+    final phone = rawPhone.replaceAll(RegExp(r'[\s\-.]'), '');
     final link = _fundLinkCtrl.text.trim();
 
     if (fundName.isEmpty) {
@@ -193,6 +257,12 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
       _errorMessage = null;
     });
     try {
+      final selectedFrequency = _selectedFrequency;
+      final suggestedAmount = MoMoFundConfig.computeSuggestedPerMemberAmount(
+        targetTotalAmount: widget.targetTotalAmount,
+        memberCount: widget.memberCount,
+        frequency: selectedFrequency,
+      );
       await ref.read(momoFundProvider(widget.tripId).notifier).saveFundConfig(
             fundName: fundName,
             hostUserId: widget.hostUserId,
@@ -201,9 +271,18 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
             momoFundDeeplink: link.isEmpty ? null : link,
             qrCodeUrl: _scannedQrPayload ?? (link.isEmpty ? null : link),
             targetTotalAmount: widget.targetTotalAmount,
+            defaultFrequency: selectedFrequency,
+            suggestedPerMemberAmount:
+                suggestedAmount > 0 ? suggestedAmount : null,
           );
-      if (mounted) {
+      if (!mounted) return;
+      if (Navigator.of(context).canPop()) {
         Navigator.pop(context, fundName);
+      } else {
+        ModuleNotification.success(
+          context,
+          'Đã lưu cấu hình "$fundName" & đồng bộ mức chia quỹ!',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -220,11 +299,14 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
   Widget build(BuildContext context) {
     // Keep autoDispose momoFundProvider alive while the setup sheet is open.
     ref.watch(momoFundProvider(widget.tripId));
-    final (cycleLabel, perMemberAmount) = switch (_cycleMode) {
-      0 => ('ngày', 30200),
-      1 => ('tuần', 212000),
-      _ => ('tháng', 845000),
-    };
+    final safeMembers = widget.memberCount.clamp(1, 100);
+    final selectedFrequency = _selectedFrequency;
+    final perMemberAmount = MoMoFundConfig.computeSuggestedPerMemberAmount(
+      targetTotalAmount: widget.targetTotalAmount,
+      memberCount: safeMembers,
+      frequency: selectedFrequency,
+    ).round();
+    final cycleLabel = MoMoFundConfig.cycleUnitLabel(selectedFrequency);
 
     final hasQr = (_scannedQrPayload?.isNotEmpty == true) ||
         _fundLinkCtrl.text.trim().isNotEmpty;
@@ -294,7 +376,10 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
               AppSegmentedControl(
                 segments: const ['Theo ngày', 'Theo tuần', 'Theo tháng'],
                 selectedIndex: _cycleMode,
-                onChanged: (i) => setState(() => _cycleMode = i),
+                onChanged: (i) => setState(() {
+                  _dirtyCycle = true;
+                  _cycleMode = i;
+                }),
               ),
               const SizedBox(height: 10),
               AppInsetCard(
@@ -302,18 +387,18 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Mức đóng đề xuất / người',
                             style: TextStyle(fontSize: 13, color: AppColors.onSurfaceVariant),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            'Tổng 8.450.000đ • 4 thành viên',
-                            style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
+                            'Tổng ${MoMoDeeplinkHelper.formatVnd(widget.targetTotalAmount.round())} • $safeMembers thành viên',
+                            style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
@@ -338,6 +423,7 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       child: TextField(
                         controller: _fundNameCtrl,
+                        onChanged: (_) => _dirtyName = true,
                         decoration: const InputDecoration(
                           labelText: 'Tên Quỹ nhóm MoMo',
                           border: InputBorder.none,
@@ -350,6 +436,7 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
                       child: TextField(
                         controller: _phoneCtrl,
                         keyboardType: TextInputType.phone,
+                        onChanged: (_) => _dirtyPhone = true,
                         decoration: const InputDecoration(
                           labelText: 'Số điện thoại MoMo chủ quỹ',
                           hintText: '09xx xxx xxx',
@@ -362,6 +449,7 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       child: TextField(
                         controller: _fundLinkCtrl,
+                        onChanged: (_) => _dirtyLink = true,
                         decoration: const InputDecoration(
                           labelText: 'Đường dẫn (Link) Quỹ nhóm MoMo',
                           hintText: 'https://me.momo.vn/...',

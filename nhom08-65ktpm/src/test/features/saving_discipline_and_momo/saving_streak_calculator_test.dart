@@ -798,6 +798,109 @@ void main() {
       expect(result.shouldWarn, isFalse);
       expect(result.urgency, DepositReminderUrgency.none);
     });
+
+    test('suppresses warning when member already saved ahead for current terms', () {
+      final weeklyPlan = SavingPlan(
+        id: 'p_prepaid',
+        tripId: 't1',
+        memberId: 'm1',
+        memberName: 'Bình',
+        targetAmount: 800000,
+        paidAmount: 600000, // Already saved 3 terms worth (Term 1..3)
+        frequency: SavingFrequency.weekly,
+        installmentAmount: 200000,
+        totalInstallments: 4,
+        startDate: DateTime(2026, 11, 1),
+        deadlineDate: DateTime(2026, 11, 29),
+      );
+
+      // On Nov 22 (Term 3 due date), cumulative requirement for Term 1..3 is 600,000 -> already saved!
+      final warnTerm3 = SavingStreakCalculator.evaluateTodayDepositWarning(
+        plan: weeklyPlan,
+        deposits: const [],
+        today: DateTime(2026, 11, 22),
+      );
+      expect(warnTerm3.shouldWarn, isFalse);
+
+      // Group default: anchor Nov 21, weekly -> Period 1 due Nov 28, already saved 400k -> no warning
+      final groupAlreadySaved = SavingStreakCalculator.evaluateGroupDefaultDepositWarning(
+        frequency: SavingFrequency.weekly,
+        amount: 200000,
+        anchorDate: DateTime(2026, 11, 21),
+        deposits: const [],
+        totalTargetAmount: 800000,
+        alreadySavedAmount: 400000, // Covers week 1 & week 2
+        today: DateTime(2026, 11, 28),
+      );
+      expect(groupAlreadySaved.shouldWarn, isFalse);
+
+      // Weekly started today (Nov 28): Period 1 due Dec 5 (not day 0) -> no warning today
+      final weeklyFirstDay = SavingStreakCalculator.nextIncomingDepositFromGroupDefault(
+        frequency: SavingFrequency.weekly,
+        amount: 200000,
+        anchorDate: DateTime(2026, 11, 28),
+        deposits: const [],
+        today: DateTime(2026, 11, 28),
+      );
+      expect(weeklyFirstDay, isNotNull);
+      expect(weeklyFirstDay!.dueDate, DateTime(2026, 12, 5));
+      expect(weeklyFirstDay.daysUntilDue, 7);
+
+      // Monthly started Jan 31: Period 1 due Feb 28 (clamped); if paid in Feb, Period 2 is Mar 31
+      final monthlyMonthEnd = SavingStreakCalculator.nextIncomingDepositFromGroupDefault(
+        frequency: SavingFrequency.monthly,
+        amount: 500000,
+        anchorDate: DateTime(2026, 1, 31),
+        deposits: const [],
+        today: DateTime(2026, 1, 31),
+      );
+      expect(monthlyMonthEnd, isNotNull);
+      expect(monthlyMonthEnd!.dueDate, DateTime(2026, 2, 28));
+
+      final monthlyNextAfterPaid = SavingStreakCalculator.nextIncomingDepositFromGroupDefault(
+        frequency: SavingFrequency.monthly,
+        amount: 500000,
+        anchorDate: DateTime(2026, 1, 31),
+        deposits: [
+          DepositRecord(
+            id: 'd_jan31',
+            tripId: 't1',
+            memberId: 'm1',
+            memberName: 'Bình',
+            amount: 500000,
+            depositDate: DateTime(2026, 2, 5),
+            status: DepositStatus.approved,
+          ),
+        ],
+        today: DateTime(2026, 2, 10),
+      );
+      expect(monthlyNextAfterPaid, isNotNull);
+      expect(monthlyNextAfterPaid!.dueDate, DateTime(2026, 3, 31));
+
+      // Group default switched to daily while a weekly deposit still covers today -> no warning
+      final groupCrossTermSaved = SavingStreakCalculator.evaluateGroupDefaultDepositWarning(
+        frequency: SavingFrequency.daily,
+        amount: 50000,
+        anchorDate: DateTime(2026, 11, 28),
+        deposits: [
+          DepositRecord(
+            id: 'd_week_pending',
+            tripId: 't1',
+            memberId: 'm1',
+            memberName: 'Bình',
+            amount: 200000,
+            depositDate: DateTime(2026, 11, 26),
+            termDueDate: DateTime(2026, 11, 30),
+            termFrequency: SavingFrequency.weekly,
+            status: DepositStatus.pending,
+          ),
+        ],
+        totalTargetAmount: 1000000,
+        alreadySavedAmount: 0,
+        today: DateTime(2026, 11, 28),
+      );
+      expect(groupCrossTermSaved.shouldWarn, isFalse);
+    });
   });
 
   group('SavingStreakCalculator Incoming Deposit Calendar Tests', () {

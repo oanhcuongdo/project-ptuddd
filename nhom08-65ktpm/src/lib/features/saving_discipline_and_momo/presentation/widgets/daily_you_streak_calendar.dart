@@ -8,7 +8,9 @@ import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../models/deposit_record.dart';
 import '../../models/member_streak.dart';
+import '../../models/momo_fund_config.dart';
 import '../../models/saving_plan.dart';
+import '../../providers/momo_fund_provider.dart';
 import '../../providers/receipt_approval_provider.dart';
 import '../../providers/saving_plan_provider.dart';
 import '../../providers/saving_streak_provider.dart';
@@ -126,13 +128,53 @@ class _DailyYouStreakCalendarState
     final streakAsync = ref.watch(savingStreakStreamProvider(_params));
     final depositsAsync = ref.watch(memberDepositsStreamProvider(_params));
     final plansAsync = ref.watch(tripSavingPlansStreamProvider(widget.tripId));
-    final journals = ref.watch(savingJournalProvider(_params));
+    final membersAsync = ref.watch(tripMembersStreamProvider(widget.tripId));
+    final fundConfigAsync = ref.watch(momoFundStreamProvider(widget.tripId));
+    final tripSummaryAsync = ref.watch(tripSummaryStreamProvider(widget.tripId));
+    final localJournals = ref.watch(savingJournalProvider(_params));
 
     final streak = streakAsync.value ??
         MemberStreak(memberId: widget.memberId, tripId: widget.tripId);
+    final journals = {
+      ...streak.journalEntries,
+      ...localJournals,
+    };
     final deposits = depositsAsync.value ?? const <DepositRecord>[];
     final plans = plansAsync.value ?? const <SavingPlan>[];
     final memberPlan = plans.where((p) => p.memberId == widget.memberId).firstOrNull;
+    final fundConfig = fundConfigAsync.value;
+    final tripSummary = tripSummaryAsync.value;
+    final groupSplitAmount = fundConfig?.suggestedPerMemberAmount ?? 0.0;
+    final membersList = membersAsync.value ?? const [];
+    final currentMember = membersList
+        .where((m) => m.userId == widget.memberId)
+        .firstOrNull;
+    final memberContributed = currentMember?.contributedAmount.toDouble() ?? 0.0;
+    final memberTarget = (currentMember != null && currentMember.targetContribution > 0)
+        ? currentMember.targetContribution.toDouble()
+        : ((tripSummary != null && tripSummary.perMemberTarget > 0)
+            ? tripSummary.perMemberTarget.toDouble()
+            : ((fundConfig != null && fundConfig.targetTotalAmount > 0)
+                ? (fundConfig.targetTotalAmount /
+                        (membersList.isNotEmpty ? membersList.length : 1).clamp(1, 100))
+                    .roundToDouble()
+                : 0.0));
+    final effectiveGroupSplitAmount = groupSplitAmount > 0
+        ? groupSplitAmount
+        : (fundConfig != null && fundConfig.targetTotalAmount > 0
+            ? MoMoFundConfig.computeSuggestedPerMemberAmount(
+                targetTotalAmount: fundConfig.targetTotalAmount,
+                memberCount: membersList.isNotEmpty ? membersList.length : 1,
+                frequency: fundConfig.defaultFrequency,
+              )
+            : 0.0);
+    final joinedDay = currentMember == null
+        ? null
+        : DateTime(
+            currentMember.joinedAt.year,
+            currentMember.joinedAt.month,
+            currentMember.joinedAt.day,
+          );
 
     final today = DateTime.now();
     final todayDay = DateTime(today.year, today.month, today.day);
@@ -147,12 +189,25 @@ class _DailyYouStreakCalendarState
             today: today,
           )
         : null;
-    final depositReminder = (widget.showDepositWarning && memberPlan != null)
-        ? SavingStreakCalculator.evaluateTodayDepositWarning(
-            plan: memberPlan,
-            deposits: deposits,
-            today: today,
-          )
+    final depositReminder = widget.showDepositWarning
+        ? (memberPlan != null
+            ? SavingStreakCalculator.evaluateTodayDepositWarning(
+                plan: memberPlan,
+                deposits: deposits,
+                today: today,
+              )
+            : (effectiveGroupSplitAmount > 0 && fundConfig != null
+                ? SavingStreakCalculator.evaluateGroupDefaultDepositWarning(
+                    frequency: fundConfig.defaultFrequency,
+                    amount: effectiveGroupSplitAmount,
+                    anchorDate: fundConfig.updatedAt,
+                    deposits: deposits,
+                    totalTargetAmount: memberTarget,
+                    alreadySavedAmount: memberContributed,
+                    deadlineDate: tripSummary?.startDate,
+                    today: today,
+                  )
+                : null))
         : null;
     final nextIncoming = memberPlan != null
         ? SavingStreakCalculator.nextIncomingDeposit(
@@ -160,7 +215,18 @@ class _DailyYouStreakCalendarState
             deposits: deposits,
             today: today,
           )
-        : null;
+        : (effectiveGroupSplitAmount > 0 && fundConfig != null
+            ? SavingStreakCalculator.nextIncomingDepositFromGroupDefault(
+                frequency: fundConfig.defaultFrequency,
+                amount: effectiveGroupSplitAmount,
+                anchorDate: fundConfig.updatedAt,
+                deposits: deposits,
+                totalTargetAmount: memberTarget,
+                alreadySavedAmount: memberContributed,
+                deadlineDate: tripSummary?.startDate,
+                today: today,
+              )
+            : null);
 
     final days = SavingStreakCalculator.buildMonthCalendar(
       month: _visibleMonth,
@@ -168,6 +234,9 @@ class _DailyYouStreakCalendarState
       deposits: deposits,
       journals: journals,
       plan: memberPlan,
+      nextIncomingOverride: memberPlan == null ? nextIncoming : null,
+      groupAnchorDate: memberPlan == null ? fundConfig?.updatedAt : null,
+      scheduleDeadlineDate: tripSummary?.startDate,
       today: today,
     );
 
@@ -281,6 +350,7 @@ class _DailyYouStreakCalendarState
                     cell: cell,
                     isToday: cell.isoDate == todayIso,
                     todayDay: todayDay,
+                    joinedDay: joinedDay,
                   );
                 },
               ),
@@ -528,6 +598,7 @@ class _DailyYouStreakCalendarState
     required StreakCalendarDay cell,
     required bool isToday,
     required DateTime todayDay,
+    DateTime? joinedDay,
   }) {
     final Color bg;
     final Color fg;
@@ -587,10 +658,12 @@ class _DailyYouStreakCalendarState
     final isPending = cell.status == StreakDayStatus.pending;
     final isLate = cell.status == StreakDayStatus.late;
     final isFuture = cell.date.isAfter(todayDay);
+    final cellDay = DateTime(cell.date.year, cell.date.month, cell.date.day);
+    final isBeforeJoined = joinedDay != null && cellDay.isBefore(joinedDay);
     final isFutureScheduled = cell.status == StreakDayStatus.upcoming &&
         (cell.isNextDue || cell.isScheduledDue) &&
         isFuture;
-    final canTap = !isPending && !isLate && !isFuture;
+    final canTap = !isPending && !isLate && !isFuture && !isBeforeJoined;
     final hasNote =
         cell.journalNote != null && cell.journalNote!.trim().isNotEmpty;
 
@@ -599,6 +672,8 @@ class _DailyYouStreakCalendarState
       onTap = () => _showInfoSnackBar('Biên lai ngày này đang chờ Trưởng nhóm duyệt.');
     } else if (isLate) {
       onTap = () => _showInfoSnackBar('Biên lai ngày này được duyệt nhưng nộp trễ kỳ hạn.');
+    } else if (isBeforeJoined) {
+      onTap = () => _showInfoSnackBar('Bạn chưa tham gia chuyến đi vào ngày này.');
     } else if (canTap) {
       onTap = () => _openJournalForDay(
             cell.date,

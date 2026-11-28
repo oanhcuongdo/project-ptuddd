@@ -1,10 +1,16 @@
 import 'dart:io';
+import '../../../models/trip_member.dart';
+import '../../../models/trip_model.dart';
 import '../models/momo_fund_config.dart';
 import '../models/saving_plan.dart';
 import '../models/deposit_record.dart';
 import '../models/member_streak.dart';
 
 abstract class SavingRepository {
+  /// Trip & Members (Read-only sync)
+  Stream<TripModel?> watchTripSummary(String tripId);
+  Stream<List<TripMember>> watchTripMembers(String tripId);
+
   /// MoMo Fund Config
   Future<MoMoFundConfig?> getFundConfig(String tripId);
   Stream<MoMoFundConfig?> watchFundConfig(String tripId);
