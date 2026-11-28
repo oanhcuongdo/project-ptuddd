@@ -133,7 +133,13 @@ class _ChatRoomViewState extends State<ChatRoomView> {
     String? currentUserId,
   ) {
     final nextValue = !_autoTranslateEnabled;
-    setState(() => _autoTranslateEnabled = nextValue);
+    setState(() {
+      _autoTranslateEnabled = nextValue;
+      if (!nextValue) {
+        _translatedByMsgId.clear();
+        _translatingMsgIds.clear();
+      }
+    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -142,7 +148,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
         content: Text(
           nextValue
               ? 'Đã bật Tự động dịch mọi tin nhắn đến sang Tiếng Việt.'
-              : 'Đã tắt chế độ Tự động dịch.',
+              : 'Đã tắt Tự động dịch và ẩn toàn bộ bản dịch.',
         ),
       ),
     );
