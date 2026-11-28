@@ -9,6 +9,8 @@ import '../seed/default_topics_data.dart';
 /// Repository quản lý Kho chủ đề hội thoại (`conversation_topics`)
 /// và Tiến độ hoàn thành của người dùng (`user_topic_progress`).
 class TopicsRepository {
+  final Set<String> _syncedRemoteTopicIds = <String>{};
+
   bool get isReady => SupabaseConfig.isInitialized;
 
   /// Tải danh sách chủ đề (A1-B2) kèm trạng thái hoàn thành của [userId].
@@ -30,9 +32,13 @@ class TopicsRepository {
 
       final defaultMap = DefaultTopicsData.byId;
       final mergedById = <String, TopicModel>{};
+      _syncedRemoteTopicIds.clear();
 
       for (final raw in rows) {
         final remote = TopicModel.fromMap(raw);
+        if (remote.id.isNotEmpty) {
+          _syncedRemoteTopicIds.add(remote.id);
+        }
         final fallback = defaultMap[remote.id];
 
         // Fill in curated starters/dialogues if the remote seed row only has metadata
@@ -74,19 +80,44 @@ class TopicsRepository {
     }
   }
 
+  /// Đảm bảo [topic] đã tồn tại trong bảng `conversation_topics` trên Supabase
+  /// trước khi ghi khóa ngoại ở `user_topic_progress`.
+  Future<void> ensureTopicSynced(TopicModel topic) async {
+    if (!isReady || topic.id.trim().isEmpty) return;
+    if (_syncedRemoteTopicIds.contains(topic.id)) return;
+
+    await SupabaseConfig.client
+        .from(DatabaseTables.conversationTopics)
+        .upsert(
+          topic.toDatabaseMap(),
+          onConflict: 'id',
+          ignoreDuplicates: true,
+        );
+    _syncedRemoteTopicIds.add(topic.id);
+  }
+
   /// Cập nhật trạng thái hoàn thành chủ đề vào bảng `user_topic_progress`.
   Future<void> setTopicCompleted({
     required String userId,
     required String topicId,
     required bool isCompleted,
+    TopicModel? topic,
   }) async {
-    if (!isReady || userId.trim().isEmpty || topicId.trim().isEmpty) return;
+    final normalizedUid = userId.trim();
+    final normalizedTopicId = topicId.trim();
+    if (!isReady || normalizedUid.isEmpty || normalizedTopicId.isEmpty) return;
+
+    // Sync fallback topic first to avoid foreign key violation on user_topic_progress
+    final topicToSync = topic ?? DefaultTopicsData.byId[normalizedTopicId];
+    if (topicToSync != null && !_syncedRemoteTopicIds.contains(normalizedTopicId)) {
+      await ensureTopicSynced(topicToSync);
+    }
 
     final progress = TopicProgressModel(
-      userId: userId,
-      topicId: topicId,
+      userId: normalizedUid,
+      topicId: normalizedTopicId,
       isCompleted: isCompleted,
-      completedAt: DateTime.now(),
+      completedAt: isCompleted ? DateTime.now() : null,
     );
 
     await SupabaseConfig.client
@@ -131,4 +162,3 @@ class TopicsRepository {
     return index == -1 ? 99 : index;
   }
 }
-

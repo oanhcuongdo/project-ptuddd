@@ -34,22 +34,113 @@ class ChatRepository {
         .toList();
   }
 
-  /// Tải danh sách thành viên đang trực tuyến thật từ bảng `profiles` (`is_online = true`)
+  /// Tải bảng xếp hạng thành viên có chuỗi cao nhất từ bảng `profiles`
+  /// kết hợp `conversation_members` & `conversations` để biết rõ phòng học
+  /// nơi thành viên đang đạt chuỗi cao nhất.
   Future<List<OnlineMemberModel>> fetchOnlineMembers({
     required String excludeUserId,
     int limit = 6,
   }) async {
     try {
-      final rows = await SupabaseConfig.client
+      final client = SupabaseConfig.client;
+      final profileRows = await client
           .from(DatabaseTables.profiles)
-          .select('user_id, display_name, avatar_url, target_lang, proficiency_level')
-          .eq('is_online', true)
-          .neq('user_id', excludeUserId)
-          .limit(limit);
+          .select(
+            'user_id, display_name, avatar_url, target_lang, proficiency_level, streak_count, best_streak',
+          )
+          .limit(30);
 
-      return rows
-          .map<OnlineMemberModel>((r) => OnlineMemberModel.fromMap(r))
+      if (profileRows.isEmpty) return const [];
+
+      final userIds = profileRows
+          .map<String>((r) => r['user_id'].toString())
           .toList();
+
+      // Lấy thêm chuỗi theo phòng để tìm ra phòng có chuỗi cao nhất của từng thành viên
+      final topRoomByUser =
+          <String, ({String convId, int effectiveStreak, int bestStreak})>{};
+      final convNameMap = <String, String>{};
+
+      try {
+        final memberRows = await client
+            .from(DatabaseTables.conversationMembers)
+            .select(
+              'user_id, conversation_id, status, streak_count, best_streak, last_chat_date',
+            )
+            .inFilter('user_id', userIds);
+
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final convIds = <String>{};
+
+        for (final m in memberRows) {
+          if ((m['status'] as String? ?? 'approved') != 'approved') continue;
+          final uid = m['user_id'].toString();
+          final cid = m['conversation_id'].toString();
+          final rawStreak = (m['streak_count'] as num?)?.toInt() ?? 0;
+          final rawBest = (m['best_streak'] as num?)?.toInt() ?? 0;
+          final lastDate = ConversationModel.parseDateOnly(m['last_chat_date']);
+          final effective = (rawStreak > 0 &&
+                  lastDate != null &&
+                  today.difference(lastDate).inDays <= 1)
+              ? rawStreak
+              : 0;
+
+          final existing = topRoomByUser[uid];
+          final isBetter = existing == null ||
+              effective > existing.effectiveStreak ||
+              (effective == existing.effectiveStreak &&
+                  rawBest > existing.bestStreak);
+          if (isBetter) {
+            topRoomByUser[uid] = (
+              convId: cid,
+              effectiveStreak: effective,
+              bestStreak: rawBest,
+            );
+            convIds.add(cid);
+          }
+        }
+
+        if (convIds.isNotEmpty) {
+          final convRows = await client
+              .from(DatabaseTables.conversations)
+              .select('id, name, type')
+              .inFilter('id', convIds.toList());
+          for (final c in convRows) {
+            if ((c['type'] as String? ?? 'group') != 'group') continue;
+            final name = (c['name'] as String?)?.trim() ?? '';
+            if (name.isNotEmpty) {
+              convNameMap[c['id'].toString()] = name;
+            }
+          }
+        }
+      } catch (_) {}
+
+      final members = profileRows.map<OnlineMemberModel>((r) {
+        final uid = r['user_id'].toString();
+        final roomInfo = topRoomByUser[uid];
+        final resolvedStreak = roomInfo?.effectiveStreak ?? 0;
+        final resolvedBest = roomInfo?.bestStreak ?? 0;
+        final topRoomName =
+            roomInfo != null ? convNameMap[roomInfo.convId] : null;
+
+        return OnlineMemberModel.fromMap(
+          r,
+          resolvedStreakCount: resolvedStreak,
+          resolvedBestStreak: resolvedBest,
+          topRoomName: topRoomName,
+        );
+      }).toList();
+
+      members.sort((a, b) {
+        final cmpStreak = b.streakCount.compareTo(a.streakCount);
+        if (cmpStreak != 0) return cmpStreak;
+        final cmpBest = b.bestStreak.compareTo(a.bestStreak);
+        if (cmpBest != 0) return cmpBest;
+        return a.displayName.compareTo(b.displayName);
+      });
+
+      return members.take(limit).toList();
     } catch (_) {
       return const [];
     }

@@ -19,21 +19,30 @@ class TopicsProvider extends ChangeNotifier {
   bool _showOnlyIncomplete = false;
   String? _boundUserId;
   bool _hasLoadedInitial = false;
+  bool _isDisposed = false;
+  int _loadRequestSeq = 0;
+  final Set<String> _updatingTopicIds = <String>{};
 
-  List<TopicModel> get allTopics => _topics;
+  List<TopicModel> get allTopics => List<TopicModel>.unmodifiable(_topics);
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get selectedLevel => _selectedLevel;
   String get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
   bool get showOnlyIncomplete => _showOnlyIncomplete;
+  bool get hasActiveFilters =>
+      _selectedLevel != 'ALL' ||
+      _selectedCategory != 'ALL' ||
+      _searchQuery.trim().isNotEmpty ||
+      _showOnlyIncomplete;
+  bool isUpdatingTopic(String topicId) => _updatingTopicIds.contains(topicId);
 
   int get totalCount => _topics.length;
   int get completedCount => _topics.where((t) => t.isCompleted).length;
   double get completionProgress =>
       totalCount == 0 ? 0.0 : completedCount / totalCount;
 
-  /// Danh sách danh mục duy nhất để hiển thị bộ lọc phụ
+  /// Danh sách danh mục duy nhất (đã sắp xếp ổn định) để hiển thị bộ lọc phụ
   List<String> get availableCategories {
     final set = <String>{};
     for (final topic in _topics) {
@@ -41,7 +50,9 @@ class TopicsProvider extends ChangeNotifier {
         set.add(topic.category.trim());
       }
     }
-    return ['ALL', ...set];
+    final sorted = set.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return ['ALL', ...sorted];
   }
 
   /// Danh sách chủ đề sau khi áp dụng bộ lọc cấp độ (A1-B2), danh mục và từ khóa tìm kiếm
@@ -54,7 +65,9 @@ class TopicsProvider extends ChangeNotifier {
         return false;
       }
 
-      if (_selectedCategory != 'ALL' && topic.category != _selectedCategory) {
+      if (_selectedCategory != 'ALL' &&
+          topic.category.trim().toLowerCase() !=
+              _selectedCategory.toLowerCase()) {
         return false;
       }
 
@@ -82,9 +95,10 @@ class TopicsProvider extends ChangeNotifier {
   }
 
   int countByLevel(String level) {
-    if (level.toUpperCase() == 'ALL') return _topics.length;
+    final normalized = level.trim().toUpperCase();
+    if (normalized.isEmpty || normalized == 'ALL') return _topics.length;
     return _topics
-        .where((topic) => topic.level.toUpperCase() == level.toUpperCase())
+        .where((topic) => topic.level.trim().toUpperCase() == normalized)
         .length;
   }
 
@@ -110,47 +124,59 @@ class TopicsProvider extends ChangeNotifier {
       return;
     }
 
+    final requestId = ++_loadRequestSeq;
     _boundUserId = normalizedUid;
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
-      _topics = await _repository.fetchTopics(userId: _boundUserId);
+      final fetched = await _repository.fetchTopics(userId: _boundUserId);
+      if (_isDisposed || requestId != _loadRequestSeq) return;
+      _topics = fetched;
       _hasLoadedInitial = true;
     } catch (e) {
+      if (_isDisposed || requestId != _loadRequestSeq) return;
       _errorMessage = 'Không thể tải danh sách chủ đề. Vui lòng thử lại.';
       debugPrint('[TopicsProvider] Lỗi loadTopics: $e');
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (!_isDisposed && requestId == _loadRequestSeq) {
+        _isLoading = false;
+        _safeNotifyListeners();
+      }
     }
   }
 
   void setLevelFilter(String level) {
-    final normalized = level.trim().toUpperCase();
+    final candidate = level.trim().toUpperCase();
+    final normalized = (candidate == 'ALL' ||
+            TopicModel.supportedLevels.contains(candidate))
+        ? candidate
+        : 'ALL';
     if (_selectedLevel == normalized) return;
     _selectedLevel = normalized;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void setCategoryFilter(String category) {
-    final normalized = category.trim();
-    if (_selectedCategory == normalized) return;
+    final trimmed = category.trim();
+    final normalized =
+        (trimmed.isEmpty || trimmed.toUpperCase() == 'ALL') ? 'ALL' : trimmed;
+    if (_selectedCategory.toLowerCase() == normalized.toLowerCase()) return;
     _selectedCategory = normalized;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void setSearchQuery(String query) {
     if (_searchQuery == query) return;
     _searchQuery = query;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void setShowOnlyIncomplete(bool value) {
     if (_showOnlyIncomplete == value) return;
     _showOnlyIncomplete = value;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void resetFilters() {
@@ -158,7 +184,13 @@ class TopicsProvider extends ChangeNotifier {
     _selectedCategory = 'ALL';
     _searchQuery = '';
     _showOnlyIncomplete = false;
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  void clearError() {
+    if (_errorMessage == null) return;
+    _errorMessage = null;
+    _safeNotifyListeners();
   }
 
   /// Đổi trạng thái hoàn thành của một chủ đề (Optimistic UI + lưu Supabase).
@@ -170,17 +202,24 @@ class TopicsProvider extends ChangeNotifier {
     if (index == -1) return false;
 
     final previousTopic = _topics[index];
+    if (_updatingTopicIds.contains(topicId)) {
+      return previousTopic.isCompleted;
+    }
+
     final nextCompleted = !previousTopic.isCompleted;
 
-    // Optimistic UI update
+    // Optimistic UI update + guard against concurrent taps on the same topic
+    _updatingTopicIds.add(topicId);
     final updatedList = List<TopicModel>.from(_topics);
     updatedList[index] = previousTopic.copyWith(isCompleted: nextCompleted);
     _topics = updatedList;
     _errorMessage = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     final effectiveUid = userId ?? _boundUserId;
     if (effectiveUid == null || effectiveUid.trim().isEmpty) {
+      _updatingTopicIds.remove(topicId);
+      _safeNotifyListeners();
       return nextCompleted;
     }
 
@@ -189,18 +228,38 @@ class TopicsProvider extends ChangeNotifier {
         userId: effectiveUid,
         topicId: topicId,
         isCompleted: nextCompleted,
+        topic: previousTopic,
       );
       return nextCompleted;
     } catch (e) {
-      // Revert on error
-      final revertedList = List<TopicModel>.from(_topics);
-      revertedList[index] = previousTopic;
-      _topics = revertedList;
+      // Lookup current index by topicId in case _topics changed while awaiting
+      final currentIndex = _topics.indexWhere((t) => t.id == topicId);
+      if (currentIndex != -1) {
+        final revertedList = List<TopicModel>.from(_topics);
+        revertedList[currentIndex] = _topics[currentIndex].copyWith(
+          isCompleted: previousTopic.isCompleted,
+        );
+        _topics = revertedList;
+      }
       _errorMessage = 'Không thể lưu tiến độ chủ đề lên đám mây.';
-      notifyListeners();
       debugPrint('[TopicsProvider] Lỗi toggleTopicCompleted: $e');
       return previousTopic.isCompleted;
+    } finally {
+      _updatingTopicIds.remove(topicId);
+      _safeNotifyListeners();
     }
+  }
+
+  void _safeNotifyListeners() {
+    if (!_isDisposed) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }
 

@@ -12,9 +12,8 @@ import '../components/jitsi_meet_frame.dart';
 import '../providers/chat_provider.dart';
 import '../styles/chat_styles.dart';
 
-/// Màn hình Video Call Jitsi Meet nhúng trực tiếp trong BuddyTalk kèm Đồng hồ 2 tầng:
-/// - Tầng 1: Thời gian học trong buổi Meet -> đủ `session.minMinutes` tự động 🔥 +1 Chuỗi phòng
-/// - Tầng 2: Cộng dồn vào mục tiêu cá nhân hôm nay (`profiles.daily_goal_minutes`) -> đủ tự 🔥 +1 Chuỗi cá nhân
+/// Màn hình Video Call Jitsi Meet nhúng trực tiếp trong BuddyTalk kèm Đồng hồ điểm danh:
+/// Học đủ `session.minMinutes` trong buổi học -> tự động 🔥 +1 Chuỗi phòng.
 class RoomMeetCallView extends StatefulWidget {
   final ConversationModel room;
   final MeetSessionModel session;
@@ -34,8 +33,6 @@ class RoomMeetCallView extends StatefulWidget {
 class _RoomMeetCallViewState extends State<RoomMeetCallView> {
   Timer? _timer;
   int _attendedSeconds = 0;
-  int _syncedPersonalMinutes = 0;
-  int _basePersonalTodayMinutes = 0;
   bool _streakAwarded = false;
   bool _isAwarding = false;
   String _serverId = 'jitsi_riot';
@@ -62,21 +59,14 @@ class _RoomMeetCallViewState extends State<RoomMeetCallView> {
   Future<void> _initAttendanceAndStartTimer() async {
     final uid = _userId;
     if (uid != null) {
-      final results = await Future.wait([
-        _chatProvider.fetchMyMeetAttendance(
-          sessionId: widget.session.id,
-          userId: uid,
-        ),
-        _chatProvider.fetchTodayPersonalMinutes(uid),
-      ]);
+      final att = await _chatProvider.fetchMyMeetAttendance(
+        sessionId: widget.session.id,
+        userId: uid,
+      );
       if (!mounted) return;
-      final att = results[0] as ({int attendedSeconds, bool streakAwarded});
-      final todayMins = results[1] as int;
       setState(() {
         _attendedSeconds = att.attendedSeconds;
         _streakAwarded = att.streakAwarded;
-        _syncedPersonalMinutes = att.attendedSeconds ~/ 60;
-        _basePersonalTodayMinutes = todayMins;
       });
     }
 
@@ -90,46 +80,29 @@ class _RoomMeetCallViewState extends State<RoomMeetCallView> {
     final uid = _userId;
     if (uid == null) return;
 
-    // Đủ số phút tối thiểu của buổi Meet -> tự động điểm danh & lên chuỗi!
+    // Đủ số phút tối thiểu của buổi Meet -> tự động điểm danh & cộng chuỗi phòng!
     if (!_streakAwarded &&
         !_isAwarding &&
         _attendedSeconds >= widget.session.requiredSeconds) {
       _isAwarding = true;
-      final profile = context.read<AuthProvider>().currentProfile;
-      final dailyGoal = profile?.dailyGoalMinutes ?? 15;
-      final earnedMinsNow =
-          (_attendedSeconds ~/ 60) - _syncedPersonalMinutes;
-      final minsToAdd = earnedMinsNow > 0 ? earnedMinsNow : widget.session.minMinutes;
-
       final res = await _chatProvider.awardMeetStreak(
         sessionId: widget.session.id,
         conversationId: widget.room.id,
         userId: uid,
         attendedSeconds: _attendedSeconds,
-        addMinutesToDaily: minsToAdd,
-        dailyGoalMinutes: dailyGoal,
+        addMinutesToDaily: widget.session.minMinutes,
+        dailyGoalMinutes: widget.session.minMinutes,
       );
 
       if (!mounted) return;
       setState(() {
         _streakAwarded = true;
         _isAwarding = false;
-        _syncedPersonalMinutes = _attendedSeconds ~/ 60;
-        if (res.personalTodayMinutes != null) {
-          _basePersonalTodayMinutes = res.personalTodayMinutes!;
-        }
       });
-
-      if (res.personalStreak != null && res.personalStreak! > 0) {
-        context.read<AuthProvider>().updateLocalStreak(
-              streakCount: res.personalStreak!,
-              bestStreak: res.personalBestStreak,
-            );
-      }
 
       final streakMsg = res.roomStreak != null
           ? '🔥 Đủ ${widget.session.minMinutes} phút! Chuỗi phòng "${widget.room.name}" đã lên ${res.roomStreak} ngày!'
-          : '🔥 Xuất sắc! Bạn đã hoàn thành đủ ${widget.session.minMinutes} phút trong buổi Meet!';
+          : '🔥 Xuất sắc! Bạn đã hoàn thành đủ ${widget.session.minMinutes} phút trong buổi học!';
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -287,14 +260,6 @@ class _RoomMeetCallViewState extends State<RoomMeetCallView> {
 
   @override
   Widget build(BuildContext context) {
-    final profile = context.watch<AuthProvider>().currentProfile;
-    final dailyGoal = (profile?.dailyGoalMinutes ?? 15) > 0
-        ? (profile?.dailyGoalMinutes ?? 15)
-        : 15;
-    final extraUnsyncedMins =
-        ((_attendedSeconds ~/ 60) - _syncedPersonalMinutes).clamp(0, 600);
-    final livePersonalToday = _basePersonalTodayMinutes + extraUnsyncedMins;
-
     final progress = (_attendedSeconds / widget.session.requiredSeconds)
         .clamp(0.0, 1.0);
 
@@ -410,19 +375,11 @@ class _RoomMeetCallViewState extends State<RoomMeetCallView> {
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              '• Mục tiêu ngày: $livePersonalToday/$dailyGoal phút',
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                color: Colors.white.withValues(alpha: 0.75),
-                              ),
-                            ),
                           ],
                         ),
                         const SizedBox(height: 6),
                         SizedBox(
-                          width: 320,
+                          width: 260,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(999),
                             child: LinearProgressIndicator(

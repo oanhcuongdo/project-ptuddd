@@ -7,8 +7,8 @@ import '../../data/models/online_member_model.dart';
 import '../styles/chat_styles.dart';
 
 /// Cột cộng đồng bên phải trang Khám phá phòng học (100% dữ liệu thật từ Supabase):
-/// 1. Phòng học nổi bật (xếp hạng 1–5 theo số thành viên thực tế)
-/// 2. Thành viên đang online (truy vấn thật từ `profiles.is_online = true`)
+/// 1. Phòng học sôi nổi (xếp hạng 1–5 theo số thành viên thực tế)
+/// 2. Xếp hạng chuỗi cao (sắp xếp thành viên theo `streak_count` & `best_streak` giảm dần)
 class ChatCommunitySidebar extends StatelessWidget {
   final List<ConversationModel> allRooms;
   final List<OnlineMemberModel> onlineMembers;
@@ -34,6 +34,16 @@ class ChatCommunitySidebar extends StatelessWidget {
     final topRooms = List<ConversationModel>.from(allRooms)
       ..sort((a, b) => b.memberCount.compareTo(a.memberCount));
     final displayedTop = topRooms.take(5).toList();
+
+    final topStreakMembers = List<OnlineMemberModel>.from(onlineMembers)
+      ..sort((a, b) {
+        final cmpStreak = b.streakCount.compareTo(a.streakCount);
+        if (cmpStreak != 0) return cmpStreak;
+        final cmpBest = b.bestStreak.compareTo(a.bestStreak);
+        if (cmpBest != 0) return cmpBest;
+        return a.displayName.compareTo(b.displayName);
+      });
+    final displayedMembers = topStreakMembers.take(5).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,7 +102,7 @@ class ChatCommunitySidebar extends StatelessWidget {
 
         const SizedBox(height: AppSpacing.lg),
 
-        // Card 2: Thành viên đang online thật từ Supabase
+        // Card 2: Bảng xếp hạng thành viên có chuỗi cao nhất từ Supabase
         Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: ChatStyles.cardDecoration,
@@ -101,18 +111,15 @@ class ChatCommunitySidebar extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 9,
-                    height: 9,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF16A34A),
-                      shape: BoxShape.circle,
-                    ),
+                  const Icon(
+                    Icons.local_fire_department_rounded,
+                    size: 19,
+                    color: AppColors.streakOrange,
                   ),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
-                      'Bạn bè đang online',
+                      'Xếp hạng chuỗi cao',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
@@ -120,39 +127,43 @@ class ChatCommunitySidebar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (onlineMembers.isNotEmpty)
+                  if (displayedMembers.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 7,
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: ChatStyles.tealPillBg,
+                        color: AppColors.streakBg,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        '${onlineMembers.length}',
+                        'Top ${displayedMembers.length}',
                         style: const TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w800,
-                          color: ChatStyles.tealDark,
+                          color: Color(0xFFC2410C),
                         ),
                       ),
                     ),
                 ],
               ),
               const SizedBox(height: 12),
-              if (onlineMembers.isEmpty)
+              if (displayedMembers.isEmpty)
                 const Text(
-                  'Hiện chưa có thêm thành viên nào đang trực tuyến.',
+                  'Chưa có dữ liệu xếp hạng chuỗi thành viên.',
                   style: ChatStyles.metaText,
                 )
               else
                 Column(
                   children: [
-                    for (var i = 0; i < onlineMembers.length; i++) ...[
-                      _OnlineMemberRow(member: onlineMembers[i]),
-                      if (i < onlineMembers.length - 1)
+                    for (var i = 0; i < displayedMembers.length; i++) ...[
+                      _TopStreakMemberRow(
+                        rank: i + 1,
+                        member: displayedMembers[i],
+                        colors: _rankColors[i % _rankColors.length],
+                      ),
+                      if (i < displayedMembers.length - 1)
                         const SizedBox(height: 12),
                     ],
                   ],
@@ -219,7 +230,7 @@ class _TopRoomRow extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '${room.memberCount} tv',
+              '${room.memberCount} thành viên',
               style: ChatStyles.metaText,
             ),
           ],
@@ -229,10 +240,16 @@ class _TopRoomRow extends StatelessWidget {
   }
 }
 
-class _OnlineMemberRow extends StatelessWidget {
+class _TopStreakMemberRow extends StatelessWidget {
+  final int rank;
   final OnlineMemberModel member;
+  final ({Color bg, Color fg}) colors;
 
-  const _OnlineMemberRow({required this.member});
+  const _TopStreakMemberRow({
+    required this.rank,
+    required this.member,
+    required this.colors,
+  });
 
   String _initials(String name) {
     final trimmed = name.trim();
@@ -244,8 +261,8 @@ class _OnlineMemberRow extends StatelessWidget {
 
   Widget _initialsAvatar() {
     return Container(
-      width: 36,
-      height: 36,
+      width: 32,
+      height: 32,
       decoration: const BoxDecoration(
         color: ChatStyles.tealPillBg,
         shape: BoxShape.circle,
@@ -254,7 +271,7 @@ class _OnlineMemberRow extends StatelessWidget {
       child: Text(
         _initials(member.displayName),
         style: const TextStyle(
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.w800,
           color: ChatStyles.tealDark,
         ),
@@ -266,39 +283,44 @@ class _OnlineMemberRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasUrl =
         member.avatarUrl != null && member.avatarUrl!.startsWith('http');
+    final hasStreak = member.streakCount > 0;
+    final meta = member.bestStreak > member.streakCount
+        ? '${member.targetLang} • ${member.proficiencyLevel} • Kỷ lục ${member.bestStreak}'
+        : '${member.targetLang} • ${member.proficiencyLevel}';
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            hasUrl
-                ? ClipOval(
-                    child: Image.network(
-                      member.avatarUrl!,
-                      width: 36,
-                      height: 36,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _initialsAvatar(),
-                    ),
-                  )
-                : _initialsAvatar(),
-            Positioned(
-              right: -1,
-              bottom: -1,
-              child: Container(
-                width: 11,
-                height: 11,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF16A34A),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.8),
-                ),
-              ),
+        Container(
+          width: 22,
+          height: 22,
+          decoration: BoxDecoration(
+            color: colors.bg,
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            '$rank',
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+              color: colors.fg,
             ),
-          ],
+          ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
+        hasUrl
+            ? ClipOval(
+                child: Image.network(
+                  member.avatarUrl!,
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _initialsAvatar(),
+                ),
+              )
+            : _initialsAvatar(),
+        const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +328,7 @@ class _OnlineMemberRow extends StatelessWidget {
               Text(
                 member.displayName,
                 style: const TextStyle(
-                  fontSize: 13.5,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -314,13 +336,71 @@ class _OnlineMemberRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                'Đang học ${member.targetLang} • ${member.proficiencyLevel}',
+                meta,
                 style: const TextStyle(
-                  fontSize: 11.5,
+                  fontSize: 11,
                   color: AppColors.textMuted,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+              ),
+              if (member.topRoomName != null) ...[
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.meeting_room_outlined,
+                      size: 11.5,
+                      color: ChatStyles.tealPrimary,
+                    ),
+                    const SizedBox(width: 3),
+                    Expanded(
+                      child: Text(
+                        'Phòng: ${member.topRoomName}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: ChatStyles.tealDark,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(width: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          decoration: BoxDecoration(
+            color: hasStreak ? AppColors.streakBg : const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: hasStreak ? const Color(0xFFFDBA74) : AppColors.divider,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.local_fire_department_rounded,
+                size: 13,
+                color:
+                    hasStreak ? AppColors.streakOrange : AppColors.textMuted,
+              ),
+              const SizedBox(width: 2),
+              Text(
+                '${member.streakCount}',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                  color: hasStreak
+                      ? const Color(0xFFC2410C)
+                      : AppColors.textMuted,
+                ),
               ),
             ],
           ),
