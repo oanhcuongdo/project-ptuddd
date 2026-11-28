@@ -16,8 +16,10 @@ class ChatRoomHeader extends StatelessWidget {
   final bool isInfoPanelOpen;
   final bool canScheduleMeet;
   final bool hasLiveMeet;
+  final bool isAutoTranslateEnabled;
   final VoidCallback onToggleInfoPanel;
   final VoidCallback onMeetActionTap;
+  final VoidCallback? onToggleAutoTranslate;
 
   const ChatRoomHeader({
     super.key,
@@ -27,8 +29,10 @@ class ChatRoomHeader extends StatelessWidget {
     this.isInfoPanelOpen = false,
     this.canScheduleMeet = false,
     this.hasLiveMeet = false,
+    this.isAutoTranslateEnabled = false,
     required this.onToggleInfoPanel,
     required this.onMeetActionTap,
+    this.onToggleAutoTranslate,
   });
 
   @override
@@ -139,6 +143,59 @@ class ChatRoomHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
+          if (onToggleAutoTranslate != null) ...[
+            Tooltip(
+              message: isAutoTranslateEnabled
+                  ? 'Đang bật Tự động dịch tin nhắn đến (bấm để tắt)'
+                  : 'Bật Tự động dịch toàn bộ tin nhắn đến',
+              child: InkWell(
+                onTap: onToggleAutoTranslate,
+                borderRadius: BorderRadius.circular(999),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isAutoTranslateEnabled
+                        ? ChatStyles.tealPrimary
+                        : ChatStyles.tealSoftBg,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: isAutoTranslateEnabled
+                          ? ChatStyles.tealPrimary
+                          : ChatStyles.tealBorder,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.translate_rounded,
+                        size: 15,
+                        color: isAutoTranslateEnabled
+                            ? Colors.white
+                            : ChatStyles.tealDark,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        isAutoTranslateEnabled ? 'Tự dịch: BẬT' : 'Tự dịch',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: isAutoTranslateEnabled
+                              ? Colors.white
+                              : ChatStyles.tealDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+          ],
           RoomStreakBadge(room: room),
           if (hasLiveMeet || canScheduleMeet) ...[
             const SizedBox(width: AppSpacing.sm),

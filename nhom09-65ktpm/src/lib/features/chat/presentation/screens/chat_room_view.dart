@@ -4,6 +4,11 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth_profile/presentation/providers/auth_provider.dart';
+import '../../../chat_online/models/translation_language.dart';
+import '../../../chat_online/models/translation_result.dart';
+import '../../../chat_online/services/translation_service.dart';
+import '../../../vocab_notebook/data/repositories/vocab_repository.dart';
+import '../../../vocab_notebook/presentation/providers/vocab_provider.dart';
 import '../../data/models/conversation_model.dart';
 import '../../data/models/meet_session_model.dart';
 import '../../data/models/message_model.dart';
@@ -12,7 +17,12 @@ import '../components/chat_meet_banner.dart';
 import '../components/chat_message_composer.dart';
 import '../components/chat_room_header.dart';
 import '../components/chat_room_info_panel.dart';
+import '../components/compose_translate_dialog.dart';
+import '../components/inline_correction_bubble.dart';
+import '../components/message_translation_footer.dart';
+import '../components/message_word_picker_dialog.dart';
 import '../components/schedule_meet_dialog.dart';
+import '../helpers/chat_translate_helper.dart';
 import '../providers/chat_provider.dart';
 import '../styles/chat_room_styles.dart';
 import '../styles/chat_styles.dart';
@@ -45,7 +55,11 @@ class _ChatRoomViewState extends State<ChatRoomView> {
   late final ChatProvider _chatProvider;
   int _lastMessageCount = 0;
   bool _showInfoPanel = false;
+  bool _autoTranslateEnabled = false;
   MeetSessionModel? _joinedMeetSession;
+  final _translationService = TranslationService();
+  final Map<String, TranslationResult> _translatedByMsgId = {};
+  final Set<String> _translatingMsgIds = {};
 
   @override
   void initState() {
@@ -64,6 +78,8 @@ class _ChatRoomViewState extends State<ChatRoomView> {
     if (oldWidget.room.id != widget.room.id) {
       _lastMessageCount = 0;
       _messageController.clear();
+      _translatedByMsgId.clear();
+      _translatingMsgIds.clear();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _chatProvider.openRoomMessages(widget.room.id);
@@ -83,6 +99,201 @@ class _ChatRoomViewState extends State<ChatRoomView> {
   void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('$feature sẽ được tích hợp ở đợt tiếp theo.')),
+    );
+  }
+
+  Future<void> _translateMessage(MessageModel msg) async {
+    if (_translatingMsgIds.contains(msg.id)) return;
+    final plainText = ChatTranslateHelper.plainTextForTranslation(msg.content);
+    if (plainText.isEmpty) return;
+
+    setState(() => _translatingMsgIds.add(msg.id));
+    final result = await _translationService.translate(
+      text: plainText,
+      from: 'auto',
+      to: 'vi',
+    );
+    if (!mounted) return;
+    setState(() {
+      _translatingMsgIds.remove(msg.id);
+      _translatedByMsgId[msg.id] = result;
+    });
+  }
+
+  void _toggleMessageTranslation(MessageModel msg) {
+    if (_translatedByMsgId.containsKey(msg.id)) {
+      setState(() => _translatedByMsgId.remove(msg.id));
+      return;
+    }
+    _translateMessage(msg);
+  }
+
+  void _toggleAutoTranslate(
+    List<MessageModel> messages,
+    String? currentUserId,
+  ) {
+    final nextValue = !_autoTranslateEnabled;
+    setState(() {
+      _autoTranslateEnabled = nextValue;
+      if (!nextValue) {
+        _translatedByMsgId.clear();
+        _translatingMsgIds.clear();
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: ChatStyles.tealDark,
+        duration: const Duration(seconds: 2),
+        content: Text(
+          nextValue
+              ? 'Đã bật Tự động dịch mọi tin nhắn đến sang Tiếng Việt.'
+              : 'Đã tắt Tự động dịch và ẩn toàn bộ bản dịch.',
+        ),
+      ),
+    );
+
+    if (nextValue) {
+      _autoTranslatePendingMessages(messages, currentUserId);
+    }
+  }
+
+  void _autoTranslatePendingMessages(
+    List<MessageModel> messages,
+    String? currentUserId,
+  ) {
+    if (!_autoTranslateEnabled) return;
+    for (final msg in messages) {
+      final isMine = currentUserId != null && msg.senderId == currentUserId;
+      if (isMine) continue;
+      if (_translatedByMsgId.containsKey(msg.id) ||
+          _translatingMsgIds.contains(msg.id)) {
+        continue;
+      }
+      final plainText = ChatTranslateHelper.plainTextForTranslation(msg.content);
+      if (plainText.isEmpty ||
+          TranslationService.containsVietnameseDiacritics(plainText)) {
+        continue;
+      }
+      _translateMessage(msg);
+    }
+  }
+
+  Future<void> _openComposeTranslate(ConversationModel liveRoom) async {
+    final preferredLang = TranslationLanguage.fromCode(liveRoom.targetLang);
+    final defaultTarget = preferredLang == TranslationLanguage.vi ||
+            preferredLang == TranslationLanguage.auto
+        ? TranslationLanguage.en
+        : preferredLang;
+
+    final res = await ComposeTranslateDialog.show(
+      context,
+      initialText: _messageController.text,
+      defaultTargetLang: defaultTarget,
+      translationService: _translationService,
+    );
+    if (!mounted || res == null) return;
+
+    if (res.action == ComposeTranslateAction.replaceInput) {
+      _messageController.text = res.translatedText;
+      _messageController.selection = TextSelection.collapsed(
+        offset: res.translatedText.length,
+      );
+      return;
+    }
+
+    final profile = context.read<AuthProvider>().currentProfile;
+    if (profile == null) return;
+    final senderName =
+        profile.displayName.trim().isNotEmpty ? profile.displayName : 'Bạn';
+
+    final bilingualContent = ChatTranslateHelper.encodeBilingual(
+      primaryText: res.translatedText,
+      secondaryText: res.originalText,
+    );
+    _messageController.clear();
+    await _chatProvider.sendMessage(
+      conversationId: widget.room.id,
+      senderId: profile.userId,
+      senderName: senderName,
+      senderAvatarUrl: profile.avatarUrl,
+      content: bilingualContent,
+    );
+  }
+
+  Future<void> _openInlineCorrection(MessageModel msg) async {
+    final draft = await InlineCorrectionDialog.show(
+      context,
+      originalText: msg.content,
+    );
+    if (!mounted || draft == null) return;
+
+    final profile = context.read<AuthProvider>().currentProfile;
+    if (profile == null) return;
+    final senderName =
+        profile.displayName.trim().isNotEmpty ? profile.displayName : 'Bạn';
+
+    final encoded = ChatTranslateHelper.encodeCorrection(
+      originalText: draft.originalText,
+      correctedText: draft.correctedText,
+      note: draft.note,
+    );
+
+    await _chatProvider.sendMessage(
+      conversationId: widget.room.id,
+      senderId: profile.userId,
+      senderName: senderName,
+      senderAvatarUrl: profile.avatarUrl,
+      content: encoded,
+    );
+  }
+
+  void _openWordPicker(MessageModel msg) {
+    VocabProvider? vocabProvider;
+    try {
+      vocabProvider = Provider.of<VocabProvider>(context, listen: false);
+    } on ProviderNotFoundException {
+      vocabProvider = null;
+    }
+
+    final currentUserId = context.read<AuthProvider>().currentProfile?.userId;
+
+    MessageWordPickerDialog.show(
+      context,
+      rawMessageContent: msg.content,
+      translationService: _translationService,
+      onSaveWord: ({
+        required word,
+        required translatedMeaning,
+        required sourceLang,
+        required targetLang,
+        required exampleSentence,
+      }) async {
+        if (vocabProvider != null) {
+          final saved = await vocabProvider.addOrUpdateWord(
+            word: word,
+            translatedMeaning: translatedMeaning,
+            sourceLang: sourceLang,
+            targetLang: targetLang,
+            exampleSentence: exampleSentence,
+          );
+          return saved != null;
+        }
+        if (currentUserId == null) return false;
+        try {
+          await VocabRepository().addVocabEntry(
+            userId: currentUserId,
+            word: word,
+            translatedMeaning: translatedMeaning,
+            sourceLang: sourceLang,
+            targetLang: targetLang,
+            exampleSentence: exampleSentence,
+          );
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
     );
   }
 
@@ -201,6 +412,12 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       _lastMessageCount = messages.length;
       if (messages.isNotEmpty) {
         _scrollToBottom();
+        if (_autoTranslateEnabled) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _autoTranslatePendingMessages(messages, currentUserId);
+          });
+        }
       }
     }
 
@@ -269,6 +486,9 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                           isInfoPanelOpen: canDockInfoPanel && _showInfoPanel,
                           canScheduleMeet: canManageRoom,
                           hasLiveMeet: activeMeet?.isLive ?? false,
+                          isAutoTranslateEnabled: _autoTranslateEnabled,
+                          onToggleAutoTranslate: () =>
+                              _toggleAutoTranslate(messages, currentUserId),
                           onToggleInfoPanel: handleToggleInfoPanel,
                           onBack: widget.onBack,
                           onMeetActionTap: () {
@@ -362,6 +582,8 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                           controller: _messageController,
                           onSend: _handleSend,
                           isSending: chat.isSendingMessage,
+                          onTranslateInputTap: () =>
+                              _openComposeTranslate(liveRoom),
                           onSuggestTopicTap: () => _showComingSoon(
                             'Gợi ý chủ đề & câu mở đầu hội thoại',
                           ),
@@ -540,46 +762,108 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                         ),
                         const SizedBox(height: 4),
                       ],
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        decoration:
-                            ChatRoomStyles.messageBubble(isMine: isMine),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              msg.content,
-                              style: ChatRoomStyles.messageText(isMine: isMine),
-                            ),
-                            if (isMine) ...[
-                              const SizedBox(height: 3),
-                              Row(
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              decoration:
+                                  ChatRoomStyles.messageBubble(isMine: isMine),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    _formatTime(msg.createdAt),
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      color:
-                                          Colors.white.withValues(alpha: 0.80),
+                                  _buildBubbleBody(msg.content, isMine),
+                                  if (isMine) ...[
+                                    const SizedBox(height: 3),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          _formatTime(msg.createdAt),
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            color: Colors.white
+                                                .withValues(alpha: 0.80),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Icon(
+                                          Icons.done_all_rounded,
+                                          size: 13,
+                                          color: Colors.white
+                                              .withValues(alpha: 0.85),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(width: 3),
-                                  Icon(
-                                    Icons.done_all_rounded,
-                                    size: 13,
-                                    color: Colors.white.withValues(alpha: 0.85),
-                                  ),
+                                  ],
                                 ],
                               ),
-                            ],
+                            ),
+                          ),
+                          if (!isMine) ...[
+                            const SizedBox(width: 4),
+                            IconButton(
+                              onPressed: () => _toggleMessageTranslation(msg),
+                              tooltip: _translatedByMsgId.containsKey(msg.id)
+                                  ? 'Ẩn bản dịch'
+                                  : 'Dịch nhanh sang Tiếng Việt',
+                              visualDensity: VisualDensity.compact,
+                              style: IconButton.styleFrom(
+                                backgroundColor:
+                                    _translatedByMsgId.containsKey(msg.id)
+                                        ? ChatStyles.tealPillBg
+                                        : Colors.white,
+                                foregroundColor: ChatStyles.tealDark,
+                                minimumSize: const Size(28, 28),
+                                padding: const EdgeInsets.all(5),
+                                side: const BorderSide(
+                                  color: ChatStyles.tealBorder,
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.translate_rounded,
+                                size: 15,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            IconButton(
+                              onPressed: () => _openInlineCorrection(msg),
+                              tooltip: 'Sửa lỗi câu cho bạn học',
+                              visualDensity: VisualDensity.compact,
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFF047857),
+                                minimumSize: const Size(28, 28),
+                                padding: const EdgeInsets.all(5),
+                                side: const BorderSide(
+                                  color: Color(0xFFA7F3D0),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.spellcheck_rounded,
+                                size: 15,
+                              ),
+                            ),
                           ],
-                        ),
+                        ],
                       ),
+                      if (!isMine &&
+                          (_translatingMsgIds.contains(msg.id) ||
+                              _translatedByMsgId.containsKey(msg.id)))
+                        MessageTranslationFooter(
+                          result: _translatedByMsgId[msg.id],
+                          isTranslating: _translatingMsgIds.contains(msg.id),
+                          onPickWords: () => _openWordPicker(msg),
+                          onRetry: () => _translateMessage(msg),
+                          onHide: () =>
+                              setState(() => _translatedByMsgId.remove(msg.id)),
+                        ),
                     ],
                   ),
                 ),
@@ -588,6 +872,56 @@ class _ChatRoomViewState extends State<ChatRoomView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildBubbleBody(String rawContent, bool isMine) {
+    final correction = ChatTranslateHelper.parseCorrection(rawContent);
+    if (correction != null) {
+      return InlineCorrectionBubble(data: correction, isMine: isMine);
+    }
+
+    final bilingual = ChatTranslateHelper.parseBilingual(rawContent);
+    if (bilingual != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            bilingual.primaryText,
+            style: ChatRoomStyles.messageText(isMine: isMine),
+          ),
+          const SizedBox(height: 5),
+          Container(
+            padding: const EdgeInsets.only(top: 5),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: isMine
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : AppColors.divider,
+                ),
+              ),
+            ),
+            child: Text(
+              bilingual.secondaryText,
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: isMine
+                    ? Colors.white.withValues(alpha: 0.85)
+                    : AppColors.textSecondary,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Text(
+      rawContent,
+      style: ChatRoomStyles.messageText(isMine: isMine),
     );
   }
 }

@@ -10,6 +10,7 @@ class ChatMessageComposer extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
   final VoidCallback onSuggestTopicTap;
+  final VoidCallback? onTranslateInputTap;
   final bool isSending;
 
   const ChatMessageComposer({
@@ -17,6 +18,7 @@ class ChatMessageComposer extends StatelessWidget {
     required this.controller,
     required this.onSend,
     required this.onSuggestTopicTap,
+    this.onTranslateInputTap,
     this.isSending = false,
   });
 
@@ -44,10 +46,15 @@ class ChatMessageComposer extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              cursorColor: ChatStyles.tealPrimary,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textPrimary,
+              ),
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => onSend(),
               decoration: InputDecoration(
-                hintText: 'Nhập tin nhắn...',
+                hintText: 'Nhập tin nhắn (bấm 🌐 để dịch hộ)...',
                 hintStyle: const TextStyle(
                   fontSize: 13.5,
                   color: AppColors.textMuted,
@@ -55,6 +62,17 @@ class ChatMessageComposer extends StatelessWidget {
                 isDense: true,
                 filled: true,
                 fillColor: const Color(0xFFF3F6F8),
+                suffixIcon: onTranslateInputTap != null
+                    ? IconButton(
+                        onPressed: onTranslateInputTap,
+                        tooltip: 'Dịch hộ & Gửi song ngữ',
+                        icon: const Icon(
+                          Icons.translate_rounded,
+                          size: 19,
+                          color: ChatStyles.tealDark,
+                        ),
+                      )
+                    : null,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 18,
                   vertical: 12,
