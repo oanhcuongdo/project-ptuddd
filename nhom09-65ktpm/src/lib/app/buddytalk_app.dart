@@ -5,6 +5,7 @@ import '../core/constants/app_constants.dart';
 import '../core/theme/app_theme.dart';
 import '../features/auth_profile/presentation/providers/auth_provider.dart';
 import '../features/chat/presentation/providers/chat_provider.dart';
+import '../features/conversation_topics/presentation/providers/topics_provider.dart';
 import '../features/notifications/presentation/providers/notification_provider.dart';
 import 'router/app_router.dart';
 
@@ -20,6 +21,9 @@ class BuddyTalkApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<ChatProvider>(
           create: (_) => ChatProvider(),
+        ),
+        ChangeNotifierProvider<TopicsProvider>(
+          create: (_) => TopicsProvider(),
         ),
         ChangeNotifierProvider<NotificationProvider>(
           create: (_) => NotificationProvider(),
