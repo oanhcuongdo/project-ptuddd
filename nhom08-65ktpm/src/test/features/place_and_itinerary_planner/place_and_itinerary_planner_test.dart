@@ -177,11 +177,16 @@ void main() {
       expect(suggestions.single.category, PlaceCategory.food);
     });
 
-    test('filters fallback suggestions by query', () {
-      final suggestions = repository.fallback(null, 'bến thành');
+    test('filters dynamic fallback suggestions by query and destination', () {
+      final suggestions = repository.fallback(
+        null,
+        'đặc sản',
+        destinationName: 'Đà Lạt',
+      );
 
       expect(suggestions, hasLength(1));
       expect(suggestions.single.category, PlaceCategory.food);
+      expect(suggestions.single.name, contains('Đà Lạt'));
     });
 
     test('resolves known Vietnam destination coordinates offline', () async {

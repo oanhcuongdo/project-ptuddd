@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,7 +11,7 @@ final authStateProvider = StreamProvider<AppUser?>((ref) {
   return ref.watch(authRepositoryProvider).watchAuthState();
 });
 
-/// Handles interactive authentication actions (Email/Password, Google, Reset, SignOut).
+/// Handles interactive authentication actions (Email/Password, Google, Reset, Profile, SignOut).
 final authControllerProvider =
     AsyncNotifierProvider<AuthController, void>(AuthController.new);
 
@@ -64,6 +65,54 @@ class AuthController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(authRepositoryProvider).sendPasswordResetEmail(email);
+    });
+    return !state.hasError;
+  }
+
+  Future<bool> sendEmailVerification() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(authRepositoryProvider).sendEmailVerification();
+    });
+    return !state.hasError;
+  }
+
+  Future<AppUser?> reloadUser() async {
+    state = const AsyncLoading();
+    AppUser? refreshed;
+    state = await AsyncValue.guard(() async {
+      refreshed = await ref.read(authRepositoryProvider).reloadCurrentUser();
+    });
+    return refreshed;
+  }
+
+  Future<AppUser?> updateProfile({
+    required String displayName,
+    String? phoneNumber,
+    Uint8List? avatarBytes,
+  }) async {
+    state = const AsyncLoading();
+    AppUser? updated;
+    state = await AsyncValue.guard(() async {
+      updated = await ref.read(authRepositoryProvider).updateProfile(
+            displayName: displayName,
+            phoneNumber: phoneNumber,
+            avatarBytes: avatarBytes,
+          );
+    });
+    return updated;
+  }
+
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(authRepositoryProvider).changePassword(
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+          );
     });
     return !state.hasError;
   }

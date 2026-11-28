@@ -16,6 +16,8 @@ abstract class AppUser with _$AppUser {
     String? avatarUrl,
     String? avatarStoragePath,
     String? phoneNumber,
+    @Default('email') String authProvider,
+    @Default(true) bool emailVerified,
     @Default(<String>[]) List<String> tripIds,
     @TimestampConverter() required DateTime createdAt,
     @TimestampConverter() required DateTime updatedAt,
@@ -23,6 +25,8 @@ abstract class AppUser with _$AppUser {
 
   factory AppUser.fromJson(Map<String, dynamic> json) =>
       _$AppUserFromJson(json);
+
+  bool get isEmailPasswordUser => authProvider == 'email';
 
   String get initials {
     final parts = displayName

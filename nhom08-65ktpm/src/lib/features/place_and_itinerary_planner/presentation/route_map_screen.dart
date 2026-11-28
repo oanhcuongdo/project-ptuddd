@@ -1,9 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/full_screen_image_viewer.dart';
 import '../models/place_plan.dart';
 import '../models/place_suggestion.dart';
 import '../providers/itinerary_providers.dart';
@@ -15,6 +20,7 @@ class RouteMapScreen extends ConsumerStatefulWidget {
   final String? destinationName;
   final double? initialLat;
   final double? initialLng;
+
   const RouteMapScreen({
     super.key,
     required this.tripId,
@@ -22,6 +28,7 @@ class RouteMapScreen extends ConsumerStatefulWidget {
     this.initialLat,
     this.initialLng,
   });
+
   @override
   ConsumerState<RouteMapScreen> createState() => _RouteMapScreenState();
 }
@@ -29,8 +36,10 @@ class RouteMapScreen extends ConsumerStatefulWidget {
 class _RouteMapScreenState extends ConsumerState<RouteMapScreen> {
   GoogleMapController? mapController;
   String query = '';
-  late double _centerLat = widget.initialLat ?? 10.7769;
-  late double _centerLon = widget.initialLng ?? 106.7009;
+  late double _centerLat = widget.initialLat ?? 16.0544;
+  late double _centerLon = widget.initialLng ?? 108.2022;
+  bool _mapInitFailed = false;
+  String? _mapStatusMessage;
 
   @override
   void initState() {
@@ -39,32 +48,148 @@ class _RouteMapScreenState extends ConsumerState<RouteMapScreen> {
   }
 
   Future<void> _initMapAndSuggestions() async {
-    final plans = ref.read(itineraryProvider(widget.tripId)).plans;
-    if (plans.isNotEmpty) {
-      _centerLat = plans.first.latitude;
-      _centerLon = plans.first.longitude;
-    } else if ((widget.initialLat == null || widget.initialLng == null) &&
-        (widget.destinationName?.trim().isNotEmpty ?? false)) {
-      final resolved = await ref
-          .read(placeDiscoveryRepositoryProvider)
-          .resolveDestinationCoordinates(widget.destinationName!);
-      if (resolved != null && mounted) {
-        setState(() {
-          _centerLat = resolved.lat;
-          _centerLon = resolved.lon;
-        });
+    try {
+      final plans = ref.read(itineraryProvider(widget.tripId)).plans;
+      if (plans.isNotEmpty) {
+        _centerLat = plans.first.latitude;
+        _centerLon = plans.first.longitude;
+      } else if ((widget.initialLat == null || widget.initialLng == null) &&
+          (widget.destinationName?.trim().isNotEmpty ?? false)) {
+        final resolved = await ref
+            .read(placeDiscoveryRepositoryProvider)
+            .resolveDestinationCoordinates(widget.destinationName!);
+        if (resolved != null && mounted) {
+          setState(() {
+            _centerLat = resolved.lat;
+            _centerLon = resolved.lon;
+          });
+        }
       }
+
+      if (mapController != null) {
+        try {
+          await mapController!.animateCamera(
+            CameraUpdate.newLatLng(LatLng(_centerLat, _centerLon)),
+          );
+        } catch (_) {}
+      }
+      if (!mounted) return;
+      await ref.read(itineraryProvider(widget.tripId).notifier).searchSuggestions(
+            latitude: _centerLat,
+            longitude: _centerLon,
+            destinationName: widget.destinationName,
+          );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _mapStatusMessage = 'Không thể tải dữ liệu bản đồ trực tuyến: $e';
+      });
+    }
+  }
+
+  bool get _supportsNativeGoogleMap =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+
+  Widget _buildMapSurface(
+    Set<Marker> markers,
+    List<LatLng> points,
+    bool usedFallback,
+  ) {
+    if (_mapInitFailed || !_supportsNativeGoogleMap) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: AppEmptyState(
+          icon: Icons.map_outlined,
+          title: 'Bản đồ tương tác chưa khả dụng',
+          subtitle: _mapStatusMessage ??
+              'Thiếu Google Maps API Key hoặc thiết bị đang ngoại tuyến. Bạn vẫn có thể tìm và thêm địa điểm từ danh sách bên dưới.',
+          actionLabel: 'Thử tải lại',
+          actionIcon: Icons.refresh,
+          onAction: () {
+            setState(() {
+              _mapInitFailed = false;
+              _mapStatusMessage = null;
+            });
+            _initMapAndSuggestions();
+          },
+        ),
+      );
     }
 
-    await mapController?.animateCamera(
-      CameraUpdate.newLatLng(LatLng(_centerLat, _centerLon)),
-    );
-    if (!mounted) return;
-    await ref.read(itineraryProvider(widget.tripId).notifier).searchSuggestions(
-          latitude: _centerLat,
-          longitude: _centerLon,
-          destinationName: widget.destinationName,
-        );
+    try {
+      return Stack(
+        children: [
+          SizedBox(
+            height: 260,
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: LatLng(_centerLat, _centerLon),
+                zoom: 12,
+              ),
+              markers: markers,
+              polylines: {
+                if (points.length > 1)
+                  Polyline(
+                    polylineId: const PolylineId('route'),
+                    points: points,
+                    color: AppColors.primary,
+                    width: 5,
+                  ),
+              },
+              onMapCreated: (c) {
+                try {
+                  mapController = c;
+                  c.moveCamera(
+                    CameraUpdate.newLatLng(LatLng(_centerLat, _centerLon)),
+                  );
+                } catch (e) {
+                  if (mounted) {
+                    setState(() {
+                      _mapInitFailed = true;
+                      _mapStatusMessage =
+                          'Không khởi tạo được Google Maps (kiểm tra API Key / mạng).';
+                    });
+                  }
+                }
+              },
+            ),
+          ),
+          if (usedFallback)
+            Positioned(
+              left: 10,
+              right: 10,
+              top: 10,
+              child: Material(
+                elevation: 1,
+                borderRadius: BorderRadius.circular(10),
+                color: AppColors.amberContainer,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  child: Text(
+                    'Đang hiển thị gợi ý ngoại tuyến theo điểm đến chuyến đi.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.onAmberContainer,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    } catch (e) {
+      return Padding(
+        padding: const EdgeInsets.all(12),
+        child: AppEmptyState(
+          icon: Icons.location_off_outlined,
+          title: 'Không thể mở Google Maps',
+          subtitle: 'Chi tiết: $e',
+        ),
+      );
+    }
   }
 
   @override
@@ -95,6 +220,7 @@ class _RouteMapScreenState extends ConsumerState<RouteMapScreen> {
     };
     final points = plans.map((p) => LatLng(p.latitude, p.longitude)).toList();
     final km = _distance(plans);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Bản đồ & check-in')),
       body: Column(
@@ -152,31 +278,7 @@ class _RouteMapScreenState extends ConsumerState<RouteMapScreen> {
               ],
             ),
           ),
-          SizedBox(
-            height: 280,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(_centerLat, _centerLon),
-                zoom: 12,
-              ),
-              markers: markers,
-              polylines: {
-                if (points.length > 1)
-                  Polyline(
-                    polylineId: const PolylineId('route'),
-                    points: points,
-                    color: Colors.blue,
-                    width: 5,
-                  ),
-              },
-              onMapCreated: (c) {
-                mapController = c;
-                c.moveCamera(
-                  CameraUpdate.newLatLng(LatLng(_centerLat, _centerLon)),
-                );
-              },
-            ),
-          ),
+          _buildMapSurface(markers, points, state.usedFallbackSuggestions),
           Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
@@ -187,13 +289,38 @@ class _RouteMapScreenState extends ConsumerState<RouteMapScreen> {
           Expanded(
             child: ListView(
               children: [
+                if (suggestions.isEmpty && plans.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: AppEmptyState(
+                      icon: Icons.explore_outlined,
+                      title: 'Không có địa điểm gợi ý phù hợp',
+                      subtitle:
+                          'Thử từ khóa khác hoặc thêm địa điểm thủ công vào lịch trình.',
+                      actionLabel: 'Thêm thủ công',
+                      onAction: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AddActivityScreen(
+                            tripId: widget.tripId,
+                            defaultLat: _centerLat,
+                            defaultLon: _centerLon,
+                            destinationName: widget.destinationName,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 for (final suggestion in suggestions)
                   ListTile(
-                    leading: const Icon(Icons.place),
+                    leading: const Icon(Icons.place, color: AppColors.primary),
                     title: Text(suggestion.name),
                     subtitle: Text(suggestion.address),
                     trailing: IconButton(
-                      icon: const Icon(Icons.add_circle),
+                      icon: const Icon(
+                        Icons.add_circle,
+                        color: AppColors.primary,
+                      ),
                       onPressed: () => _addSuggestion(suggestion),
                     ),
                   ),
@@ -235,14 +362,25 @@ class _RouteMapScreenState extends ConsumerState<RouteMapScreen> {
     PlaceCategory.food => BitmapDescriptor.hueOrange,
     PlaceCategory.hotel => BitmapDescriptor.hueGreen,
   };
+
   Future<void> _addSuggestion(PlaceSuggestion suggestion) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            AddActivityScreen(tripId: widget.tripId, suggestion: suggestion),
-      ),
-    );
+    try {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AddActivityScreen(
+            tripId: widget.tripId,
+            suggestion: suggestion,
+            destinationName: widget.destinationName,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể thêm địa điểm: $e')),
+      );
+    }
   }
 
   double _distance(List<PlacePlan> plans) {
@@ -289,8 +427,9 @@ class _RouteMapScreenState extends ConsumerState<RouteMapScreen> {
       if (!await _requestLocationPermission()) {
         throw Exception('Chưa được cấp quyền vị trí.');
       }
-      if (!await Geolocator.isLocationServiceEnabled())
+      if (!await Geolocator.isLocationServiceEnabled()) {
         throw Exception('Vui lòng bật dịch vụ vị trí.');
+      }
       final position = await Geolocator.getCurrentPosition();
       final meters = Geolocator.distanceBetween(
         position.latitude,
@@ -298,10 +437,11 @@ class _RouteMapScreenState extends ConsumerState<RouteMapScreen> {
         plan.latitude,
         plan.longitude,
       );
-      if (meters > 150)
+      if (meters > 150) {
         throw Exception(
           'Bạn đang cách điểm đến ${meters.round()} m; cần ở trong bán kính 150 m.',
         );
+      }
       if (!await _requestCameraPermission()) {
         throw Exception('Chưa được cấp quyền camera để chụp ảnh check-in.');
       }
@@ -311,56 +451,27 @@ class _RouteMapScreenState extends ConsumerState<RouteMapScreen> {
       );
       if (image == null || !mounted) return;
       await ref.read(itineraryRepositoryProvider).checkIn(plan, image);
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Check-in thành công!')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Check-in thành công!')),
+        );
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
         );
+      }
     }
   }
 
   void _showCheckInPhoto(PlacePlan plan) {
     final url = plan.checkInPhotoUrl;
     if (url == null || url.isEmpty) return;
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => Dialog(
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppBar(
-              title: Text(
-                'Check-in: ${plan.placeName}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              automaticallyImplyLeading: false,
-              actions: [
-                IconButton(
-                  onPressed: () => Navigator.pop(dialogCtx),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 360),
-              child: Image.network(
-                url,
-                fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Text('Không tải được ảnh check-in.'),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    FullScreenImageViewer.open(
+      context,
+      imageUrl: url,
+      title: 'Check-in: ${plan.placeName}',
     );
   }
 }

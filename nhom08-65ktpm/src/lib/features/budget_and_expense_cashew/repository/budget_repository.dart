@@ -3,9 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/data/mock_trip_data.dart';
 import '../models/budget_envelope.dart';
 import '../models/trip_expense.dart';
+import '../utils/debt_simplifier.dart';
 
 abstract interface class BudgetRepository {
   Stream<List<BudgetEnvelope>> watchEnvelopes(
@@ -19,6 +19,13 @@ abstract interface class BudgetRepository {
     required int targetBudget,
   });
 
+  Stream<Map<String, bool>> watchSettlements(String tripId);
+
+  Future<void> initializeEnvelopes({
+    required String tripId,
+    required int targetBudget,
+  });
+
   Future<void> updateEnvelopeBudget({
     required String tripId,
     required String envelopeId,
@@ -28,6 +35,11 @@ abstract interface class BudgetRepository {
   Future<TripExpense> addExpense({
     required String tripId,
     required TripExpense expense,
+  });
+
+  Future<void> settleDebt({
+    required String tripId,
+    required SimplifiedSettlement settlement,
   });
 }
 
@@ -51,6 +63,9 @@ class FirestoreBudgetRepository implements BudgetRepository {
 
   CollectionReference<Map<String, dynamic>> _expenses(String tripId) =>
       _firestore.collection('trips').doc(tripId).collection('expenses');
+
+  CollectionReference<Map<String, dynamic>> _settlements(String tripId) =>
+      _firestore.collection('trips').doc(tripId).collection('settlements');
 
   @override
   Stream<List<BudgetEnvelope>> watchEnvelopes(
@@ -86,6 +101,31 @@ class FirestoreBudgetRepository implements BudgetRepository {
               .toList(),
         );
   }
+
+  @override
+  Stream<Map<String, bool>> watchSettlements(String tripId) {
+    return _settlements(tripId).snapshots().map((snapshot) {
+      final result = <String, bool>{};
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        final settled = data['settled'] as bool? ?? false;
+        final fromId = data['fromUserId'] as String?;
+        final toId = data['toUserId'] as String?;
+        if (fromId != null && toId != null) {
+          result['${fromId}_$toId'] = settled;
+        } else {
+          result[doc.id] = settled;
+        }
+      }
+      return result;
+    });
+  }
+
+  @override
+  Future<void> initializeEnvelopes({
+    required String tripId,
+    required int targetBudget,
+  }) => _ensureDefaultEnvelopes(tripId, targetBudget);
 
   Future<void> _ensureDefaultEnvelopes(String tripId, int targetBudget) async {
     final collection = _envelopes(tripId);
@@ -196,6 +236,23 @@ class FirestoreBudgetRepository implements BudgetRepository {
     return saved;
   }
 
+  @override
+  Future<void> settleDebt({
+    required String tripId,
+    required SimplifiedSettlement settlement,
+  }) async {
+    final docId = '${settlement.fromId}_${settlement.toId}';
+    await _settlements(tripId).doc(docId).set({
+      'fromUserId': settlement.fromId,
+      'fromName': settlement.fromName,
+      'toUserId': settlement.toId,
+      'toName': settlement.toName,
+      'amount': settlement.amount,
+      'settled': true,
+      'settledAt': Timestamp.now(),
+    }, SetOptions(merge: true));
+  }
+
   int _categoryIndex(String id) {
     final index = BudgetEnvelope.defaults.indexWhere((item) => item.id == id);
     return index == -1 ? BudgetEnvelope.defaults.length : index;
@@ -205,6 +262,7 @@ class FirestoreBudgetRepository implements BudgetRepository {
 class InMemoryBudgetRepository implements BudgetRepository {
   final Map<String, List<BudgetEnvelope>> _envelopesByTrip = {};
   final Map<String, List<TripExpense>> _expensesByTrip = {};
+  final Map<String, Map<String, bool>> _settlementsByTrip = {};
   final StreamController<String> _changes =
       StreamController<String>.broadcast();
   var _nextExpenseId = 0;
@@ -215,11 +273,13 @@ class InMemoryBudgetRepository implements BudgetRepository {
     required int targetBudget,
     required bool initializeDefaults,
   }) async* {
-    _seed(tripId, targetBudget);
-    yield List.unmodifiable(_envelopesByTrip[tripId]!);
+    if (initializeDefaults || tripId == 'demo-trip') {
+      _seedIfNeeded(tripId, targetBudget);
+    }
+    yield List.unmodifiable(_envelopesByTrip[tripId] ?? const []);
     await for (final changedTripId in _changes.stream) {
       if (changedTripId == tripId) {
-        yield List.unmodifiable(_envelopesByTrip[tripId]!);
+        yield List.unmodifiable(_envelopesByTrip[tripId] ?? const []);
       }
     }
   }
@@ -229,99 +289,37 @@ class InMemoryBudgetRepository implements BudgetRepository {
     String tripId, {
     required int targetBudget,
   }) async* {
-    _seed(tripId, targetBudget);
-    yield List.unmodifiable(_expensesByTrip[tripId]!);
+    yield List.unmodifiable(_expensesByTrip[tripId] ?? const []);
     await for (final changedTripId in _changes.stream) {
       if (changedTripId == tripId) {
-        yield List.unmodifiable(_expensesByTrip[tripId]!);
+        yield List.unmodifiable(_expensesByTrip[tripId] ?? const []);
       }
     }
   }
 
-  void _seed(String tripId, int targetBudget) {
+  @override
+  Stream<Map<String, bool>> watchSettlements(String tripId) async* {
+    yield Map.unmodifiable(_settlementsByTrip[tripId] ?? const {});
+    await for (final changedTripId in _changes.stream) {
+      if (changedTripId == tripId) {
+        yield Map.unmodifiable(_settlementsByTrip[tripId] ?? const {});
+      }
+    }
+  }
+
+  @override
+  Future<void> initializeEnvelopes({
+    required String tripId,
+    required int targetBudget,
+  }) async {
+    _seedIfNeeded(tripId, targetBudget);
+    _changes.add(tripId);
+  }
+
+  void _seedIfNeeded(String tripId, int targetBudget) {
     if (_envelopesByTrip.containsKey(tripId)) return;
-    if (tripId != 'demo-trip') {
-      _envelopesByTrip[tripId] = _defaultEnvelopes(targetBudget);
-      _expensesByTrip[tripId] = [];
-      return;
-    }
-
-    final mockEnvelopes = <BudgetEnvelope>[];
-    for (final item in BudgetEnvelope.defaults) {
-      final mockCategory = item.name == 'Vé' ? 'Vé tham quan' : item.name;
-      final mock = MockTripData.envelopes.where(
-        (e) => e.category == mockCategory,
-      );
-      final match = mock.isEmpty ? null : mock.first;
-      mockEnvelopes.add(
-        BudgetEnvelope(
-          id: item.id,
-          category: item.id,
-          name: item.name,
-          iconCode: item.iconCode,
-          colorHex: item.colorHex,
-          allocatedAmount: match?.planned ?? 0,
-          plannedFromItinerary: match?.planned ?? 0,
-          spentAmount: match?.spent ?? 0,
-        ),
-      );
-    }
-    _envelopesByTrip[tripId] = mockEnvelopes;
-
-    final mockExpenses = <TripExpense>[];
-    for (var index = 0; index < MockTripData.expenses.length; index++) {
-      final mock = MockTripData.expenses[index];
-      final payer = MockTripData.members.firstWhere(
-        (member) => member.name == mock.payerName,
-      );
-      final payerId = _demoMemberId(payer.name);
-      final amountPerMember = mock.amount ~/ MockTripData.members.length;
-      var remainder = mock.amount % MockTripData.members.length;
-      final details = <String, int>{};
-      for (final member in MockTripData.members) {
-        details[_demoMemberId(member.name)] =
-            amountPerMember + (remainder > 0 ? 1 : 0);
-        if (remainder > 0) remainder--;
-      }
-      final envelope = mockEnvelopes.firstWhere(
-        (item) => item.name == mock.category,
-      );
-      mockExpenses.add(
-        TripExpense(
-          id: mock.id,
-          title: mock.title,
-          amount: mock.amount,
-          envelopeId: envelope.id,
-          category: envelope.category,
-          paymentSource: 'personal_advance',
-          paidBy: payerId,
-          paidByName: payer.name,
-          splitType: 'equal',
-          splitBetween: details.keys.toList(),
-          splitDetails: details,
-          isOcrScanned: false,
-          spentAt: DateTime(2026, 11, 15 + index),
-          createdBy: payerId,
-          createdAt: DateTime(2026, 11, 15 + index),
-        ),
-      );
-    }
-    _expensesByTrip[tripId] = mockExpenses;
-  }
-
-  String _demoMemberId(String name) {
-    switch (name) {
-      case 'Đỗ Đình An':
-        return 'demo-host-an';
-      case 'Nguyễn Xuân Bình':
-        return 'demo-member-binh';
-      case 'Hồ Thế Dũng':
-        return 'demo-member-dung';
-      case 'Đỗ Tùng Khánh':
-        return 'demo-member-khanh';
-      default:
-        return name;
-    }
+    _envelopesByTrip[tripId] = _defaultEnvelopes(targetBudget);
+    _expensesByTrip.putIfAbsent(tripId, () => []);
   }
 
   List<BudgetEnvelope> _defaultEnvelopes(int targetBudget) {
@@ -353,9 +351,8 @@ class InMemoryBudgetRepository implements BudgetRepository {
     if (allocatedAmount < 0) {
       throw ArgumentError.value(allocatedAmount, 'allocatedAmount');
     }
-    final envelopes =
-        _envelopesByTrip[tripId] ??
-        _defaultEnvelopes(MockTripData.totalTargetFund);
+    _seedIfNeeded(tripId, 0);
+    final envelopes = _envelopesByTrip[tripId]!;
     final index = envelopes.indexWhere((item) => item.id == envelopeId);
     if (index == -1) throw StateError('Không tìm thấy hũ ngân sách.');
     final old = envelopes[index];
@@ -369,7 +366,6 @@ class InMemoryBudgetRepository implements BudgetRepository {
       plannedFromItinerary: old.plannedFromItinerary,
       spentAmount: old.spentAmount,
     );
-    _envelopesByTrip[tripId] = envelopes;
     _changes.add(tripId);
   }
 
@@ -385,7 +381,7 @@ class InMemoryBudgetRepository implements BudgetRepository {
         expense.amount) {
       throw ArgumentError('Expense split must equal its amount.');
     }
-    _seed(tripId, MockTripData.totalTargetFund);
+    _seedIfNeeded(tripId, 0);
     final envelopes = _envelopesByTrip[tripId]!;
     final index = envelopes.indexWhere((item) => item.id == expense.envelopeId);
     if (index == -1) throw StateError('Không tìm thấy hũ ngân sách.');
@@ -425,6 +421,16 @@ class InMemoryBudgetRepository implements BudgetRepository {
     _expensesByTrip.putIfAbsent(tripId, () => []).insert(0, saved);
     _changes.add(tripId);
     return saved;
+  }
+
+  @override
+  Future<void> settleDebt({
+    required String tripId,
+    required SimplifiedSettlement settlement,
+  }) async {
+    final map = _settlementsByTrip.putIfAbsent(tripId, () => {});
+    map['${settlement.fromId}_${settlement.toId}'] = true;
+    _changes.add(tripId);
   }
 
   void dispose() => _changes.close();

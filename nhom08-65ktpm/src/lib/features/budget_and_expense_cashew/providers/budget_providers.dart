@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/budget_envelope.dart';
 import '../models/trip_expense.dart';
 import '../repository/budget_repository.dart';
+import '../utils/debt_simplifier.dart';
 
 class BudgetStreamParams {
   const BudgetStreamParams({
@@ -44,6 +45,11 @@ final budgetExpenseStreamProvider = StreamProvider.autoDispose
           .watchExpenses(params.tripId, targetBudget: params.targetBudget);
     });
 
+final budgetSettlementStreamProvider = StreamProvider.autoDispose
+    .family<Map<String, bool>, String>((ref, tripId) {
+      return ref.watch(budgetRepositoryProvider).watchSettlements(tripId);
+    });
+
 final budgetControllerProvider = Provider<BudgetController>((ref) {
   return BudgetController(ref.watch(budgetRepositoryProvider));
 });
@@ -52,6 +58,16 @@ class BudgetController {
   const BudgetController(this._repository);
 
   final BudgetRepository _repository;
+
+  Future<void> initializeEnvelopes({
+    required String tripId,
+    required int targetBudget,
+  }) {
+    return _repository.initializeEnvelopes(
+      tripId: tripId,
+      targetBudget: targetBudget,
+    );
+  }
 
   Future<TripExpense> addExpense({
     required String tripId,
@@ -70,6 +86,13 @@ class BudgetController {
       envelopeId: envelopeId,
       allocatedAmount: allocatedAmount,
     );
+  }
+
+  Future<void> settleDebt({
+    required String tripId,
+    required SimplifiedSettlement settlement,
+  }) {
+    return _repository.settleDebt(tripId: tripId, settlement: settlement);
   }
 }
 

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppUser {
 
- String get uid; String get email; String get displayName; String? get avatarUrl; String? get avatarStoragePath; String? get phoneNumber; List<String> get tripIds;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
+ String get uid; String get email; String get displayName; String? get avatarUrl; String? get avatarStoragePath; String? get phoneNumber; String get authProvider; bool get emailVerified; List<String> get tripIds;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $AppUserCopyWith<AppUser> get copyWith => _$AppUserCopyWithImpl<AppUser>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppUser&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.avatarStoragePath, avatarStoragePath) || other.avatarStoragePath == avatarStoragePath)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&const DeepCollectionEquality().equals(other.tripIds, tripIds)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppUser&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.avatarStoragePath, avatarStoragePath) || other.avatarStoragePath == avatarStoragePath)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.authProvider, authProvider) || other.authProvider == authProvider)&&(identical(other.emailVerified, emailVerified) || other.emailVerified == emailVerified)&&const DeepCollectionEquality().equals(other.tripIds, tripIds)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,uid,email,displayName,avatarUrl,avatarStoragePath,phoneNumber,const DeepCollectionEquality().hash(tripIds),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,uid,email,displayName,avatarUrl,avatarStoragePath,phoneNumber,authProvider,emailVerified,const DeepCollectionEquality().hash(tripIds),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'AppUser(uid: $uid, email: $email, displayName: $displayName, avatarUrl: $avatarUrl, avatarStoragePath: $avatarStoragePath, phoneNumber: $phoneNumber, tripIds: $tripIds, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'AppUser(uid: $uid, email: $email, displayName: $displayName, avatarUrl: $avatarUrl, avatarStoragePath: $avatarStoragePath, phoneNumber: $phoneNumber, authProvider: $authProvider, emailVerified: $emailVerified, tripIds: $tripIds, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $AppUserCopyWith<$Res>  {
   factory $AppUserCopyWith(AppUser value, $Res Function(AppUser) _then) = _$AppUserCopyWithImpl;
 @useResult
 $Res call({
- String uid, String email, String displayName, String? avatarUrl, String? avatarStoragePath, String? phoneNumber, List<String> tripIds,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String uid, String email, String displayName, String? avatarUrl, String? avatarStoragePath, String? phoneNumber, String authProvider, bool emailVerified, List<String> tripIds,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -65,7 +65,7 @@ class _$AppUserCopyWithImpl<$Res>
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? email = null,Object? displayName = null,Object? avatarUrl = freezed,Object? avatarStoragePath = freezed,Object? phoneNumber = freezed,Object? tripIds = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? email = null,Object? displayName = null,Object? avatarUrl = freezed,Object? avatarStoragePath = freezed,Object? phoneNumber = freezed,Object? authProvider = null,Object? emailVerified = null,Object? tripIds = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,9 @@ as String,displayName: null == displayName ? _self.displayName : displayName // 
 as String,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,avatarStoragePath: freezed == avatarStoragePath ? _self.avatarStoragePath : avatarStoragePath // ignore: cast_nullable_to_non_nullable
 as String?,phoneNumber: freezed == phoneNumber ? _self.phoneNumber : phoneNumber // ignore: cast_nullable_to_non_nullable
-as String?,tripIds: null == tripIds ? _self.tripIds : tripIds // ignore: cast_nullable_to_non_nullable
+as String?,authProvider: null == authProvider ? _self.authProvider : authProvider // ignore: cast_nullable_to_non_nullable
+as String,emailVerified: null == emailVerified ? _self.emailVerified : emailVerified // ignore: cast_nullable_to_non_nullable
+as bool,tripIds: null == tripIds ? _self.tripIds : tripIds // ignore: cast_nullable_to_non_nullable
 as List<String>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
@@ -161,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String email,  String displayName,  String? avatarUrl,  String? avatarStoragePath,  String? phoneNumber,  List<String> tripIds, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String email,  String displayName,  String? avatarUrl,  String? avatarStoragePath,  String? phoneNumber,  String authProvider,  bool emailVerified,  List<String> tripIds, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
-return $default(_that.uid,_that.email,_that.displayName,_that.avatarUrl,_that.avatarStoragePath,_that.phoneNumber,_that.tripIds,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.uid,_that.email,_that.displayName,_that.avatarUrl,_that.avatarStoragePath,_that.phoneNumber,_that.authProvider,_that.emailVerified,_that.tripIds,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -182,10 +184,10 @@ return $default(_that.uid,_that.email,_that.displayName,_that.avatarUrl,_that.av
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String email,  String displayName,  String? avatarUrl,  String? avatarStoragePath,  String? phoneNumber,  List<String> tripIds, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String email,  String displayName,  String? avatarUrl,  String? avatarStoragePath,  String? phoneNumber,  String authProvider,  bool emailVerified,  List<String> tripIds, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _AppUser():
-return $default(_that.uid,_that.email,_that.displayName,_that.avatarUrl,_that.avatarStoragePath,_that.phoneNumber,_that.tripIds,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.uid,_that.email,_that.displayName,_that.avatarUrl,_that.avatarStoragePath,_that.phoneNumber,_that.authProvider,_that.emailVerified,_that.tripIds,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +204,10 @@ return $default(_that.uid,_that.email,_that.displayName,_that.avatarUrl,_that.av
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String email,  String displayName,  String? avatarUrl,  String? avatarStoragePath,  String? phoneNumber,  List<String> tripIds, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String email,  String displayName,  String? avatarUrl,  String? avatarStoragePath,  String? phoneNumber,  String authProvider,  bool emailVerified,  List<String> tripIds, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
-return $default(_that.uid,_that.email,_that.displayName,_that.avatarUrl,_that.avatarStoragePath,_that.phoneNumber,_that.tripIds,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.uid,_that.email,_that.displayName,_that.avatarUrl,_that.avatarStoragePath,_that.phoneNumber,_that.authProvider,_that.emailVerified,_that.tripIds,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -217,7 +219,7 @@ return $default(_that.uid,_that.email,_that.displayName,_that.avatarUrl,_that.av
 @JsonSerializable()
 
 class _AppUser extends AppUser {
-  const _AppUser({required this.uid, required this.email, required this.displayName, this.avatarUrl, this.avatarStoragePath, this.phoneNumber, final  List<String> tripIds = const <String>[], @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt}): _tripIds = tripIds,super._();
+  const _AppUser({required this.uid, required this.email, required this.displayName, this.avatarUrl, this.avatarStoragePath, this.phoneNumber, this.authProvider = 'email', this.emailVerified = true, final  List<String> tripIds = const <String>[], @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt}): _tripIds = tripIds,super._();
   factory _AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
 
 @override final  String uid;
@@ -226,6 +228,8 @@ class _AppUser extends AppUser {
 @override final  String? avatarUrl;
 @override final  String? avatarStoragePath;
 @override final  String? phoneNumber;
+@override@JsonKey() final  String authProvider;
+@override@JsonKey() final  bool emailVerified;
  final  List<String> _tripIds;
 @override@JsonKey() List<String> get tripIds {
   if (_tripIds is EqualUnmodifiableListView) return _tripIds;
@@ -249,16 +253,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppUser&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.avatarStoragePath, avatarStoragePath) || other.avatarStoragePath == avatarStoragePath)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&const DeepCollectionEquality().equals(other._tripIds, _tripIds)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppUser&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.avatarStoragePath, avatarStoragePath) || other.avatarStoragePath == avatarStoragePath)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.authProvider, authProvider) || other.authProvider == authProvider)&&(identical(other.emailVerified, emailVerified) || other.emailVerified == emailVerified)&&const DeepCollectionEquality().equals(other._tripIds, _tripIds)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,uid,email,displayName,avatarUrl,avatarStoragePath,phoneNumber,const DeepCollectionEquality().hash(_tripIds),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,uid,email,displayName,avatarUrl,avatarStoragePath,phoneNumber,authProvider,emailVerified,const DeepCollectionEquality().hash(_tripIds),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'AppUser(uid: $uid, email: $email, displayName: $displayName, avatarUrl: $avatarUrl, avatarStoragePath: $avatarStoragePath, phoneNumber: $phoneNumber, tripIds: $tripIds, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'AppUser(uid: $uid, email: $email, displayName: $displayName, avatarUrl: $avatarUrl, avatarStoragePath: $avatarStoragePath, phoneNumber: $phoneNumber, authProvider: $authProvider, emailVerified: $emailVerified, tripIds: $tripIds, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -269,7 +273,7 @@ abstract mixin class _$AppUserCopyWith<$Res> implements $AppUserCopyWith<$Res> {
   factory _$AppUserCopyWith(_AppUser value, $Res Function(_AppUser) _then) = __$AppUserCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, String email, String displayName, String? avatarUrl, String? avatarStoragePath, String? phoneNumber, List<String> tripIds,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String uid, String email, String displayName, String? avatarUrl, String? avatarStoragePath, String? phoneNumber, String authProvider, bool emailVerified, List<String> tripIds,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -286,7 +290,7 @@ class __$AppUserCopyWithImpl<$Res>
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? email = null,Object? displayName = null,Object? avatarUrl = freezed,Object? avatarStoragePath = freezed,Object? phoneNumber = freezed,Object? tripIds = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? email = null,Object? displayName = null,Object? avatarUrl = freezed,Object? avatarStoragePath = freezed,Object? phoneNumber = freezed,Object? authProvider = null,Object? emailVerified = null,Object? tripIds = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_AppUser(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
@@ -294,7 +298,9 @@ as String,displayName: null == displayName ? _self.displayName : displayName // 
 as String,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,avatarStoragePath: freezed == avatarStoragePath ? _self.avatarStoragePath : avatarStoragePath // ignore: cast_nullable_to_non_nullable
 as String?,phoneNumber: freezed == phoneNumber ? _self.phoneNumber : phoneNumber // ignore: cast_nullable_to_non_nullable
-as String?,tripIds: null == tripIds ? _self._tripIds : tripIds // ignore: cast_nullable_to_non_nullable
+as String?,authProvider: null == authProvider ? _self.authProvider : authProvider // ignore: cast_nullable_to_non_nullable
+as String,emailVerified: null == emailVerified ? _self.emailVerified : emailVerified // ignore: cast_nullable_to_non_nullable
+as bool,tripIds: null == tripIds ? _self._tripIds : tripIds // ignore: cast_nullable_to_non_nullable
 as List<String>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,

@@ -2,17 +2,22 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/data/mock_trip_data.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_inset_card.dart';
 import '../../../core/widgets/app_section_header.dart';
+import '../../../core/widgets/app_skeleton_loader.dart';
 import '../../../core/widgets/app_status_badge.dart';
+import '../../../core/widgets/trip_detail_app_bar.dart';
+import '../../../core/widgets/vnd_text_field.dart';
 import '../../../models/trip_member.dart';
+import '../../auth_and_group/presentation/widgets/trip_members_sheet.dart';
 import '../../auth_and_group/providers/auth_providers.dart';
 import '../../auth_and_group/providers/trip_providers.dart';
 import '../../auth_and_group/repository/auth_repository.dart';
@@ -29,27 +34,24 @@ class BudgetScreen extends ConsumerStatefulWidget {
 }
 
 class _BudgetScreenState extends ConsumerState<BudgetScreen> {
-  final Set<String> _paidKeys = <String>{};
-
   Future<void> _editEnvelopeBudget(
     String tripId,
     BudgetEnvelope envelope,
   ) async {
     final controller = TextEditingController(
-      text: envelope.allocatedAmount.toString(),
+      text: VndThousandInputFormatter.formatDigits(
+        envelope.allocatedAmount.toString(),
+      ),
     );
     final amount = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Ngân sách hũ ${envelope.name}'),
-        content: TextField(
+        content: VndTextField(
           controller: controller,
           autofocus: true,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Số tiền dự kiến (VNĐ)',
-            suffixText: 'đ',
-          ),
+          labelText: 'Số tiền dự kiến (VNĐ)',
+          border: const UnderlineInputBorder(),
         ),
         actions: [
           TextButton(
@@ -58,10 +60,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           ),
           FilledButton(
             onPressed: () {
-              final parsed = int.tryParse(
-                controller.text.replaceAll('.', '').trim(),
-              );
-              if (parsed == null || parsed < 0) return;
+              final parsed = AppFormatters.parseVnd(controller.text);
               Navigator.pop(context, parsed);
             },
             child: const Text('Lưu'),
@@ -84,13 +83,16 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     }
   }
 
-  Future<void> _confirmPayDebt(SimplifiedSettlement settlement) async {
+  Future<void> _confirmPayDebt(
+    String tripId,
+    SimplifiedSettlement settlement,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xác nhận đã thanh toán'),
+        title: const Text('Xác nhận chốt quyết toán'),
         content: Text(
-          '${settlement.fromName} đã chuyển '
+          'Xác nhận ${settlement.fromName} đã thanh toán '
           '${AppFormatters.formatVnd(settlement.amount)} cho '
           '${settlement.toName}?',
         ),
@@ -101,15 +103,35 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Xác nhận'),
+            child: const Text('Chốt quyết toán'),
           ),
         ],
       ),
     );
-    if (confirmed == true && mounted) {
-      setState(() {
-        _paidKeys.add('${settlement.fromId}_${settlement.toId}');
-      });
+    if (confirmed != true || !mounted) return;
+    try {
+      HapticFeedback.lightImpact();
+      await ref
+          .read(budgetControllerProvider)
+          .settleDebt(tripId: tripId, settlement: settlement);
+      _showMessage('Đã chốt quyết toán thành công.');
+    } catch (e) {
+      _showMessage('Không thể lưu trạng thái quyết toán: $e');
+    }
+  }
+
+  Future<void> _createSuggestedEnvelopes(
+    String tripId,
+    int targetBudget,
+  ) async {
+    try {
+      HapticFeedback.lightImpact();
+      await ref
+          .read(budgetControllerProvider)
+          .initializeEnvelopes(tripId: tripId, targetBudget: targetBudget);
+      _showMessage('Đã khởi tạo các hũ ngân sách gợi ý.');
+    } catch (e) {
+      _showMessage('Không thể khởi tạo hũ ngân sách: $e');
     }
   }
 
@@ -165,16 +187,16 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         ref.read(authRepositoryProvider).currentUser;
     final memberAsync = ref.watch(currentTripMembersProvider);
     final members = memberAsync.asData?.value ?? const <TripMember>[];
-    final targetBudget = trip?.targetBudget ?? MockTripData.totalTargetFund;
+    final targetBudget = trip?.targetBudget ?? 0;
     final memberContributions = members.fold<int>(
       0,
-      (sum, member) => sum + member.contributedAmount,
+      (total, member) => total + member.contributedAmount,
     );
-    final totalCollected = trip != null && trip.totalSavedAmount > 0
-        ? trip.totalSavedAmount
-        : memberContributions > 0
-        ? memberContributions
-        : MockTripData.currentSavedFund;
+    final totalCollected = trip != null
+        ? (trip.totalSavedAmount > 0
+              ? trip.totalSavedAmount
+              : memberContributions)
+        : memberContributions;
     final streamParams = BudgetStreamParams(
       tripId: tripId,
       targetBudget: targetBudget,
@@ -182,52 +204,57 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     );
     final envelopeAsync = ref.watch(budgetEnvelopeStreamProvider(streamParams));
     final expensesAsync = ref.watch(budgetExpenseStreamProvider(streamParams));
+    final settledMap =
+        ref.watch(budgetSettlementStreamProvider(tripId)).asData?.value ??
+        const <String, bool>{};
 
     return Scaffold(
-      appBar: AppBar(
-        leadingWidth: 100,
-        leading: TextButton.icon(
-          onPressed: () => context.go('/trips'),
-          icon: const Icon(
-            Icons.chevron_left,
-            color: AppColors.onPrimaryContainer,
-          ),
-          label: const Text(
-            'Chuyến đi',
-            style: TextStyle(color: AppColors.onPrimaryContainer),
-          ),
-        ),
-        title: const Text('Ngân sách'),
-        actions: [
+      appBar: TripDetailAppBar(
+        title: 'Ngân sách',
+        onMembersPressed: () => TripMembersSheet.show(context),
+        extraActions: [
           IconButton(
             key: const Key('budget_add_expense_button'),
             tooltip: 'Thêm khoản chi / Quét OCR',
-            icon: const Icon(Icons.add, color: AppColors.primary, size: 26),
+            icon: Icon(
+              Icons.add,
+              color: Theme.of(context).colorScheme.primary,
+              size: 26,
+            ),
             onPressed: () => context.push('/trip/budget/add'),
           ),
         ],
       ),
       body: envelopeAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const AppSkeletonLoader(),
         error: (error, _) => _LoadError(
           message: 'Không tải được các hũ ngân sách: $error',
           onRetry: () =>
               ref.invalidate(budgetEnvelopeStreamProvider(streamParams)),
         ),
         data: (envelopes) => expensesAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const AppSkeletonLoader(),
           error: (error, _) => _LoadError(
             message: 'Không tải được khoản chi: $error',
             onRetry: () =>
                 ref.invalidate(budgetExpenseStreamProvider(streamParams)),
           ),
-          data: (expenses) => _buildBudgetContent(
-            tripId: tripId,
-            envelopes: envelopes,
-            expenses: expenses,
-            members: members,
-            targetBudget: targetBudget,
-            totalCollected: totalCollected,
+          data: (expenses) => RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(budgetEnvelopeStreamProvider(streamParams));
+              ref.invalidate(budgetExpenseStreamProvider(streamParams));
+              ref.invalidate(budgetSettlementStreamProvider(tripId));
+              await Future<void>.delayed(const Duration(milliseconds: 250));
+            },
+            child: _buildBudgetContent(
+              tripId: tripId,
+              envelopes: envelopes,
+              expenses: expenses,
+              members: members,
+              settledMap: settledMap,
+              targetBudget: targetBudget,
+              totalCollected: totalCollected,
+            ),
           ),
         ),
       ),
@@ -239,20 +266,22 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     required List<BudgetEnvelope> envelopes,
     required List<TripExpense> expenses,
     required List<TripMember> members,
+    required Map<String, bool> settledMap,
     required int targetBudget,
     required int totalCollected,
   }) {
     final totalSpent = envelopes.fold<int>(
       0,
-      (sum, envelope) => sum + envelope.spentAmount,
+      (total, envelope) => total + envelope.spentAmount,
     );
     final totalPlanned = envelopes.fold<int>(
       0,
-      (sum, envelope) => sum + envelope.allocatedAmount,
+      (total, envelope) => total + envelope.allocatedAmount,
     );
     final settlements = _calculateSettlements(expenses, members);
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       children: [
         AppInsetCard(
@@ -304,7 +333,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         ),
         const SizedBox(height: 24),
         AppSectionHeader(
-          title: 'Hũ ngân sách Cashew',
+          title: 'Hũ ngân sách',
           trailing: Text(
             '${envelopes.length} danh mục',
             style: const TextStyle(
@@ -314,12 +343,14 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           ),
         ),
         if (envelopes.isEmpty)
-          const AppInsetCard(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Chưa có hũ ngân sách. Trưởng nhóm cần mở lại mục Ngân sách '
-              'để khởi tạo các danh mục.',
-            ),
+          AppEmptyState(
+            icon: Icons.account_balance_wallet_outlined,
+            title: 'Chưa có hũ ngân sách',
+            subtitle:
+                'Khởi tạo 6 hũ ngân sách chuẩn (Di chuyển, Lưu trú, Ăn uống, Vé, Mua sắm, Dự phòng) để theo dõi chi tiêu.',
+            actionLabel: 'Gợi ý chia hũ ngân sách',
+            actionIcon: Icons.auto_awesome,
+            onAction: () => _createSuggestedEnvelopes(tripId, targetBudget),
           )
         else
           for (final envelope in envelopes) ...[
@@ -361,10 +392,11 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                     for (var index = 0; index < settlements.length; index++)
                       _SettlementTile(
                         settlement: settlements[index],
-                        isPaid: _paidKeys.contains(
-                          '${settlements[index].fromId}_${settlements[index].toId}',
-                        ),
-                        onConfirm: () => _confirmPayDebt(settlements[index]),
+                        isPaid:
+                            settledMap['${settlements[index].fromId}_${settlements[index].toId}'] ??
+                            false,
+                        onConfirm: () =>
+                            _confirmPayDebt(tripId, settlements[index]),
                         showDivider: index < settlements.length - 1,
                       ),
                   ],
@@ -372,46 +404,51 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         ),
         const SizedBox(height: 24),
         const AppSectionHeader(title: 'Chi tiêu gần đây'),
-        AppInsetCard(
-          child: expenses.isEmpty
-              ? const ListTile(title: Text('Chưa có khoản chi nào.'))
-              : Column(
-                  children: [
-                    for (var index = 0; index < expenses.length; index++)
-                      Column(
-                        children: [
-                          ListTile(
-                            leading: const Icon(
-                              Icons.receipt_long,
-                              color: AppColors.primary,
-                            ),
-                            title: Text(
-                              expenses[index].title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            subtitle: Text(
-                              '${expenses[index].paidByName} trả • '
-                              '${expenses[index].category} • '
-                              '${expenses[index].paymentSource == 'group_fund' ? 'Quỹ chung' : 'Ứng trước'}',
-                            ),
-                            trailing: Text(
-                              AppFormatters.formatVnd(expenses[index].amount),
-                              style: AppTheme.monoAmount(),
-                            ),
-                            onTap: () => context.push(
-                              '/trip/budget/detail',
-                              extra: expenses[index],
-                            ),
-                          ),
-                          if (index < expenses.length - 1)
-                            const Divider(indent: 56),
-                        ],
+        if (expenses.isEmpty)
+          AppEmptyState(
+            icon: Icons.receipt_long_outlined,
+            title: 'Chưa có khoản chi nào',
+            subtitle:
+                'Bấm + ở góc trên để thêm khoản chi thủ công hoặc quét hóa đơn OCR.',
+            actionLabel: 'Thêm hóa đơn',
+            onAction: () => context.push('/trip/budget/add'),
+          )
+        else
+          AppInsetCard(
+            child: Column(
+              children: [
+                for (var index = 0; index < expenses.length; index++)
+                  Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(
+                          Icons.receipt_long,
+                          color: AppColors.primary,
+                        ),
+                        title: Text(
+                          expenses[index].title,
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        subtitle: Text(
+                          '${expenses[index].paidByName} trả • '
+                          '${expenses[index].category} • '
+                          '${expenses[index].paymentSource == 'group_fund' ? 'Quỹ chung' : 'Ứng trước'}',
+                        ),
+                        trailing: Text(
+                          AppFormatters.formatVnd(expenses[index].amount),
+                          style: AppTheme.monoAmount(),
+                        ),
+                        onTap: () => context.push(
+                          '/trip/budget/detail',
+                          extra: expenses[index],
+                        ),
                       ),
-                  ],
-                ),
-        ),
+                      if (index < expenses.length - 1) const Divider(indent: 56),
+                    ],
+                  ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -616,12 +653,20 @@ class _EnvelopeCard extends StatelessWidget {
   final int collectedAmount;
   final VoidCallback onEdit;
 
+  Color _progressColor(double rawRatio) {
+    if (rawRatio > 1.0) return AppColors.dangerRed;
+    if (rawRatio >= 0.8) return AppColors.terracotta;
+    return AppColors.primary;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final progress = envelope.allocatedAmount == 0
-        ? 0.0
-        : (envelope.spentAmount / envelope.allocatedAmount).clamp(0.0, 1.0);
-    final nearLimit = progress >= 0.85;
+    final rawRatio = envelope.allocatedAmount == 0
+        ? (envelope.spentAmount > 0 ? 1.1 : 0.0)
+        : envelope.spentAmount / envelope.allocatedAmount;
+    final clampedProgress = rawRatio.clamp(0.0, 1.0);
+    final barColor = _progressColor(rawRatio);
+
     return AppInsetCard(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -666,12 +711,10 @@ class _EnvelopeCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: LinearProgressIndicator(
-                value: progress,
+                value: clampedProgress,
                 minHeight: 6,
                 backgroundColor: AppColors.surfaceContainerHigh,
-                valueColor: AlwaysStoppedAnimation(
-                  nearLimit ? AppColors.amber : envelope.color,
-                ),
+                valueColor: AlwaysStoppedAnimation(barColor),
               ),
             ),
           ],
@@ -756,16 +799,25 @@ class _SettlementTile extends StatelessWidget {
           title: Text('${settlement.fromName} trả ${settlement.toName}'),
           subtitle: isPaid
               ? const AppStatusBadge(
-                  label: 'Đã thanh toán',
+                  label: 'Đã tất toán',
                   tone: AppBadgeTone.mint,
+                  icon: Icons.check_circle,
                 )
-              : GestureDetector(
-                  onTap: onConfirm,
-                  child: const Text(
-                    'Xác nhận đã trả',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.onPrimaryContainer,
+              : Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 28),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: onConfirm,
+                    child: const Text(
+                      'Chốt quyết toán',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                 ),

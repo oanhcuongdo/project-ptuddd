@@ -9,14 +9,16 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_inset_card.dart';
+import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_section_header.dart';
+import '../../../core/widgets/vnd_text_field.dart';
 import '../../../models/trip_model.dart';
 import '../../goal_and_checklist/data/smart_templates.dart';
 import '../../goal_and_checklist/providers/checklist_providers.dart';
 import '../providers/trip_providers.dart';
 import '../repository/trip_repository.dart';
 
-/// Màn hình Tạo chuyến đi & Mã QR — ghi Firestore bằng WriteBatch và sinh mã QR thật.
+/// Màn hình Tạo chuyến đi toàn trang — chỉ hiện Bottom Sheet QR mời thành viên sau khi lưu thành công.
 class CreateTripQrScreen extends ConsumerStatefulWidget {
   const CreateTripQrScreen({super.key});
 
@@ -31,11 +33,10 @@ class _CreateTripQrScreenState extends ConsumerState<CreateTripQrScreen> {
   late DateTime _endDate;
   final _startCtrl = TextEditingController();
   final _endCtrl = TextEditingController();
-  final _budgetCtrl = TextEditingController(text: '8.450.000đ');
+  final _budgetCtrl = TextEditingController();
 
   late final String _inviteCode = TripRepository.generateInviteCode();
   Uint8List? _coverBytes;
-  bool _copied = false;
   TripType _tripType = TripType.other;
   bool _autoApplyTemplate = true;
   String? _validationError;
@@ -72,9 +73,7 @@ class _CreateTripQrScreenState extends ConsumerState<CreateTripQrScreen> {
       setState(() => _coverBytes = bytes);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Không chọn được ảnh: $e')));
+      _showSnackBar('Không chọn được ảnh: $e');
     }
   }
 
@@ -99,14 +98,6 @@ class _CreateTripQrScreenState extends ConsumerState<CreateTripQrScreen> {
         _endDate = picked.isBefore(_startDate) ? _startDate : picked;
         _endCtrl.text = AppFormatters.formatDate(_endDate);
       }
-    });
-  }
-
-  Future<void> _copyInviteCode() async {
-    await Clipboard.setData(ClipboardData(text: _inviteCode));
-    setState(() => _copied = true);
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _copied = false);
     });
   }
 
@@ -172,12 +163,107 @@ class _CreateTripQrScreenState extends ConsumerState<CreateTripQrScreen> {
       if (!mounted) return;
     }
 
-    _showSnackBar(
-      templateCount > 0
-          ? 'Đã tạo "${created.title}" và thêm $templateCount đầu việc mẫu!'
-          : 'Đã tạo chuyến đi "${created.title}"!',
+    await _showInviteQrSheet(created, templateCount);
+    if (mounted) {
+      context.go('/trip/checklist');
+    }
+  }
+
+  Future<void> _showInviteQrSheet(TripModel trip, int templateCount) async {
+    var copied = false;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) => StatefulBuilder(
+        builder: (sheetCtx, setSheetState) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.outlineVariant,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Tạo chuyến đi thành công!',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  templateCount > 0
+                      ? 'Đã thêm sẵn $templateCount đầu việc mẫu. Chia sẻ QR này để mời bạn bè:'
+                      : 'Chia sẻ mã QR hoặc mã mời bên dưới cho thành viên nhóm:',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.outlineVariantSoft),
+                  ),
+                  child: QrImageView(
+                    data: 'travelbuddy://join?code=${trip.inviteCode}',
+                    version: QrVersions.auto,
+                    size: 160,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  trip.inviteCode,
+                  style: AppTheme.monoAmount(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: trip.inviteCode),
+                          );
+                          setSheetState(() => copied = true);
+                        },
+                        icon: Icon(
+                          copied ? Icons.check : Icons.content_copy,
+                          size: 18,
+                        ),
+                        label: Text(copied ? 'Đã sao chép' : 'Sao chép mã'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () => Navigator.pop(sheetCtx),
+                        child: const Text('Vào chuyến đi'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
-    context.go('/trip/checklist');
   }
 
   void _showSnackBar(String message) {
@@ -218,7 +304,6 @@ class _CreateTripQrScreenState extends ConsumerState<CreateTripQrScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Ảnh bìa
           InkWell(
             borderRadius: BorderRadius.circular(12),
             onTap: isSaving ? null : _pickCoverImage,
@@ -324,13 +409,35 @@ class _CreateTripQrScreenState extends ConsumerState<CreateTripQrScreen> {
                   onTap: () => _pickDate(isStart: false),
                 ),
                 const Divider(indent: 16),
-                _InputRow(
-                  fieldKey: const Key('create_trip_budget_field'),
-                  label: 'Mục tiêu quỹ',
-                  controller: _budgetCtrl,
-                  isMono: true,
-                  keyboardType: TextInputType.number,
-                  valueColor: AppColors.onPrimaryContainer,
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('Mục tiêu quỹ', style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          key: const Key('create_trip_budget_field'),
+                          controller: _budgetCtrl,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [VndThousandInputFormatter()],
+                          textAlign: TextAlign.right,
+                          style: AppTheme.monoAmount(
+                            fontSize: 15,
+                            color: AppColors.onPrimaryContainer,
+                          ),
+                          decoration: const InputDecoration(
+                            hintText: 'VD: 8.450.000',
+                            suffixText: 'đ',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const Divider(indent: 16),
                 Padding(
@@ -417,96 +524,10 @@ class _CreateTripQrScreenState extends ConsumerState<CreateTripQrScreen> {
               ),
             ),
           const SizedBox(height: 24),
-
-          const AppSectionHeader(title: 'Mời thành viên'),
-          AppInsetCard(
-            borderRadius: 16,
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.outlineVariantSoft),
-                  ),
-                  child: QrImageView(
-                    data: 'travelbuddy://join?code=$_inviteCode',
-                    version: QrVersions.auto,
-                    size: 140,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Mã mời nhóm',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _inviteCode,
-                  style: AppTheme.monoAmount(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 44,
-                        child: FilledButton.tonalIcon(
-                          onPressed: _copyInviteCode,
-                          icon: Icon(
-                            _copied ? Icons.check : Icons.content_copy,
-                            size: 18,
-                          ),
-                          label: Text(_copied ? 'Đã sao chép' : 'Sao chép mã'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.surfaceContainerHigh,
-                            foregroundColor: AppColors.onSurface,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: SizedBox(
-                        height: 44,
-                        child: FilledButton.icon(
-                          onPressed: () {
-                            _copyInviteCode();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Đã sao chép mã mời $_inviteCode để gửi cho bạn bè.',
-                                ),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.ios_share, size: 18),
-                          label: const Text('Chia sẻ'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.onPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          AppPrimaryButton(
+            label: isSaving ? 'Đang tạo chuyến đi...' : 'Tạo chuyến đi & Lấy mã QR',
+            icon: Icons.qr_code_2_rounded,
+            onPressed: isSaving ? null : _saveTrip,
           ),
         ],
       ),
@@ -523,8 +544,6 @@ class _InputRow extends StatelessWidget {
     this.isMono = false,
     this.readOnly = false,
     this.onTap,
-    this.keyboardType,
-    this.valueColor = AppColors.onSurfaceVariant,
   });
 
   final String label;
@@ -534,8 +553,6 @@ class _InputRow extends StatelessWidget {
   final bool isMono;
   final bool readOnly;
   final VoidCallback? onTap;
-  final TextInputType? keyboardType;
-  final Color valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -551,11 +568,16 @@ class _InputRow extends StatelessWidget {
               controller: controller,
               readOnly: readOnly,
               onTap: onTap,
-              keyboardType: keyboardType,
               textAlign: TextAlign.right,
               style: isMono
-                  ? AppTheme.monoAmount(fontSize: 15, color: valueColor)
-                  : TextStyle(fontSize: 16, color: valueColor),
+                  ? AppTheme.monoAmount(
+                      fontSize: 15,
+                      color: AppColors.onSurfaceVariant,
+                    )
+                  : const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.onSurfaceVariant,
+                    ),
               decoration: InputDecoration(
                 hintText: hintText,
                 border: InputBorder.none,

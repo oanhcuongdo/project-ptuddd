@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/local_notification_service.dart';
@@ -11,9 +11,13 @@ import '../../../core/widgets/app_inset_card.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_section_header.dart';
 import '../../../core/widgets/app_segmented_control.dart';
+import '../../../core/widgets/app_skeleton_loader.dart';
 import '../../../core/widgets/app_status_badge.dart';
+import '../../../core/widgets/full_screen_image_viewer.dart';
+import '../../../core/widgets/trip_detail_app_bar.dart';
 import '../../../models/trip_member.dart';
 import '../../../models/trip_model.dart';
+import '../../auth_and_group/presentation/widgets/trip_members_sheet.dart';
 import '../../auth_and_group/providers/auth_providers.dart';
 import '../../auth_and_group/providers/trip_providers.dart';
 import '../../auth_and_group/repository/auth_repository.dart';
@@ -257,45 +261,11 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
   }
 
   void _showProofDialog(ChecklistItem item) {
-    if (!item.hasProofPhoto) return;
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => Dialog(
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppBar(
-              title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-              automaticallyImplyLeading: false,
-              actions: [
-                IconButton(
-                  onPressed: () => Navigator.pop(dialogCtx),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 360),
-              child: Image.network(
-                item.proofImageUrl!,
-                fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.broken_image_outlined, size: 42),
-                      SizedBox(height: 8),
-                      Text('Không tải được ảnh minh chứng.'),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    if (!item.hasProofPhoto || item.proofImageUrl == null) return;
+    FullScreenImageViewer.open(
+      context,
+      imageUrl: item.proofImageUrl!,
+      title: item.title,
     );
   }
 
@@ -340,27 +310,17 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
         : ChecklistReminderHelper.groupPackingByScope(items);
 
     return Scaffold(
-      appBar: AppBar(
-        leadingWidth: 100,
-        leading: TextButton.icon(
-          onPressed: () => context.go('/trips'),
-          icon: const Icon(Icons.chevron_left, color: AppColors.onPrimaryContainer),
-          label: const Text(
-            'Chuyến đi',
-            style: TextStyle(color: AppColors.onPrimaryContainer),
-          ),
-        ),
-        title: Text(trip.title),
-        actions: [
-          IconButton(
-            tooltip: 'Thành viên & Hồ sơ',
-            icon: const Icon(Icons.group_outlined, color: AppColors.primary),
-            onPressed: () => context.push('/trip/members'),
-          ),
+      appBar: TripDetailAppBar(
+        title: trip.title,
+        onMembersPressed: () => TripMembersSheet.show(context, trip: trip),
+        extraActions: [
           IconButton(
             key: const Key('checklist_templates_button'),
             tooltip: 'Thư viện mẫu',
-            icon: const Icon(Icons.auto_awesome_outlined, color: AppColors.primary),
+            icon: Icon(
+              Icons.auto_awesome_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             onPressed: () => _showTemplatesSheet(trip),
           ),
         ],
@@ -368,17 +328,26 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('checklist_add_fab'),
         heroTag: 'checklist_fab',
-        onPressed: () => _showAddItemSheet(tripId, members, items.length),
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          _showAddItemSheet(tripId, members, items.length);
+        },
         icon: const Icon(Icons.add),
         label: const Text('Thêm việc'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       body: checklistAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const AppSkeletonLoader(),
         error: (err, _) => Center(child: Text('Không tải được checklist: $err')),
-        data: (_) => ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+        data: (_) => RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(tripChecklistProvider(tripId));
+            await Future<void>.delayed(const Duration(milliseconds: 250));
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
           children: [
             // Thẻ Countdown & 2 vòng tròn tiến độ sẵn sàng trước giờ G
             AppInsetCard(
@@ -520,9 +489,12 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
                               children: [
                                 _ChecklistItemRow(
                                   item: item,
-                                  onToggle: () => ref
-                                      .read(checklistControllerProvider.notifier)
-                                      .toggleItem(item),
+                                  onToggle: () {
+                                    HapticFeedback.lightImpact();
+                                    ref
+                                        .read(checklistControllerProvider.notifier)
+                                        .toggleItem(item);
+                                  },
                                   onCameraTap: () => _pickAndUploadProof(item),
                                   onProofTap: () => _showProofDialog(item),
                                   onAssignTap: () =>
@@ -539,7 +511,8 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
                   ),
                 ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );

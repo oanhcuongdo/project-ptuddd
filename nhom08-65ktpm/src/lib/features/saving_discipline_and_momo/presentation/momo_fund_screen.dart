@@ -9,7 +9,9 @@ import '../../../core/widgets/app_inset_card.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_section_header.dart';
 import '../../../core/widgets/app_status_badge.dart';
+import '../../../core/widgets/trip_detail_app_bar.dart';
 import '../../../models/trip_member.dart';
+import '../../auth_and_group/presentation/widgets/trip_members_sheet.dart';
 import '../models/deposit_record.dart';
 import '../models/member_streak.dart';
 import '../models/momo_fund_config.dart';
@@ -439,24 +441,10 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        leadingWidth: 120,
-        leading: TextButton.icon(
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-          ),
-          onPressed: () {
-            if (GoRouter.maybeOf(context) != null) {
-              context.go('/trips');
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
-          icon: const Icon(Icons.chevron_left, color: AppColors.onPrimaryContainer),
-          label: const Text('Chuyến đi', style: TextStyle(color: AppColors.onPrimaryContainer)),
-        ),
-        title: const Text('Quỹ MoMo'),
-        actions: [
+      appBar: TripDetailAppBar(
+        title: 'Quỹ MoMo',
+        onMembersPressed: () => TripMembersSheet.show(context),
+        extraActions: [
           IconButton(
             tooltip: 'Kế hoạch tích góp',
             icon: const Icon(Icons.event_repeat_rounded, color: AppColors.onPrimaryContainer),
@@ -528,8 +516,19 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
               ),
             ),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(momoFundStreamProvider(widget.tripId));
+                ref.invalidate(tripDepositsStreamProvider(widget.tripId));
+                ref.invalidate(tripSavingPlansStreamProvider(widget.tripId));
+                ref.invalidate(tripStreaksStreamProvider(widget.tripId));
+                ref.invalidate(tripSummaryStreamProvider(widget.tripId));
+                ref.invalidate(tripMembersStreamProvider(widget.tripId));
+                await Future<void>.delayed(const Duration(milliseconds: 250));
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
               children: [
           if (firstError != null) ...[
             AppInsetCard(
@@ -564,10 +563,12 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
             ),
             const SizedBox(height: 12),
           ],
-          // 1. Thẻ Liên kết Quỹ nhóm MoMo
+          // 1. Thẻ Liên kết Quỹ nhóm MoMo (màu MoMo chỉ nằm trong thẻ liên kết)
           AppInsetCard(
             borderRadius: 16,
             padding: const EdgeInsets.all(16),
+            backgroundColor: AppColors.momoTint,
+            borderColor: AppColors.momoContainer,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -846,6 +847,7 @@ class _MomoFundContentState extends ConsumerState<_MomoFundContent> {
           ),
         ],
       ),
+            ),
           ),
         ],
       ),

@@ -9,6 +9,8 @@ import '../../../core/widgets/app_inset_card.dart';
 import '../../../core/widgets/app_section_header.dart';
 import '../../../core/widgets/app_status_badge.dart';
 import '../../../models/trip_model.dart';
+import '../../goal_and_checklist/providers/checklist_providers.dart';
+import '../../goal_and_checklist/utils/checklist_reminder_helper.dart';
 import '../providers/auth_providers.dart';
 import '../providers/trip_providers.dart';
 import 'widgets/join_trip_qr_sheet.dart';
@@ -65,10 +67,9 @@ class _TripListScreenState extends ConsumerState<TripListScreen> {
     context.go('/trip/checklist');
   }
 
-  Future<void> _handleSignOut() async {
-    await ref.read(authControllerProvider.notifier).signOut();
-    if (mounted) {
-      context.go('/login');
+  void _openProfile() {
+    if (GoRouter.maybeOf(context) != null) {
+      context.push('/profile');
     }
   }
 
@@ -80,25 +81,31 @@ class _TripListScreenState extends ConsumerState<TripListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leadingWidth: 140,
+        leadingWidth: 148,
         leading: Padding(
           padding: const EdgeInsets.only(left: 16),
           child: InkWell(
-            onTap: _handleSignOut,
+            key: const Key('trip_list_profile_button'),
+            onTap: _openProfile,
             borderRadius: BorderRadius.circular(20),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 15,
                   backgroundColor: AppColors.primaryContainer,
-                  child: Text(
-                    user?.initials ?? 'TB',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.onPrimaryContainer,
-                    ),
-                  ),
+                  backgroundImage: user?.avatarUrl != null
+                      ? NetworkImage(user!.avatarUrl!)
+                      : null,
+                  child: user?.avatarUrl == null
+                      ? Text(
+                          user?.initials ?? 'TB',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.onPrimaryContainer,
+                          ),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -129,16 +136,16 @@ class _TripListScreenState extends ConsumerState<TripListScreen> {
             icon: const Icon(Icons.add, color: AppColors.primary, size: 26),
             onPressed: () => context.push('/trips/create'),
           ),
-          IconButton(
-            key: const Key('trip_list_logout_button'),
-            tooltip: 'Đăng xuất',
-            icon: const Icon(Icons.logout, color: AppColors.onSurfaceVariant, size: 21),
-            onPressed: _handleSignOut,
-          ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(tripListProvider);
+          await Future<void>.delayed(const Duration(milliseconds: 250));
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
         children: [
           // Ô tìm kiếm
           Container(
@@ -313,22 +320,26 @@ class _TripListScreenState extends ConsumerState<TripListScreen> {
               );
             },
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class _FeaturedTripCard extends StatelessWidget {
+class _FeaturedTripCard extends ConsumerWidget {
   const _FeaturedTripCard({required this.trip, required this.onTap});
 
   final TripModel trip;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final fundPercent = trip.fundProgress;
-    final checklistPercent = trip.checklistProgress;
+    final checklistItems = ref.watch(tripChecklistProvider(trip.id)).asData?.value;
+    final checklistPercent = checklistItems != null && checklistItems.isNotEmpty
+        ? ChecklistReminderHelper.computeReadiness(checklistItems).progress
+        : trip.checklistProgress;
     final daysLeft = trip.daysUntilStart();
     final countdownText =
         daysLeft >= 0 ? 'Còn $daysLeft ngày' : 'Đang / đã đi';

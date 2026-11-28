@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/theme/app_colors.dart';
 import '../models/place_plan.dart';
 import '../models/place_suggestion.dart';
 import '../providers/itinerary_providers.dart';
 import '../utils/schedule_conflict_helper.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AddActivityScreen extends ConsumerStatefulWidget {
   final String tripId;
@@ -12,6 +15,8 @@ class AddActivityScreen extends ConsumerStatefulWidget {
   final int dayCount;
   final double? defaultLat;
   final double? defaultLon;
+  final String? destinationName;
+
   const AddActivityScreen({
     super.key,
     required this.tripId,
@@ -20,7 +25,9 @@ class AddActivityScreen extends ConsumerStatefulWidget {
     this.dayCount = 14,
     this.defaultLat,
     this.defaultLon,
+    this.destinationName,
   });
+
   @override
   ConsumerState<AddActivityScreen> createState() => _AddActivityScreenState();
 }
@@ -34,11 +41,11 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
   );
   late final TextEditingController lat = TextEditingController(
     text:
-        '${widget.initialPlan?.latitude ?? widget.suggestion?.latitude ?? widget.defaultLat ?? 10.7769}',
+        '${widget.initialPlan?.latitude ?? widget.suggestion?.latitude ?? widget.defaultLat ?? 16.0544}',
   );
   late final TextEditingController lon = TextEditingController(
     text:
-        '${widget.initialPlan?.longitude ?? widget.suggestion?.longitude ?? widget.defaultLon ?? 106.7009}',
+        '${widget.initialPlan?.longitude ?? widget.suggestion?.longitude ?? widget.defaultLon ?? 108.2022}',
   );
   late final TextEditingController duration = TextEditingController(
     text:
@@ -60,38 +67,84 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
       widget.initialPlan?.category ??
       widget.suggestion?.category ??
       PlaceCategory.attraction;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPlan == null &&
+        widget.suggestion == null &&
+        (widget.defaultLat == null || widget.defaultLon == null) &&
+        (widget.destinationName?.trim().isNotEmpty ?? false)) {
+      Future.microtask(_resolveDefaultCoordinates);
+    }
+  }
+
+  Future<void> _resolveDefaultCoordinates() async {
+    try {
+      final coords = await ref
+          .read(placeDiscoveryRepositoryProvider)
+          .resolveDestinationCoordinates(widget.destinationName!);
+      if (coords != null && mounted) {
+        lat.text = coords.lat.toStringAsFixed(4);
+        lon.text = coords.lon.toStringAsFixed(4);
+      }
+    } catch (_) {}
+  }
+
   @override
   void dispose() {
-    for (final c in [name, address, lat, lon, duration, ticket, food])
+    for (final c in [name, address, lat, lon, duration, ticket, food]) {
       c.dispose();
+    }
     super.dispose();
   }
 
   DateTime get start => DateTime(2020, 1, 1, time.hour, time.minute);
+
   Future<void> _submit() async {
-    final old = widget.initialPlan;
-    final plan = PlacePlan(
-      id:
-          old?.id ??
-          '${widget.tripId}_${DateTime.now().microsecondsSinceEpoch}',
-      tripId: widget.tripId,
-      dayNumber: day,
-      sortOrder:
-          old?.sortOrder ??
-          ref.read(itineraryProvider(widget.tripId)).forDay(day).length,
-      placeName: name.text.trim(),
-      category: category,
-      latitude: double.tryParse(lat.text) ?? 0,
-      longitude: double.tryParse(lon.text) ?? 0,
-      address: address.text.trim(),
-      startTime: start,
-      durationMinutes: int.tryParse(duration.text) ?? 60,
-      ticketCost: double.tryParse(ticket.text) ?? 0,
-      foodCost: double.tryParse(food.text) ?? 0,
-    );
-    if (plan.placeName.isEmpty) return;
-    await ref.read(itineraryProvider(widget.tripId).notifier).save(plan);
-    if (mounted) Navigator.pop(context);
+    if (_isSaving) return;
+    final placeName = name.text.trim();
+    if (placeName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập tên địa điểm.')),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final old = widget.initialPlan;
+      final plan = PlacePlan(
+        id:
+            old?.id ??
+            '${widget.tripId}_${DateTime.now().microsecondsSinceEpoch}',
+        tripId: widget.tripId,
+        dayNumber: day,
+        sortOrder:
+            old?.sortOrder ??
+            ref.read(itineraryProvider(widget.tripId)).forDay(day).length,
+        placeName: placeName,
+        category: category,
+        latitude: double.tryParse(lat.text) ?? 0,
+        longitude: double.tryParse(lon.text) ?? 0,
+        address: address.text.trim(),
+        startTime: start,
+        durationMinutes: int.tryParse(duration.text) ?? 60,
+        ticketCost: double.tryParse(ticket.text) ?? 0,
+        foodCost: double.tryParse(food.text) ?? 0,
+      );
+      await ref.read(itineraryProvider(widget.tripId).notifier).save(plan);
+      HapticFeedback.lightImpact();
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể lưu địa điểm: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -107,6 +160,7 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
               start.isBefore(p.endTime),
         )
         .isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -126,14 +180,16 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
             decoration: const InputDecoration(labelText: 'Địa chỉ'),
           ),
           DropdownButtonFormField<PlaceCategory>(
-            value: category,
+            initialValue: category,
             decoration: const InputDecoration(labelText: 'Phân loại'),
             items: PlaceCategory.values
                 .map(
                   (c) => DropdownMenuItem(value: c, child: Text(_category(c))),
                 )
                 .toList(),
-            onChanged: (v) => setState(() => category = v!),
+            onChanged: (v) {
+              if (v != null) setState(() => category = v);
+            },
           ),
           Row(
             children: [
@@ -162,7 +218,9 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
               (i) =>
                   DropdownMenuItem(value: i + 1, child: Text('Ngày ${i + 1}')),
             ),
-            onChanged: (v) => setState(() => day = v!),
+            onChanged: (v) {
+              if (v != null) setState(() => day = v);
+            },
           ),
           ListTile(
             key: const Key('activity_start_time_tile'),
@@ -202,21 +260,21 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
           if (conflict)
             const Card(
               key: Key('activity_conflict_warning'),
-              color: Color(0xfffff3cd),
+              color: AppColors.secondaryContainer,
               child: Padding(
                 padding: EdgeInsets.all(12),
                 child: Text(
                   'Cảnh báo: khung giờ này đang trùng với một địa điểm khác trong ngày.',
-                  style: TextStyle(color: Colors.brown),
+                  style: TextStyle(color: AppColors.onSecondaryContainer),
                 ),
               ),
             ),
           const SizedBox(height: 16),
           FilledButton.icon(
             key: const Key('activity_save_button'),
-            onPressed: _submit,
+            onPressed: _isSaving ? null : _submit,
             icon: const Icon(Icons.save),
-            label: const Text('Lưu lịch trình'),
+            label: Text(_isSaving ? 'Đang lưu...' : 'Lưu lịch trình'),
           ),
         ],
       ),

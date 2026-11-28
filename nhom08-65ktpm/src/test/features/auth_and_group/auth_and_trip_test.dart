@@ -4,11 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:travel_buddy/core/utils/formatters.dart';
+import 'package:travel_buddy/core/widgets/vnd_text_field.dart';
 import 'package:travel_buddy/features/auth_and_group/presentation/login_screen.dart';
 import 'package:travel_buddy/features/auth_and_group/presentation/members_profile_screen.dart';
 import 'package:travel_buddy/features/auth_and_group/presentation/trip_list_screen.dart';
 import 'package:travel_buddy/features/auth_and_group/repository/auth_repository.dart';
 import 'package:travel_buddy/features/auth_and_group/repository/trip_repository.dart';
+import 'package:travel_buddy/main.dart';
 import 'package:travel_buddy/models/app_user.dart';
 
 void main() {
@@ -142,6 +144,53 @@ void main() {
 
       expect(find.text('Thành viên (4)'), findsOneWidget);
       expect(find.text('Đỗ Đình An'), findsOneWidget);
+    });
+
+    test('blocks Email/Password signup when email already used Google Sign-In', () async {
+      final authRepo = InMemoryAuthRepository(seedSignedIn: false);
+      expect(
+        () => authRepo.registerWithEmailAndPassword(
+          email: 'google.user@travelbuddy.vn',
+          password: 'password123',
+          displayName: 'Google User',
+        ),
+        throwsA(isA<AuthFailure>()),
+      );
+    });
+
+    test('VndThousandInputFormatter formats thousand separators cleanly', () {
+      expect(VndThousandInputFormatter.formatDigits('1080000'), '1.080.000');
+    });
+
+    testWidgets('unverified email user is redirected to VerifyEmailScreen', (tester) async {
+      final authRepo = InMemoryAuthRepository(seedSignedIn: false);
+      await authRepo.registerWithEmailAndPassword(
+        email: 'unverified@tlu.edu.vn',
+        password: 'password123',
+        displayName: 'Chưa xác thực',
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(authRepo)],
+          child: const TravelBuddyApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Xác thực Email'), findsOneWidget);
+      expect(find.byKey(const Key('verify_email_check_button')), findsOneWidget);
+    });
+
+    testWidgets('TripListScreen has no AppBar logout button and opens Profile', (tester) async {
+      await tester.pumpWidget(const ProviderScope(child: TravelBuddyApp()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('trip_list_logout_button')), findsNothing);
+      await tester.tap(find.byKey(const Key('trip_list_profile_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hồ sơ cá nhân'), findsOneWidget);
+      expect(find.byKey(const Key('profile_change_password_tile')), findsOneWidget);
     });
   });
 }

@@ -3,17 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/trip_shell_scaffold.dart';
+import '../features/auth_and_group/presentation/change_password_screen.dart';
 import '../features/auth_and_group/presentation/create_trip_qr_screen.dart';
+import '../features/auth_and_group/presentation/edit_profile_screen.dart';
+import '../features/auth_and_group/presentation/forgot_password_screen.dart';
 import '../features/auth_and_group/presentation/login_screen.dart';
 import '../features/auth_and_group/presentation/members_profile_screen.dart';
+import '../features/auth_and_group/presentation/profile_screen.dart';
+import '../features/auth_and_group/presentation/register_screen.dart';
 import '../features/auth_and_group/presentation/trip_list_screen.dart';
+import '../features/auth_and_group/presentation/verify_email_screen.dart';
 import '../features/auth_and_group/providers/auth_providers.dart';
 import '../features/auth_and_group/providers/trip_providers.dart';
 import '../features/auth_and_group/repository/auth_repository.dart';
+import '../features/budget_and_expense_cashew/models/trip_expense.dart';
 import '../features/budget_and_expense_cashew/presentation/add_expense_ocr_screen.dart';
 import '../features/budget_and_expense_cashew/presentation/budget_screen.dart';
 import '../features/budget_and_expense_cashew/presentation/expense_detail_screen.dart';
-import '../features/budget_and_expense_cashew/models/trip_expense.dart';
 import '../features/goal_and_checklist/presentation/checklist_screen.dart';
 import '../features/place_and_itinerary_planner/presentation/add_activity_screen.dart';
 import '../features/place_and_itinerary_planner/presentation/itinerary_screen.dart';
@@ -24,6 +30,12 @@ import '../features/saving_discipline_and_momo/presentation/routes.dart';
 /// Route path constants for the Travel Buddy application.
 abstract final class AppRoutes {
   static const String login = '/login';
+  static const String register = '/register';
+  static const String verifyEmail = '/verify-email';
+  static const String forgotPassword = '/forgot-password';
+  static const String profile = '/profile';
+  static const String editProfile = '/profile/edit';
+  static const String changePassword = '/profile/change-password';
   static const String trips = '/trips';
   static const String createTrip = '/trips/create';
   static const String members = '/trip/members';
@@ -41,8 +53,7 @@ class _RouterAuthNotifier extends ChangeNotifier {
   void refresh() => notifyListeners();
 }
 
-/// Provides the application's [GoRouter] instance with Firebase Auth guard
-/// and live `tripId` / `memberId` binding across all modules.
+/// Provides the application's [GoRouter] instance with Firebase Auth & Email-Verification guard.
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = _RouterAuthNotifier();
   ref.listen(authStateProvider, (_, _) => refreshNotifier.refresh());
@@ -66,12 +77,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final user =
           authAsync.asData?.value ??
           ref.read(authRepositoryProvider).currentUser;
-      final isLoggingIn = state.matchedLocation == AppRoutes.login;
+      final loc = state.matchedLocation;
+      final isPublicAuthRoute =
+          loc == AppRoutes.login ||
+          loc == AppRoutes.register ||
+          loc == AppRoutes.forgotPassword;
+      final isVerifyRoute = loc == AppRoutes.verifyEmail;
 
       if (user == null) {
-        return isLoggingIn ? null : AppRoutes.login;
+        return isPublicAuthRoute ? null : AppRoutes.login;
       }
-      if (isLoggingIn) {
+
+      if (user.isEmailPasswordUser && !user.emailVerified) {
+        return isVerifyRoute ? null : AppRoutes.verifyEmail;
+      }
+
+      if (isPublicAuthRoute || isVerifyRoute) {
         return AppRoutes.trips;
       }
       return null;
@@ -81,6 +102,38 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.login,
         name: 'login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        name: 'register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.verifyEmail,
+        name: 'verify_email',
+        builder: (context, state) => const VerifyEmailScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        name: 'forgot_password',
+        builder: (context, state) => ForgotPasswordScreen(
+          initialEmail: state.uri.queryParameters['email'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        name: 'profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        name: 'edit_profile',
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.changePassword,
+        name: 'change_password',
+        builder: (context, state) => const ChangePasswordScreen(),
       ),
       GoRoute(
         path: AppRoutes.trips,
@@ -236,6 +289,7 @@ class _LiveItineraryPage extends ConsumerWidget {
     return ItineraryScreen(
       tripId: tripId,
       dayCount: days,
+      startDate: trip?.startDate,
       destinationName: trip?.destination,
       destinationLat: trip?.destinationLat,
       destinationLng: trip?.destinationLng,

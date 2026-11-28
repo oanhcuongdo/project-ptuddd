@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_primary_button.dart';
@@ -71,6 +72,7 @@ class _SavingJournalDialogState extends State<SavingJournalDialog> {
   }
 
   void _submit() {
+    HapticFeedback.lightImpact();
     Navigator.of(context).pop(
       SavingJournalDialogResult(
         emoji: _selectedEmoji,
@@ -160,7 +162,7 @@ class _SavingJournalDialogState extends State<SavingJournalDialog> {
                 icon: widget.alreadyCheckedIn
                     ? Icons.check_rounded
                     : Icons.local_fire_department_rounded,
-                backgroundColor: AppColors.mint,
+                backgroundColor: AppColors.primary,
                 onPressed: _submit,
               ),
             ],

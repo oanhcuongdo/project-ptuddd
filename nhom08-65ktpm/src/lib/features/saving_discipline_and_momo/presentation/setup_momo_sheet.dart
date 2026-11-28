@@ -351,22 +351,7 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  TextButton(
-                    onPressed: _isSaving ? null : _saveConfig,
-                    child: _isSaving
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text(
-                            'Lưu',
-                            style: TextStyle(
-                              color: AppColors.onPrimaryContainer,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                  ),
+                  const SizedBox(width: 56),
                 ],
               ),
               const SizedBox(height: 12),
@@ -558,7 +543,7 @@ class _SetupMomoContentState extends ConsumerState<_SetupMomoContent> {
               ],
               AppPrimaryButton(
                 label: _isSaving ? 'Đang lưu...' : 'Lưu cấu hình & Liên kết MoMo',
-                backgroundColor: AppColors.momo,
+                backgroundColor: AppColors.primary,
                 onPressed: _isSaving ? null : _saveConfig,
               ),
             ],

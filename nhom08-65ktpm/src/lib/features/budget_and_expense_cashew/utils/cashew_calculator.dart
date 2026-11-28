@@ -1,22 +1,51 @@
-/// Evaluates quick arithmetic expressions for the Cashew-style amount keypad.
+/// Evaluates quick arithmetic expressions for the amount keypad.
 abstract final class CashewCalculator {
+  static final RegExp _thousandGroupRegex = RegExp(r'\.(?=\d{3}(?!\d))');
+
   /// Adds a numeric keypad value to the current expression.
   static String appendDigits(String current, String digits) {
     if (digits != '000' && !RegExp(r'^\d+$').hasMatch(digits)) {
       return current;
     }
-    if (current == '0' && digits != '000') return digits;
-    return '$current$digits';
+    final raw = stripThousandDots(current);
+    if (raw == '0' && digits != '000') return digits;
+    if (raw == '0' && digits == '000') return '0';
+    return '$raw$digits';
   }
 
   /// Removes the last digit or the trailing operator and its spacing.
   static String backspace(String current) {
-    final trimmed = current.trimRight();
+    final trimmed = stripThousandDots(current).trimRight();
     if (trimmed.isEmpty) return '';
-    if (RegExp(r'[+\-*/]$').hasMatch(trimmed)) {
+    if (RegExp(r'[+\-−*×/÷]$').hasMatch(trimmed)) {
       return trimmed.substring(0, trimmed.length - 1).trimRight();
     }
     return trimmed.substring(0, trimmed.length - 1);
+  }
+
+  /// Strips VNĐ thousand-separator dots (e.g. `1.080.000` -> `1080000`).
+  static String stripThousandDots(String expression) {
+    var result = expression;
+    while (_thousandGroupRegex.hasMatch(result)) {
+      result = result.replaceAll(_thousandGroupRegex, '');
+    }
+    return result;
+  }
+
+  /// Formats integer numbers inside [expression] with VNĐ thousand dots for display.
+  static String formatExpression(String expression) {
+    final raw = stripThousandDots(expression);
+    return raw.replaceAllMapped(RegExp(r'\d+'), (match) {
+      final digits = match.group(0)!;
+      final buf = StringBuffer();
+      for (var i = 0; i < digits.length; i++) {
+        if (i > 0 && (digits.length - i) % 3 == 0) {
+          buf.write('.');
+        }
+        buf.write(digits[i]);
+      }
+      return buf.toString();
+    });
   }
 
   /// Evaluates [expression] supporting `+`, `-`/`−`, `*`/`×`, `/`/`÷`.
@@ -24,7 +53,7 @@ abstract final class CashewCalculator {
   /// Returns `null` if [expression] is empty, syntactically invalid, or
   /// attempts division by zero.
   static double? evaluate(String expression) {
-    final normalized = expression
+    final normalized = stripThousandDots(expression)
         .replaceAll('−', '-')
         .replaceAll('×', '*')
         .replaceAll('÷', '/')
@@ -76,7 +105,7 @@ abstract final class CashewCalculator {
 
   /// Appends [operatorSymbol] (`+`, `-`, `*`, `/`) without duplicating trailing operators.
   static String appendOperator(String current, String operatorSymbol) {
-    final trimmed = current.trimRight();
+    final trimmed = stripThousandDots(current).trimRight();
     if (trimmed.isEmpty) return '';
     final normalizedOp = operatorSymbol
         .replaceAll('−', '-')
@@ -107,7 +136,6 @@ abstract final class CashewCalculator {
         continue;
       }
       if (_isOperator(ch)) {
-        // Collapse repeated operators (e.g. `100 ++ 50` -> `100 + 50`) rather than crashing.
         if (tokens.isNotEmpty && _isOperator(tokens.last)) {
           tokens[tokens.length - 1] = ch;
         } else {

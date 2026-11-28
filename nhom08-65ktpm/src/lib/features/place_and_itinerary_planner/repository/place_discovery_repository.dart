@@ -33,6 +33,8 @@ class PlaceDiscoveryRepository {
     'sài gòn': (lat: 10.7769, lon: 106.7009),
   };
 
+  bool lastSearchUsedFallback = false;
+
   /// Resolves approximate `(latitude, longitude)` for a destination name.
   Future<({double lat, double lon})?> resolveDestinationCoordinates(
     String destinationName,
@@ -73,8 +75,8 @@ class PlaceDiscoveryRepository {
   Future<List<PlaceSuggestion>> search({
     String query = '',
     PlaceCategory? category,
-    double latitude = 10.7769,
-    double longitude = 106.7009,
+    double latitude = 16.0544,
+    double longitude = 108.2022,
     String? destinationName,
   }) async {
     var targetLat = latitude;
@@ -102,7 +104,7 @@ class PlaceDiscoveryRepository {
               'data': '[out:json][timeout:15];($clauses);out center tags;',
             },
           )
-          .timeout(const Duration(seconds: 18));
+          .timeout(const Duration(seconds: 12));
       if (response.statusCode == 200) {
         final elements =
             (jsonDecode(response.body)['elements'] as List<dynamic>);
@@ -115,10 +117,20 @@ class PlaceDiscoveryRepository {
             })
             .take(50)
             .toList();
-        if (result.isNotEmpty) return result;
+        if (result.isNotEmpty) {
+          lastSearchUsedFallback = false;
+          return result;
+        }
       }
     } catch (_) {}
-    return fallback(category, query);
+    lastSearchUsedFallback = true;
+    return fallback(
+      category,
+      query,
+      destinationName: destinationName,
+      latitude: targetLat,
+      longitude: targetLon,
+    );
   }
 
   PlaceSuggestion? _fromOverpass(dynamic raw) {
@@ -144,39 +156,49 @@ class PlaceDiscoveryRepository {
     );
   }
 
-  List<PlaceSuggestion> fallback(PlaceCategory? category, String query) {
-    const items = [
+  /// Generates destination-aware offline suggestions without hardcoded city presets.
+  List<PlaceSuggestion> fallback(
+    PlaceCategory? category,
+    String query, {
+    String? destinationName,
+    double latitude = 16.0544,
+    double longitude = 108.2022,
+  }) {
+    final dest = (destinationName == null || destinationName.trim().isEmpty)
+        ? 'điểm đến'
+        : destinationName.trim();
+    final items = [
       PlaceSuggestion(
-        id: 'fallback-1',
-        name: 'Bảo tàng Chứng tích Chiến tranh',
+        id: 'fallback-attraction',
+        name: 'Điểm tham quan nổi bật $dest',
         category: PlaceCategory.attraction,
-        address: '28 Võ Văn Tần, Quận 3',
-        latitude: 10.7794,
-        longitude: 106.6922,
+        address: 'Khu vực trung tâm $dest',
+        latitude: latitude,
+        longitude: longitude,
         defaultDurationMinutes: 90,
         rating: 4.5,
       ),
       PlaceSuggestion(
-        id: 'fallback-2',
-        name: 'Chợ Bến Thành',
+        id: 'fallback-food',
+        name: 'Đặc sản địa phương $dest',
         category: PlaceCategory.food,
-        address: 'Lê Lợi, Quận 1',
-        latitude: 10.7725,
-        longitude: 106.6980,
-        defaultDurationMinutes: 90,
-        estimatedFoodCost: 120000,
-        rating: 4.2,
+        address: 'Khu ẩm thực $dest',
+        latitude: latitude + 0.004,
+        longitude: longitude + 0.004,
+        defaultDurationMinutes: 75,
+        estimatedFoodCost: 150000,
+        rating: 4.4,
       ),
       PlaceSuggestion(
-        id: 'fallback-3',
-        name: 'Khách sạn trung tâm',
+        id: 'fallback-hotel',
+        name: 'Lưu trú trung tâm $dest',
         category: PlaceCategory.hotel,
-        address: 'Quận 1, TP. Hồ Chí Minh',
-        latitude: 10.7750,
-        longitude: 106.7000,
+        address: 'Trung tâm $dest',
+        latitude: latitude - 0.003,
+        longitude: longitude - 0.003,
         defaultDurationMinutes: 30,
         estimatedFoodCost: 0,
-        rating: 4.0,
+        rating: 4.2,
       ),
     ];
     return items
@@ -184,7 +206,8 @@ class PlaceDiscoveryRepository {
           (item) =>
               (category == null || item.category == category) &&
               (query.isEmpty ||
-                  item.name.toLowerCase().contains(query.toLowerCase())),
+                  item.name.toLowerCase().contains(query.toLowerCase()) ||
+                  item.address.toLowerCase().contains(query.toLowerCase())),
         )
         .toList();
   }

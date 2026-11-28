@@ -25,7 +25,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('HŨ NGÂN SÁCH CASHEW'), findsOneWidget);
+    expect(find.text('HŨ NGÂN SÁCH'), findsOneWidget);
     expect(find.byType(BarChart), findsOneWidget);
   });
 
@@ -47,6 +47,8 @@ void main() {
     expect(find.byKey(const Key('cashew_key_C')), findsOneWidget);
     expect(find.byKey(const Key('cashew_key_+')), findsOneWidget);
     expect(find.byKey(const Key('cashew_key_−')), findsOneWidget);
+    expect(find.byKey(const Key('cashew_key_×')), findsOneWidget);
+    expect(find.byKey(const Key('cashew_key_÷')), findsOneWidget);
   });
 
   group('InMemoryBudgetRepository', () {
@@ -99,12 +101,26 @@ void main() {
         updated.singleWhere((envelope) => envelope.id == 'food').spentAmount,
         1500,
       );
+
+      await repository.settleDebt(
+        tripId: tripId,
+        settlement: const SimplifiedSettlement(
+          fromId: 'member-b',
+          fromName: 'Bình',
+          toId: 'member-a',
+          toName: 'An',
+          amount: 750,
+        ),
+      );
+      final settled = await repository.watchSettlements(tripId).first;
+      expect(settled['member-b_member-a'], isTrue);
     });
   });
 
   group('CashewCalculator keypad', () {
-    test('evaluates positive and negative entries in order', () {
+    test('evaluates positive, negative, multiply, divide and thousand dots', () {
       expect(CashewCalculator.evaluate('120000 + 30000 − 5000'), 145000);
+      expect(CashewCalculator.evaluate('1.080.000 ÷ 2 × 3'), 1620000);
     });
 
     test('appends digits and thousand shortcut then deletes safely', () {

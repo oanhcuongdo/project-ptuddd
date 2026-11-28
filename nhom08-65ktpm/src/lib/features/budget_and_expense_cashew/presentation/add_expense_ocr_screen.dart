@@ -2,18 +2,21 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../core/data/mock_trip_data.dart';
 import '../../../core/services/supabase_storage_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_inset_card.dart';
 import '../../../core/widgets/app_section_header.dart';
 import '../../../core/widgets/app_segmented_control.dart';
+import '../../../core/widgets/full_screen_image_viewer.dart';
+import '../../../core/widgets/vnd_text_field.dart';
 import '../../../models/trip_member.dart';
 import '../../auth_and_group/providers/auth_providers.dart';
 import '../../auth_and_group/providers/trip_providers.dart';
@@ -68,6 +71,12 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
     return value.round();
   }
 
+  void _setFormattedAmountExpression(String raw) {
+    final formatted = CashewCalculator.formatExpression(raw);
+    _amountCtrl.text = formatted;
+    _amountCtrl.selection = TextSelection.collapsed(offset: formatted.length);
+  }
+
   Future<void> _scanReceipt() async {
     if (kIsWeb ||
         (defaultTargetPlatform != TargetPlatform.android &&
@@ -78,16 +87,17 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (context) => SafeArea(
-        child: Wrap(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text('Chụp ảnh hóa đơn'),
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Chụp hóa đơn bằng Camera'),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Chọn ảnh từ thư viện'),
+              title: const Text('Chọn ảnh hóa đơn từ Thư viện'),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
           ],
@@ -100,29 +110,27 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
     TextRecognizer? recognizer;
     try {
       final image = await _picker.pickImage(source: source, imageQuality: 85);
-      if (image == null) return;
-
+      if (image == null || !mounted) return;
       recognizer = TextRecognizer(script: TextRecognitionScript.latin);
       final recognized = await recognizer.processImage(
         InputImage.fromFilePath(image.path),
       );
-      final rawText = recognized.text;
-      final amount = ReceiptAmountParser.extractAmount(rawText);
-      if (amount == null) {
-        _showMessage('Không tìm thấy số tiền trên hóa đơn. Hãy nhập thủ công.');
-        return;
-      }
+      if (!mounted) return;
 
+      final amount = ReceiptAmountParser.extractAmount(recognized.text);
       setState(() {
         _receiptPath = image.path;
-        _ocrRawText = rawText;
+        _ocrRawText = recognized.text;
         _ocrDetectedAmount = amount;
-        _amountCtrl.text = amount.toString();
-        _amountCtrl.selection = TextSelection.collapsed(
-          offset: _amountCtrl.text.length,
-        );
+        if (amount != null) {
+          _setFormattedAmountExpression(amount.toString());
+        }
       });
-      _showMessage('Đã nhận diện ${MockTripData.formatVnd(amount)}.');
+      _showMessage(
+        amount == null
+            ? 'Đã đính kèm ảnh nhưng chưa tìm thấy tổng tiền.'
+            : 'Đã nhận diện ${AppFormatters.formatVnd(amount)}.',
+      );
     } catch (error) {
       _showMessage('Không thể quét hóa đơn: $error');
     } finally {
@@ -136,9 +144,8 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
       setState(_amountCtrl.clear);
     } else if (keyValue == '⌫') {
       setState(() {
-        _amountCtrl.text = CashewCalculator.backspace(_amountCtrl.text);
-        _amountCtrl.selection = TextSelection.collapsed(
-          offset: _amountCtrl.text.length,
+        _setFormattedAmountExpression(
+          CashewCalculator.backspace(_amountCtrl.text),
         );
       });
     } else if (keyValue == '=') {
@@ -147,36 +154,29 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
         _showMessage('Biểu thức tính tiền không hợp lệ.');
         return;
       }
-      setState(() => _amountCtrl.text = result.round().toString());
-    } else if (keyValue == '+' || keyValue == '−') {
+      setState(() => _setFormattedAmountExpression(result.round().toString()));
+    } else if (keyValue == '+' ||
+        keyValue == '−' ||
+        keyValue == '×' ||
+        keyValue == '÷') {
       setState(() {
-        _amountCtrl.text = CashewCalculator.appendOperator(
-          _amountCtrl.text,
-          keyValue,
-        );
-        _amountCtrl.selection = TextSelection.collapsed(
-          offset: _amountCtrl.text.length,
+        _setFormattedAmountExpression(
+          CashewCalculator.appendOperator(_amountCtrl.text, keyValue),
         );
       });
     } else {
       setState(() {
-        _amountCtrl.text = CashewCalculator.appendDigits(
-          _amountCtrl.text,
-          keyValue,
-        );
-        _amountCtrl.selection = TextSelection.collapsed(
-          offset: _amountCtrl.text.length,
+        _setFormattedAmountExpression(
+          CashewCalculator.appendDigits(_amountCtrl.text, keyValue),
         );
       });
     }
   }
 
   void _addQuickAmount(int amount) {
+    HapticFeedback.lightImpact();
     setState(() {
-      _amountCtrl.text = (_parsedAmount + amount).toString();
-      _amountCtrl.selection = TextSelection.collapsed(
-        offset: _amountCtrl.text.length,
-      );
+      _setFormattedAmountExpression((_parsedAmount + amount).toString());
     });
   }
 
@@ -265,19 +265,19 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
         createdBy: memberId,
         createdAt: DateTime.now(),
       );
+
       await ref
           .read(budgetControllerProvider)
           .addExpense(tripId: tripId, expense: expense);
-      if (mounted) context.pop();
+      if (!mounted) return;
+      context.pop();
     } catch (error) {
       if (uploadedReceipt && receiptStoragePath != null) {
         try {
           await ref
               .read(supabaseStorageServiceProvider)
               .deleteFile(receiptStoragePath);
-        } catch (cleanupError) {
-          debugPrint('Receipt cleanup failed: $cleanupError');
-        }
+        } catch (_) {}
       }
       _showMessage('Không thể lưu khoản chi: $error');
     } finally {
@@ -292,10 +292,18 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
       _selectionCustomized = false;
     }
     _selectionTripId = ref.read(currentTripIdProvider);
-    if (!_selectionCustomized) {
+    if (!_selectionCustomized && _selectedMemberIds.isEmpty) {
       return members.map((member) => member.id).toSet();
     }
     return _selectedMemberIds;
+  }
+
+  int _customAllocatedSum(List<_ExpenseMember> selectedMembers) {
+    var sum = 0;
+    for (final member in selectedMembers) {
+      sum += AppFormatters.parseVnd(_customSplitControllers[member.id]?.text ?? '');
+    }
+    return sum;
   }
 
   Map<String, int>? _buildSplitDetails(
@@ -312,10 +320,10 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
     }
     final details = <String, int>{};
     for (final member in members) {
-      final value = int.tryParse(
-        _customSplitControllers[member.id]?.text.replaceAll('.', '') ?? '',
+      final value = AppFormatters.parseVnd(
+        _customSplitControllers[member.id]?.text ?? '',
       );
-      if (value == null || value < 0) return null;
+      if (value < 0) return null;
       details[member.id] = value;
     }
     final total = details.values.fold<int>(0, (sum, value) => sum + value);
@@ -336,9 +344,7 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
     if (currentUserId != null) {
       return [_ExpenseMember(id: currentUserId, name: 'Tôi')];
     }
-    return MockTripData.members
-        .map((member) => _ExpenseMember(id: member.id, name: member.name))
-        .toList();
+    return const [_ExpenseMember(id: 'self', name: 'Tôi')];
   }
 
   @override
@@ -353,7 +359,7 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
     final members = _membersFromTrip(tripMembers, currentUser?.uid);
     final activeMember = members.where((item) => item.id == currentUser?.uid);
     final payer = activeMember.isNotEmpty ? activeMember.first : members.first;
-    final targetBudget = trip?.targetBudget ?? MockTripData.totalTargetFund;
+    final targetBudget = trip?.targetBudget ?? 0;
     final envelopeAsync = ref.watch(
       budgetEnvelopeStreamProvider(
         BudgetStreamParams(
@@ -367,13 +373,23 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
     _selectedEnvelopeId ??= envelopes
         .where((envelope) => envelope.id == 'food')
         .firstOrNull
-        ?.id;
+        ?.id ??
+        envelopes.firstOrNull?.id;
 
     final selectedIds = _effectiveMemberIds(members);
-    final selectedCount = members
-        .where((m) => selectedIds.contains(m.id))
-        .length;
-    final perPerson = selectedCount == 0 ? 0 : _parsedAmount ~/ selectedCount;
+    final selectedMembers =
+        members.where((m) => selectedIds.contains(m.id)).toList();
+    final selectedCount = selectedMembers.length;
+    final totalAmount = _parsedAmount;
+    final perPerson = selectedCount == 0 ? 0 : totalAmount ~/ selectedCount;
+    final allocatedSum =
+        _isCustomSplit ? _customAllocatedSum(selectedMembers) : totalAmount;
+    final diff = totalAmount - allocatedSum;
+    final canSave =
+        !_isSaving &&
+        totalAmount > 0 &&
+        selectedCount > 0 &&
+        (!_isCustomSplit || allocatedSum == totalAmount);
 
     return Scaffold(
       appBar: AppBar(
@@ -389,25 +405,27 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
         actions: [
           TextButton(
             key: const Key('cashew_save_button'),
-            onPressed: _isSaving
-                ? null
-                : () => _saveExpense(
+            onPressed: canSave
+                ? () => _saveExpense(
                     tripId: tripId,
                     memberId: payer.id,
                     memberName: payer.name,
                     members: members,
                     envelopes: envelopes,
-                  ),
+                  )
+                : null,
             child: _isSaving
                 ? const SizedBox(
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text(
+                : Text(
                     'Lưu',
                     style: TextStyle(
-                      color: AppColors.onPrimaryContainer,
+                      color: canSave
+                          ? AppColors.onPrimaryContainer
+                          : AppColors.outline,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -441,12 +459,53 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
             ),
           ),
           if (_receiptPath != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Đã đính kèm ảnh hóa đơn • OCR: ${MockTripData.formatVnd(_ocrDetectedAmount ?? 0)}',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.onSurfaceVariant,
+            const SizedBox(height: 10),
+            AppInsetCard(
+              padding: const EdgeInsets.all(10),
+              child: InkWell(
+                onTap: () => FullScreenImageViewer.open(
+                  context,
+                  filePath: _receiptPath,
+                  title: 'Ảnh hóa đơn OCR',
+                ),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        File(_receiptPath!),
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Ảnh hóa đơn đã quét',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            _ocrDetectedAmount != null
+                                ? 'OCR nhận diện: ${AppFormatters.formatVnd(_ocrDetectedAmount!)} • Chạm để xem lớn'
+                                : 'Chạm để xem ảnh hóa đơn',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.zoom_in, color: AppColors.primary),
+                  ],
+                ),
               ),
             ),
           ],
@@ -475,11 +534,11 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
                   ),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
-                    hintText: '0',
+                    hintText: '0 đ',
                   ),
                 ),
                 Text(
-                  MockTripData.formatVnd(_parsedAmount),
+                  AppFormatters.formatVnd(totalAmount).replaceAll('đ', ' đ'),
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.onSurfaceVariant,
@@ -545,6 +604,7 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
                     controller: _titleCtrl,
                     decoration: const InputDecoration(
                       labelText: 'Nội dung khoản chi',
+                      hintText: 'VD: Ăn tối, vé tham quan...',
                       border: InputBorder.none,
                     ),
                   ),
@@ -592,22 +652,57 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
             onChanged: (index) {
               setState(() {
                 _isCustomSplit = index == 1;
+                if (!_isCustomSplit && _selectedMemberIds.isEmpty) {
+                  _selectionCustomized = false;
+                  _selectedMemberIds.addAll(members.map((m) => m.id));
+                }
+                final activeIds = _effectiveMemberIds(members);
                 final selected = members
-                    .where((member) => selectedIds.contains(member.id))
+                    .where((member) => activeIds.contains(member.id))
                     .toList();
                 if (_isCustomSplit && selected.isNotEmpty) {
-                  final base = _parsedAmount ~/ selected.length;
-                  var remainder = _parsedAmount % selected.length;
+                  final base = totalAmount ~/ selected.length;
+                  var remainder = totalAmount % selected.length;
                   for (final member in selected) {
+                    final share = base + (remainder-- > 0 ? 1 : 0);
                     _customSplitControllers
                         .putIfAbsent(member.id, () => TextEditingController())
-                        .text = (base + (remainder-- > 0 ? 1 : 0))
-                        .toString();
+                        .text = share > 0
+                        ? VndThousandInputFormatter.formatDigits(
+                            share.toString(),
+                          )
+                        : '';
                   }
                 }
               });
             },
           ),
+          if (_isCustomSplit) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: diff == 0
+                    ? AppColors.mintContainer
+                    : AppColors.secondaryContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                diff == 0
+                    ? 'Đã phân bổ ${AppFormatters.formatVnd(allocatedSum)} / ${AppFormatters.formatVnd(totalAmount)} — Khớp 100%'
+                    : diff > 0
+                    ? 'Đã phân bổ ${AppFormatters.formatVnd(allocatedSum)} / ${AppFormatters.formatVnd(totalAmount)} — còn thiếu ${AppFormatters.formatVnd(diff)}'
+                    : 'Đã phân bổ ${AppFormatters.formatVnd(allocatedSum)} / ${AppFormatters.formatVnd(totalAmount)} — thừa ${AppFormatters.formatVnd(-diff)}',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: diff == 0
+                      ? AppColors.onMintContainer
+                      : AppColors.onSecondaryContainer,
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           AppInsetCard(
             child: Column(
@@ -622,31 +717,40 @@ class _AddExpenseOcrScreenState extends ConsumerState<AddExpenseOcrScreen> {
                         title: Text(members[index].name),
                         secondary: _isCustomSplit
                             ? SizedBox(
-                                width: 100,
-                                child: TextField(
+                                width: 124,
+                                child: VndTextField(
                                   key: Key('cashew_split_${members[index].id}'),
+                                  enabled: selectedIds.contains(
+                                    members[index].id,
+                                  ),
                                   controller: _customSplitControllers
                                       .putIfAbsent(
                                         members[index].id,
                                         () => TextEditingController(
-                                          text: perPerson.toString(),
+                                          text: perPerson > 0
+                                              ? VndThousandInputFormatter.formatDigits(
+                                                  perPerson.toString(),
+                                                )
+                                              : '',
                                         ),
                                       ),
-                                  keyboardType: TextInputType.number,
                                   textAlign: TextAlign.end,
-                                  decoration: const InputDecoration(
-                                    suffixText: 'đ',
-                                    isDense: true,
-                                  ),
+                                  border: const UnderlineInputBorder(),
+                                  onChanged: (_) => setState(() {}),
                                 ),
                               )
                             : Text(
                                 selectedIds.contains(members[index].id)
-                                    ? MockTripData.formatVnd(perPerson)
+                                    ? AppFormatters.formatVnd(perPerson)
                                     : '0đ',
                                 style: AppTheme.monoAmount(fontSize: 14),
                               ),
                         onChanged: (selected) => setState(() {
+                          if (!_selectionCustomized) {
+                            _selectedMemberIds.addAll(
+                              members.map((member) => member.id),
+                            );
+                          }
                           _selectionCustomized = true;
                           if (selected == true) {
                             _selectedMemberIds.add(members[index].id);

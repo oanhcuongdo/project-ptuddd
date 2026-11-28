@@ -70,9 +70,9 @@ class FirestoreItineraryRepository implements ItineraryRepository {
   Future<void> _syncTotalPlannedCost(String tripId) async {
     try {
       final snap = await _collection(tripId).get();
-      final total = snap.docs.fold<double>(0.0, (sum, doc) {
+      final total = snap.docs.fold<double>(0.0, (total, doc) {
         final plan = PlacePlan.fromMap(doc.data(), id: doc.id);
-        return sum + plan.totalEstimatedCost;
+        return total + plan.totalEstimatedCost;
       });
       await _tripDoc(tripId).update({
         'totalPlannedItineraryCost': total.round(),

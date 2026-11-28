@@ -13,6 +13,8 @@ _AppUser _$AppUserFromJson(Map<String, dynamic> json) => _AppUser(
   avatarUrl: json['avatarUrl'] as String?,
   avatarStoragePath: json['avatarStoragePath'] as String?,
   phoneNumber: json['phoneNumber'] as String?,
+  authProvider: json['authProvider'] as String? ?? 'email',
+  emailVerified: json['emailVerified'] as bool? ?? true,
   tripIds:
       (json['tripIds'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const <String>[],
@@ -27,6 +29,8 @@ Map<String, dynamic> _$AppUserToJson(_AppUser instance) => <String, dynamic>{
   'avatarUrl': instance.avatarUrl,
   'avatarStoragePath': instance.avatarStoragePath,
   'phoneNumber': instance.phoneNumber,
+  'authProvider': instance.authProvider,
+  'emailVerified': instance.emailVerified,
   'tripIds': instance.tripIds,
   'createdAt': const TimestampConverter().toJson(instance.createdAt),
   'updatedAt': const TimestampConverter().toJson(instance.updatedAt),

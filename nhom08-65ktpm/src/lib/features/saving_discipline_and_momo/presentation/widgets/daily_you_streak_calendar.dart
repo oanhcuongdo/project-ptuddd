@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -79,6 +80,7 @@ class _DailyYouStreakCalendarState
     bool alreadyCheckedIn = false,
   }) async {
     if (_isCheckingIn) return;
+    HapticFeedback.lightImpact();
     final result = await showDialog<SavingJournalDialogResult>(
       context: context,
       builder: (_) => SavingJournalDialog(

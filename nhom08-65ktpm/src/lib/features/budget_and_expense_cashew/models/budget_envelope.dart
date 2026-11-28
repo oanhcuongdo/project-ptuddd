@@ -25,7 +25,7 @@ class BudgetEnvelope {
 
   Color get color {
     final value = int.tryParse(colorHex.replaceFirst('#', ''), radix: 16);
-    return value == null ? const Color(0xFF007AFF) : Color(0xFF000000 | value);
+    return value == null ? const Color(0xFF0F766E) : Color(0xFF000000 | value);
   }
 
   factory BudgetEnvelope.fromFirestore(String id, Map<String, dynamic> data) {
@@ -34,7 +34,7 @@ class BudgetEnvelope {
       category: data['category'] as String? ?? id,
       name: data['name'] as String? ?? id,
       iconCode: data['iconCode'] as String? ?? 'account_balance_wallet',
-      colorHex: data['colorHex'] as String? ?? '#007AFF',
+      colorHex: data['colorHex'] as String? ?? '#0F766E',
       allocatedAmount: (data['allocatedAmount'] as num?)?.round() ?? 0,
       plannedFromItinerary:
           (data['plannedFromItinerary'] as num?)?.round() ?? 0,
@@ -58,42 +58,42 @@ class BudgetEnvelope {
       id: 'transport',
       name: 'Di chuyển',
       iconCode: 'directions_car',
-      colorHex: '#007AFF',
+      colorHex: '#0F766E',
       weight: 19,
     ),
     _EnvelopeDefault(
       id: 'accommodation',
       name: 'Lưu trú',
       iconCode: 'hotel',
-      colorHex: '#5856D6',
+      colorHex: '#0284C7',
       weight: 38,
     ),
     _EnvelopeDefault(
       id: 'food',
       name: 'Ăn uống',
       iconCode: 'restaurant',
-      colorHex: '#FF9500',
+      colorHex: '#EA580C',
       weight: 28,
     ),
     _EnvelopeDefault(
       id: 'tickets',
       name: 'Vé',
       iconCode: 'confirmation_number',
-      colorHex: '#34C759',
+      colorHex: '#10B981',
       weight: 9,
     ),
     _EnvelopeDefault(
       id: 'shopping',
       name: 'Mua sắm',
       iconCode: 'shopping_bag',
-      colorHex: '#A50064',
+      colorHex: '#D97706',
       weight: 2,
     ),
     _EnvelopeDefault(
       id: 'contingency',
       name: 'Dự phòng',
       iconCode: 'shield',
-      colorHex: '#6C6C70',
+      colorHex: '#64748B',
       weight: 4,
     ),
   ];

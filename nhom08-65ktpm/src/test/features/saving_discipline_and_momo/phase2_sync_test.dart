@@ -299,7 +299,9 @@ void main() {
       await tester.tap(find.text('Theo ngày'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Lưu'));
+      final saveBtn = find.text('Lưu cấu hình & Liên kết MoMo');
+      await tester.ensureVisible(saveBtn);
+      await tester.tap(saveBtn);
       await tester.pumpAndSettle();
 
       final saved = await repo.getFundConfig(tripId);
@@ -474,7 +476,9 @@ void main() {
       expect(find.text('Đã nhận diện mã QR Quỹ nhóm MoMo'), findsOneWidget);
       expect(find.textContaining('2.000.000đ/tháng'), findsOneWidget);
 
-      await tester.tap(find.text('Lưu'));
+      final saveBtn = find.text('Lưu cấu hình & Liên kết MoMo');
+      await tester.ensureVisible(saveBtn);
+      await tester.tap(saveBtn);
       await tester.pumpAndSettle();
 
       final saved = await repo.getFundConfig(tripId);

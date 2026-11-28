@@ -26,11 +26,13 @@ class ItineraryState {
   final List<PlacePlan> plans;
   final List<PlaceSuggestion> suggestions;
   final bool loading;
+  final bool usedFallbackSuggestions;
   final String? error;
   const ItineraryState({
     this.plans = const [],
     this.suggestions = const [],
     this.loading = false,
+    this.usedFallbackSuggestions = false,
     this.error,
   });
   List<PlacePlan> forDay(int day) =>
@@ -57,6 +59,7 @@ class ItineraryNotifier extends Notifier<ItineraryState> {
           plans: plans,
           suggestions: state.suggestions,
           loading: false,
+          usedFallbackSuggestions: state.usedFallbackSuggestions,
         );
       },
       onError: (Object error, StackTrace stackTrace) {
@@ -64,6 +67,7 @@ class ItineraryNotifier extends Notifier<ItineraryState> {
           plans: state.plans,
           suggestions: state.suggestions,
           loading: false,
+          usedFallbackSuggestions: state.usedFallbackSuggestions,
           error: error.toString(),
         );
       },
@@ -84,8 +88,18 @@ class ItineraryNotifier extends Notifier<ItineraryState> {
   }
 
   Future<void> reorder(int day, int oldIndex, int newIndex) async {
+    final adjustedNew = newIndex > oldIndex ? newIndex - 1 : newIndex;
+    await reorderAdjusted(day, oldIndex, adjustedNew);
+  }
+
+  Future<void> reorderAdjusted(int day, int oldIndex, int newIndex) async {
     final list = state.forDay(day);
-    if (newIndex > oldIndex) newIndex--;
+    if (oldIndex < 0 ||
+        oldIndex >= list.length ||
+        newIndex < 0 ||
+        newIndex >= list.length) {
+      return;
+    }
     final item = list.removeAt(oldIndex);
     list.insert(newIndex, item);
     final updated = [
@@ -97,24 +111,39 @@ class ItineraryNotifier extends Notifier<ItineraryState> {
   Future<void> searchSuggestions({
     String query = '',
     PlaceCategory? category,
-    double latitude = 10.7769,
-    double longitude = 106.7009,
+    double latitude = 16.0544,
+    double longitude = 108.2022,
     String? destinationName,
   }) async {
     state = ItineraryState(
       plans: state.plans,
       suggestions: state.suggestions,
       loading: true,
+      usedFallbackSuggestions: state.usedFallbackSuggestions,
     );
-    final items = await ref
-        .read(placeDiscoveryRepositoryProvider)
-        .search(
-          query: query,
-          category: category,
-          latitude: latitude,
-          longitude: longitude,
-          destinationName: destinationName,
-        );
-    state = ItineraryState(plans: state.plans, suggestions: items);
+    try {
+      final discovery = ref.read(placeDiscoveryRepositoryProvider);
+      final items = await discovery.search(
+        query: query,
+        category: category,
+        latitude: latitude,
+        longitude: longitude,
+        destinationName: destinationName,
+      );
+      state = ItineraryState(
+        plans: state.plans,
+        suggestions: items,
+        loading: false,
+        usedFallbackSuggestions: discovery.lastSearchUsedFallback,
+      );
+    } catch (e) {
+      state = ItineraryState(
+        plans: state.plans,
+        suggestions: state.suggestions,
+        loading: false,
+        usedFallbackSuggestions: true,
+        error: e.toString(),
+      );
+    }
   }
 }

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/data/mock_trip_data.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_inset_card.dart';
 import '../../../core/widgets/app_section_header.dart';
+import '../../../core/widgets/full_screen_image_viewer.dart';
 import '../../auth_and_group/providers/trip_providers.dart';
 import '../models/trip_expense.dart';
 
@@ -17,25 +19,33 @@ class ExpenseDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mock = MockTripData.expenses.first;
+    final currentExpense = expense;
+    if (currentExpense == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Chi tiết khoản chi')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: AppEmptyState(
+              icon: Icons.receipt_long_outlined,
+              title: 'Không tìm thấy khoản chi',
+              subtitle: 'Hãy chọn một khoản chi từ danh sách hoặc thêm hóa đơn mới.',
+              actionLabel: 'Thêm khoản chi',
+              onAction: () => context.push('/trip/budget/add'),
+            ),
+          ),
+        ),
+      );
+    }
+
     final members =
         ref.watch(currentTripMembersProvider).asData?.value ?? const [];
     final memberNames = {
       for (final member in members) member.userId: member.displayName,
     };
-    final title = expense?.title ?? mock.title;
-    final amount = expense?.amount ?? mock.amount;
-    final category = expense?.category ?? mock.category;
-    final paidBy = expense?.paidByName ?? mock.payerName;
-    final splitDetails =
-        expense?.splitDetails ??
-        {
-          for (final member in MockTripData.members)
-            member.id: (mock.amount / MockTripData.members.length).round(),
-        };
-    final splitEntries = splitDetails.entries.toList();
-    final receiptUrl = expense?.receiptImageUrl;
-    final spentAt = expense?.spentAt;
+    final splitEntries = currentExpense.splitDetails.entries.toList();
+    final receiptUrl = currentExpense.receiptImageUrl;
+    final spentAt = currentExpense.spentAt;
 
     return Scaffold(
       appBar: AppBar(
@@ -66,49 +76,59 @@ class ExpenseDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                ClipRRect(
+                InkWell(
                   borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    height: 150,
-                    width: double.infinity,
-                    child: receiptUrl == null
-                        ? const ColoredBox(
-                            color: AppColors.surfaceContainerLow,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.receipt_long,
-                                  size: 42,
-                                  color: AppColors.primary,
-                                ),
-                                SizedBox(height: 6),
-                                Text(
-                                  'Chưa có ảnh hóa đơn',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.onSurfaceVariant,
+                  onTap: receiptUrl == null
+                      ? null
+                      : () => FullScreenImageViewer.open(
+                          context,
+                          imageUrl: receiptUrl,
+                          title: currentExpense.title,
+                        ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 150,
+                      width: double.infinity,
+                      child: receiptUrl == null
+                          ? const ColoredBox(
+                              color: AppColors.surfaceContainerLow,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.receipt_long,
+                                    size: 42,
+                                    color: AppColors.primary,
                                   ),
+                                  SizedBox(height: 6),
+                                  Text(
+                                    'Chưa có ảnh hóa đơn',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Image.network(
+                              receiptUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => const Center(
+                                child: Icon(
+                                  Icons.broken_image_outlined,
+                                  size: 42,
+                                  color: AppColors.onSurfaceVariant,
                                 ),
-                              ],
-                            ),
-                          )
-                        : Image.network(
-                            receiptUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => const Center(
-                              child: Icon(
-                                Icons.broken_image_outlined,
-                                size: 42,
-                                color: AppColors.onSurfaceVariant,
                               ),
                             ),
-                          ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  title,
+                  currentExpense.title,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -116,11 +136,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  spentAt == null
-                      ? 'Hạng mục: $category'
-                      : '${spentAt.day.toString().padLeft(2, '0')}/'
-                            '${spentAt.month.toString().padLeft(2, '0')}/'
-                            '${spentAt.year} • $category',
+                  '${AppFormatters.formatDate(spentAt)} • ${currentExpense.category}',
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.onSurfaceVariant,
@@ -128,13 +144,13 @@ class ExpenseDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  MockTripData.formatVnd(amount),
+                  AppFormatters.formatVnd(currentExpense.amount),
                   style: AppTheme.monoAmount(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                if (expense?.isOcrScanned == true)
+                if (currentExpense.isOcrScanned)
                   const Padding(
                     padding: EdgeInsets.only(top: 6),
                     child: Chip(
@@ -154,7 +170,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                 ListTile(
                   title: const Text('Người trả'),
                   trailing: Text(
-                    paidBy,
+                    currentExpense.paidByName,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -162,7 +178,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                 ListTile(
                   title: const Text('Nguồn tiền'),
                   trailing: Text(
-                    expense?.paymentSource == 'group_fund'
+                    currentExpense.paymentSource == 'group_fund'
                         ? 'Quỹ chung'
                         : 'Chi hộ / ứng trước',
                     style: const TextStyle(fontWeight: FontWeight.w600),
@@ -172,7 +188,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                 ListTile(
                   title: const Text('Hũ ngân sách'),
                   trailing: Text(
-                    category,
+                    currentExpense.category,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -193,7 +209,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                               splitEntries[index].key,
                         ),
                         trailing: Text(
-                          MockTripData.formatVnd(splitEntries[index].value),
+                          AppFormatters.formatVnd(splitEntries[index].value),
                           style: AppTheme.monoAmount(),
                         ),
                       ),
@@ -204,12 +220,12 @@ class ExpenseDetailScreen extends ConsumerWidget {
               ],
             ),
           ),
-          if (expense?.note?.isNotEmpty == true) ...[
+          if (currentExpense.note?.isNotEmpty == true) ...[
             const SizedBox(height: 20),
             const AppSectionHeader(title: 'Ghi chú'),
             AppInsetCard(
               padding: const EdgeInsets.all(16),
-              child: Text(expense!.note!),
+              child: Text(currentExpense.note!),
             ),
           ],
         ],

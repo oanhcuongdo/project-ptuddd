@@ -29,6 +29,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // 1.1 Ánh xạ email -> phương thức đăng nhập (chặn trùng Google Sign-In / Email)
+    match /user_emails/{emailId} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid;
+      allow delete: if false;
+    }
+
     // 2. Tra cứu mã mời QR
     match /invite_codes/{code} {
       allow get: if isSignedIn();

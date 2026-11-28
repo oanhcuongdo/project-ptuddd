@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// Theme dùng chung cho cả 5 thư mục features.
-/// Mọi màn hình chỉ sử dụng AppTheme / AppColors để đảm bảo đồng bộ 100%.
+/// Theme dùng chung cho cả 5 thư mục features (Coastal Teal & Sunset Terracotta).
 class AppTheme {
   AppTheme._();
 
@@ -44,6 +43,16 @@ class AppTheme {
           letterSpacing: -0.2,
         ),
         surfaceTintColor: Colors.transparent,
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+        ),
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.outlineVariantSoft,
@@ -98,7 +107,7 @@ class AppTheme {
     );
   }
 
-  /// Style số tiền tabular-nums (tương đương font-mono tabular-nums trong Stitch)
+  /// Style số tiền tabular-nums dùng thống nhất trên các màn tài chính.
   static TextStyle monoAmount({
     double fontSize = 15,
     FontWeight fontWeight = FontWeight.w600,

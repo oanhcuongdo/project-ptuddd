@@ -28,7 +28,7 @@ class AppSectionHeader extends StatelessWidget {
               color: AppColors.onSurfaceVariant,
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );

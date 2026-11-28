@@ -52,7 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
     if (user != null) {
-      context.go('/trips');
+      context.go(user.emailVerified ? '/trips' : '/verify-email');
     }
   }
 
@@ -71,37 +71,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Future<void> _handleForgotPassword() async {
+  void _openForgotPassword() {
     final email = _emailController.text.trim();
-    if (email.isEmpty) {
-      _showMessage('Vui lòng nhập Email của bạn trước khi đặt lại mật khẩu.');
-      return;
-    }
-    final sent =
-        await ref.read(authControllerProvider.notifier).sendPasswordReset(email);
-    if (!mounted) return;
-
-    final authState = ref.read(authControllerProvider);
-    if (!sent || authState.hasError) {
-      _showMessage(authState.error?.toString() ?? 'Không thể gửi email đặt lại.');
-      return;
-    }
-    _showMessage('Đã gửi email đặt lại mật khẩu tới $email.');
+    context.push(
+      email.isEmpty
+          ? '/forgot-password'
+          : '/forgot-password?email=${Uri.encodeComponent(email)}',
+    );
   }
 
-  Future<void> _openRegisterSheet() async {
-    final registered = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _RegisterAccountSheet(),
-    );
-    if (registered == true && mounted) {
-      context.go('/trips');
-    }
+  void _openRegisterPage() {
+    context.push('/register');
   }
 
   void _showMessage(String message) {
@@ -250,7 +230,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: isLoading ? null : _handleForgotPassword,
+                            onPressed: isLoading ? null : _openForgotPassword,
                             child: const Text(
                               'Quên mật khẩu?',
                               style: TextStyle(
@@ -309,7 +289,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           GestureDetector(
-                            onTap: isLoading ? null : _openRegisterSheet,
+                            onTap: isLoading ? null : _openRegisterPage,
                             child: const Text(
                               'Đăng ký ngay',
                               style: TextStyle(
@@ -328,146 +308,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _RegisterAccountSheet extends ConsumerStatefulWidget {
-  const _RegisterAccountSheet();
-
-  @override
-  ConsumerState<_RegisterAccountSheet> createState() =>
-      _RegisterAccountSheetState();
-}
-
-class _RegisterAccountSheetState extends ConsumerState<_RegisterAccountSheet> {
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  final _confirmCtrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
-    _confirmCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submitRegister() async {
-    final name = _nameCtrl.text.trim();
-    final email = _emailCtrl.text.trim();
-    final pass = _passwordCtrl.text;
-    final confirm = _confirmCtrl.text;
-
-    if (name.isEmpty || email.isEmpty || pass.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng điền đầy đủ thông tin.')),
-      );
-      return;
-    }
-    if (pass.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mật khẩu cần tối thiểu 6 ký tự.')),
-      );
-      return;
-    }
-    if (pass != confirm) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mật khẩu xác nhận không khớp.')),
-      );
-      return;
-    }
-
-    final user = await ref.read(authControllerProvider.notifier).registerWithEmail(
-          email: email,
-          password: pass,
-          displayName: name,
-        );
-    if (!mounted) return;
-
-    final state = ref.read(authControllerProvider);
-    if (state.hasError || user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.error?.toString() ?? 'Đăng ký thất bại.')),
-      );
-      return;
-    }
-    Navigator.of(context).pop(true);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isLoading = ref.watch(authControllerProvider).isLoading;
-
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Đăng ký tài khoản',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _nameCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Họ và tên',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _emailCtrl,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _passwordCtrl,
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Mật khẩu (>= 6 ký tự)',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _confirmCtrl,
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Nhập lại mật khẩu',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          AppPrimaryButton(
-            label: isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản',
-            onPressed: isLoading ? null : _submitRegister,
-          ),
-        ],
       ),
     );
   }
