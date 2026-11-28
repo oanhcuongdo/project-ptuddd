@@ -49,6 +49,7 @@ class _ChatRoomViewState extends State<ChatRoomView> {
   late final ChatProvider _chatProvider;
   int _lastMessageCount = 0;
   bool _showInfoPanel = false;
+  bool _autoTranslateEnabled = false;
   MeetSessionModel? _joinedMeetSession;
   final _translationService = TranslationService();
   final Map<String, TranslationResult> _translatedByMsgId = {};
@@ -119,6 +120,51 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       return;
     }
     _translateMessage(msg);
+  }
+
+  void _toggleAutoTranslate(
+    List<MessageModel> messages,
+    String? currentUserId,
+  ) {
+    final nextValue = !_autoTranslateEnabled;
+    setState(() => _autoTranslateEnabled = nextValue);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: ChatStyles.tealDark,
+        duration: const Duration(seconds: 2),
+        content: Text(
+          nextValue
+              ? 'Đã bật Tự động dịch mọi tin nhắn đến sang Tiếng Việt.'
+              : 'Đã tắt chế độ Tự động dịch.',
+        ),
+      ),
+    );
+
+    if (nextValue) {
+      _autoTranslatePendingMessages(messages, currentUserId);
+    }
+  }
+
+  void _autoTranslatePendingMessages(
+    List<MessageModel> messages,
+    String? currentUserId,
+  ) {
+    if (!_autoTranslateEnabled) return;
+    for (final msg in messages) {
+      final isMine = currentUserId != null && msg.senderId == currentUserId;
+      if (isMine) continue;
+      if (_translatedByMsgId.containsKey(msg.id) ||
+          _translatingMsgIds.contains(msg.id)) {
+        continue;
+      }
+      final plainText = ChatTranslateHelper.plainTextForTranslation(msg.content);
+      if (plainText.isEmpty ||
+          TranslationService.containsVietnameseDiacritics(plainText)) {
+        continue;
+      }
+      _translateMessage(msg);
+    }
   }
 
   void _scrollToBottom() {
@@ -236,6 +282,12 @@ class _ChatRoomViewState extends State<ChatRoomView> {
       _lastMessageCount = messages.length;
       if (messages.isNotEmpty) {
         _scrollToBottom();
+        if (_autoTranslateEnabled) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _autoTranslatePendingMessages(messages, currentUserId);
+          });
+        }
       }
     }
 
@@ -304,6 +356,9 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                           isInfoPanelOpen: canDockInfoPanel && _showInfoPanel,
                           canScheduleMeet: canManageRoom,
                           hasLiveMeet: activeMeet?.isLive ?? false,
+                          isAutoTranslateEnabled: _autoTranslateEnabled,
+                          onToggleAutoTranslate: () =>
+                              _toggleAutoTranslate(messages, currentUserId),
                           onToggleInfoPanel: handleToggleInfoPanel,
                           onBack: widget.onBack,
                           onMeetActionTap: () {
