@@ -3,36 +3,60 @@ class CompatibilityScoring {
   static const academicWeight = 0.30;
   static const capacityWeight = 0.20;
 
-  static double _bounded(double value) =>
-      value.isNaN ? 0 : value.clamp(0.0, 1.0).toDouble();
+  static double bounded(double value) =>
+      !value.isFinite ? 0 : value.clamp(0.0, 1.0).toDouble();
 
   static double calculate({
     required double timeScore,
     required double academicScore,
     required double capacityScore,
-  }) =>
-      _bounded(
-        timeWeight * _bounded(timeScore) +
-            academicWeight * _bounded(academicScore) +
-            capacityWeight * _bounded(capacityScore),
-      );
+  }) => bounded(
+    timeWeight * bounded(timeScore) +
+        academicWeight * bounded(academicScore) +
+        capacityWeight * bounded(capacityScore),
+  );
 
   static double timeFit(Iterable<int> firstSlots, Iterable<int> secondSlots) {
-    final first = firstSlots.toSet();
-    final second = secondSlots.toSet();
+    final first = firstSlots.where((slot) => slot >= 0 && slot < 21).toSet();
+    final second = secondSlots.where((slot) => slot >= 0 && slot < 21).toSet();
     final union = first.union(second).length;
     if (union == 0) return 0;
-    return first.intersection(second).length / union;
+    return bounded(first.intersection(second).length / union);
   }
 
-  static double academicFit(double? mentorGrade) =>
-      mentorGrade == null ? 0.5 : _bounded(mentorGrade / 10);
+  static double academicFit({
+    double? mentorGrade,
+    String? mentorStrength,
+    String? menteeNeed,
+  }) {
+    if (mentorGrade != null && mentorGrade.isFinite) {
+      return bounded(mentorGrade / 10);
+    }
+
+    final strengths = _tokens(mentorStrength);
+    final needs = _tokens(menteeNeed);
+    if (strengths.isEmpty || needs.isEmpty) return 0.5;
+
+    final union = strengths.union(needs).length;
+    if (union == 0) return 0.5;
+    return bounded(strengths.intersection(needs).length / union);
+  }
 
   static double capacityFit({
     required int maxMentees,
     required int currentMentees,
   }) {
     if (maxMentees <= 0) return 0;
-    return _bounded((maxMentees - currentMentees) / maxMentees);
+    if (currentMentees < 0) return 1;
+    return bounded((maxMentees - currentMentees) / maxMentees);
+  }
+
+  static Set<String> _tokens(String? text) {
+    final normalized = text?.trim().toLowerCase();
+    if (normalized == null || normalized.isEmpty) return {};
+    return normalized
+        .split(RegExp(r'[^\p{L}\p{N}]+', unicode: true))
+        .where((word) => word.length > 1)
+        .toSet();
   }
 }

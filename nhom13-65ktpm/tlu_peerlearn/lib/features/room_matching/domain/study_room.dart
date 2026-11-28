@@ -13,17 +13,17 @@ class StudyRoom {
     required this.mentorId,
     required this.name,
     required this.roomCode,
+    required this.isOpen,
     this.description,
-    this.isOpen = true,
   });
 
   factory StudyRoom.fromJson(Map<String, dynamic> json) => StudyRoom(
-        id: json['id'] as String,
-        courseId: json['course_id'] as String,
-        mentorId: json['mentor_id'] as String,
-        name: json['name'] as String,
-        description: json['description'] as String?,
-        roomCode: json['room_code'] as String,
-        isOpen: json['is_open'] as bool? ?? true,
-      );
+    id: json['id'] as String,
+    courseId: json['course_id'] as String,
+    mentorId: json['mentor_id'] as String,
+    name: json['name'] as String,
+    description: json['description'] as String?,
+    roomCode: json['room_code'] as String,
+    isOpen: json['is_open'] as bool? ?? false,
+  );
 }

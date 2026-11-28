@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,7 +28,6 @@ class _StudyRoomDetailScreenState extends ConsumerState<StudyRoomDetailScreen> {
     final profileAsync = ref.watch(currentProfileProvider);
     final profile = profileAsync.value;
     final userId = profile?.id;
-    final isAdmin = profile?.role == 'admin';
     return roomAsync.when(
       loading: () => Scaffold(
         appBar: AppBar(title: const Text('Phòng học')),
@@ -35,72 +35,55 @@ class _StudyRoomDetailScreenState extends ConsumerState<StudyRoomDetailScreen> {
       ),
       error: (error, _) => Scaffold(
         appBar: AppBar(title: const Text('Phòng học')),
-        body: Center(child: Text('Không thể tải phòng học: $error')),
+        body: _RoomLoadError(
+          message: 'Không thể tải phòng học: $error',
+          onRetry: () => ref.invalidate(studyRoomProvider(widget.roomId)),
+        ),
       ),
-      data: (room) => _buildRoomTabs(room, userId, isAdmin: isAdmin),
+      data: (room) => _buildRoomTabs(room, userId),
     );
   }
 
-  Widget _buildRoomTabs(
-    StudyRoom room,
-    String? userId, {
-    required bool isAdmin,
-  }) {
+  Widget _buildRoomTabs(StudyRoom room, String? userId) {
     final isMentor = room.mentorId == userId;
-    final tabs = isAdmin
-        ? const [
-            Tab(text: 'Tổng quan / Thành viên'),
-            Tab(text: 'Buổi học'),
-          ]
-        : const [
-            Tab(text: 'Tổng quan / Thành viên'),
-            Tab(text: 'Tài liệu'),
-            Tab(text: 'Ôn tập'),
-            Tab(text: 'Buổi học'),
-          ];
-
-    final tabViews = isAdmin
-        ? [
-            _RoomOverview(room: room, currentUserId: userId),
-            RoomSessionsTab(
-              roomId: room.id,
-              currentUserId: userId,
-              isMentor: false,
-            ),
-          ]
-        : [
-            _RoomOverview(room: room, currentUserId: userId),
-            RoomDocumentsTab(
-              roomId: room.id,
-              currentUserId: userId,
-              isMentor: isMentor,
-            ),
-            RoomPracticeTab(
-              roomId: room.id,
-              currentUserId: userId,
-              isMentor: isMentor,
-            ),
-            RoomSessionsTab(
-              roomId: room.id,
-              currentUserId: userId,
-              isMentor: isMentor,
-            ),
-          ];
-
     return DefaultTabController(
-      length: tabs.length,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Text(room.name),
-          bottom: TabBar(
+          bottom: const TabBar(
             isScrollable: true,
-            tabs: tabs,
+            tabs: [
+              Tab(text: 'Tổng quan / Thành viên'),
+              Tab(text: 'Tài liệu'),
+              Tab(text: 'Ôn tập'),
+              Tab(text: 'Buổi học'),
+            ],
           ),
         ),
         body: ResponsiveContainer(
           maxWidth: 960,
           padding: EdgeInsets.zero,
-          child: TabBarView(children: tabViews),
+          child: TabBarView(
+            children: [
+              _RoomOverview(room: room, currentUserId: userId),
+              RoomDocumentsTab(
+                roomId: room.id,
+                currentUserId: userId,
+                isMentor: isMentor,
+              ),
+              RoomPracticeTab(
+                roomId: room.id,
+                currentUserId: userId,
+                isMentor: isMentor,
+              ),
+              RoomSessionsTab(
+                roomId: room.id,
+                currentUserId: userId,
+                isMentor: isMentor,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -118,7 +101,10 @@ class _RoomOverview extends ConsumerWidget {
     final membersAsync = ref.watch(roomMembersProvider(room.id));
     return membersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Lỗi tải thành viên: $error')),
+      error: (error, _) => _RoomLoadError(
+        message: 'Không thể tải thành viên: $error',
+        onRetry: () => ref.invalidate(roomMembersProvider(room.id)),
+      ),
       data: (members) {
         final mentors = members.where((m) => m.role == 'mentor').toList();
         final mentees = members.where((m) => m.role != 'mentor').toList()
@@ -147,11 +133,61 @@ class _RoomOverview extends ConsumerWidget {
                         Text(room.description!),
                       ],
                       const SizedBox(height: 8),
-                      SelectableText('Mã phòng: ${room.roomCode}'),
+                      Row(
+                        children: [
+                          const Icon(Icons.vpn_key_outlined, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SelectableText(
+                              'Room Code: ${room.roomCode}',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Sao chép Room Code',
+                            icon: const Icon(Icons.copy),
+                            onPressed: () async {
+                              try {
+                                await Clipboard.setData(
+                                  ClipboardData(text: room.roomCode),
+                                );
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Đã sao chép Room Code'),
+                                    ),
+                                  );
+                                }
+                              } catch (error) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Không thể sao chép mã phòng: $error',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
               ),
+              if (currentUserId != null &&
+                  mentees.any((member) => member.userId == currentUserId))
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => _leaveRoom(context, ref),
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Rời phòng'),
+                  ),
+                ),
               const SizedBox(height: 16),
               Text(
                 'Mentor phụ trách',
@@ -181,7 +217,9 @@ class _RoomOverview extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               if (mentees.isEmpty)
-                const Card(child: ListTile(title: Text('Chưa có học viên nào'))),
+                const Card(
+                  child: ListTile(title: Text('Chưa có học viên nào')),
+                ),
               ...mentees.map(
                 (member) => _MemberTile(
                   member: member,
@@ -224,16 +262,60 @@ class _RoomOverview extends ConsumerWidget {
       ),
     );
     if (confirm != true) return;
+    final requesterId = currentUserId;
+    if (requesterId == null) return;
     try {
       await ref
           .read(roomMatchingRepositoryProvider)
-          .removeMember(roomId: room.id, userId: member.userId);
+          .removeMember(
+            roomId: room.id,
+            userId: member.userId,
+            requestedById: requesterId,
+          );
       ref.invalidate(roomMembersProvider(room.id));
+      ref.invalidate(myRoomsProvider(requesterId));
     } catch (error) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Không thể xóa thành viên: $error')),
         );
+      }
+    }
+  }
+
+  Future<void> _leaveRoom(BuildContext context, WidgetRef ref) async {
+    final userId = currentUserId;
+    if (userId == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rời phòng học?'),
+        content: const Text('Bạn sẽ không còn thấy phòng này trong danh sách.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Ở lại'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Rời phòng'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await ref
+          .read(roomMatchingRepositoryProvider)
+          .leaveRoom(roomId: room.id, userId: userId);
+      ref.invalidate(roomMembersProvider(room.id));
+      ref.invalidate(myRoomsProvider(userId));
+      if (context.mounted) Navigator.of(context).pop();
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Không thể rời phòng: $error')));
       }
     }
   }
@@ -268,8 +350,9 @@ class _MemberTile extends StatelessWidget {
           : null,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor:
-              isMentor ? colorScheme.primaryContainer : colorScheme.secondaryContainer,
+          backgroundColor: isMentor
+              ? colorScheme.primaryContainer
+              : colorScheme.secondaryContainer,
           child: Icon(
             isMentor ? Icons.school_outlined : Icons.person,
             color: isMentor
@@ -317,16 +400,18 @@ class _MemberTile extends StatelessWidget {
               child: Text(
                 isMentor ? 'Mentor' : 'Mentee',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isMentor
-                          ? colorScheme.onPrimaryContainer
-                          : colorScheme.onSecondaryContainer,
-                    ),
+                  fontWeight: FontWeight.w600,
+                  color: isMentor
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onSecondaryContainer,
+                ),
               ),
             ),
           ],
         ),
-        subtitle: member.studentId == null ? null : Text('MSV: ${member.studentId}'),
+        subtitle: member.studentId == null
+            ? null
+            : Text('MSV: ${member.studentId}'),
         trailing: canManage
             ? IconButton(
                 tooltip: 'Xóa thành viên',
@@ -334,6 +419,36 @@ class _MemberTile extends StatelessWidget {
                 icon: const Icon(Icons.person_remove_outlined),
               )
             : null,
+      ),
+    );
+  }
+}
+
+class _RoomLoadError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _RoomLoadError({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off_outlined, size: 36),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Thử lại'),
+            ),
+          ],
+        ),
       ),
     );
   }

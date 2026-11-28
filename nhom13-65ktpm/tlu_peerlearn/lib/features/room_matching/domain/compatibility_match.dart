@@ -23,5 +23,8 @@ class CompatibilityMatch {
     this.courseGrade,
   });
 
-  int get percentage => (score * 100).round().clamp(0, 100);
+  int get percentage {
+    if (!score.isFinite) return 0;
+    return (score.clamp(0.0, 1.0) * 100).round();
+  }
 }
