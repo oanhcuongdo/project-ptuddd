@@ -132,7 +132,7 @@ Nhằm phục vụ quá trình làm việc nhóm 5 thành viên hiệu quả, tr
   - `session_management/`: Quản lý buổi học, Session Timer, Đánh giá đối tác & Bộ Theme UI Material 3 toàn app (Thành viên 2 - Trịnh Trung Kiên).
   - `buddy_matching/`: Tìm kiếm & Ghép cặp bạn đồng hành bù trừ ngôn ngữ (Thành viên 3 - Đỗ Việt Tiến).
   - `conversation_topics/`: Kho kịch bản chủ đề hội thoại tình huống A1-B2 & Starters (Thành viên 4 - Cao Đức Đạo).
-  - `translation_notebook/` & `chat_online/`: Trợ lý dịch tức thì (`TranslationLanguage`, `TranslationResult` hỗ trợ cặp ngôn ngữ Trung - Việt - Anh & trạng thái Cache), Hiển thị song ngữ & Sổ tay từ vựng ôn tập (Thành viên 5 - Trương Tuấn Hải).
+  - `vocab_notebook/` & `chat_online/`: Trợ lý dịch tức thì (`TranslationLanguage`, `TranslationResult`, `TranslationService` hỗ trợ Trung - Việt - Anh đa nền tảng Web/Android & Cache), tầng dữ liệu & quản lý trạng thái Sổ tay từ vựng (`VocabEntryModel`, `VocabFilter`, `VocabRepository`, `VocabProvider` kết nối bảng `vocab_notebook` Supabase) và bộ `VocabStyles` Material 3 (Thành viên 5 - Trương Tuấn Hải).
 - Mỗi thư mục tính năng gồm 2 tầng rõ ràng:
   - `data/`: Models, Repositories kết nối trực tuyến tới Supabase Cloud / Firebase.
   - `presentation/`: Màn hình giao diện (Screens/Components/Styles), Quản lý trạng thái bằng **Provider / ChangeNotifier** ($UI = f(State)$).
