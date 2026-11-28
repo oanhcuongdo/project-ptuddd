@@ -1,0 +1,1182 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:buddytalk/app/buddytalk_app.dart';
+import 'package:buddytalk/app/layouts/main_layout.dart';
+import 'package:buddytalk/app/router/guards/auth_guard.dart';
+import 'package:buddytalk/app/router/routes/index.dart';
+import 'package:buddytalk/features/auth_profile/data/models/language_model.dart';
+import 'package:buddytalk/features/auth_profile/data/models/profile_model.dart';
+import 'package:buddytalk/features/auth_profile/data/repositories/auth_repository.dart';
+import 'package:buddytalk/features/auth_profile/presentation/providers/auth_provider.dart';
+import 'package:buddytalk/features/chat/data/models/conversation_model.dart';
+import 'package:buddytalk/features/chat/data/models/meet_session_model.dart';
+import 'package:buddytalk/features/chat/data/models/message_model.dart';
+import 'package:buddytalk/features/chat/data/models/online_member_model.dart';
+import 'package:buddytalk/features/chat/data/models/room_join_request.dart';
+import 'package:buddytalk/features/chat/data/models/room_member_model.dart';
+import 'package:buddytalk/features/chat/data/models/streak_board_model.dart';
+import 'package:buddytalk/features/chat/data/repositories/chat_repository.dart';
+import 'package:buddytalk/features/chat/presentation/providers/chat_provider.dart';
+import 'package:buddytalk/features/chat/presentation/screens/chat_rooms_tab.dart';
+import 'package:buddytalk/features/notifications/data/models/notification_model.dart';
+import 'package:buddytalk/features/notifications/data/repositories/notification_repository.dart';
+import 'package:buddytalk/features/notifications/presentation/components/notification_bell_button.dart';
+import 'package:buddytalk/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class _FakeAuthRepository extends AuthRepository {
+  _FakeAuthRepository({required this.initialProfile});
+
+  final ProfileModel initialProfile;
+
+  @override
+  bool get canRestoreSession => true;
+
+  @override
+  Future<ProfileModel?> restoreSession() async => initialProfile;
+
+  @override
+  Future<List<LanguageModel>> fetchAllowedLanguages() async => const [
+        LanguageModel(
+          code: 'vi',
+          name: 'Tiếng Việt',
+          shortLabel: 'Việt',
+          flagCode: 'VN',
+          sortOrder: 1,
+        ),
+        LanguageModel(
+          code: 'en',
+          name: 'English',
+          shortLabel: 'Anh',
+          flagCode: 'GB',
+          sortOrder: 2,
+        ),
+        LanguageModel(
+          code: 'ja',
+          name: 'Tiếng Nhật',
+          shortLabel: 'Nhật',
+          flagCode: 'JP',
+          sortOrder: 3,
+        ),
+      ];
+
+  @override
+  Future<ProfileModel> completeOnboarding({
+    required String userId,
+    required String displayName,
+    String? avatarUrl,
+    String? nativeLang,
+    required String targetLang,
+    required String proficiencyLevel,
+    required int dailyGoalMinutes,
+  }) async {
+    return ProfileModel(
+      userId: userId,
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+      nativeLang: nativeLang ?? initialProfile.nativeLang,
+      targetLang: targetLang,
+      proficiencyLevel: proficiencyLevel,
+      dailyGoalMinutes: dailyGoalMinutes,
+      onboardingCompleted: true,
+    );
+  }
+}
+
+class _FakeChatRepository extends ChatRepository {
+  bool _joined = false;
+  String? _approvalRoomStatus;
+  final List<ConversationModel> _createdRooms = [];
+  final Map<String, List<MessageModel>> _messagesByRoom = {};
+  void Function(MessageModel)? _onNewMessage;
+
+  void emitRealtimeMessage(MessageModel msg) {
+    _messagesByRoom.putIfAbsent(msg.conversationId, () => []).add(msg);
+    _onNewMessage?.call(msg);
+  }
+
+  @override
+  bool get isReady => true;
+
+  @override
+  Future<List<LanguageModel>> fetchAllowedLanguages() async => const [
+        LanguageModel(
+          code: 'en',
+          name: 'English',
+          shortLabel: 'Anh',
+          flagCode: 'GB',
+          sortOrder: 1,
+        ),
+      ];
+
+  @override
+  Future<List<OnlineMemberModel>> fetchOnlineMembers({
+    required String excludeUserId,
+    int limit = 6,
+  }) async =>
+      const [
+        OnlineMemberModel(
+          userId: 'u-online-2',
+          displayName: 'Trương Tuấn Hải',
+          targetLang: 'EN',
+          proficiencyLevel: 'A2',
+          streakCount: 2,
+          bestStreak: 4,
+          topRoomName: 'clb tiếng anh',
+        ),
+        OnlineMemberModel(
+          userId: 'u-online-1',
+          displayName: 'Trịnh Trung Kiên',
+          targetLang: 'EN',
+          proficiencyLevel: 'B1',
+          streakCount: 6,
+          bestStreak: 8,
+          topRoomName: 'CLB Luyện Tiếng Anh Giao Tiếp',
+        ),
+      ];
+
+  ConversationModel _sampleRoom() => ConversationModel(
+        id: 'room-1',
+        type: 'group',
+        name: 'CLB Luyện Tiếng Anh Giao Tiếp',
+        description: 'Thực hành phản xạ giao tiếp 20 phút mỗi tối.',
+        level: 'A2',
+        targetLang: 'en',
+        maxMembers: 20,
+        createdBy: 'u-owner',
+        managerName: 'Nguyễn Minh Anh',
+        memberCount: _joined ? 4 : 3,
+        isJoined: _joined,
+        membershipStatus: _joined ? 'approved' : null,
+      );
+
+  ConversationModel _approvalRoom() => ConversationModel(
+        id: 'room-approval',
+        type: 'group',
+        name: 'Nhóm Luyện IELTS Chuyên Sâu',
+        description: 'Cần quản lý duyệt trước khi vào phòng.',
+        level: 'B2',
+        targetLang: 'en',
+        maxMembers: 15,
+        requireApproval: true,
+        createdBy: 'u-owner-2',
+        managerName: 'Trịnh Trung Kiên',
+        memberCount: 5,
+        isJoined: _approvalRoomStatus == 'approved',
+        membershipStatus: _approvalRoomStatus,
+      );
+
+  @override
+  Future<List<ConversationModel>> fetchMyConversations(String userId) async {
+    return [
+      ..._createdRooms,
+      if (_joined) _sampleRoom(),
+    ];
+  }
+
+  @override
+  Future<List<ConversationModel>> fetchPublicGroupRooms({
+    required String userId,
+    String? searchQuery,
+    String? targetLang,
+    String? level,
+  }) async {
+    return [..._createdRooms, _sampleRoom(), _approvalRoom()];
+  }
+
+  @override
+  Future<ConversationModel> createGroupRoom({
+    required String createdBy,
+    required String managerName,
+    required String name,
+    required String description,
+    String? level,
+    required String targetLang,
+    int? maxMembers,
+    bool requireApproval = false,
+    String? coverUrl,
+    String? roomFocus,
+  }) async {
+    final created = ConversationModel(
+      id: 'room-new-${_createdRooms.length + 1}',
+      type: 'group',
+      name: name.trim(),
+      description: description.trim(),
+      level: level,
+      targetLang: targetLang,
+      maxMembers: maxMembers,
+      requireApproval: requireApproval,
+      coverUrl: coverUrl,
+      roomFocus: roomFocus,
+      createdBy: createdBy,
+      managerName: managerName,
+      memberCount: 1,
+      isJoined: true,
+      membershipStatus: 'approved',
+      myRole: 'owner',
+    );
+    _createdRooms.add(created);
+    return created;
+  }
+
+  @override
+  Future<void> joinRoom({
+    required String conversationId,
+    required String userId,
+    bool requireApproval = false,
+  }) async {
+    if (conversationId == 'room-approval') {
+      _approvalRoomStatus = requireApproval ? 'pending' : 'approved';
+    } else {
+      _joined = true;
+    }
+  }
+
+  @override
+  Future<void> leaveRoom({
+    required String conversationId,
+    required String userId,
+  }) async {
+    if (conversationId == 'room-approval') {
+      _approvalRoomStatus = null;
+    } else {
+      _joined = false;
+    }
+  }
+
+  @override
+  Future<List<RoomJoinRequest>> fetchPendingRequests(
+    String conversationId,
+  ) async =>
+      const [];
+
+  @override
+  Future<List<MessageModel>> fetchMessages(
+    String conversationId, {
+    int limit = 100,
+  }) async =>
+      List<MessageModel>.from(_messagesByRoom[conversationId] ?? const []);
+
+  @override
+  Future<MessageModel> sendMessage({
+    required String conversationId,
+    required String senderId,
+    required String senderName,
+    String? senderAvatarUrl,
+    required String content,
+  }) async {
+    final list = _messagesByRoom.putIfAbsent(conversationId, () => []);
+    final saved = MessageModel(
+      id: 'msg-${list.length + 1}',
+      conversationId: conversationId,
+      senderId: senderId,
+      senderName: senderName,
+      senderAvatarUrl: senderAvatarUrl,
+      content: content.trim(),
+      createdAt: DateTime.now(),
+    );
+    list.add(saved);
+    return saved;
+  }
+
+  @override
+  Future<({String name, String? avatarUrl})> fetchSenderProfile(
+    String userId,
+  ) async =>
+      (name: 'Trịnh Trung Kiên', avatarUrl: null);
+
+  @override
+  RealtimeChannel? subscribeToRoomMessages({
+    required String conversationId,
+    required void Function(MessageModel message) onNewMessage,
+  }) {
+    _onNewMessage = onNewMessage;
+    return null;
+  }
+
+  @override
+  Future<void> unsubscribeChannel(RealtimeChannel channel) async {}
+
+  @override
+  Future<
+      ({
+        int streakCount,
+        int bestStreak,
+        DateTime lastChatDate,
+        bool incrementedToday,
+      })?> recordRoomChatStreak({
+    required String conversationId,
+    required String userId,
+  }) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return (
+      streakCount: 1,
+      bestStreak: 1,
+      lastChatDate: today,
+      incrementedToday: true,
+    );
+  }
+
+  final List<RoomMemberModel> _roomMembers = [
+    const RoomMemberModel(
+      userId: 'u-chat',
+      displayName: 'Phạm Văn Hưng',
+      proficiencyLevel: 'B2',
+      role: 'owner',
+    ),
+    const RoomMemberModel(
+      userId: 'u-other',
+      displayName: 'Trịnh Trung Kiên',
+      proficiencyLevel: 'B1',
+      role: 'member',
+    ),
+  ];
+
+  @override
+  Future<List<RoomMemberModel>> fetchRoomMembers(String conversationId) async =>
+      List<RoomMemberModel>.from(_roomMembers);
+
+  @override
+  Future<void> updateMemberRole({
+    required String conversationId,
+    required String targetUserId,
+    required String newRole,
+    required String actorId,
+    required String roomName,
+  }) async {
+    for (var i = 0; i < _roomMembers.length; i++) {
+      if (_roomMembers[i].userId == targetUserId) {
+        _roomMembers[i] = _roomMembers[i].copyWith(role: newRole);
+      }
+    }
+  }
+
+  @override
+  Future<void> updateRoomDescription({
+    required String conversationId,
+    required String description,
+  }) async {}
+
+  MeetSessionModel? _activeMeet;
+  int _savedAttendedSeconds = 0;
+  bool _savedStreakAwarded = false;
+  int _todayPersonalMinutes = 0;
+
+  @override
+  Future<MeetSessionModel?> fetchActiveMeetSession(
+    String conversationId,
+  ) async =>
+      (_activeMeet != null &&
+              _activeMeet!.conversationId == conversationId &&
+              !_activeMeet!.isEnded)
+          ? _activeMeet
+          : null;
+
+  @override
+  Future<MeetSessionModel> createMeetSession({
+    required String conversationId,
+    required String roomName,
+    required String hostId,
+    required String hostName,
+    required String title,
+    required DateTime scheduledAt,
+    required int minMinutes,
+    required bool startImmediately,
+  }) async {
+    _activeMeet = MeetSessionModel(
+      id: 'meet-1',
+      conversationId: conversationId,
+      hostId: hostId,
+      hostName: hostName,
+      title: title,
+      meetRoomCode: 'BuddyTalk-TestRoom',
+      scheduledAt: scheduledAt,
+      minMinutes: minMinutes,
+      status: startImmediately ? 'live' : 'scheduled',
+      createdAt: DateTime.now(),
+    );
+    _savedAttendedSeconds = 0;
+    _savedStreakAwarded = false;
+    return _activeMeet!;
+  }
+
+  @override
+  Future<void> updateMeetSessionStatus({
+    required String sessionId,
+    required String status,
+  }) async {
+    if (_activeMeet?.id == sessionId) {
+      _activeMeet = _activeMeet!.copyWith(status: status);
+    }
+  }
+
+  @override
+  RealtimeChannel? subscribeToRoomMeetSessions({
+    required String conversationId,
+    required void Function() onChanged,
+  }) =>
+      null;
+
+  @override
+  Future<({int attendedSeconds, bool streakAwarded})> fetchMyMeetAttendance({
+    required String sessionId,
+    required String userId,
+  }) async =>
+      (
+        attendedSeconds: _savedAttendedSeconds,
+        streakAwarded: _savedStreakAwarded,
+      );
+
+  @override
+  Future<List<MeetAttendanceModel>> fetchSessionAttendances(
+    String sessionId,
+  ) async =>
+      [
+        MeetAttendanceModel(
+          sessionId: sessionId,
+          userId: 'u-chat',
+          displayName: 'Phạm Văn Hưng',
+          attendedSeconds: _savedAttendedSeconds,
+          streakAwarded: _savedStreakAwarded,
+          updatedAt: DateTime.now(),
+        ),
+      ];
+
+  @override
+  Future<void> saveMeetAttendanceProgress({
+    required String sessionId,
+    required String userId,
+    required int attendedSeconds,
+    required bool streakAwarded,
+  }) async {
+    _savedAttendedSeconds = attendedSeconds;
+    _savedStreakAwarded = streakAwarded;
+  }
+
+  @override
+  Future<int> fetchTodayPersonalMinutes(String userId) async =>
+      _todayPersonalMinutes;
+
+  @override
+  Future<
+      ({
+        int todayMinutes,
+        int streakCount,
+        int bestStreak,
+        bool goalReached,
+      })?> recordPersonalDailyMeetMinutes({
+    required String userId,
+    required int addMinutes,
+    required int dailyGoalMinutes,
+  }) async {
+    _todayPersonalMinutes += addMinutes;
+    final reached = _todayPersonalMinutes >= dailyGoalMinutes;
+    return (
+      todayMinutes: _todayPersonalMinutes,
+      streakCount: reached ? 1 : 0,
+      bestStreak: reached ? 1 : 0,
+      goalReached: reached,
+    );
+  }
+
+  @override
+  Future<StreakBoardData> fetchStreakBoardData({
+    required String userId,
+    required int dailyGoalMinutes,
+    DateTime? now,
+  }) async {
+    final ref = now ?? DateTime.now();
+    final todayKey = StreakBoardData.formatDateKey(ref);
+    final yesterdayKey = StreakBoardData.formatDateKey(
+      ref.subtract(const Duration(days: 1)),
+    );
+    final weekDays = StreakBoardData.buildCurrentWeekDays(
+      referenceDate: ref,
+      dailyGoalMinutes: dailyGoalMinutes,
+      logsByDateKey: {
+        yesterdayKey: (
+          completedMinutes: dailyGoalMinutes,
+          goalMinutes: dailyGoalMinutes,
+          isCompleted: true,
+        ),
+        todayKey: (
+          completedMinutes: _todayPersonalMinutes,
+          goalMinutes: dailyGoalMinutes,
+          isCompleted: _todayPersonalMinutes >= dailyGoalMinutes,
+        ),
+      },
+    );
+    return StreakBoardData(
+      todayMinutes: _todayPersonalMinutes,
+      dailyGoalMinutes: dailyGoalMinutes,
+      weekDays: weekDays,
+      recentHistory: [
+        StreakHistoryItem(
+          sessionId: 'meet-1',
+          conversationId: 'room-1',
+          roomName: 'CLB Luyện Tiếng Anh Giao Tiếp',
+          sessionTitle: 'Luyện nói buổi tối',
+          attendedSeconds: 900,
+          minMinutes: 15,
+          streakAwarded: true,
+          updatedAt: ref,
+        ),
+      ],
+    );
+  }
+}
+
+class _FakeNotificationRepository extends NotificationRepository {
+  void Function(NotificationModel)? _onNew;
+
+  List<NotificationModel> _items = [
+    NotificationModel(
+      id: 'notif-1',
+      userId: 'u-manager',
+      actorId: 'u-requester',
+      type: 'room_join_request',
+      title: 'Yêu cầu tham gia phòng mới',
+      body: 'Nguyễn Minh Anh xin tham gia phòng "Nhóm Luyện IELTS Chuyên Sâu".',
+      referenceId: 'room-approval',
+      isRead: false,
+      createdAt: DateTime.now(),
+    ),
+  ];
+
+  void emitRealtime(NotificationModel notification) {
+    _items = [notification, ..._items];
+    _onNew?.call(notification);
+  }
+
+  @override
+  bool get isReady => true;
+
+  @override
+  Future<List<NotificationModel>> fetchNotifications(String userId) async {
+    return _items.where((n) => n.userId == userId).toList();
+  }
+
+  @override
+  Future<void> markAsRead(String notificationId) async {
+    _items = _items
+        .map((n) => n.id == notificationId ? n.copyWith(isRead: true) : n)
+        .toList();
+  }
+
+  @override
+  Future<void> markAllAsRead(String userId) async {
+    _items = _items.map((n) => n.copyWith(isRead: true)).toList();
+  }
+
+  @override
+  RealtimeChannel? subscribeToUserNotifications({
+    required String userId,
+    required void Function(NotificationModel notification) onNewNotification,
+  }) {
+    _onNew = onNewNotification;
+    return null;
+  }
+
+  @override
+  Future<void> unsubscribe(RealtimeChannel channel) async {}
+}
+
+void main() {
+  setUpAll(() {
+    registerAllRoutes();
+  });
+
+  testWidgets('Đăng nhập & Đăng ký gọn nhẹ (chỉ Email, Mật khẩu, Xác nhận MK)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(const BuddyTalkApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Đăng nhập'), findsOneWidget);
+    expect(find.text('Tiếp tục với Google'), findsOneWidget);
+
+    await tester.tap(find.text('Đăng ký ngay'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tạo tài khoản BuddyTalk'), findsOneWidget);
+    expect(find.text('Độ mạnh mật khẩu'), findsOneWidget);
+    expect(find.text('Đăng ký tài khoản'), findsOneWidget);
+    expect(find.text('Họ và tên'), findsNothing);
+    expect(find.text('Đăng ký nhanh với Google'), findsNothing);
+
+    await tester.enterText(
+      find.byType(TextFormField).at(0),
+      'phamvanhung@65ktpm.edu.vn',
+    );
+    await tester.enterText(find.byType(TextFormField).at(1), 'Hung@123456');
+    await tester.enterText(find.byType(TextFormField).at(2), 'Hung@123456');
+    await tester.pump();
+
+    expect(find.text('Mạnh'), findsOneWidget);
+  });
+
+  testWidgets('Onboarding: Bỏ qua Bước 1 tạo tên user_<id> + sang Bước 2 chọn ngôn ngữ & phút tùy chỉnh', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final repo = _FakeAuthRepository(
+      initialProfile: const ProfileModel(
+        userId: '1d17ee6a-0895-405d-8d74-fd3000000000',
+        displayName: '',
+        onboardingCompleted: false,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: repo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: _FakeChatRepository()),
+          ),
+          ChangeNotifierProvider<NotificationProvider>(
+            create: (_) => NotificationProvider(
+              repository: _FakeNotificationRepository(),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: AuthGuard(child: MainLayout())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bước 1 / 2'), findsOneWidget);
+    expect(find.text('Bỏ qua'), findsOneWidget);
+
+    await tester.tap(find.text('Bỏ qua'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bước 2 / 2'), findsOneWidget);
+    expect(find.text('Bỏ qua'), findsNothing);
+    expect(find.text('Ngôn ngữ mẹ đẻ'), findsNothing);
+    expect(find.text('JP Nhật'), findsOneWidget);
+    expect(find.text('15 phút / ngày'), findsOneWidget);
+    expect(find.text('Tùy chỉnh thời gian'), findsOneWidget);
+
+    await tester.tap(find.text('JP Nhật'));
+    await tester.tap(find.text('B1'));
+    await tester.ensureVisible(find.text('Tùy chỉnh thời gian'));
+    await tester.tap(find.text('Tùy chỉnh thời gian'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).last, '45');
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Hoàn tất & Bắt đầu hành trình 🎉'));
+    await tester.tap(find.text('Hoàn tất & Bắt đầu hành trình 🎉'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('BuddyTalk'), findsOneWidget);
+    expect(find.text('user_1d17ee6a'), findsOneWidget);
+    expect(find.text('JA • B1'), findsOneWidget);
+  });
+
+  testWidgets('MainLayout hiển thị Sidebar NavLink + Header + Outlet trên Chrome & Mobile', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(autoRestore: false),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: _FakeChatRepository()),
+          ),
+          ChangeNotifierProvider<NotificationProvider>(
+            create: (_) => NotificationProvider(
+              repository: _FakeNotificationRepository(),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: MainLayout()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('BuddyTalk'), findsOneWidget);
+    expect(find.text('Phòng học'), findsOneWidget);
+    expect(find.text('Phòng của tôi'), findsOneWidget);
+    expect(find.text('Trò chuyện Realtime'), findsNothing);
+    expect(find.text('Kỷ luật'), findsNothing);
+
+    await tester.tap(find.text('Bạn đồng hành'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tìm bạn đồng hành'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Thu gọn menu'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Mở rộng menu'), findsOneWidget);
+
+    tester.view.physicalSize = const Size(390, 900);
+    await tester.pumpAndSettle();
+    expect(find.byType(NavigationBar), findsOneWidget);
+  });
+
+  testWidgets('ChatRoomsTab: Khám phá danh sách phòng nhóm và bấm Tham gia phòng', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final authRepo = _FakeAuthRepository(
+      initialProfile: const ProfileModel(
+        userId: 'u-chat',
+        displayName: 'Phạm Văn Hưng',
+        onboardingCompleted: true,
+      ),
+    );
+
+    final chatRepo = _FakeChatRepository();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: authRepo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: chatRepo),
+          ),
+        ],
+        child: const MaterialApp(home: Scaffold(body: ChatRoomsTab())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Chuyển sang tab Khám phá phòng học (gồm 1 phòng mở + 1 phòng cần kiểm duyệt)
+    await tester.tap(find.text('Khám phá (2)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('CLB Luyện Tiếng Anh Giao Tiếp'), findsWidgets);
+    expect(find.text('Luyện nói cùng bạn bè'), findsOneWidget);
+    expect(find.text('Phòng học sôi nổi'), findsOneWidget);
+    expect(find.text('Xếp hạng chuỗi cao'), findsOneWidget);
+    expect(find.text('Phòng: clb tiếng anh'), findsOneWidget);
+    expect(find.text('5 thành viên'), findsWidgets);
+    expect(find.text('Quản lý: Nguyễn Minh Anh'), findsOneWidget);
+    expect(find.text('Tham gia'), findsOneWidget);
+    expect(find.text('Xin tham gia'), findsOneWidget);
+    expect(find.text('Cần duyệt'), findsOneWidget);
+    expect(find.text('Hiển thị 1–2 trong tổng số 2 phòng'), findsOneWidget);
+
+    // Bấm Xin tham gia ở phòng cần duyệt -> chuyển sang Chờ duyệt
+    await tester.ensureVisible(find.text('Xin tham gia'));
+    await tester.tap(find.text('Xin tham gia'));
+    await tester.pumpAndSettle();
+    expect(find.text('Chờ duyệt'), findsOneWidget);
+
+    // Thử chuyển chế độ Danh sách <-> Lưới
+    await tester.ensureVisible(find.text('Danh sách'));
+    await tester.tap(find.text('Danh sách'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lưới'));
+    await tester.pumpAndSettle();
+
+    // Bấm Tham gia -> cập nhật sang Vào chat và hiện trong Phòng của tôi (1)
+    await tester.ensureVisible(find.text('Tham gia'));
+    await tester.tap(find.text('Tham gia'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Phòng của tôi (1)'), findsOneWidget);
+    expect(find.text('Vào chat'), findsOneWidget);
+
+    // Mở hộp thoại + Tạo phòng mới (Không yêu cầu trình độ & Không giới hạn thành viên)
+    await tester.ensureVisible(find.text('Tạo phòng mới'));
+    await tester.tap(find.text('Tạo phòng mới'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tạo phòng học nhóm mới'), findsOneWidget);
+    expect(find.text('Người quản lý phòng: Phạm Văn Hưng'), findsOneWidget);
+    expect(find.text('Không yêu cầu'), findsOneWidget);
+    expect(find.text('Không giới hạn'), findsOneWidget);
+
+    await tester.enterText(
+      find.byType(TextFormField).at(0),
+      'Phòng Luyện Nói Tự Do',
+    );
+
+    // Chọn ngôn ngữ + định hướng kỹ năng
+    await tester.tap(find.byType(DropdownButtonFormField<String>).at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('GB English').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Giao tiếp tự do'));
+    await tester.pumpAndSettle();
+
+    // Tạo phòng với mặc định Không yêu cầu trình độ & Không giới hạn thành viên
+    await tester.ensureVisible(find.text('Tạo phòng nhóm ngay'));
+    await tester.tap(find.text('Tạo phòng nhóm ngay'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Phòng của tôi (2)'), findsOneWidget);
+    expect(find.text('Phòng Luyện Nói Tự Do'), findsWidgets);
+    expect(find.text('Giao tiếp tự do'), findsOneWidget);
+    expect(find.text('Mọi trình độ'), findsOneWidget);
+    expect(find.text('1 thành viên • Không giới hạn'), findsOneWidget);
+    expect(find.text('Quản lý: Phạm Văn Hưng'), findsOneWidget);
+
+    // Bấm Vào chat -> mở giao diện phòng chat 2 cột (cột trái Tin nhắn + khung chat phải)
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -350));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Vào chat').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Không gian học'), findsOneWidget);
+    expect(find.text('Hẹn lịch Meet'), findsOneWidget);
+    expect(find.byTooltip('Gợi ý chủ đề & câu mở đầu'), findsOneWidget);
+
+    // Gửi tin nhắn thật vào repository & nhận tin nhắn Realtime từ người khác
+    await tester.enterText(
+      find.byType(TextField).last,
+      'Hello everyone!',
+    );
+    await tester.tap(find.byTooltip('Gửi tin nhắn'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hello everyone!'), findsWidgets);
+
+    chatRepo.emitRealtimeMessage(
+      MessageModel(
+        id: 'msg-rt-1',
+        conversationId: 'room-1',
+        senderId: 'u-other',
+        senderName: 'Trịnh Trung Kiên',
+        content: 'Hi! Ready to practice?',
+        createdAt: DateTime.now(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Hi! Ready to practice?'), findsOneWidget);
+    expect(find.textContaining('Trịnh Trung Kiên'), findsOneWidget);
+
+    // Chuyển nhanh sang phòng khác ngay ở cột trái "Không gian học"
+    await tester.tap(find.text('Phòng Luyện Nói Tự Do').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Bắt đầu cuộc trò chuyện nào!'), findsOneWidget);
+
+    // Bấm nút Thông tin phòng bên góc phải (kiểu Zalo) -> mở bảng Thông tin phòng & phân quyền Phó phòng
+    await tester.tap(find.byTooltip('Thông tin phòng'));
+    await tester.pumpAndSettle();
+    expect(find.text('Thông tin phòng'), findsOneWidget);
+    expect(find.text('Chủ phòng'), findsOneWidget);
+    expect(find.text('Thành viên phòng (2)'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Tùy chọn thành viên'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Phân làm Trợ giảng'));
+    await tester.pumpAndSettle();
+    expect(find.text('Trợ giảng'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Rời phòng'),
+      200,
+      scrollable: find.descendant(
+        of: find.byType(ListView).last,
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(find.text('Rời phòng'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Quay lại danh sách phòng'));
+    await tester.pumpAndSettle();
+    expect(find.text('Phòng của tôi (2)'), findsOneWidget);
+  });
+
+  testWidgets('NotificationBellButton xổ dropdown kiểu Facebook & tự đồng bộ phòng khi nhận duyệt Realtime', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final authRepo = _FakeAuthRepository(
+      initialProfile: const ProfileModel(
+        userId: 'u-manager',
+        displayName: 'Phạm Văn Hưng',
+        onboardingCompleted: true,
+      ),
+    );
+    final chatRepo = _FakeChatRepository();
+    final notifRepo = _FakeNotificationRepository();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: authRepo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: chatRepo),
+          ),
+          ChangeNotifierProvider<NotificationProvider>(
+            create: (_) => NotificationProvider(repository: notifRepo),
+          ),
+        ],
+        child: const MaterialApp(home: AuthGuard(child: MainLayout())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Badge số lượng chưa đọc = 1 hiển thị cạnh chuông thông báo
+    expect(find.byTooltip('Thông báo'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(NotificationBellButton),
+        matching: find.text('1'),
+      ),
+      findsOneWidget,
+    );
+
+    // Bấm vào chuông -> xổ dropdown kiểu Facebook (Tất cả / Chưa đọc)
+    await tester.tap(find.byTooltip('Thông báo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Thông báo'), findsOneWidget);
+    expect(find.text('Chưa đọc (1)'), findsOneWidget);
+    expect(find.text('Xem & Duyệt'), findsOneWidget);
+    expect(find.text('Đọc tất cả'), findsOneWidget);
+
+    // Đánh dấu đọc tất cả -> xóa badge đỏ & chuyển tab Chưa đọc sẽ báo đã đọc hết
+    await tester.tap(find.text('Đọc tất cả'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Đọc tất cả'), findsNothing);
+    await tester.tap(find.text('Chưa đọc'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bạn đã đọc hết thông báo.'), findsOneWidget);
+
+    // Giả lập nhận sự kiện Realtime được duyệt phòng -> badge nhảy lên 1 ngay lập tức
+    notifRepo.emitRealtime(
+      NotificationModel(
+        id: 'notif-2',
+        userId: 'u-manager',
+        type: 'room_join_approved',
+        title: 'Đã được duyệt vào phòng học',
+        body: 'Quản lý phòng đã duyệt bạn vào phòng.',
+        referenceId: 'room-approval',
+        isRead: false,
+        createdAt: DateTime.now(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Chưa đọc (1)'), findsOneWidget);
+
+    // Bấm lại vào chuông để đóng dropdown
+    await tester.tap(find.byTooltip('Thông báo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Chưa đọc (1)'), findsNothing);
+  });
+
+  testWidgets('Chuỗi lửa riêng từng phòng chat (kiểu TikTok: ban đầu 0, nhắn lên 1, quên 1 ngày mất về 0)', (
+    tester,
+  ) async {
+    // 1. Kiểm tra logic chuỗi riêng từng phòng: nhắn hôm nay -> sáng lửa; hôm qua -> chờ giữ lửa; quên 1 ngày -> về 0
+    final today = DateTime(2026, 11, 25);
+    final activeRoom = ConversationModel(
+      id: 'r1',
+      type: 'group',
+      name: 'CLB Tiếng Anh',
+      createdBy: 'u1',
+      roomStreakCount: 5,
+      bestStreak: 5,
+      lastChatDate: today,
+    );
+    final atRiskRoom = activeRoom.copyWith(
+      lastChatDate: today.subtract(const Duration(days: 1)),
+    );
+    final lostRoom = activeRoom.copyWith(
+      lastChatDate: today.subtract(const Duration(days: 2)),
+    );
+
+    expect(activeRoom.effectiveRoomStreak(today), 5);
+    expect(activeRoom.isStreakLitToday(today), isTrue);
+    expect(atRiskRoom.effectiveRoomStreak(today), 5);
+    expect(atRiskRoom.isStreakAtRisk(today), isTrue);
+    expect(lostRoom.effectiveRoomStreak(today), 0);
+    expect(lostRoom.isStreakLost(today), isTrue);
+
+    // 2. Kiểm tra quy tắc mới: Nhắn tin thường KHÔNG lên chuỗi -> học đủ 1 phút trong Meet mới lên chuỗi "1 ngày"!
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final authRepo = _FakeAuthRepository(
+      initialProfile: const ProfileModel(
+        userId: 'u-chat',
+        displayName: 'Phạm Văn Hưng',
+        dailyGoalMinutes: 15,
+        onboardingCompleted: true,
+      ),
+    );
+    final chatRepo = _FakeChatRepository();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: authRepo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: chatRepo),
+          ),
+        ],
+        child: const MaterialApp(home: Scaffold(body: ChatRoomsTab())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Tham gia phòng rồi bấm Vào chat
+    await tester.tap(find.text('Khám phá (2)'));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -350));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tham gia'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Vào chat'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('0 ngày'), findsOneWidget);
+
+    // Nhắn tin thường -> chuỗi vẫn giữ nguyên 0 ngày
+    await tester.enterText(find.byType(TextField).last, 'Hello!');
+    await tester.tap(find.byTooltip('Gửi tin nhắn'));
+    await tester.pumpAndSettle();
+    expect(find.text('0 ngày'), findsOneWidget);
+
+    // Chủ phòng / Trợ giảng bấm Hẹn lịch Meet -> chọn 1 phút (Demo) -> Mở phòng Meet ngay
+    await tester.tap(find.text('Hẹn lịch Meet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1 phút (Demo)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mở phòng Meet ngay'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Rời buổi học'), findsOneWidget);
+
+    // Giả lập học đủ 60 giây trong phòng Meet -> tự động cộng chuỗi phòng!
+    await tester.pump(const Duration(seconds: 61));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Đã đủ 1 phút • Đã cộng chuỗi phòng!'),
+      findsOneWidget,
+    );
+
+    // Rời buổi học -> quay lại khung chat thấy đốm lửa đã lên "1 ngày"
+    await tester.tap(find.text('Rời buổi học'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 ngày'), findsOneWidget);
+  });
+
+  test('StreakBoardData tổng hợp đúng 7 ngày T2->CN & ChatProvider.loadStreakBoard tải lịch sử', () async {
+    // Thứ 4 ngày 25/11/2026
+    final wednesday = DateTime(2026, 11, 25);
+    final weekDays = StreakBoardData.buildCurrentWeekDays(
+      referenceDate: wednesday,
+      dailyGoalMinutes: 15,
+      logsByDateKey: {
+        '2026-11-23': (completedMinutes: 20, goalMinutes: 15, isCompleted: true),
+        '2026-11-24': (completedMinutes: 15, goalMinutes: 15, isCompleted: true),
+        '2026-11-25': (completedMinutes: 10, goalMinutes: 15, isCompleted: false),
+      },
+    );
+
+    expect(weekDays.length, 7);
+    expect(weekDays.first.shortWeekdayLabel, 'T2');
+    expect(weekDays.last.shortWeekdayLabel, 'CN');
+    expect(weekDays[0].isCompleted, isTrue);
+    expect(weekDays[1].isCompleted, isTrue);
+    expect(weekDays[2].isToday, isTrue);
+    expect(weekDays[2].hasPartialProgress, isTrue);
+    expect(weekDays[3].isFuture, isTrue);
+
+    final board = StreakBoardData(
+      todayMinutes: 10,
+      dailyGoalMinutes: 15,
+      weekDays: weekDays,
+      recentHistory: const [],
+    );
+    expect(board.completedDaysThisWeek, 2);
+    expect(board.remainingMinutesToday, 5);
+    expect(board.isTodayGoalCompleted, isFalse);
+
+    final provider = ChatProvider(repository: _FakeChatRepository());
+    await provider.loadStreakBoard(userId: 'u-chat', dailyGoalMinutes: 15);
+    expect(provider.isLoadingStreakBoard, isFalse);
+    expect(provider.streakBoard, isNotNull);
+    expect(provider.streakBoard!.weekDays.length, 7);
+    expect(provider.streakBoard!.recentHistory.length, 1);
+    expect(provider.streakBoard!.recentHistory.first.attendedMinutes, 15);
+  });
+
+  testWidgets('Bấm mục Bảng chuỗi trên Sidebar mở Dashboard Bảng cập nhật chuỗi phòng', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final authRepo = _FakeAuthRepository(
+      initialProfile: const ProfileModel(
+        userId: 'u-chat',
+        displayName: 'Phạm Văn Hưng',
+        dailyGoalMinutes: 15,
+        onboardingCompleted: true,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(repository: authRepo),
+          ),
+          ChangeNotifierProvider<ChatProvider>(
+            create: (_) => ChatProvider(repository: _FakeChatRepository()),
+          ),
+          ChangeNotifierProvider<NotificationProvider>(
+            create: (_) => NotificationProvider(
+              repository: _FakeNotificationRepository(),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: AuthGuard(child: MainLayout())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Không còn huy hiệu chuỗi tổng cá nhân trên Header
+    expect(find.byTooltip('Xem bảng cập nhật chuỗi'), findsNothing);
+
+    await tester.tap(find.text('Bảng chuỗi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bảng cập nhật chuỗi'), findsOneWidget);
+    expect(find.text('Chuỗi phòng cao nhất'), findsOneWidget);
+    expect(find.text('Kỷ lục chuỗi phòng'), findsOneWidget);
+    expect(find.text('Hoạt động học 7 ngày tuần này'), findsOneWidget);
+    expect(find.text('Lịch sử điểm danh gần đây'), findsOneWidget);
+    expect(find.text('+1 chuỗi 🔥'), findsOneWidget);
+  });
+}
